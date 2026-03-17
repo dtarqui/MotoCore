@@ -1,4 +1,5 @@
-# MotoCore
+
+<img width="1024" height="1024" alt="image" src="https://github.com/user-attachments/assets/37b92f90-e109-4989-9789-7bf45a1c6afa" />
 
 # MotoCore – Sistema de Gestión para Talleres de Motocicletas
 
