@@ -9,8 +9,6 @@
 
 El objetivo principal del proyecto es demostrar la implementación de una **arquitectura SaaS moderna multiplataforma** que permita a talleres pequeños y medianos digitalizar sus procesos operativos.
 
-Este proyecto está orientado a servir como **proyecto de investigación o desarrollo para una maestría**, integrando tecnologías actuales de desarrollo web, aplicaciones móviles híbridas y arquitectura backend escalable.
-
 ---
 
 # 2. Objetivos del Proyecto
