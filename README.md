@@ -1,332 +1,108 @@
 
-<img width="1024" height="1024" alt="image" src="https://github.com/user-attachments/assets/37b92f90-e109-4989-9789-7bf45a1c6afa" />
+<p align="center">
+        <img src="https://github.com/user-attachments/assets/37b92f90-e109-4989-9789-7bf45a1c6afa" alt="MotoCore logo" width="280" />
+</p>
 
-# MotoCore – Sistema de Gestión para Talleres de Motocicletas
+# MotoCore
 
-## 1. Descripción del Proyecto
+Plataforma SaaS para la gestión integral de talleres de motocicletas, diseñada para operar en web, móvil y escritorio desde una misma base funcional.
 
-**MotoCore** es una plataforma multiplataforma diseñada para gestionar operaciones de talleres especializados en motocicletas. El sistema permite administrar clientes, motocicletas, órdenes de trabajo, inventario de repuestos y seguimiento de mantenimiento desde una interfaz moderna accesible vía web, móvil y escritorio.
+## Resumen
 
-El objetivo principal del proyecto es demostrar la implementación de una **arquitectura SaaS moderna multiplataforma** que permita a talleres pequeños y medianos digitalizar sus procesos operativos.
+MotoCore centraliza la operación diaria de un taller: clientes, motocicletas, órdenes de trabajo, inventario, historial técnico y recordatorios de mantenimiento. El enfoque del proyecto es construir una solución moderna, escalable y multiplataforma para talleres pequeños y medianos.
 
----
+## Propuesta de valor
 
-# 2. Objetivos del Proyecto
+- Digitaliza procesos operativos del taller.
+- Mejora el seguimiento de servicios y mantenimientos.
+- Organiza el historial técnico de cada motocicleta.
+- Facilita el control de repuestos y stock.
+- Entrega métricas para soporte de decisiones.
 
-## Objetivo General
+## Alcance
 
-Desarrollar una plataforma multiplataforma para la gestión integral de talleres de motocicletas que permita mejorar el control operativo, el seguimiento de mantenimiento y la administración de clientes.
+MotoCore está orientado a:
 
-## Objetivos Específicos
+- Talleres de motocicletas.
+- Mecánicos independientes.
+- Pequeños centros de servicio de motos.
+- Talleres especializados en mantenimiento y reparación.
 
-* Diseñar una arquitectura web moderna basada en APIs.
-* Implementar una aplicación multiplataforma accesible desde web, móvil y escritorio.
-* Centralizar la gestión de motocicletas, clientes y servicios.
-* Facilitar el control de inventario de repuestos.
-* Proporcionar historial técnico completo de cada motocicleta.
-* Implementar recordatorios automáticos de mantenimiento.
+Incluye soporte para múltiples talleres bajo arquitectura SaaS.
 
----
+## Arquitectura (alto nivel)
 
-# 3. Alcance del Sistema
-
-El sistema está orientado principalmente a:
-
-* talleres de motocicletas
-* mecánicos independientes
-* pequeños centros de servicio de motos
-* talleres especializados en mantenimiento y reparación
-
-El sistema permitirá administrar múltiples talleres bajo una arquitectura SaaS.
-
----
-
-# 4. Arquitectura del Sistema
-
-El sistema seguirá una arquitectura **cliente-servidor basada en API REST**.
-
-Arquitectura general:
-
-```
+```text
 Frontend (React PWA)
-        |
         |
 Backend API (ASP.NET Core)
         |
-        |
-Base de Datos (PostgreSQL)
+Base de datos (PostgreSQL)
 ```
 
-Extensión multiplataforma:
+Distribución multiplataforma:
 
-```
-Web Application (PWA)
-Mobile App (Capacitor)
-Desktop App (Electron)
-```
+- Web: PWA.
+- Móvil: empaquetado con Capacitor.
+- Escritorio: empaquetado con Electron.
 
-Esto permite reutilizar **un solo frontend** para múltiples plataformas.
+## Stack tecnológico
 
----
+**Frontend**
 
-# 5. Stack Tecnológico
+- React
+- TypeScript
+- Vite
+- TailwindCSS
+- React Query
+- React Router
 
-## Frontend
+**Backend**
 
-Tecnologías utilizadas para la interfaz de usuario:
+- ASP.NET Core
+- C#
+- Arquitectura basada en servicios
 
-* React
-* TypeScript
-* Vite
-* TailwindCSS
-* React Query
-* React Router
+**Datos**
 
-Características del frontend:
+- PostgreSQL
 
-* arquitectura basada en componentes
-* interfaz responsive
-* soporte para instalación como aplicación
-* manejo eficiente de estado y consumo de API
+## Módulos principales
 
----
+- Gestión de clientes.
+- Gestión de motocicletas.
+- Órdenes de trabajo.
+- Inventario de repuestos.
+- Historial de mantenimiento.
+- Recordatorios de servicio.
+- Dashboard de métricas.
 
-## Progressive Web App (PWA)
+## Seguridad
 
-El sistema será implementado como una PWA para permitir:
+- Autenticación basada en tokens.
+- Control de acceso por roles.
+- Protección de endpoints API.
 
-* instalación en dispositivos móviles
-* funcionamiento offline parcial
-* notificaciones
-* experiencia similar a aplicaciones nativas
+Roles contemplados:
 
----
+- Administrador.
+- Mecánico.
+- Recepcionista.
 
-## Aplicación Móvil
+## Estado del proyecto
 
-Para empaquetar la aplicación web como aplicación móvil se utilizará:
+Proyecto en fase de definición y estructuración funcional/técnica.
 
-* Capacitor
+## Documentación
 
-Esto permitirá generar aplicaciones para:
+Para mantener este README claro y concreto, el detalle completo se documenta en archivos separados:
 
-* Android
-* iOS
+- [Objetivos del proyecto](docs/objetivos.md)
+- [Arquitectura y plataforma](docs/arquitectura.md)
+- [Módulos funcionales](docs/modulos.md)
+- [Seguridad y roles](docs/seguridad.md)
+- [Roadmap y extensiones futuras](docs/roadmap.md)
 
-sin necesidad de mantener un proyecto móvil separado.
+## Licencia
 
----
-
-## Aplicación de Escritorio
-
-Para permitir ejecución como aplicación de escritorio se utilizará:
-
-* Electron
-
-Esto permitirá ejecutar el sistema como aplicación en:
-
-* Windows
-* Linux
-* macOS
-
----
-
-## Backend
-
-El backend estará desarrollado con:
-
-* ASP.NET Core
-* C#
-* Arquitectura basada en servicios
-
-Responsabilidades del backend:
-
-* exponer API REST
-* manejar autenticación
-* lógica de negocio
-* acceso a base de datos
-* control de seguridad
-
----
-
-## Base de Datos
-
-El sistema utilizará:
-
-* PostgreSQL
-
-Características:
-
-* base de datos relacional
-* alto rendimiento
-* soporte para escalabilidad
-* ideal para aplicaciones SaaS
-
----
-
-# 6. Módulos Principales del Sistema
-
-## Gestión de Clientes
-
-Permite registrar y administrar clientes del taller.
-
-Funciones:
-
-* registro de clientes
-* información de contacto
-* historial de servicios
-* búsqueda rápida
-
----
-
-## Gestión de Motocicletas
-
-Cada cliente puede tener múltiples motocicletas registradas.
-
-Información registrada:
-
-* marca
-* modelo
-* año
-* número de chasis
-* placa
-* kilometraje
-* historial de mantenimiento
-
----
-
-## Órdenes de Trabajo
-
-Permite registrar los servicios realizados a cada motocicleta.
-
-Funciones:
-
-* apertura de orden de trabajo
-* diagnóstico
-* lista de servicios realizados
-* repuestos utilizados
-* estado del servicio
-* costo total
-
-Estados posibles:
-
-* pendiente
-* en diagnóstico
-* en reparación
-* finalizado
-* entregado
-
----
-
-## Inventario de Repuestos
-
-Control de repuestos disponibles en el taller.
-
-Funciones:
-
-* registro de repuestos
-* control de stock
-* alertas de bajo inventario
-* historial de uso de repuestos
-
-Ejemplos de repuestos:
-
-* aceite de motor
-* filtros
-* bujías
-* pastillas de freno
-* neumáticos
-
----
-
-## Historial de Mantenimiento
-
-Cada motocicleta tendrá un historial completo de servicios realizados.
-
-Incluye:
-
-* fecha de servicio
-* kilometraje
-* repuestos instalados
-* diagnóstico del mecánico
-* fotografías del estado del vehículo
-
----
-
-## Recordatorios de Servicio
-
-El sistema podrá generar recordatorios automáticos basados en:
-
-* kilometraje
-* tiempo desde el último servicio
-
-Ejemplos:
-
-* cambio de aceite
-* revisión de frenos
-* cambio de filtro
-
----
-
-## Panel de Control (Dashboard)
-
-El sistema incluirá un panel de métricas para el administrador del taller.
-
-Indicadores:
-
-* servicios realizados por mes
-* ingresos del taller
-* repuestos más utilizados
-* clientes recurrentes
-* motocicletas atendidas
-
----
-
-# 7. Seguridad del Sistema
-
-El sistema implementará:
-
-* autenticación basada en tokens
-* control de acceso por roles
-* protección de endpoints API
-
-Roles posibles:
-
-* administrador
-* mecánico
-* recepcionista
-
----
-
-# 8. Beneficios del Sistema
-
-La implementación del sistema permitirá:
-
-* digitalizar procesos del taller
-* mejorar el control de servicios
-* mantener historial técnico de motocicletas
-* optimizar inventario de repuestos
-* mejorar la atención al cliente
-* facilitar la toma de decisiones
-
----
-
-# 9. Posibles Extensiones Futuras
-
-El sistema puede ampliarse con funcionalidades adicionales como:
-
-* integración con facturación electrónica
-* aplicación móvil para clientes
-* notificaciones por WhatsApp
-* predicción de mantenimiento basada en datos históricos
-* integración con proveedores de repuestos
-
----
-
-# 10. Conclusión
-
-MotoCore propone una solución tecnológica moderna para la gestión de talleres de motocicletas mediante el uso de tecnologías web actuales y arquitectura multiplataforma.
-
-El sistema busca mejorar la eficiencia operativa de los talleres y proporcionar herramientas digitales que faciliten el control de mantenimiento, la administración de clientes y la gestión de inventarios.
-
-Además, el proyecto permite demostrar la aplicación de buenas prácticas en arquitectura de software, desarrollo multiplataforma y diseño de sistemas empresariales.
+Este proyecto se distribuye bajo los términos definidos en [LICENSE](LICENSE).
