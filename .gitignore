@@ -1,0 +1,39 @@
+# OS and editor
+.DS_Store
+Thumbs.db
+.idea/
+.vs/
+.vscode/*
+!.vscode/extensions.json
+*.swp
+*.swo
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+*.local
+
+# Logs
+logs/
+*.log
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
+frontend/coverage/
+
+# Backend
+backend/**/bin/
+backend/**/obj/
+backend/**/TestResults/
+backend/**/.vs/
+backend/**/Properties/launchSettings.json
+backend/**/appsettings.Local.json
+backend/**/appsettings.*.local.json
+
+# NuGet and tooling
+*.nupkg
+*.snupkg
+.nuget/

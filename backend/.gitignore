@@ -1,0 +1,16 @@
+# Build output
+bin/
+obj/
+TestResults/
+
+# User-specific files
+*.user
+*.rsuser
+*.suo
+
+# Local configuration
+appsettings.Local.json
+appsettings.*.local.json
+
+# IDE
+.vs/

@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/MotoCore.Api/MotoCore.Api.csproj" />
+    <Project Path="src/MotoCore.Application/MotoCore.Application.csproj" />
+    <Project Path="src/MotoCore.Domain/MotoCore.Domain.csproj" />
+    <Project Path="src/MotoCore.Infrastructure/MotoCore.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/MotoCore.Api.Tests/MotoCore.Api.Tests.csproj" />
+  </Folder>
+</Solution>
