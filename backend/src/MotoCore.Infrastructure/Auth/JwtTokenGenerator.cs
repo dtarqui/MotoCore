@@ -1,10 +1,10 @@
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using MotoCore.Application.Auth.Contracts;
 using MotoCore.Application.Auth.Models;
 using MotoCore.Domain.Auth;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 namespace MotoCore.Infrastructure.Auth;
 

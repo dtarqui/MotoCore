@@ -2,9 +2,9 @@ using MotoCore.Application.Auth.Contracts;
 using MotoCore.Application.Auth.Models;
 using MotoCore.Application.Common.Results;
 
-namespace MotoCore.Api.Endpoints;
+namespace MotoCore.Api.Controllers;
 
-public static class AuthEndpoints
+public static class AuthController
 {
     public static IEndpointRouteBuilder MapAuthEndpoints(this IEndpointRouteBuilder app)
     {

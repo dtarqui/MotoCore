@@ -17,10 +17,12 @@ public static class DependencyInjection
         {
             if (databaseProvider.Equals("PostgreSql", StringComparison.OrdinalIgnoreCase))
             {
-                var connectionString = configuration.GetConnectionString("DefaultConnection")
-                    ?? throw new InvalidOperationException("DefaultConnection is required when using PostgreSql.");
+                var connectionString = PostgresConnectionStringResolver.Resolve(
+                    configuration,
+                    "POSTGRES_* settings, DefaultConnection, or DATABASE_URL is required when using PostgreSql.");
 
-                options.UseNpgsql(connectionString);
+                options.UseNpgsql(connectionString, npgsqlOptions =>
+                    npgsqlOptions.MigrationsAssembly(typeof(Persistence.MotoCoreDbContext).Assembly.FullName));
                 return;
             }
 

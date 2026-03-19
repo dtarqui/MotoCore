@@ -1,6 +1,61 @@
-@MotoCore.Api_HostAddress = http://localhost:5104
+@baseUrl = http://localhost:5104
+@email = admin@motocore.local
+@password = Admin@123
+@auth_token = 
 
-GET {{MotoCore.Api_HostAddress}}/weatherforecast/
-Accept: application/json
+### 1. Register first user (becomes Administrator)
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
 
-###
+{
+  "email": "{{email}}",
+  "password": "{{password}}",
+  "firstName": "Admin",
+  "lastName": "User"
+}
+
+### 2. Login to get JWT token
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "password": "{{password}}"
+}
+
+### 3. Get all users (requires JWT + Administrator role)
+GET {{baseUrl}}/api/users
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+### 4. Get current user info (requires JWT)
+GET {{baseUrl}}/api/users/{userId}
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+### 5. Create a second user (Mechanic)
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "mechanic@motocore.local",
+  "password": "Mechanic@123",
+  "firstName": "John",
+  "lastName": "Mechanic"
+}
+
+### 6. Update user info (requires JWT + Administrator role)
+PUT {{baseUrl}}/api/users/{userId}
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+Content-Type: application/json
+
+{
+  "firstName": "John",
+  "lastName": "Updated",
+  "role": "Mechanic"
+}
+
+### 7. Delete user (requires JWT + Administrator role)
+DELETE {{baseUrl}}/api/users/{userId}
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+### 8. Health check
+GET {{baseUrl}}/health

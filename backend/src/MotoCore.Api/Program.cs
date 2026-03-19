@@ -1,18 +1,48 @@
-using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
-using MotoCore.Api.Endpoints;
+using MotoCore.Api.Controllers;
 using MotoCore.Application;
 using MotoCore.Infrastructure;
 using MotoCore.Infrastructure.Auth;
+using MotoCore.Infrastructure.Configuration;
 using MotoCore.Infrastructure.Persistence;
+using System.Text;
+
+EnvironmentFileLoader.LoadFromStandardLocations(Directory.GetCurrentDirectory(), AppContext.BaseDirectory);
 
 var builder = WebApplication.CreateBuilder(args);
 var jwtOptions = JwtOptions.FromConfiguration(builder.Configuration);
+var corsPolicyName = "Frontend";
+var configuredCorsOrigins = builder.Configuration
+    .GetSection("Cors:AllowedOrigins")
+    .Get<string[]>()
+    ?? [];
 
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(corsPolicyName, policy =>
+    {
+        if (configuredCorsOrigins.Length > 0)
+        {
+            policy.WithOrigins(configuredCorsOrigins)
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+
+            return;
+        }
+
+        if (builder.Environment.IsDevelopment())
+        {
+            policy.SetIsOriginAllowed(IsLocalDevelopmentOrigin)
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        }
+    });
+});
 
 builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
@@ -59,7 +89,16 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<MotoCoreDbContext>();
-    dbContext.Database.EnsureCreated();
+    var databaseProvider = builder.Configuration["Database:Provider"] ?? "InMemory";
+
+    if (databaseProvider.Equals("PostgreSql", StringComparison.OrdinalIgnoreCase))
+    {
+        dbContext.Database.Migrate();
+    }
+    else
+    {
+        dbContext.Database.EnsureCreated();
+    }
 }
 
 if (app.Environment.IsDevelopment())
@@ -73,6 +112,7 @@ if (app.Environment.IsDevelopment())
     });
 }
 
+app.UseCors(corsPolicyName);
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
@@ -85,5 +125,23 @@ app.MapGet("/health", () => Results.Ok(new
 })).WithTags("System");
 
 app.MapAuthEndpoints();
+app.MapUserEndpoints();
 
 app.Run();
+
+static bool IsLocalDevelopmentOrigin(string origin)
+{
+    if (!Uri.TryCreate(origin, UriKind.Absolute, out var uri))
+    {
+        return false;
+    }
+
+    if (!uri.Scheme.Equals(Uri.UriSchemeHttp, StringComparison.OrdinalIgnoreCase)
+        && !uri.Scheme.Equals(Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase))
+    {
+        return false;
+    }
+
+    return uri.Host.Equals("localhost", StringComparison.OrdinalIgnoreCase)
+        || uri.Host.Equals("127.0.0.1", StringComparison.OrdinalIgnoreCase);
+}

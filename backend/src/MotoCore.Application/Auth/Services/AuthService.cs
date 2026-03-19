@@ -1,8 +1,8 @@
-using System.Net.Mail;
 using MotoCore.Application.Auth.Contracts;
 using MotoCore.Application.Auth.Models;
 using MotoCore.Application.Common.Results;
 using MotoCore.Domain.Auth;
+using System.Net.Mail;
 
 namespace MotoCore.Application.Auth.Services;
 
@@ -103,7 +103,7 @@ public sealed class AuthService(
 
         var replacementRefreshToken = CreateRefreshToken(userAccount.Id, ipAddress, now);
         existingRefreshToken.Revoke(now, ipAddress, replacementRefreshToken.RefreshToken.TokenHash);
-        userAccount.RefreshTokens.Add(replacementRefreshToken.RefreshToken);
+    await userIdentityRepository.AddRefreshTokenAsync(replacementRefreshToken.RefreshToken, cancellationToken);
         userAccount.UpdatedAtUtc = now;
 
         var accessToken = jwtTokenGenerator.Generate(userAccount);
@@ -160,7 +160,7 @@ public sealed class AuthService(
         var accessToken = jwtTokenGenerator.Generate(userAccount);
         var refreshToken = CreateRefreshToken(userAccount.Id, ipAddress, now);
 
-        userAccount.RefreshTokens.Add(refreshToken.RefreshToken);
+        await userIdentityRepository.AddRefreshTokenAsync(refreshToken.RefreshToken, cancellationToken);
         userAccount.UpdatedAtUtc = now;
 
         await userIdentityRepository.SaveChangesAsync(cancellationToken);

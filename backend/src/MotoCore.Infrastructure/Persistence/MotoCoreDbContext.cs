@@ -11,6 +11,13 @@ public sealed class MotoCoreDbContext(DbContextOptions<MotoCoreDbContext> option
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        ConfigureUsers(modelBuilder);
+        ConfigureRefreshTokens(modelBuilder);
+        ConfigureExternalLogins(modelBuilder);
+    }
+
+    private static void ConfigureUsers(ModelBuilder modelBuilder)
+    {
         modelBuilder.Entity<UserAccount>(entity =>
         {
             entity.ToTable("users");
@@ -31,7 +38,10 @@ public sealed class MotoCoreDbContext(DbContextOptions<MotoCoreDbContext> option
                 .HasForeignKey(externalLogin => externalLogin.UserAccountId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
+    }
 
+    private static void ConfigureRefreshTokens(ModelBuilder modelBuilder)
+    {
         modelBuilder.Entity<RefreshToken>(entity =>
         {
             entity.ToTable("refresh_tokens");
@@ -42,7 +52,10 @@ public sealed class MotoCoreDbContext(DbContextOptions<MotoCoreDbContext> option
             entity.Property(refreshToken => refreshToken.ReplacedByTokenHash).HasMaxLength(128);
             entity.HasIndex(refreshToken => refreshToken.TokenHash).IsUnique();
         });
+    }
 
+    private static void ConfigureExternalLogins(ModelBuilder modelBuilder)
+    {
         modelBuilder.Entity<ExternalLogin>(entity =>
         {
             entity.ToTable("external_logins");

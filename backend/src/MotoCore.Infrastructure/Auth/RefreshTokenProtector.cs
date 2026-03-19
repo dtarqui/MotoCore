@@ -1,6 +1,6 @@
+using MotoCore.Application.Auth.Contracts;
 using System.Security.Cryptography;
 using System.Text;
-using MotoCore.Application.Auth.Contracts;
 
 namespace MotoCore.Infrastructure.Auth;
 
