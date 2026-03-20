@@ -12,5 +12,6 @@ public interface IWorkshopRepository
     Task AddMembershipAsync(WorkshopMembership membership, CancellationToken cancellationToken = default);
     Task UpdateAsync(Workshop workshop, CancellationToken cancellationToken = default);
     Task UpdateMembershipAsync(WorkshopMembership membership, CancellationToken cancellationToken = default);
+    Task DeleteAsync(Workshop workshop, CancellationToken cancellationToken = default);
     Task SaveChangesAsync(CancellationToken cancellationToken = default);
 }

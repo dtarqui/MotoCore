@@ -29,7 +29,7 @@ Este proyecto implementa **Clean Architecture** (Arquitectura Limpia) con separa
 - `UserAccount` - Usuario del sistema
 - `RefreshToken` - Tokens de actualización JWT
 - `ExternalLogin` - Autenticación con proveedores externos
-- `SystemRoles` - Roles del sistema (Administrator, Mechanic, Receptionist)
+- `SystemRoles` - Roles del sistema (Owner, Mechanic, Receptionist)
 
 #### 2. **MotoCore.Application** (Capa de Aplicación)
 - **Depende solo de Domain**
@@ -87,7 +87,8 @@ Este proyecto implementa **Clean Architecture** (Arquitectura Limpia) con separa
    ↓
    - Valida email y contraseña (min 8 caracteres)
    - Hash de contraseña
-   - Primer usuario → Administrator
+   - Primer usuario → Owner (dueño único del taller)
+   - Usuarios subsecuentes → Receptionist (rol por defecto)
    - Genera Access Token (15 min) + Refresh Token (7 días)
 
 2. LOGIN
@@ -123,10 +124,26 @@ Este proyecto implementa **Clean Architecture** (Arquitectura Limpia) con separa
 ### Users (`/api/users`)
 | Método | Endpoint | Descripción | Auth |
 |--------|----------|-------------|------|
-| GET | `/` | Listar usuarios | Admin |
-| GET | `/{userId}` | Obtener usuario | User/Admin |
-| PUT | `/{userId}` | Actualizar usuario | Admin |
-| DELETE | `/{userId}` | Eliminar usuario | Admin |
+| GET | `/` | Listar usuarios | Owner |
+| GET | `/me` | Obtener mi perfil | User |
+| GET | `/{userId}` | Obtener usuario | User/Owner |
+| PUT | `/me` | Actualizar mi perfil | User |
+| PUT | `/{userId}` | Actualizar usuario | Owner |
+| PATCH | `/{userId}/role` | Cambiar rol | Owner |
+| DELETE | `/{userId}` | Eliminar usuario | Owner |
+
+### Workshops (`/api/workshops`)
+| Método | Endpoint | Descripción | Auth |
+|--------|----------|-------------|------|
+| POST | `/` | Crear taller | Owner |
+| GET | `/` | Listar mis talleres | User |
+| GET | `/{id}` | Ver taller | Member |
+| PUT | `/{id}` | Actualizar taller | Owner |
+| DELETE | `/{id}` | Eliminar taller | Owner |
+| GET | `/{id}/members` | Listar miembros | Member |
+| POST | `/{id}/members/invite` | Invitar miembro | Owner |
+| DELETE | `/{id}/members/{mid}` | Remover miembro | Owner |
+| PATCH | `/{id}/members/{mid}/role` | Cambiar rol miembro | Owner |
 
 ### System
 | Método | Endpoint | Descripción | Auth |
@@ -135,9 +152,9 @@ Este proyecto implementa **Clean Architecture** (Arquitectura Limpia) con separa
 
 ## 🎭 Roles del Sistema
 
-- **Administrator** - Control total del sistema
-- **Mechanic** - Mecánico del taller
-- **Receptionist** - Recepcionista
+- **Owner** - Dueño único del taller, primer usuario registrado
+- **Mechanic** - Mecánico del taller (múltiples permitidos)
+- **Receptionist** - Recepcionista (múltiples permitidos, rol por defecto)
 
 ## 🗄️ Base de Datos
 

@@ -59,6 +59,12 @@ public sealed class WorkshopRepository(MotoCoreDbContext dbContext) : IWorkshopR
         return Task.CompletedTask;
     }
 
+    public Task DeleteAsync(Workshop workshop, CancellationToken cancellationToken = default)
+    {
+        dbContext.Workshops.Remove(workshop);
+        return Task.CompletedTask;
+    }
+
     public async Task SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         await dbContext.SaveChangesAsync(cancellationToken);

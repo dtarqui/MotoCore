@@ -76,6 +76,56 @@ public sealed class WorkshopService(
         return Result<IReadOnlyList<WorkshopDto>>.Success(dtos);
     }
 
+    public async Task<Result<WorkshopDto>> UpdateWorkshopAsync(Guid workshopId, Guid requestingUserId, UpdateWorkshopRequest request, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(request.Name))
+        {
+            return Result<WorkshopDto>.Failure("workshop.invalid_name", "Workshop name is required.");
+        }
+
+        var workshop = await workshopRepository.GetByIdAsync(workshopId, cancellationToken);
+        if (workshop is null)
+        {
+            return Result<WorkshopDto>.Failure("workshop.not_found", "Workshop not found.");
+        }
+
+        if (workshop.OwnerId != requestingUserId)
+        {
+            return Result<WorkshopDto>.Failure("workshop.access_denied", "Only the workshop owner can update it.");
+        }
+
+        workshop.Name = request.Name.Trim();
+        workshop.Description = request.Description?.Trim();
+        workshop.Address = request.Address?.Trim();
+        workshop.PhoneNumber = request.PhoneNumber?.Trim();
+        workshop.Email = request.Email?.Trim();
+        workshop.UpdatedAtUtc = DateTimeOffset.UtcNow;
+
+        await workshopRepository.UpdateAsync(workshop, cancellationToken);
+        await workshopRepository.SaveChangesAsync(cancellationToken);
+
+        return Result<WorkshopDto>.Success(MapToDto(workshop));
+    }
+
+    public async Task<Result> DeleteWorkshopAsync(Guid workshopId, Guid requestingUserId, CancellationToken cancellationToken = default)
+    {
+        var workshop = await workshopRepository.GetByIdAsync(workshopId, cancellationToken);
+        if (workshop is null)
+        {
+            return Result.Failure("workshop.not_found", "Workshop not found.");
+        }
+
+        if (workshop.OwnerId != requestingUserId)
+        {
+            return Result.Failure("workshop.access_denied", "Only the workshop owner can delete it.");
+        }
+
+        await workshopRepository.DeleteAsync(workshop, cancellationToken);
+        await workshopRepository.SaveChangesAsync(cancellationToken);
+
+        return Result.Success();
+    }
+
     public async Task<Result<IReadOnlyList<WorkshopMemberDto>>> GetWorkshopMembersAsync(Guid workshopId, Guid requestingUserId, CancellationToken cancellationToken = default)
     {
         var membership = await workshopRepository.GetMembershipAsync(workshopId, requestingUserId, cancellationToken);

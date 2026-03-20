@@ -71,6 +71,53 @@ public sealed class UserService(IUserIdentityRepository userRepository) : IUserS
         return Result.Success();
     }
 
+    public async Task<Result<UserDto>> UpdateUserRoleAsync(
+        Guid userId,
+        UpdateUserRoleRequest request,
+        string? modifiedByUserId,
+        CancellationToken cancellationToken = default)
+    {
+        var user = await userRepository.GetByIdAsync(userId, cancellationToken);
+        if (user is null)
+        {
+            return Result<UserDto>.Failure("user.not_found", "User not found.");
+        }
+
+        if (!SystemRoles.IsSupported(request.Role))
+        {
+            return Result<UserDto>.Failure("user.invalid_role", "Invalid role.");
+        }
+
+        user.Role = request.Role;
+        user.UpdatedAtUtc = DateTimeOffset.UtcNow;
+
+        await userRepository.UpdateAsync(user, cancellationToken);
+        await userRepository.SaveChangesAsync(cancellationToken);
+
+        return Result<UserDto>.Success(MapToDto(user));
+    }
+
+    public async Task<Result<UserStatisticsDto>> GetStatisticsAsync(CancellationToken cancellationToken = default)
+    {
+        var users = await userRepository.GetAllAsync(cancellationToken);
+
+        var totalUsers = users.Count;
+        var confirmedUsers = users.Count(u => u.EmailConfirmed);
+        var unconfirmedUsers = totalUsers - confirmedUsers;
+
+        var usersByRole = users
+            .GroupBy(u => u.Role)
+            .ToDictionary(g => g.Key, g => g.Count());
+
+        var statistics = new UserStatisticsDto(
+            totalUsers,
+            confirmedUsers,
+            unconfirmedUsers,
+            usersByRole);
+
+        return Result<UserStatisticsDto>.Success(statistics);
+    }
+
     private static UserDto MapToDto(UserAccount user) =>
         new(
             user.Id,
