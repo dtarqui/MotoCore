@@ -1,4 +1,6 @@
 using System.Security.Claims;
+using MotoCore.Api.Extensions;
+using MotoCore.Api.Filters;
 using MotoCore.Application.Common.Results;
 using MotoCore.Application.Users.Contracts;
 using MotoCore.Application.Users.Models;
@@ -24,7 +26,8 @@ public static class UserController
 
         group.MapPut("/{userId:guid}", UpdateUser)
             .WithName("UpdateUser")
-            .WithSummary("Update user details (Administrator only).");
+            .WithSummary("Update user details (Administrator only).")
+            .WithValidation<UpdateUserRequest>();
 
         group.MapDelete("/{userId:guid}", DeleteUser)
             .WithName("DeleteUser")
@@ -41,7 +44,7 @@ public static class UserController
         }
 
         var result = await userService.GetAllUsersAsync(cancellationToken);
-        return ToHttpResult(result);
+        return result.ToHttpResult();
     }
 
     private static async Task<IResult> GetUserById(Guid userId, IUserService userService, ClaimsPrincipal user, CancellationToken cancellationToken)
@@ -55,7 +58,7 @@ public static class UserController
         }
 
         var result = await userService.GetUserByIdAsync(userId, cancellationToken);
-        return ToHttpResult(result);
+        return result.ToHttpResult();
     }
 
     private static async Task<IResult> UpdateUser(
@@ -71,7 +74,7 @@ public static class UserController
         }
 
         var result = await userService.UpdateUserAsync(userId, request, GetCurrentUserId(user), cancellationToken);
-        return ToHttpResult(result);
+        return result.ToHttpResult();
     }
 
     private static async Task<IResult> DeleteUser(Guid userId, IUserService userService, ClaimsPrincipal user, CancellationToken cancellationToken)
@@ -82,7 +85,7 @@ public static class UserController
         }
 
         var result = await userService.DeleteUserAsync(userId, cancellationToken);
-        return ToHttpResult(result);
+        return result.ToHttpResult();
     }
 
     private static bool IsAdministrator(ClaimsPrincipal user) =>
@@ -90,36 +93,4 @@ public static class UserController
 
     private static string? GetCurrentUserId(ClaimsPrincipal user) =>
         user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-    private static IResult ToHttpResult<T>(Result<T> result)
-    {
-        if (result.IsSuccess)
-        {
-            return Results.Ok(result.Value);
-        }
-
-        return ToProblemResult(result.Error!);
-    }
-
-    private static IResult ToHttpResult(Result result)
-    {
-        if (result.IsSuccess)
-        {
-            return Results.NoContent();
-        }
-
-        return ToProblemResult(result.Error!);
-    }
-
-    private static IResult ToProblemResult(Error error)
-    {
-        var statusCode = error.Code switch
-        {
-            "user.not_found" => StatusCodes.Status404NotFound,
-            "user.invalid_role" => StatusCodes.Status400BadRequest,
-            _ => StatusCodes.Status400BadRequest,
-        };
-
-        return Results.Problem(statusCode: statusCode, title: error.Code, detail: error.Message);
-    }
 }

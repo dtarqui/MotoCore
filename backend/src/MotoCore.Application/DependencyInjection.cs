@@ -1,3 +1,4 @@
+using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using MotoCore.Application.Auth.Contracts;
 using MotoCore.Application.Auth.Services;
@@ -12,6 +13,10 @@ public static class DependencyInjection
     {
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IUserService, UserService>();
+
+        // Register FluentValidation validators
+        services.AddValidatorsFromAssemblyContaining<IAuthService>(ServiceLifetime.Scoped);
+
         return services;
     }
 }

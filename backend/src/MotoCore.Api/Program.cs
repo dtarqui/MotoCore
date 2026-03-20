@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using MotoCore.Api.Controllers;
+using MotoCore.Api.Middleware;
 using MotoCore.Application;
 using MotoCore.Infrastructure;
 using MotoCore.Infrastructure.Auth;
@@ -112,6 +113,7 @@ if (app.Environment.IsDevelopment())
     });
 }
 
+app.UseGlobalExceptionHandling();
 app.UseCors(corsPolicyName);
 app.UseHttpsRedirection();
 app.UseAuthentication();

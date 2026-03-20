@@ -1,3 +1,5 @@
+using MotoCore.Api.Extensions;
+using MotoCore.Api.Filters;
 using MotoCore.Application.Auth.Contracts;
 using MotoCore.Application.Auth.Models;
 using MotoCore.Application.Common.Results;
@@ -17,15 +19,18 @@ public static class AuthController
 
         group.MapPost("/register", Register)
             .WithName("RegisterAccount")
-            .WithSummary("Create a local account and issue access/refresh tokens.");
+            .WithSummary("Create a local account and issue access/refresh tokens.")
+            .WithValidation<RegisterAccountRequest>();
 
         group.MapPost("/login", Login)
             .WithName("Login")
-            .WithSummary("Authenticate a user with email and password.");
+            .WithSummary("Authenticate a user with email and password.")
+            .WithValidation<LoginRequest>();
 
         group.MapPost("/refresh-token", RefreshToken)
             .WithName("RefreshToken")
-            .WithSummary("Rotate the refresh token and issue a new access token.");
+            .WithSummary("Rotate the refresh token and issue a new access token.")
+            .WithValidation<RefreshTokenRequest>();
 
         group.MapPost("/logout", Logout)
             .WithName("Logout")
@@ -37,7 +42,7 @@ public static class AuthController
     private static async Task<IResult> GetExternalProviders(IAuthService authService, CancellationToken cancellationToken)
     {
         var result = await authService.GetExternalProvidersAsync(cancellationToken);
-        return ToHttpResult(result);
+        return result.ToHttpResult();
     }
 
     private static async Task<IResult> Register(RegisterAccountRequest request, HttpContext httpContext, IAuthService authService, CancellationToken cancellationToken)
@@ -49,19 +54,19 @@ public static class AuthController
             return Results.Created("/api/auth/login", result.Value);
         }
 
-        return ToHttpResult(result);
+        return result.ToHttpResult();
     }
 
     private static async Task<IResult> Login(LoginRequest request, HttpContext httpContext, IAuthService authService, CancellationToken cancellationToken)
     {
         var result = await authService.LoginAsync(request, GetIpAddress(httpContext), cancellationToken);
-        return ToHttpResult(result);
+        return result.ToHttpResult();
     }
 
     private static async Task<IResult> RefreshToken(RefreshTokenRequest request, HttpContext httpContext, IAuthService authService, CancellationToken cancellationToken)
     {
         var result = await authService.RefreshTokenAsync(request, GetIpAddress(httpContext), cancellationToken);
-        return ToHttpResult(result);
+        return result.ToHttpResult();
     }
 
     private static async Task<IResult> Logout(LogoutRequest request, HttpContext httpContext, IAuthService authService, CancellationToken cancellationToken)
@@ -73,43 +78,7 @@ public static class AuthController
             return Results.NoContent();
         }
 
-        return ToHttpResult(result);
-    }
-
-    private static IResult ToHttpResult<T>(Result<T> result)
-    {
-        if (result.IsSuccess)
-        {
-            return Results.Ok(result.Value);
-        }
-
-        return ToProblemResult(result.Error!);
-    }
-
-    private static IResult ToHttpResult(Result result)
-    {
-        if (result.IsSuccess)
-        {
-            return Results.NoContent();
-        }
-
-        return ToProblemResult(result.Error!);
-    }
-
-    private static IResult ToProblemResult(Error error)
-    {
-        var statusCode = error.Code switch
-        {
-            "auth.invalid_credentials" => StatusCodes.Status401Unauthorized,
-            "auth.invalid_refresh_token" => StatusCodes.Status401Unauthorized,
-            "auth.email_in_use" => StatusCodes.Status409Conflict,
-            "auth.invalid_email" => StatusCodes.Status400BadRequest,
-            "auth.invalid_password" => StatusCodes.Status400BadRequest,
-            "auth.invalid_role" => StatusCodes.Status400BadRequest,
-            _ => StatusCodes.Status400BadRequest,
-        };
-
-        return Results.Problem(statusCode: statusCode, title: error.Code, detail: error.Message);
+        return result.ToHttpResult();
     }
 
     private static string? GetIpAddress(HttpContext httpContext) =>
