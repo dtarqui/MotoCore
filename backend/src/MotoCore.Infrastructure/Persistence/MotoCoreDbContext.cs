@@ -33,6 +33,8 @@ public sealed class MotoCoreDbContext(DbContextOptions<MotoCoreDbContext> option
             entity.Property(user => user.FirstName).HasMaxLength(100).IsRequired();
             entity.Property(user => user.LastName).HasMaxLength(100).IsRequired();
             entity.Property(user => user.Role).HasMaxLength(50).IsRequired();
+            entity.Property(user => user.EmailConfirmationToken).HasMaxLength(256);
+            entity.Property(user => user.PasswordResetToken).HasMaxLength(256);
             entity.HasIndex(user => user.NormalizedEmail).IsUnique();
             entity.HasMany(user => user.RefreshTokens)
                 .WithOne(refreshToken => refreshToken.UserAccount)

@@ -12,6 +12,10 @@ public sealed class UserAccount
     public string LastName { get; set; } = string.Empty;
     public string Role { get; set; } = SystemRoles.Receptionist;
     public bool EmailConfirmed { get; set; }
+    public string? EmailConfirmationToken { get; set; }
+    public DateTimeOffset? EmailConfirmationTokenExpiresAt { get; set; }
+    public string? PasswordResetToken { get; set; }
+    public DateTimeOffset? PasswordResetTokenExpiresAt { get; set; }
     public DateTimeOffset CreatedAtUtc { get; set; } = DateTimeOffset.UtcNow;
     public DateTimeOffset? UpdatedAtUtc { get; set; }
 

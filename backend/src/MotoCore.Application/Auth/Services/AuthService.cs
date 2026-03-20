@@ -4,6 +4,7 @@ using MotoCore.Application.Common.Results;
 using MotoCore.Application.Workshops.Contracts;
 using MotoCore.Domain.Auth;
 using System.Net.Mail;
+using System.Security.Cryptography;
 
 namespace MotoCore.Application.Auth.Services;
 
@@ -17,6 +18,8 @@ public sealed class AuthService(
 {
     private const int MinimumPasswordLength = 8;
     private const int RefreshTokenLifetimeDays = 7;
+    private const int EmailConfirmationTokenExpirationHours = 24;
+    private const int PasswordResetTokenExpirationHours = 1;
 
     public async Task<Result<AuthResponse>> RegisterAsync(RegisterAccountRequest request, string? ipAddress, CancellationToken cancellationToken = default)
     {
@@ -54,6 +57,8 @@ public sealed class AuthService(
             LastName = request.LastName.Trim(),
             Role = resolvedRole,
             EmailConfirmed = false,
+            EmailConfirmationToken = GenerateSecureToken(),
+            EmailConfirmationTokenExpiresAt = DateTimeOffset.UtcNow.AddHours(EmailConfirmationTokenExpirationHours),
         };
 
         userAccount.PasswordHash = passwordHashingService.HashPassword(userAccount, request.Password);
@@ -228,5 +233,147 @@ public sealed class AuthService(
     private static UserAccountResponse MapUser(UserAccount userAccount) =>
         new(userAccount.Id, userAccount.Email, userAccount.FirstName, userAccount.LastName, userAccount.Role);
 
+    public async Task<Result> ChangePasswordAsync(Guid userId, ChangePasswordRequest request, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(request.NewPassword) || request.NewPassword.Length < MinimumPasswordLength)
+        {
+            return Result.Failure("auth.invalid_password", "Password must be at least 8 characters long.");
+        }
+
+        var userAccount = await userIdentityRepository.GetByIdAsync(userId, cancellationToken);
+
+        if (userAccount is null)
+        {
+            return Result.Failure("auth.user_not_found", "User not found.");
+        }
+
+        if (!passwordHashingService.VerifyPassword(userAccount, request.CurrentPassword))
+        {
+            return Result.Failure("auth.invalid_password", "Current password is incorrect.");
+        }
+
+        userAccount.PasswordHash = passwordHashingService.HashPassword(userAccount, request.NewPassword);
+        userAccount.UpdatedAtUtc = DateTimeOffset.UtcNow;
+
+        await userIdentityRepository.SaveChangesAsync(cancellationToken);
+
+        return Result.Success();
+    }
+
+    public async Task<Result> ForgotPasswordAsync(ForgotPasswordRequest request, CancellationToken cancellationToken = default)
+    {
+        var normalizedEmail = NormalizeEmail(request.Email);
+        var userAccount = await userIdentityRepository.GetByEmailAsync(normalizedEmail, cancellationToken);
+
+        if (userAccount is null)
+        {
+            return Result.Success();
+        }
+
+        var token = GenerateSecureToken();
+        userAccount.PasswordResetToken = token;
+        userAccount.PasswordResetTokenExpiresAt = DateTimeOffset.UtcNow.AddHours(PasswordResetTokenExpirationHours);
+        userAccount.UpdatedAtUtc = DateTimeOffset.UtcNow;
+
+        await userIdentityRepository.SaveChangesAsync(cancellationToken);
+
+        return Result.Success();
+    }
+
+    public async Task<Result> ResetPasswordAsync(ResetPasswordRequest request, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(request.NewPassword) || request.NewPassword.Length < MinimumPasswordLength)
+        {
+            return Result.Failure("auth.invalid_password", "Password must be at least 8 characters long.");
+        }
+
+        var normalizedEmail = NormalizeEmail(request.Email);
+        var userAccount = await userIdentityRepository.GetByEmailAsync(normalizedEmail, cancellationToken);
+
+        if (userAccount is null || string.IsNullOrWhiteSpace(userAccount.PasswordResetToken))
+        {
+            return Result.Failure("auth.invalid_token", "Invalid or expired reset token.");
+        }
+
+        if (userAccount.PasswordResetToken != request.Token)
+        {
+            return Result.Failure("auth.invalid_token", "Invalid or expired reset token.");
+        }
+
+        if (userAccount.PasswordResetTokenExpiresAt is null || userAccount.PasswordResetTokenExpiresAt < DateTimeOffset.UtcNow)
+        {
+            return Result.Failure("auth.invalid_token", "Invalid or expired reset token.");
+        }
+
+        userAccount.PasswordHash = passwordHashingService.HashPassword(userAccount, request.NewPassword);
+        userAccount.PasswordResetToken = null;
+        userAccount.PasswordResetTokenExpiresAt = null;
+        userAccount.UpdatedAtUtc = DateTimeOffset.UtcNow;
+
+        await userIdentityRepository.SaveChangesAsync(cancellationToken);
+
+        return Result.Success();
+    }
+
+    public async Task<Result> ConfirmEmailAsync(ConfirmEmailRequest request, CancellationToken cancellationToken = default)
+    {
+        var normalizedEmail = NormalizeEmail(request.Email);
+        var userAccount = await userIdentityRepository.GetByEmailAsync(normalizedEmail, cancellationToken);
+
+        if (userAccount is null || string.IsNullOrWhiteSpace(userAccount.EmailConfirmationToken))
+        {
+            return Result.Failure("auth.invalid_token", "Invalid or expired confirmation token.");
+        }
+
+        if (userAccount.EmailConfirmationToken != request.Token)
+        {
+            return Result.Failure("auth.invalid_token", "Invalid or expired confirmation token.");
+        }
+
+        if (userAccount.EmailConfirmationTokenExpiresAt is null || userAccount.EmailConfirmationTokenExpiresAt < DateTimeOffset.UtcNow)
+        {
+            return Result.Failure("auth.invalid_token", "Invalid or expired confirmation token.");
+        }
+
+        userAccount.EmailConfirmed = true;
+        userAccount.EmailConfirmationToken = null;
+        userAccount.EmailConfirmationTokenExpiresAt = null;
+        userAccount.UpdatedAtUtc = DateTimeOffset.UtcNow;
+
+        await userIdentityRepository.SaveChangesAsync(cancellationToken);
+
+        return Result.Success();
+    }
+
+    public async Task<Result> ResendConfirmationAsync(ResendConfirmationRequest request, CancellationToken cancellationToken = default)
+    {
+        var normalizedEmail = NormalizeEmail(request.Email);
+        var userAccount = await userIdentityRepository.GetByEmailAsync(normalizedEmail, cancellationToken);
+
+        if (userAccount is null)
+        {
+            return Result.Success();
+        }
+
+        if (userAccount.EmailConfirmed)
+        {
+            return Result.Failure("auth.email_already_confirmed", "Email is already confirmed.");
+        }
+
+        var token = GenerateSecureToken();
+        userAccount.EmailConfirmationToken = token;
+        userAccount.EmailConfirmationTokenExpiresAt = DateTimeOffset.UtcNow.AddHours(EmailConfirmationTokenExpirationHours);
+        userAccount.UpdatedAtUtc = DateTimeOffset.UtcNow;
+
+        await userIdentityRepository.SaveChangesAsync(cancellationToken);
+
+        return Result.Success();
+    }
+
+    private static string GenerateSecureToken()
+    {
+        var randomBytes = RandomNumberGenerator.GetBytes(32);
+        return Convert.ToBase64String(randomBytes);
+    }
     private sealed record GeneratedRefreshToken(string Token, DateTimeOffset ExpiresAtUtc, RefreshToken RefreshToken);
 }

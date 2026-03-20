@@ -35,6 +35,32 @@ public static class AuthController
             .WithName("Logout")
             .WithSummary("Revoke the current refresh token session.");
 
+        group.MapPost("/change-password", ChangePassword)
+            .WithName("ChangePassword")
+            .WithSummary("Change the password for the authenticated user.")
+            .WithValidation<ChangePasswordRequest>()
+            .RequireAuthorization();
+
+        group.MapPost("/forgot-password", ForgotPassword)
+            .WithName("ForgotPassword")
+            .WithSummary("Request a password reset token.")
+            .WithValidation<ForgotPasswordRequest>();
+
+        group.MapPost("/reset-password", ResetPassword)
+            .WithName("ResetPassword")
+            .WithSummary("Reset password using a reset token.")
+            .WithValidation<ResetPasswordRequest>();
+
+        group.MapPost("/confirm-email", ConfirmEmail)
+            .WithName("ConfirmEmail")
+            .WithSummary("Confirm email address using confirmation token.")
+            .WithValidation<ConfirmEmailRequest>();
+
+        group.MapPost("/resend-confirmation", ResendConfirmation)
+            .WithName("ResendConfirmation")
+            .WithSummary("Resend email confirmation token.")
+            .WithValidation<ResendConfirmationRequest>();
+
         return app;
     }
 
@@ -75,6 +101,73 @@ public static class AuthController
         if (result.IsSuccess)
         {
             return Results.NoContent();
+        }
+
+        return result.ToHttpResult();
+    }
+
+    private static async Task<IResult> ChangePassword(ChangePasswordRequest request, HttpContext httpContext, IAuthService authService, CancellationToken cancellationToken)
+    {
+        var userId = httpContext.User.GetUserId();
+
+        if (userId is null)
+        {
+            return Results.Unauthorized();
+        }
+
+        var result = await authService.ChangePasswordAsync(userId.Value, request, cancellationToken);
+
+        if (result.IsSuccess)
+        {
+            return Results.NoContent();
+        }
+
+        return result.ToHttpResult();
+    }
+
+    private static async Task<IResult> ForgotPassword(ForgotPasswordRequest request, IAuthService authService, CancellationToken cancellationToken)
+    {
+        var result = await authService.ForgotPasswordAsync(request, cancellationToken);
+
+        if (result.IsSuccess)
+        {
+            return Results.Ok(new { message = "If the email exists, a password reset link has been sent." });
+        }
+
+        return result.ToHttpResult();
+    }
+
+    private static async Task<IResult> ResetPassword(ResetPasswordRequest request, IAuthService authService, CancellationToken cancellationToken)
+    {
+        var result = await authService.ResetPasswordAsync(request, cancellationToken);
+
+        if (result.IsSuccess)
+        {
+            return Results.Ok(new { message = "Password has been reset successfully." });
+        }
+
+        return result.ToHttpResult();
+    }
+
+    private static async Task<IResult> ConfirmEmail(ConfirmEmailRequest request, IAuthService authService, CancellationToken cancellationToken)
+    {
+        var result = await authService.ConfirmEmailAsync(request, cancellationToken);
+
+        if (result.IsSuccess)
+        {
+            return Results.Ok(new { message = "Email confirmed successfully." });
+        }
+
+        return result.ToHttpResult();
+    }
+
+    private static async Task<IResult> ResendConfirmation(ResendConfirmationRequest request, IAuthService authService, CancellationToken cancellationToken)
+    {
+        var result = await authService.ResendConfirmationAsync(request, cancellationToken);
+
+        if (result.IsSuccess)
+        {
+            return Results.Ok(new { message = "If the email exists, a new confirmation link has been sent." });
         }
 
         return result.ToHttpResult();
