@@ -1,5 +1,4 @@
 using FluentValidation;
-using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace MotoCore.Api.Filters;
 
@@ -15,14 +14,14 @@ public sealed class ValidationFilter<T> : IEndpointFilter
     public async ValueTask<object?> InvokeAsync(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
     {
         var request = context.Arguments.OfType<T>().FirstOrDefault();
-        
+
         if (request is null)
         {
             return await next(context);
         }
 
         var validationResult = await _validator.ValidateAsync(request);
-        
+
         if (!validationResult.IsValid)
         {
             var errors = validationResult.Errors
@@ -42,7 +41,7 @@ public sealed class ValidationFilter<T> : IEndpointFilter
     {
         if (string.IsNullOrEmpty(str) || char.IsLower(str[0]))
             return str;
-        
+
         return char.ToLowerInvariant(str[0]) + str.Substring(1);
     }
 }

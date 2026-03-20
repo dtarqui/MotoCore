@@ -1,3 +1,5 @@
+using MotoCore.Domain.Workshops;
+
 namespace MotoCore.Domain.Auth;
 
 public sealed class UserAccount
@@ -15,4 +17,5 @@ public sealed class UserAccount
 
     public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
     public ICollection<ExternalLogin> ExternalLogins { get; set; } = new List<ExternalLogin>();
+    public ICollection<WorkshopMembership> WorkshopMemberships { get; set; } = new List<WorkshopMembership>();
 }

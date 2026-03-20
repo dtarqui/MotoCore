@@ -5,4 +5,5 @@ public sealed record RegisterAccountRequest(
     string Password,
     string FirstName,
     string LastName,
-    string? Role);
+    string? Role,
+    string? WorkshopName);

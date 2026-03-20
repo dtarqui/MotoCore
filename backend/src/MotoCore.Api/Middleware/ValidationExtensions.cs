@@ -1,6 +1,5 @@
 using FluentValidation;
 using System.Net;
-using System.Text.Json;
 
 namespace MotoCore.Api.Middleware;
 
@@ -24,7 +23,7 @@ public static class ValidationExtensions
     public static async Task<IResult> ValidateAsync<T>(T request, IValidator<T> validator)
     {
         var validationResult = await validator.ValidateAsync(request);
-        
+
         if (!validationResult.IsValid)
         {
             var errors = validationResult.Errors
@@ -52,7 +51,7 @@ public static class ValidationExtensions
     {
         if (string.IsNullOrEmpty(str) || char.IsLower(str[0]))
             return str;
-        
+
         return char.ToLowerInvariant(str[0]) + str.Substring(1);
     }
 }

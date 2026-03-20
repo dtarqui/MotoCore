@@ -1,6 +1,7 @@
 using MotoCore.Application.Auth.Contracts;
 using MotoCore.Application.Auth.Models;
 using MotoCore.Application.Common.Results;
+using MotoCore.Application.Workshops.Contracts;
 using MotoCore.Domain.Auth;
 using System.Net.Mail;
 
@@ -11,7 +12,8 @@ public sealed class AuthService(
     IPasswordHashingService passwordHashingService,
     IJwtTokenGenerator jwtTokenGenerator,
     IRefreshTokenProtector refreshTokenProtector,
-    IExternalAuthProviderCatalog externalAuthProviderCatalog) : IAuthService
+    IExternalAuthProviderCatalog externalAuthProviderCatalog,
+    IWorkshopRepository workshopRepository) : IAuthService
 {
     private const int MinimumPasswordLength = 8;
     private const int RefreshTokenLifetimeDays = 7;
@@ -103,7 +105,7 @@ public sealed class AuthService(
 
         var replacementRefreshToken = CreateRefreshToken(userAccount.Id, ipAddress, now);
         existingRefreshToken.Revoke(now, ipAddress, replacementRefreshToken.RefreshToken.TokenHash);
-    await userIdentityRepository.AddRefreshTokenAsync(replacementRefreshToken.RefreshToken, cancellationToken);
+        await userIdentityRepository.AddRefreshTokenAsync(replacementRefreshToken.RefreshToken, cancellationToken);
         userAccount.UpdatedAtUtc = now;
 
         var accessToken = jwtTokenGenerator.Generate(userAccount);
@@ -157,7 +159,9 @@ public sealed class AuthService(
     private async Task<AuthResponse> IssueTokensAsync(UserAccount userAccount, string? ipAddress, CancellationToken cancellationToken)
     {
         var now = DateTimeOffset.UtcNow;
-        var accessToken = jwtTokenGenerator.Generate(userAccount);
+
+        var userWithMemberships = await userIdentityRepository.GetByIdAsync(userAccount.Id, cancellationToken);
+        var accessToken = jwtTokenGenerator.Generate(userWithMemberships!, userWithMemberships?.WorkshopMemberships);
         var refreshToken = CreateRefreshToken(userAccount.Id, ipAddress, now);
 
         await userIdentityRepository.AddRefreshTokenAsync(refreshToken.RefreshToken, cancellationToken);
@@ -212,7 +216,7 @@ public sealed class AuthService(
     {
         if (string.IsNullOrWhiteSpace(requestedRole))
         {
-            return isFirstUser ? SystemRoles.Administrator : SystemRoles.Receptionist;
+            return isFirstUser ? SystemRoles.Owner : SystemRoles.Receptionist;
         }
 
         var normalizedRole = SystemRoles.All.FirstOrDefault(role =>

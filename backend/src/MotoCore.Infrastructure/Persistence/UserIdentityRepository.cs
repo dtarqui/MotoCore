@@ -13,18 +13,21 @@ public sealed class UserIdentityRepository(MotoCoreDbContext dbContext) : IUserI
         dbContext.Users
             .Include(user => user.RefreshTokens)
             .Include(user => user.ExternalLogins)
+            .Include(user => user.WorkshopMemberships)
             .FirstOrDefaultAsync(user => user.Id == userId, cancellationToken);
 
     public Task<UserAccount?> GetByEmailAsync(string normalizedEmail, CancellationToken cancellationToken = default) =>
         dbContext.Users
             .Include(user => user.RefreshTokens)
             .Include(user => user.ExternalLogins)
+            .Include(user => user.WorkshopMemberships)
             .SingleOrDefaultAsync(user => user.NormalizedEmail == normalizedEmail, cancellationToken);
 
     public Task<UserAccount?> GetByRefreshTokenHashAsync(string refreshTokenHash, CancellationToken cancellationToken = default) =>
         dbContext.Users
             .Include(user => user.RefreshTokens)
             .Include(user => user.ExternalLogins)
+            .Include(user => user.WorkshopMemberships)
             .SingleOrDefaultAsync(
                 user => user.RefreshTokens.Any(refreshToken => refreshToken.TokenHash == refreshTokenHash),
                 cancellationToken);

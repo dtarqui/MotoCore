@@ -4,6 +4,8 @@ using MotoCore.Application.Auth.Contracts;
 using MotoCore.Application.Auth.Services;
 using MotoCore.Application.Users.Contracts;
 using MotoCore.Application.Users.Services;
+using MotoCore.Application.Workshops.Contracts;
+using MotoCore.Application.Workshops.Services;
 
 namespace MotoCore.Application;
 
@@ -13,8 +15,8 @@ public static class DependencyInjection
     {
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IUserService, UserService>();
+        services.AddScoped<IWorkshopService, WorkshopService>();
 
-        // Register FluentValidation validators
         services.AddValidatorsFromAssemblyContaining<IAuthService>(ServiceLifetime.Scoped);
 
         return services;

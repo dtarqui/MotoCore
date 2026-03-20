@@ -2,7 +2,6 @@ using MotoCore.Api.Extensions;
 using MotoCore.Api.Filters;
 using MotoCore.Application.Auth.Contracts;
 using MotoCore.Application.Auth.Models;
-using MotoCore.Application.Common.Results;
 
 namespace MotoCore.Api.Controllers;
 

@@ -2,6 +2,7 @@ using Microsoft.IdentityModel.Tokens;
 using MotoCore.Application.Auth.Contracts;
 using MotoCore.Application.Auth.Models;
 using MotoCore.Domain.Auth;
+using MotoCore.Domain.Workshops;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -10,7 +11,7 @@ namespace MotoCore.Infrastructure.Auth;
 
 public sealed class JwtTokenGenerator(JwtOptions jwtOptions) : IJwtTokenGenerator
 {
-    public AccessTokenResult Generate(UserAccount userAccount)
+    public AccessTokenResult Generate(UserAccount userAccount, IEnumerable<WorkshopMembership>? memberships = null)
     {
         var expiresAtUtc = DateTimeOffset.UtcNow.AddMinutes(jwtOptions.AccessTokenMinutes);
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.SigningKey));
@@ -28,6 +29,15 @@ public sealed class JwtTokenGenerator(JwtOptions jwtOptions) : IJwtTokenGenerato
             new(ClaimTypes.Email, userAccount.Email),
             new(ClaimTypes.Role, userAccount.Role),
         };
+
+        if (memberships is not null)
+        {
+            foreach (var membership in memberships.Where(m => m.IsActive))
+            {
+                claims.Add(new Claim("workshop_id", membership.WorkshopId.ToString()));
+                claims.Add(new Claim("workshop_role", $"{membership.WorkshopId}:{membership.Role}"));
+            }
+        }
 
         var token = new JwtSecurityToken(
             issuer: jwtOptions.Issuer,
