@@ -10,7 +10,7 @@ public static class WorkOrderController
 {
     public static RouteGroupBuilder MapWorkOrderEndpoints(this IEndpointRouteBuilder endpoints)
     {
-        var group = endpoints.MapGroup("/api/workshops/{workshopId:guid}/work-orders")
+        var group = endpoints.MapGroup("/api/work-orders")
             .WithTags("Work Orders")
             .RequireAuthorization();
 
@@ -43,7 +43,6 @@ public static class WorkOrderController
     }
 
     private static async Task<IResult> CreateWorkOrder(
-        Guid workshopId,
         CreateWorkOrderRequest request,
         IWorkOrderService workOrderService,
         HttpContext httpContext)
@@ -54,18 +53,23 @@ public static class WorkOrderController
             return Results.Unauthorized();
         }
 
-        var result = await workOrderService.CreateWorkOrderAsync(workshopId, userId.Value, request);
+        var workshopId = httpContext.User.GetFirstWorkshopId();
+        if (!workshopId.HasValue)
+        {
+            return Results.BadRequest(new { error = "No workshop assigned to user" });
+        }
+
+        var result = await workOrderService.CreateWorkOrderAsync(workshopId.Value, userId.Value, request);
 
         if (result.IsSuccess)
         {
-            return Results.Created($"/api/workshops/{workshopId}/work-orders/{result.Value!.Id}", result.Value);
+            return Results.Created($"/api/work-orders/{result.Value!.Id}", result.Value);
         }
 
         return result.ToHttpResult();
     }
 
     private static async Task<IResult> GetWorkOrderById(
-        Guid workshopId,
         Guid workOrderId,
         IWorkOrderService workOrderService,
         HttpContext httpContext)
@@ -76,12 +80,17 @@ public static class WorkOrderController
             return Results.Unauthorized();
         }
 
-        var result = await workOrderService.GetWorkOrderByIdAsync(workshopId, workOrderId, userId.Value);
+        var workshopId = httpContext.User.GetFirstWorkshopId();
+        if (!workshopId.HasValue)
+        {
+            return Results.BadRequest(new { error = "No workshop assigned to user" });
+        }
+
+        var result = await workOrderService.GetWorkOrderByIdAsync(workshopId.Value, workOrderId, userId.Value);
         return result.ToHttpResult();
     }
 
     private static async Task<IResult> GetWorkshopWorkOrders(
-        Guid workshopId,
         IWorkOrderService workOrderService,
         HttpContext httpContext)
     {
@@ -91,12 +100,17 @@ public static class WorkOrderController
             return Results.Unauthorized();
         }
 
-        var result = await workOrderService.GetWorkshopWorkOrdersAsync(workshopId, userId.Value);
+        var workshopId = httpContext.User.GetFirstWorkshopId();
+        if (!workshopId.HasValue)
+        {
+            return Results.BadRequest(new { error = "No workshop assigned to user" });
+        }
+
+        var result = await workOrderService.GetWorkshopWorkOrdersAsync(workshopId.Value, userId.Value);
         return result.ToHttpResult();
     }
 
     private static async Task<IResult> GetMotorcycleWorkOrders(
-        Guid workshopId,
         Guid motorcycleId,
         IWorkOrderService workOrderService,
         HttpContext httpContext)
@@ -107,12 +121,17 @@ public static class WorkOrderController
             return Results.Unauthorized();
         }
 
-        var result = await workOrderService.GetMotorcycleWorkOrdersAsync(workshopId, motorcycleId, userId.Value);
+        var workshopId = httpContext.User.GetFirstWorkshopId();
+        if (!workshopId.HasValue)
+        {
+            return Results.BadRequest(new { error = "No workshop assigned to user" });
+        }
+
+        var result = await workOrderService.GetMotorcycleWorkOrdersAsync(workshopId.Value, motorcycleId, userId.Value);
         return result.ToHttpResult();
     }
 
     private static async Task<IResult> UpdateWorkOrderStatus(
-        Guid workshopId,
         Guid workOrderId,
         UpdateWorkOrderStatusRequest request,
         IWorkOrderService workOrderService,
@@ -124,12 +143,17 @@ public static class WorkOrderController
             return Results.Unauthorized();
         }
 
-        var result = await workOrderService.UpdateWorkOrderStatusAsync(workshopId, workOrderId, userId.Value, request);
+        var workshopId = httpContext.User.GetFirstWorkshopId();
+        if (!workshopId.HasValue)
+        {
+            return Results.BadRequest(new { error = "No workshop assigned to user" });
+        }
+
+        var result = await workOrderService.UpdateWorkOrderStatusAsync(workshopId.Value, workOrderId, userId.Value, request);
         return result.ToHttpResult();
     }
 
     private static async Task<IResult> UpdateWorkOrderDiagnosis(
-        Guid workshopId,
         Guid workOrderId,
         UpdateWorkOrderDiagnosisRequest request,
         IWorkOrderService workOrderService,
@@ -141,12 +165,17 @@ public static class WorkOrderController
             return Results.Unauthorized();
         }
 
-        var result = await workOrderService.UpdateWorkOrderDiagnosisAsync(workshopId, workOrderId, userId.Value, request);
+        var workshopId = httpContext.User.GetFirstWorkshopId();
+        if (!workshopId.HasValue)
+        {
+            return Results.BadRequest(new { error = "No workshop assigned to user" });
+        }
+
+        var result = await workOrderService.UpdateWorkOrderDiagnosisAsync(workshopId.Value, workOrderId, userId.Value, request);
         return result.ToHttpResult();
     }
 
     private static async Task<IResult> CloseWorkOrder(
-        Guid workshopId,
         Guid workOrderId,
         CloseWorkOrderRequest request,
         IWorkOrderService workOrderService,
@@ -158,12 +187,17 @@ public static class WorkOrderController
             return Results.Unauthorized();
         }
 
-        var result = await workOrderService.CloseWorkOrderAsync(workshopId, workOrderId, userId.Value, request);
+        var workshopId = httpContext.User.GetFirstWorkshopId();
+        if (!workshopId.HasValue)
+        {
+            return Results.BadRequest(new { error = "No workshop assigned to user" });
+        }
+
+        var result = await workOrderService.CloseWorkOrderAsync(workshopId.Value, workOrderId, userId.Value, request);
         return result.ToHttpResult();
     }
 
     private static async Task<IResult> DeliverWorkOrder(
-        Guid workshopId,
         Guid workOrderId,
         IWorkOrderService workOrderService,
         HttpContext httpContext)
@@ -174,7 +208,13 @@ public static class WorkOrderController
             return Results.Unauthorized();
         }
 
-        var result = await workOrderService.DeliverWorkOrderAsync(workshopId, workOrderId, userId.Value);
+        var workshopId = httpContext.User.GetFirstWorkshopId();
+        if (!workshopId.HasValue)
+        {
+            return Results.BadRequest(new { error = "No workshop assigned to user" });
+        }
+
+        var result = await workOrderService.DeliverWorkOrderAsync(workshopId.Value, workOrderId, userId.Value);
         return result.ToHttpResult();
     }
 }

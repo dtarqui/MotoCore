@@ -10,7 +10,7 @@ public static class InventoryController
 {
     public static RouteGroupBuilder MapInventoryEndpoints(this IEndpointRouteBuilder endpoints)
     {
-        var group = endpoints.MapGroup("/api/workshops/{workshopId:guid}/inventory")
+        var group = endpoints.MapGroup("/api/inventory")
             .WithTags("Inventory")
             .RequireAuthorization();
 
@@ -42,7 +42,6 @@ public static class InventoryController
     }
 
     private static async Task<IResult> CreatePart(
-        Guid workshopId,
         CreatePartRequest request,
         IInventoryService inventoryService,
         HttpContext httpContext)
@@ -53,18 +52,23 @@ public static class InventoryController
             return Results.Unauthorized();
         }
 
-        var result = await inventoryService.CreatePartAsync(workshopId, userId.Value, request);
+        var workshopId = httpContext.User.GetFirstWorkshopId();
+        if (!workshopId.HasValue)
+        {
+            return Results.BadRequest(new { error = "No workshop assigned to user" });
+        }
+
+        var result = await inventoryService.CreatePartAsync(workshopId.Value, userId.Value, request);
 
         if (result.IsSuccess)
         {
-            return Results.Created($"/api/workshops/{workshopId}/inventory/parts/{result.Value!.Id}", result.Value);
+            return Results.Created($"/api/inventory/parts/{result.Value!.Id}", result.Value);
         }
 
         return result.ToHttpResult();
     }
 
     private static async Task<IResult> GetPartById(
-        Guid workshopId,
         Guid partId,
         IInventoryService inventoryService,
         HttpContext httpContext)
@@ -75,12 +79,17 @@ public static class InventoryController
             return Results.Unauthorized();
         }
 
-        var result = await inventoryService.GetPartByIdAsync(workshopId, partId, userId.Value);
+        var workshopId = httpContext.User.GetFirstWorkshopId();
+        if (!workshopId.HasValue)
+        {
+            return Results.BadRequest(new { error = "No workshop assigned to user" });
+        }
+
+        var result = await inventoryService.GetPartByIdAsync(workshopId.Value, partId, userId.Value);
         return result.ToHttpResult();
     }
 
     private static async Task<IResult> GetWorkshopParts(
-        Guid workshopId,
         IInventoryService inventoryService,
         HttpContext httpContext)
     {
@@ -90,12 +99,17 @@ public static class InventoryController
             return Results.Unauthorized();
         }
 
-        var result = await inventoryService.GetWorkshopPartsAsync(workshopId, userId.Value);
+        var workshopId = httpContext.User.GetFirstWorkshopId();
+        if (!workshopId.HasValue)
+        {
+            return Results.BadRequest(new { error = "No workshop assigned to user" });
+        }
+
+        var result = await inventoryService.GetWorkshopPartsAsync(workshopId.Value, userId.Value);
         return result.ToHttpResult();
     }
 
     private static async Task<IResult> GetLowStockParts(
-        Guid workshopId,
         IInventoryService inventoryService,
         HttpContext httpContext)
     {
@@ -105,12 +119,17 @@ public static class InventoryController
             return Results.Unauthorized();
         }
 
-        var result = await inventoryService.GetLowStockPartsAsync(workshopId, userId.Value);
+        var workshopId = httpContext.User.GetFirstWorkshopId();
+        if (!workshopId.HasValue)
+        {
+            return Results.BadRequest(new { error = "No workshop assigned to user" });
+        }
+
+        var result = await inventoryService.GetLowStockPartsAsync(workshopId.Value, userId.Value);
         return result.ToHttpResult();
     }
 
     private static async Task<IResult> UpdatePart(
-        Guid workshopId,
         Guid partId,
         UpdatePartRequest request,
         IInventoryService inventoryService,
@@ -122,12 +141,17 @@ public static class InventoryController
             return Results.Unauthorized();
         }
 
-        var result = await inventoryService.UpdatePartAsync(workshopId, partId, userId.Value, request);
+        var workshopId = httpContext.User.GetFirstWorkshopId();
+        if (!workshopId.HasValue)
+        {
+            return Results.BadRequest(new { error = "No workshop assigned to user" });
+        }
+
+        var result = await inventoryService.UpdatePartAsync(workshopId.Value, partId, userId.Value, request);
         return result.ToHttpResult();
     }
 
     private static async Task<IResult> DeletePart(
-        Guid workshopId,
         Guid partId,
         IInventoryService inventoryService,
         HttpContext httpContext)
@@ -138,12 +162,17 @@ public static class InventoryController
             return Results.Unauthorized();
         }
 
-        var result = await inventoryService.DeletePartAsync(workshopId, partId, userId.Value);
+        var workshopId = httpContext.User.GetFirstWorkshopId();
+        if (!workshopId.HasValue)
+        {
+            return Results.BadRequest(new { error = "No workshop assigned to user" });
+        }
+
+        var result = await inventoryService.DeletePartAsync(workshopId.Value, partId, userId.Value);
         return result.ToHttpResult();
     }
 
     private static async Task<IResult> CreatePartMovement(
-        Guid workshopId,
         CreatePartMovementRequest request,
         IInventoryService inventoryService,
         HttpContext httpContext)
@@ -154,18 +183,23 @@ public static class InventoryController
             return Results.Unauthorized();
         }
 
-        var result = await inventoryService.CreatePartMovementAsync(workshopId, userId.Value, request);
+        var workshopId = httpContext.User.GetFirstWorkshopId();
+        if (!workshopId.HasValue)
+        {
+            return Results.BadRequest(new { error = "No workshop assigned to user" });
+        }
+
+        var result = await inventoryService.CreatePartMovementAsync(workshopId.Value, userId.Value, request);
 
         if (result.IsSuccess)
         {
-            return Results.Created($"/api/workshops/{workshopId}/inventory/movements/{result.Value!.Id}", result.Value);
+            return Results.Created($"/api/inventory/movements/{result.Value!.Id}", result.Value);
         }
 
         return result.ToHttpResult();
     }
 
     private static async Task<IResult> GetWorkshopMovements(
-        Guid workshopId,
         IInventoryService inventoryService,
         HttpContext httpContext)
     {
@@ -175,7 +209,13 @@ public static class InventoryController
             return Results.Unauthorized();
         }
 
-        var result = await inventoryService.GetWorkshopMovementsAsync(workshopId, userId.Value);
+        var workshopId = httpContext.User.GetFirstWorkshopId();
+        if (!workshopId.HasValue)
+        {
+            return Results.BadRequest(new { error = "No workshop assigned to user" });
+        }
+
+        var result = await inventoryService.GetWorkshopMovementsAsync(workshopId.Value, userId.Value);
         return result.ToHttpResult();
     }
 }

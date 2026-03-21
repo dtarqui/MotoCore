@@ -10,7 +10,7 @@ public static class ClientController
 {
     public static RouteGroupBuilder MapClientEndpoints(this IEndpointRouteBuilder endpoints)
     {
-        var group = endpoints.MapGroup("/api/workshops/{workshopId:guid}/clients")
+        var group = endpoints.MapGroup("/api/clients")
             .WithTags("Clients")
             .RequireAuthorization();
 
@@ -39,7 +39,6 @@ public static class ClientController
     }
 
     private static async Task<IResult> CreateClient(
-        Guid workshopId,
         CreateClientRequest request,
         IClientService clientService,
         HttpContext httpContext)
@@ -50,18 +49,23 @@ public static class ClientController
             return Results.Unauthorized();
         }
 
-        var result = await clientService.CreateClientAsync(workshopId, userId.Value, request);
+        var workshopId = httpContext.User.GetFirstWorkshopId();
+        if (!workshopId.HasValue)
+        {
+            return Results.BadRequest(new { error = "No workshop assigned to user" });
+        }
+
+        var result = await clientService.CreateClientAsync(workshopId.Value, userId.Value, request);
 
         if (result.IsSuccess)
         {
-            return Results.Created($"/api/workshops/{workshopId}/clients/{result.Value!.Id}", result.Value);
+            return Results.Created($"/api/clients/{result.Value!.Id}", result.Value);
         }
 
         return result.ToHttpResult();
     }
 
     private static async Task<IResult> GetClientById(
-        Guid workshopId,
         Guid clientId,
         IClientService clientService,
         HttpContext httpContext)
@@ -72,12 +76,17 @@ public static class ClientController
             return Results.Unauthorized();
         }
 
-        var result = await clientService.GetClientByIdAsync(workshopId, clientId, userId.Value);
+        var workshopId = httpContext.User.GetFirstWorkshopId();
+        if (!workshopId.HasValue)
+        {
+            return Results.BadRequest(new { error = "No workshop assigned to user" });
+        }
+
+        var result = await clientService.GetClientByIdAsync(workshopId.Value, clientId, userId.Value);
         return result.ToHttpResult();
     }
 
     private static async Task<IResult> GetWorkshopClients(
-        Guid workshopId,
         IClientService clientService,
         HttpContext httpContext)
     {
@@ -87,12 +96,17 @@ public static class ClientController
             return Results.Unauthorized();
         }
 
-        var result = await clientService.GetWorkshopClientsAsync(workshopId, userId.Value);
+        var workshopId = httpContext.User.GetFirstWorkshopId();
+        if (!workshopId.HasValue)
+        {
+            return Results.BadRequest(new { error = "No workshop assigned to user" });
+        }
+
+        var result = await clientService.GetWorkshopClientsAsync(workshopId.Value, userId.Value);
         return result.ToHttpResult();
     }
 
     private static async Task<IResult> SearchClients(
-        Guid workshopId,
         string query,
         IClientService clientService,
         HttpContext httpContext)
@@ -103,12 +117,17 @@ public static class ClientController
             return Results.Unauthorized();
         }
 
-        var result = await clientService.SearchClientsAsync(workshopId, query, userId.Value);
+        var workshopId = httpContext.User.GetFirstWorkshopId();
+        if (!workshopId.HasValue)
+        {
+            return Results.BadRequest(new { error = "No workshop assigned to user" });
+        }
+
+        var result = await clientService.SearchClientsAsync(workshopId.Value, query, userId.Value);
         return result.ToHttpResult();
     }
 
     private static async Task<IResult> UpdateClient(
-        Guid workshopId,
         Guid clientId,
         UpdateClientRequest request,
         IClientService clientService,
@@ -120,12 +139,17 @@ public static class ClientController
             return Results.Unauthorized();
         }
 
-        var result = await clientService.UpdateClientAsync(workshopId, clientId, userId.Value, request);
+        var workshopId = httpContext.User.GetFirstWorkshopId();
+        if (!workshopId.HasValue)
+        {
+            return Results.BadRequest(new { error = "No workshop assigned to user" });
+        }
+
+        var result = await clientService.UpdateClientAsync(workshopId.Value, clientId, userId.Value, request);
         return result.ToHttpResult();
     }
 
     private static async Task<IResult> DeleteClient(
-        Guid workshopId,
         Guid clientId,
         IClientService clientService,
         HttpContext httpContext)
@@ -136,12 +160,17 @@ public static class ClientController
             return Results.Unauthorized();
         }
 
-        var result = await clientService.DeleteClientAsync(workshopId, clientId, userId.Value);
+        var workshopId = httpContext.User.GetFirstWorkshopId();
+        if (!workshopId.HasValue)
+        {
+            return Results.BadRequest(new { error = "No workshop assigned to user" });
+        }
+
+        var result = await clientService.DeleteClientAsync(workshopId.Value, clientId, userId.Value);
         return result.ToHttpResult();
     }
 
     private static async Task<IResult> GetClientSummary(
-        Guid workshopId,
         Guid clientId,
         IClientService clientService,
         HttpContext httpContext)
@@ -152,12 +181,17 @@ public static class ClientController
             return Results.Unauthorized();
         }
 
-        var result = await clientService.GetClientSummaryAsync(workshopId, clientId, userId.Value);
+        var workshopId = httpContext.User.GetFirstWorkshopId();
+        if (!workshopId.HasValue)
+        {
+            return Results.BadRequest(new { error = "No workshop assigned to user" });
+        }
+
+        var result = await clientService.GetClientSummaryAsync(workshopId.Value, clientId, userId.Value);
         return result.ToHttpResult();
     }
 
     private static async Task<IResult> GetClientStatistics(
-        Guid workshopId,
         IClientService clientService,
         HttpContext httpContext)
     {
@@ -167,7 +201,13 @@ public static class ClientController
             return Results.Unauthorized();
         }
 
-        var result = await clientService.GetClientStatisticsAsync(workshopId, userId.Value);
+        var workshopId = httpContext.User.GetFirstWorkshopId();
+        if (!workshopId.HasValue)
+        {
+            return Results.BadRequest(new { error = "No workshop assigned to user" });
+        }
+
+        var result = await clientService.GetClientStatisticsAsync(workshopId.Value, userId.Value);
         return result.ToHttpResult();
     }
 }

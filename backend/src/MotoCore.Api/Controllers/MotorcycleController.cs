@@ -10,7 +10,7 @@ public static class MotorcycleController
 {
     public static RouteGroupBuilder MapMotorcycleEndpoints(this IEndpointRouteBuilder endpoints)
     {
-        var group = endpoints.MapGroup("/api/workshops/{workshopId:guid}/motorcycles")
+        var group = endpoints.MapGroup("/api/motorcycles")
             .WithTags("Motorcycles")
             .RequireAuthorization();
 
@@ -35,7 +35,6 @@ public static class MotorcycleController
     }
 
     private static async Task<IResult> CreateMotorcycle(
-        Guid workshopId,
         CreateMotorcycleRequest request,
         IMotorcycleService motorcycleService,
         HttpContext httpContext)
@@ -46,18 +45,23 @@ public static class MotorcycleController
             return Results.Unauthorized();
         }
 
-        var result = await motorcycleService.CreateMotorcycleAsync(workshopId, userId.Value, request);
+        var workshopId = httpContext.User.GetFirstWorkshopId();
+        if (!workshopId.HasValue)
+        {
+            return Results.BadRequest(new { error = "No workshop assigned to user" });
+        }
+
+        var result = await motorcycleService.CreateMotorcycleAsync(workshopId.Value, userId.Value, request);
 
         if (result.IsSuccess)
         {
-            return Results.Created($"/api/workshops/{workshopId}/motorcycles/{result.Value!.Id}", result.Value);
+            return Results.Created($"/api/motorcycles/{result.Value!.Id}", result.Value);
         }
 
         return result.ToHttpResult();
     }
 
     private static async Task<IResult> GetMotorcycleById(
-        Guid workshopId,
         Guid motorcycleId,
         IMotorcycleService motorcycleService,
         HttpContext httpContext)
@@ -68,12 +72,17 @@ public static class MotorcycleController
             return Results.Unauthorized();
         }
 
-        var result = await motorcycleService.GetMotorcycleByIdAsync(workshopId, motorcycleId, userId.Value);
+        var workshopId = httpContext.User.GetFirstWorkshopId();
+        if (!workshopId.HasValue)
+        {
+            return Results.BadRequest(new { error = "No workshop assigned to user" });
+        }
+
+        var result = await motorcycleService.GetMotorcycleByIdAsync(workshopId.Value, motorcycleId, userId.Value);
         return result.ToHttpResult();
     }
 
     private static async Task<IResult> GetWorkshopMotorcycles(
-        Guid workshopId,
         IMotorcycleService motorcycleService,
         HttpContext httpContext)
     {
@@ -83,12 +92,17 @@ public static class MotorcycleController
             return Results.Unauthorized();
         }
 
-        var result = await motorcycleService.GetWorkshopMotorcyclesAsync(workshopId, userId.Value);
+        var workshopId = httpContext.User.GetFirstWorkshopId();
+        if (!workshopId.HasValue)
+        {
+            return Results.BadRequest(new { error = "No workshop assigned to user" });
+        }
+
+        var result = await motorcycleService.GetWorkshopMotorcyclesAsync(workshopId.Value, userId.Value);
         return result.ToHttpResult();
     }
 
     private static async Task<IResult> GetClientMotorcycles(
-        Guid workshopId,
         Guid clientId,
         IMotorcycleService motorcycleService,
         HttpContext httpContext)
@@ -99,12 +113,17 @@ public static class MotorcycleController
             return Results.Unauthorized();
         }
 
-        var result = await motorcycleService.GetClientMotorcyclesAsync(workshopId, clientId, userId.Value);
+        var workshopId = httpContext.User.GetFirstWorkshopId();
+        if (!workshopId.HasValue)
+        {
+            return Results.BadRequest(new { error = "No workshop assigned to user" });
+        }
+
+        var result = await motorcycleService.GetClientMotorcyclesAsync(workshopId.Value, clientId, userId.Value);
         return result.ToHttpResult();
     }
 
     private static async Task<IResult> UpdateMotorcycle(
-        Guid workshopId,
         Guid motorcycleId,
         UpdateMotorcycleRequest request,
         IMotorcycleService motorcycleService,
@@ -116,12 +135,17 @@ public static class MotorcycleController
             return Results.Unauthorized();
         }
 
-        var result = await motorcycleService.UpdateMotorcycleAsync(workshopId, motorcycleId, userId.Value, request);
+        var workshopId = httpContext.User.GetFirstWorkshopId();
+        if (!workshopId.HasValue)
+        {
+            return Results.BadRequest(new { error = "No workshop assigned to user" });
+        }
+
+        var result = await motorcycleService.UpdateMotorcycleAsync(workshopId.Value, motorcycleId, userId.Value, request);
         return result.ToHttpResult();
     }
 
     private static async Task<IResult> DeleteMotorcycle(
-        Guid workshopId,
         Guid motorcycleId,
         IMotorcycleService motorcycleService,
         HttpContext httpContext)
@@ -132,7 +156,13 @@ public static class MotorcycleController
             return Results.Unauthorized();
         }
 
-        var result = await motorcycleService.DeleteMotorcycleAsync(workshopId, motorcycleId, userId.Value);
+        var workshopId = httpContext.User.GetFirstWorkshopId();
+        if (!workshopId.HasValue)
+        {
+            return Results.BadRequest(new { error = "No workshop assigned to user" });
+        }
+
+        var result = await motorcycleService.DeleteMotorcycleAsync(workshopId.Value, motorcycleId, userId.Value);
         return result.ToHttpResult();
     }
 }

@@ -9,7 +9,7 @@ public static class MaintenanceHistoryController
 {
     public static RouteGroupBuilder MapMaintenanceHistoryEndpoints(this IEndpointRouteBuilder endpoints)
     {
-        var group = endpoints.MapGroup("/api/workshops/{workshopId:guid}/maintenance-history")
+        var group = endpoints.MapGroup("/api/maintenance-history")
             .WithTags("Maintenance History")
             .RequireAuthorization();
 
@@ -30,7 +30,6 @@ public static class MaintenanceHistoryController
     }
 
     private static async Task<IResult> CreateMaintenanceHistoryEntry(
-        Guid workshopId,
         CreateMaintenanceHistoryEntryRequest request,
         IMaintenanceHistoryService maintenanceHistoryService,
         HttpContext httpContext)
@@ -41,18 +40,23 @@ public static class MaintenanceHistoryController
             return Results.Unauthorized();
         }
 
-        var result = await maintenanceHistoryService.CreateMaintenanceHistoryEntryAsync(workshopId, userId.Value, request);
+        var workshopId = httpContext.User.GetFirstWorkshopId();
+        if (!workshopId.HasValue)
+        {
+            return Results.BadRequest(new { error = "No workshop assigned to user" });
+        }
+
+        var result = await maintenanceHistoryService.CreateMaintenanceHistoryEntryAsync(workshopId.Value, userId.Value, request);
 
         if (result.IsSuccess)
         {
-            return Results.Created($"/api/workshops/{workshopId}/maintenance-history/{result.Value!.Id}", result.Value);
+            return Results.Created($"/api/maintenance-history/{result.Value!.Id}", result.Value);
         }
 
         return result.ToHttpResult();
     }
 
     private static async Task<IResult> GetMaintenanceHistoryEntryById(
-        Guid workshopId,
         Guid entryId,
         IMaintenanceHistoryService maintenanceHistoryService,
         HttpContext httpContext)
@@ -63,12 +67,17 @@ public static class MaintenanceHistoryController
             return Results.Unauthorized();
         }
 
-        var result = await maintenanceHistoryService.GetMaintenanceHistoryEntryByIdAsync(workshopId, entryId, userId.Value);
+        var workshopId = httpContext.User.GetFirstWorkshopId();
+        if (!workshopId.HasValue)
+        {
+            return Results.BadRequest(new { error = "No workshop assigned to user" });
+        }
+
+        var result = await maintenanceHistoryService.GetMaintenanceHistoryEntryByIdAsync(workshopId.Value, entryId, userId.Value);
         return result.ToHttpResult();
     }
 
     private static async Task<IResult> GetMotorcycleMaintenanceHistory(
-        Guid workshopId,
         Guid motorcycleId,
         IMaintenanceHistoryService maintenanceHistoryService,
         HttpContext httpContext)
@@ -79,12 +88,17 @@ public static class MaintenanceHistoryController
             return Results.Unauthorized();
         }
 
-        var result = await maintenanceHistoryService.GetMotorcycleMaintenanceHistoryAsync(workshopId, motorcycleId, userId.Value);
+        var workshopId = httpContext.User.GetFirstWorkshopId();
+        if (!workshopId.HasValue)
+        {
+            return Results.BadRequest(new { error = "No workshop assigned to user" });
+        }
+
+        var result = await maintenanceHistoryService.GetMotorcycleMaintenanceHistoryAsync(workshopId.Value, motorcycleId, userId.Value);
         return result.ToHttpResult();
     }
 
     private static async Task<IResult> GetClientMaintenanceHistory(
-        Guid workshopId,
         Guid clientId,
         IMaintenanceHistoryService maintenanceHistoryService,
         HttpContext httpContext)
@@ -95,7 +109,13 @@ public static class MaintenanceHistoryController
             return Results.Unauthorized();
         }
 
-        var result = await maintenanceHistoryService.GetClientMaintenanceHistoryAsync(workshopId, clientId, userId.Value);
+        var workshopId = httpContext.User.GetFirstWorkshopId();
+        if (!workshopId.HasValue)
+        {
+            return Results.BadRequest(new { error = "No workshop assigned to user" });
+        }
+
+        var result = await maintenanceHistoryService.GetClientMaintenanceHistoryAsync(workshopId.Value, clientId, userId.Value);
         return result.ToHttpResult();
     }
 
