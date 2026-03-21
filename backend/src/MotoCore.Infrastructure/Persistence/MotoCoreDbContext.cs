@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using MotoCore.Domain.Auth;
 using MotoCore.Domain.Clients;
 using MotoCore.Domain.Motorcycles;
+using MotoCore.Domain.WorkOrders;
 using MotoCore.Domain.Workshops;
 
 namespace MotoCore.Infrastructure.Persistence;
@@ -15,6 +16,7 @@ public sealed class MotoCoreDbContext(DbContextOptions<MotoCoreDbContext> option
     public DbSet<WorkshopMembership> WorkshopMemberships => Set<WorkshopMembership>();
     public DbSet<Client> Clients => Set<Client>();
     public DbSet<Motorcycle> Motorcycles => Set<Motorcycle>();
+    public DbSet<WorkOrder> WorkOrders => Set<WorkOrder>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -25,6 +27,7 @@ public sealed class MotoCoreDbContext(DbContextOptions<MotoCoreDbContext> option
         ConfigureWorkshopMemberships(modelBuilder);
         ConfigureClients(modelBuilder);
         ConfigureMotorcycles(modelBuilder);
+        ConfigureWorkOrders(modelBuilder);
     }
 
     private static void ConfigureUsers(ModelBuilder modelBuilder)
@@ -297,6 +300,108 @@ public sealed class MotoCoreDbContext(DbContextOptions<MotoCoreDbContext> option
             entity.HasIndex(m => new { m.WorkshopId, m.LicensePlate })
                 .IsUnique()
                 .HasDatabaseName("ix_motorcycles_workshop_id_license_plate");
+        });
+    }
+
+    private static void ConfigureWorkOrders(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<WorkOrder>(entity =>
+        {
+            entity.ToTable("work_orders");
+
+            entity.HasKey(wo => wo.Id);
+
+            entity.Property(wo => wo.Id)
+                .HasColumnName("id")
+                .ValueGeneratedNever();
+
+            entity.Property(wo => wo.WorkshopId)
+                .HasColumnName("workshop_id")
+                .IsRequired();
+
+            entity.Property(wo => wo.MotorcycleId)
+                .HasColumnName("motorcycle_id")
+                .IsRequired();
+
+            entity.Property(wo => wo.OrderNumber)
+                .HasColumnName("order_number")
+                .HasMaxLength(50)
+                .IsRequired();
+
+            entity.Property(wo => wo.Status)
+                .HasColumnName("status")
+                .HasMaxLength(50)
+                .IsRequired();
+
+            entity.Property(wo => wo.Description)
+                .HasColumnName("description")
+                .HasMaxLength(2000);
+
+            entity.Property(wo => wo.Diagnosis)
+                .HasColumnName("diagnosis")
+                .HasMaxLength(2000);
+
+            entity.Property(wo => wo.CurrentMileage)
+                .HasColumnName("current_mileage");
+
+            entity.Property(wo => wo.EstimatedCost)
+                .HasColumnName("estimated_cost")
+                .HasColumnType("decimal(18,2)")
+                .HasDefaultValue(0);
+
+            entity.Property(wo => wo.FinalCost)
+                .HasColumnName("final_cost")
+                .HasColumnType("decimal(18,2)")
+                .HasDefaultValue(0);
+
+            entity.Property(wo => wo.ScheduledDate)
+                .HasColumnName("scheduled_date");
+
+            entity.Property(wo => wo.StartedAtUtc)
+                .HasColumnName("started_at_utc");
+
+            entity.Property(wo => wo.CompletedAtUtc)
+                .HasColumnName("completed_at_utc");
+
+            entity.Property(wo => wo.DeliveredAtUtc)
+                .HasColumnName("delivered_at_utc");
+
+            entity.Property(wo => wo.CreatedByUserId)
+                .HasColumnName("created_by_user_id")
+                .IsRequired();
+
+            entity.Property(wo => wo.AssignedMechanicUserId)
+                .HasColumnName("assigned_mechanic_user_id");
+
+            entity.Property(wo => wo.Notes)
+                .HasColumnName("notes")
+                .HasMaxLength(2000);
+
+            entity.Property(wo => wo.IsActive)
+                .HasColumnName("is_active")
+                .HasDefaultValue(true)
+                .IsRequired();
+
+            entity.Property(wo => wo.CreatedAtUtc)
+                .HasColumnName("created_at_utc")
+                .HasDefaultValueSql("NOW()")
+                .ValueGeneratedOnAdd();
+
+            entity.Property(wo => wo.UpdatedAtUtc)
+                .HasColumnName("updated_at_utc");
+
+            entity.HasIndex(wo => wo.WorkshopId)
+                .HasDatabaseName("ix_work_orders_workshop_id");
+
+            entity.HasIndex(wo => wo.MotorcycleId)
+                .HasDatabaseName("ix_work_orders_motorcycle_id");
+
+            entity.HasIndex(wo => new { wo.WorkshopId, wo.OrderNumber })
+                .IsUnique()
+                .HasDatabaseName("ix_work_orders_workshop_id_order_number");
+
+            entity.HasIndex(wo => wo.Status)
+                .HasDatabaseName("ix_work_orders_status");
         });
     }
 }

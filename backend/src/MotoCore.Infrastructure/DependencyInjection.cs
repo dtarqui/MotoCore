@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using MotoCore.Application.Auth.Contracts;
 using MotoCore.Application.Clients.Contracts;
 using MotoCore.Application.Motorcycles.Contracts;
+using MotoCore.Application.WorkOrders.Contracts;
 using MotoCore.Application.Workshops.Contracts;
 using MotoCore.Infrastructure.Auth;
 using MotoCore.Infrastructure.Persistence;
@@ -42,6 +43,7 @@ public static class DependencyInjection
         services.AddScoped<IWorkshopRepository, WorkshopRepository>();
         services.AddScoped<IClientRepository, ClientRepository>();
         services.AddScoped<IMotorcycleRepository, MotorcycleRepository>();
+        services.AddScoped<IWorkOrderRepository, WorkOrderRepository>();
         services.AddScoped<IPasswordHashingService, PasswordHashingService>();
         services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
         services.AddScoped<IRefreshTokenProtector, RefreshTokenProtector>();
