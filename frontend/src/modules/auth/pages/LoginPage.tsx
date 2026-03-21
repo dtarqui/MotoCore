@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { Navigate, useLocation, useNavigate } from 'react-router-dom'
+import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { Alert, AlertDescription, AlertTitle } from '@/shared/ui/alert'
 import { Button } from '@/shared/ui/button'
 import {
@@ -104,6 +104,13 @@ export function LoginPage() {
               <Button className="w-full" type="submit" disabled={isLoggingIn}>
                 {isLoggingIn ? 'Ingresando...' : 'Ingresar'}
               </Button>
+
+              <div className="text-center text-sm text-gray-600 dark:text-gray-300">
+                ¿No tienes cuenta?{' '}
+                <Link to="/register" className="font-medium text-gray-900 underline dark:text-gray-100">
+                  Regístrate
+                </Link>
+              </div>
             </form>
           </CardContent>
         </Card>

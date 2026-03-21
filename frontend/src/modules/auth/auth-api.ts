@@ -1,5 +1,5 @@
 import { API_BASE_URL } from '@/shared/config/api'
-import type { AuthSession, LoginRequest } from './types'
+import type { AuthSession, LoginRequest, RegisterRequest } from './types'
 
 type ProblemDetails = {
   title?: string
@@ -22,6 +22,24 @@ async function parseProblemDetails(response: Response) {
 
 export async function loginRequest(payload: LoginRequest) {
   const response = await fetch(buildApiUrl('/api/auth/login'), {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  })
+
+  if (!response.ok) {
+    const message = await parseProblemDetails(response)
+    throw new Error(message)
+  }
+
+  const data = (await response.json()) as AuthSession
+  return data
+}
+
+export async function registerRequest(payload: RegisterRequest) {
+  const response = await fetch(buildApiUrl('/api/auth/register'), {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

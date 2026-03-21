@@ -5,6 +5,7 @@ import { ClientesPage } from '../modules/clientes/pages/ClientesPage'
 import { OrdenesPage } from '../modules/ordenes/pages/OrdenesPage'
 import { InventarioPage } from '../modules/inventario/pages/InventarioPage'
 import { LoginPage } from '../modules/auth/pages/LoginPage'
+import { RegisterPage } from '../modules/auth/pages/RegisterPage'
 import { UnauthorizedPage } from '../modules/auth/pages/UnauthorizedPage'
 import { ProtectedRoute, RoleRoute } from '../modules/auth/components/ProtectedRoute'
 
@@ -12,6 +13,10 @@ export const appRouter = createBrowserRouter([
   {
     path: '/login',
     element: <LoginPage />,
+  },
+  {
+    path: '/register',
+    element: <RegisterPage />,
   },
   {
     element: <ProtectedRoute />,

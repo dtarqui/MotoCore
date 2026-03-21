@@ -5,7 +5,16 @@ export type AuthContextValue = {
   session: AuthSession | null
   isAuthenticated: boolean
   isLoggingIn: boolean
+  isRegistering: boolean
   login: (email: string, password: string) => Promise<void>
+  register: (payload: {
+    email: string
+    password: string
+    firstName: string
+    lastName: string
+    role?: UserRole
+    workshopName?: string
+  }) => Promise<void>
   logout: () => void
   hasAnyRole: (roles: UserRole[]) => boolean
 }
