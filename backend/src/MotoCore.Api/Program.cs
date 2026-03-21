@@ -132,6 +132,7 @@ app.MapWorkshopEndpoints();
 app.MapClientEndpoints();
 app.MapMotorcycleEndpoints();
 app.MapWorkOrderEndpoints();
+app.MapInventoryEndpoints();
 
 app.Run();
 

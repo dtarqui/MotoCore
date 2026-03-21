@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using MotoCore.Domain.Auth;
 using MotoCore.Domain.Clients;
+using MotoCore.Domain.Inventory;
 using MotoCore.Domain.Motorcycles;
 using MotoCore.Domain.WorkOrders;
 using MotoCore.Domain.Workshops;
@@ -17,6 +18,8 @@ public sealed class MotoCoreDbContext(DbContextOptions<MotoCoreDbContext> option
     public DbSet<Client> Clients => Set<Client>();
     public DbSet<Motorcycle> Motorcycles => Set<Motorcycle>();
     public DbSet<WorkOrder> WorkOrders => Set<WorkOrder>();
+    public DbSet<Part> Parts => Set<Part>();
+    public DbSet<PartMovement> PartMovements => Set<PartMovement>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -28,6 +31,8 @@ public sealed class MotoCoreDbContext(DbContextOptions<MotoCoreDbContext> option
         ConfigureClients(modelBuilder);
         ConfigureMotorcycles(modelBuilder);
         ConfigureWorkOrders(modelBuilder);
+        ConfigureParts(modelBuilder);
+        ConfigurePartMovements(modelBuilder);
     }
 
     private static void ConfigureUsers(ModelBuilder modelBuilder)
@@ -402,6 +407,186 @@ public sealed class MotoCoreDbContext(DbContextOptions<MotoCoreDbContext> option
 
             entity.HasIndex(wo => wo.Status)
                 .HasDatabaseName("ix_work_orders_status");
+        });
+    }
+
+    private static void ConfigureParts(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Part>(entity =>
+        {
+            entity.ToTable("parts");
+
+            entity.HasKey(p => p.Id);
+
+            entity.Property(p => p.Id)
+                .HasColumnName("id")
+                .ValueGeneratedNever();
+
+            entity.Property(p => p.WorkshopId)
+                .HasColumnName("workshop_id")
+                .IsRequired();
+
+            entity.Property(p => p.PartNumber)
+                .HasColumnName("part_number")
+                .HasMaxLength(50)
+                .IsRequired();
+
+            entity.Property(p => p.Name)
+                .HasColumnName("name")
+                .HasMaxLength(200)
+                .IsRequired();
+
+            entity.Property(p => p.Description)
+                .HasColumnName("description")
+                .HasMaxLength(1000);
+
+            entity.Property(p => p.Brand)
+                .HasColumnName("brand")
+                .HasMaxLength(100);
+
+            entity.Property(p => p.Category)
+                .HasColumnName("category")
+                .HasMaxLength(100);
+
+            entity.Property(p => p.CurrentStock)
+                .HasColumnName("current_stock")
+                .HasDefaultValue(0);
+
+            entity.Property(p => p.MinimumStock)
+                .HasColumnName("minimum_stock")
+                .HasDefaultValue(0);
+
+            entity.Property(p => p.MaximumStock)
+                .HasColumnName("maximum_stock")
+                .HasDefaultValue(0);
+
+            entity.Property(p => p.UnitCost)
+                .HasColumnName("unit_cost")
+                .HasColumnType("decimal(18,2)")
+                .HasDefaultValue(0);
+
+            entity.Property(p => p.SalePrice)
+                .HasColumnName("sale_price")
+                .HasColumnType("decimal(18,2)")
+                .HasDefaultValue(0);
+
+            entity.Property(p => p.Location)
+                .HasColumnName("location")
+                .HasMaxLength(100);
+
+            entity.Property(p => p.SupplierName)
+                .HasColumnName("supplier_name")
+                .HasMaxLength(200);
+
+            entity.Property(p => p.SupplierContact)
+                .HasColumnName("supplier_contact")
+                .HasMaxLength(200);
+
+            entity.Property(p => p.Notes)
+                .HasColumnName("notes")
+                .HasMaxLength(1000);
+
+            entity.Property(p => p.IsActive)
+                .HasColumnName("is_active")
+                .HasDefaultValue(true)
+                .IsRequired();
+
+            entity.Property(p => p.CreatedAtUtc)
+                .HasColumnName("created_at_utc")
+                .HasDefaultValueSql("NOW()")
+                .ValueGeneratedOnAdd();
+
+            entity.Property(p => p.UpdatedAtUtc)
+                .HasColumnName("updated_at_utc");
+
+            entity.HasIndex(p => p.WorkshopId)
+                .HasDatabaseName("ix_parts_workshop_id");
+
+            entity.HasIndex(p => new { p.WorkshopId, p.PartNumber })
+                .IsUnique()
+                .HasDatabaseName("ix_parts_workshop_id_part_number");
+
+            entity.HasIndex(p => p.Category)
+                .HasDatabaseName("ix_parts_category");
+        });
+    }
+
+    private static void ConfigurePartMovements(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<PartMovement>(entity =>
+        {
+            entity.ToTable("part_movements");
+
+            entity.HasKey(pm => pm.Id);
+
+            entity.Property(pm => pm.Id)
+                .HasColumnName("id")
+                .ValueGeneratedNever();
+
+            entity.Property(pm => pm.WorkshopId)
+                .HasColumnName("workshop_id")
+                .IsRequired();
+
+            entity.Property(pm => pm.PartId)
+                .HasColumnName("part_id")
+                .IsRequired();
+
+            entity.Property(pm => pm.MovementType)
+                .HasColumnName("movement_type")
+                .HasMaxLength(50)
+                .IsRequired();
+
+            entity.Property(pm => pm.Quantity)
+                .HasColumnName("quantity")
+                .IsRequired();
+
+            entity.Property(pm => pm.PreviousStock)
+                .HasColumnName("previous_stock")
+                .IsRequired();
+
+            entity.Property(pm => pm.NewStock)
+                .HasColumnName("new_stock")
+                .IsRequired();
+
+            entity.Property(pm => pm.UnitCost)
+                .HasColumnName("unit_cost")
+                .HasColumnType("decimal(18,2)");
+
+            entity.Property(pm => pm.TotalCost)
+                .HasColumnName("total_cost")
+                .HasColumnType("decimal(18,2)");
+
+            entity.Property(pm => pm.WorkOrderId)
+                .HasColumnName("work_order_id");
+
+            entity.Property(pm => pm.CreatedByUserId)
+                .HasColumnName("created_by_user_id")
+                .IsRequired();
+
+            entity.Property(pm => pm.Reference)
+                .HasColumnName("reference")
+                .HasMaxLength(200);
+
+            entity.Property(pm => pm.Notes)
+                .HasColumnName("notes")
+                .HasMaxLength(1000);
+
+            entity.Property(pm => pm.CreatedAtUtc)
+                .HasColumnName("created_at_utc")
+                .HasDefaultValueSql("NOW()")
+                .ValueGeneratedOnAdd();
+
+            entity.HasIndex(pm => pm.WorkshopId)
+                .HasDatabaseName("ix_part_movements_workshop_id");
+
+            entity.HasIndex(pm => pm.PartId)
+                .HasDatabaseName("ix_part_movements_part_id");
+
+            entity.HasIndex(pm => pm.WorkOrderId)
+                .HasDatabaseName("ix_part_movements_work_order_id");
+
+            entity.HasIndex(pm => pm.MovementType)
+                .HasDatabaseName("ix_part_movements_movement_type");
         });
     }
 }
