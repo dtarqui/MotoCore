@@ -2,7 +2,9 @@ using MotoCore.Application.Auth.Contracts;
 using MotoCore.Application.Auth.Models;
 using MotoCore.Application.Common.Results;
 using MotoCore.Application.Common.Utilities;
+using MotoCore.Application.Workshops.Contracts;
 using MotoCore.Domain.Auth;
+using MotoCore.Domain.Workshops;
 using System.Security.Cryptography;
 
 namespace MotoCore.Application.Auth.Services;
@@ -12,7 +14,8 @@ public sealed class AuthService(
     IPasswordHashingService passwordHashingService,
     IJwtTokenGenerator jwtTokenGenerator,
     IRefreshTokenProtector refreshTokenProtector,
-    IExternalAuthProviderCatalog externalAuthProviderCatalog
+    IExternalAuthProviderCatalog externalAuthProviderCatalog,
+    IWorkshopRepository workshopRepository
     ) : IAuthService
 {
     private const int MinimumPasswordLength = 8;
@@ -60,8 +63,36 @@ public sealed class AuthService(
         userAccount.PasswordHash = passwordHashingService.HashPassword(userAccount, request.Password);
 
         await userIdentityRepository.AddAsync(userAccount, cancellationToken);
+        await userIdentityRepository.SaveChangesAsync(cancellationToken);
 
-        var response = await IssueTokensAsync(userAccount, ipAddress, cancellationToken);
+        // Create default workshop for the owner
+        var workshop = new Workshop
+        {
+            Name = request.WorkshopName.Trim(),
+            OwnerId = userAccount.Id,
+            IsActive = true,
+            CreatedAtUtc = DateTimeOffset.UtcNow
+        };
+
+        await workshopRepository.AddAsync(workshop, cancellationToken);
+
+        // Add owner as workshop member
+        var membership = new WorkshopMembership
+        {
+            WorkshopId = workshop.Id,
+            UserAccountId = userAccount.Id,
+            Role = SystemRoles.Owner,
+            IsActive = true,
+            JoinedAtUtc = DateTimeOffset.UtcNow
+        };
+
+        await workshopRepository.AddMembershipAsync(membership, cancellationToken);
+        await workshopRepository.SaveChangesAsync(cancellationToken);
+
+        // Reload user with workshop memberships for token generation
+        userAccount = await userIdentityRepository.GetByIdAsync(userAccount.Id, cancellationToken);
+
+        var response = await IssueTokensAsync(userAccount!, ipAddress, cancellationToken);
 
         return Result<AuthResponse>.Success(response);
     }
