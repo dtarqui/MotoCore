@@ -1,7 +1,6 @@
 using MotoCore.Application.Auth.Contracts;
 using MotoCore.Application.Auth.Models;
 using MotoCore.Application.Common.Results;
-using MotoCore.Application.Workshops.Contracts;
 using MotoCore.Domain.Auth;
 using System.Net.Mail;
 using System.Security.Cryptography;
@@ -13,8 +12,8 @@ public sealed class AuthService(
     IPasswordHashingService passwordHashingService,
     IJwtTokenGenerator jwtTokenGenerator,
     IRefreshTokenProtector refreshTokenProtector,
-    IExternalAuthProviderCatalog externalAuthProviderCatalog,
-    IWorkshopRepository workshopRepository) : IAuthService
+    IExternalAuthProviderCatalog externalAuthProviderCatalog
+    ) : IAuthService
 {
     private const int MinimumPasswordLength = 8;
     private const int RefreshTokenLifetimeDays = 7;
@@ -165,8 +164,7 @@ public sealed class AuthService(
     {
         var now = DateTimeOffset.UtcNow;
 
-        var userWithMemberships = await userIdentityRepository.GetByIdAsync(userAccount.Id, cancellationToken);
-        var accessToken = jwtTokenGenerator.Generate(userWithMemberships!, userWithMemberships?.WorkshopMemberships);
+        var accessToken = jwtTokenGenerator.Generate(userAccount, userAccount.WorkshopMemberships);
         var refreshToken = CreateRefreshToken(userAccount.Id, ipAddress, now);
 
         await userIdentityRepository.AddRefreshTokenAsync(refreshToken.RefreshToken, cancellationToken);

@@ -13,6 +13,8 @@ public sealed class JwtTokenGenerator(JwtOptions jwtOptions) : IJwtTokenGenerato
 {
     public AccessTokenResult Generate(UserAccount userAccount, IEnumerable<WorkshopMembership>? memberships = null)
     {
+        ArgumentNullException.ThrowIfNull(userAccount);
+
         var expiresAtUtc = DateTimeOffset.UtcNow.AddMinutes(jwtOptions.AccessTokenMinutes);
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.SigningKey));
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -20,14 +22,14 @@ public sealed class JwtTokenGenerator(JwtOptions jwtOptions) : IJwtTokenGenerato
         var claims = new List<Claim>
         {
             new(JwtRegisteredClaimNames.Sub, userAccount.Id.ToString()),
-            new(JwtRegisteredClaimNames.Email, userAccount.Email),
-            new(JwtRegisteredClaimNames.GivenName, userAccount.FirstName),
-            new(JwtRegisteredClaimNames.FamilyName, userAccount.LastName),
+            new(JwtRegisteredClaimNames.Email, userAccount.Email ?? string.Empty),
+            new(JwtRegisteredClaimNames.GivenName, userAccount.FirstName ?? string.Empty),
+            new(JwtRegisteredClaimNames.FamilyName, userAccount.LastName ?? string.Empty),
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new(ClaimTypes.NameIdentifier, userAccount.Id.ToString()),
-            new(ClaimTypes.Name, userAccount.Email),
-            new(ClaimTypes.Email, userAccount.Email),
-            new(ClaimTypes.Role, userAccount.Role),
+            new(ClaimTypes.Name, userAccount.Email ?? string.Empty),
+            new(ClaimTypes.Email, userAccount.Email ?? string.Empty),
+            new(ClaimTypes.Role, userAccount.Role ?? string.Empty),
         };
 
         if (memberships is not null)
