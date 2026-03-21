@@ -10,7 +10,7 @@ public static class ClientController
 {
     public static RouteGroupBuilder MapClientEndpoints(this IEndpointRouteBuilder endpoints)
     {
-        var group = endpoints.MapGroup("/clients")
+        var group = endpoints.MapGroup("/api/workshops/{workshopId:guid}/clients")
             .WithTags("Clients")
             .RequireAuthorization();
 
@@ -18,11 +18,11 @@ public static class ClientController
             .WithValidation<CreateClientRequest>()
             .RequireAuthorization(policy => policy.RequireRole(SystemRoles.Owner, SystemRoles.Receptionist));
 
+        group.MapGet("/", GetWorkshopClients);
+
         group.MapGet("/{clientId:guid}", GetClientById);
 
-        group.MapGet("/workshop/{workshopId:guid}", GetWorkshopClients);
-
-        group.MapGet("/workshop/{workshopId:guid}/search", SearchClients);
+        group.MapGet("/search", SearchClients);
 
         group.MapPut("/{clientId:guid}", UpdateClient)
             .WithValidation<UpdateClientRequest>()
@@ -33,7 +33,7 @@ public static class ClientController
 
         group.MapGet("/{clientId:guid}/summary", GetClientSummary);
 
-        group.MapGet("/workshop/{workshopId:guid}/statistics", GetClientStatistics);
+        group.MapGet("/statistics", GetClientStatistics);
 
         return group;
     }
@@ -54,13 +54,14 @@ public static class ClientController
 
         if (result.IsSuccess)
         {
-            return Results.Created($"/clients/{result.Value!.Id}", result.Value);
+            return Results.Created($"/api/workshops/{workshopId}/clients/{result.Value!.Id}", result.Value);
         }
 
         return result.ToHttpResult();
     }
 
     private static async Task<IResult> GetClientById(
+        Guid workshopId,
         Guid clientId,
         IClientService clientService,
         HttpContext httpContext)
@@ -71,7 +72,7 @@ public static class ClientController
             return Results.Unauthorized();
         }
 
-        var result = await clientService.GetClientByIdAsync(clientId, userId.Value);
+        var result = await clientService.GetClientByIdAsync(workshopId, clientId, userId.Value);
         return result.ToHttpResult();
     }
 
@@ -107,6 +108,7 @@ public static class ClientController
     }
 
     private static async Task<IResult> UpdateClient(
+        Guid workshopId,
         Guid clientId,
         UpdateClientRequest request,
         IClientService clientService,
@@ -118,11 +120,12 @@ public static class ClientController
             return Results.Unauthorized();
         }
 
-        var result = await clientService.UpdateClientAsync(clientId, userId.Value, request);
+        var result = await clientService.UpdateClientAsync(workshopId, clientId, userId.Value, request);
         return result.ToHttpResult();
     }
 
     private static async Task<IResult> DeleteClient(
+        Guid workshopId,
         Guid clientId,
         IClientService clientService,
         HttpContext httpContext)
@@ -133,11 +136,12 @@ public static class ClientController
             return Results.Unauthorized();
         }
 
-        var result = await clientService.DeleteClientAsync(clientId, userId.Value);
+        var result = await clientService.DeleteClientAsync(workshopId, clientId, userId.Value);
         return result.ToHttpResult();
     }
 
     private static async Task<IResult> GetClientSummary(
+        Guid workshopId,
         Guid clientId,
         IClientService clientService,
         HttpContext httpContext)
@@ -148,7 +152,7 @@ public static class ClientController
             return Results.Unauthorized();
         }
 
-        var result = await clientService.GetClientSummaryAsync(clientId, userId.Value);
+        var result = await clientService.GetClientSummaryAsync(workshopId, clientId, userId.Value);
         return result.ToHttpResult();
     }
 

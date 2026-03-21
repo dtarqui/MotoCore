@@ -57,18 +57,18 @@ public sealed class ClientService(
         return Result<ClientDto>.Success(MapToDto(client));
     }
 
-    public async Task<Result<ClientDto>> GetClientByIdAsync(Guid clientId, Guid requestingUserId, CancellationToken cancellationToken = default)
+    public async Task<Result<ClientDto>> GetClientByIdAsync(Guid workshopId, Guid clientId, Guid requestingUserId, CancellationToken cancellationToken = default)
     {
-        var client = await clientRepository.GetByIdAsync(clientId, cancellationToken);
-        if (client is null)
-        {
-            return Result<ClientDto>.Failure("client.not_found", "Client not found.");
-        }
-
-        var membership = await workshopRepository.GetMembershipAsync(client.WorkshopId, requestingUserId, cancellationToken);
+        var membership = await workshopRepository.GetMembershipAsync(workshopId, requestingUserId, cancellationToken);
         if (membership is null || !membership.IsActive)
         {
             return Result<ClientDto>.Failure("client.access_denied", "You don't have access to this workshop.");
+        }
+
+        var client = await clientRepository.GetByIdAsync(clientId, cancellationToken);
+        if (client is null || client.WorkshopId != workshopId)
+        {
+            return Result<ClientDto>.Failure("client.not_found", "Client not found.");
         }
 
         return Result<ClientDto>.Success(MapToDto(client));
@@ -107,15 +107,9 @@ public sealed class ClientService(
         return Result<IReadOnlyList<ClientDto>>.Success(dtos);
     }
 
-    public async Task<Result<ClientDto>> UpdateClientAsync(Guid clientId, Guid requestingUserId, UpdateClientRequest request, CancellationToken cancellationToken = default)
+    public async Task<Result<ClientDto>> UpdateClientAsync(Guid workshopId, Guid clientId, Guid requestingUserId, UpdateClientRequest request, CancellationToken cancellationToken = default)
     {
-        var client = await clientRepository.GetByIdAsync(clientId, cancellationToken);
-        if (client is null)
-        {
-            return Result<ClientDto>.Failure("client.not_found", "Client not found.");
-        }
-
-        var membership = await workshopRepository.GetMembershipAsync(client.WorkshopId, requestingUserId, cancellationToken);
+        var membership = await workshopRepository.GetMembershipAsync(workshopId, requestingUserId, cancellationToken);
         if (membership is null || !membership.IsActive)
         {
             return Result<ClientDto>.Failure("client.access_denied", "You don't have access to this workshop.");
@@ -124,6 +118,12 @@ public sealed class ClientService(
         if (!CanManageClients(membership.Role))
         {
             return Result<ClientDto>.Failure("client.insufficient_permissions", "Only Owner and Receptionist can update clients.");
+        }
+
+        var client = await clientRepository.GetByIdAsync(clientId, cancellationToken);
+        if (client is null || client.WorkshopId != workshopId)
+        {
+            return Result<ClientDto>.Failure("client.not_found", "Client not found.");
         }
 
         var normalizedEmail = request.Email.Trim().ToUpperInvariant();
@@ -158,15 +158,9 @@ public sealed class ClientService(
         return Result<ClientDto>.Success(MapToDto(client));
     }
 
-    public async Task<Result> DeleteClientAsync(Guid clientId, Guid requestingUserId, CancellationToken cancellationToken = default)
+    public async Task<Result> DeleteClientAsync(Guid workshopId, Guid clientId, Guid requestingUserId, CancellationToken cancellationToken = default)
     {
-        var client = await clientRepository.GetByIdAsync(clientId, cancellationToken);
-        if (client is null)
-        {
-            return Result.Failure("client.not_found", "Client not found.");
-        }
-
-        var membership = await workshopRepository.GetMembershipAsync(client.WorkshopId, requestingUserId, cancellationToken);
+        var membership = await workshopRepository.GetMembershipAsync(workshopId, requestingUserId, cancellationToken);
         if (membership is null || !membership.IsActive)
         {
             return Result.Failure("client.access_denied", "You don't have access to this workshop.");
@@ -175,6 +169,12 @@ public sealed class ClientService(
         if (!CanManageClients(membership.Role))
         {
             return Result.Failure("client.insufficient_permissions", "Only Owner and Receptionist can delete clients.");
+        }
+
+        var client = await clientRepository.GetByIdAsync(clientId, cancellationToken);
+        if (client is null || client.WorkshopId != workshopId)
+        {
+            return Result.Failure("client.not_found", "Client not found.");
         }
 
         client.IsActive = false;
@@ -186,18 +186,18 @@ public sealed class ClientService(
         return Result.Success();
     }
 
-    public async Task<Result<ClientSummaryDto>> GetClientSummaryAsync(Guid clientId, Guid requestingUserId, CancellationToken cancellationToken = default)
+    public async Task<Result<ClientSummaryDto>> GetClientSummaryAsync(Guid workshopId, Guid clientId, Guid requestingUserId, CancellationToken cancellationToken = default)
     {
-        var client = await clientRepository.GetByIdAsync(clientId, cancellationToken);
-        if (client is null)
-        {
-            return Result<ClientSummaryDto>.Failure("client.not_found", "Client not found.");
-        }
-
-        var membership = await workshopRepository.GetMembershipAsync(client.WorkshopId, requestingUserId, cancellationToken);
+        var membership = await workshopRepository.GetMembershipAsync(workshopId, requestingUserId, cancellationToken);
         if (membership is null || !membership.IsActive)
         {
             return Result<ClientSummaryDto>.Failure("client.access_denied", "You don't have access to this workshop.");
+        }
+
+        var client = await clientRepository.GetByIdAsync(clientId, cancellationToken);
+        if (client is null || client.WorkshopId != workshopId)
+        {
+            return Result<ClientSummaryDto>.Failure("client.not_found", "Client not found.");
         }
 
         var summary = new ClientSummaryDto(
