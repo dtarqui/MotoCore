@@ -129,6 +129,7 @@ app.MapGet("/health", () => Results.Ok(new
 app.MapAuthEndpoints();
 app.MapUserEndpoints();
 app.MapWorkshopEndpoints();
+app.MapClientEndpoints();
 
 app.Run();
 

@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using MotoCore.Domain.Auth;
+using MotoCore.Domain.Clients;
 using MotoCore.Domain.Workshops;
 
 namespace MotoCore.Infrastructure.Persistence;
@@ -11,6 +12,7 @@ public sealed class MotoCoreDbContext(DbContextOptions<MotoCoreDbContext> option
     public DbSet<ExternalLogin> ExternalLogins => Set<ExternalLogin>();
     public DbSet<Workshop> Workshops => Set<Workshop>();
     public DbSet<WorkshopMembership> WorkshopMemberships => Set<WorkshopMembership>();
+    public DbSet<Client> Clients => Set<Client>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -19,6 +21,7 @@ public sealed class MotoCoreDbContext(DbContextOptions<MotoCoreDbContext> option
         ConfigureExternalLogins(modelBuilder);
         ConfigureWorkshops(modelBuilder);
         ConfigureWorkshopMemberships(modelBuilder);
+        ConfigureClients(modelBuilder);
     }
 
     private static void ConfigureUsers(ModelBuilder modelBuilder)
@@ -111,6 +114,103 @@ public sealed class MotoCoreDbContext(DbContextOptions<MotoCoreDbContext> option
                 .OnDelete(DeleteBehavior.Cascade);
 
             entity.HasIndex(membership => new { membership.WorkshopId, membership.UserAccountId }).IsUnique();
+        });
+    }
+
+    private static void ConfigureClients(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Client>(entity =>
+        {
+            entity.ToTable("clients");
+
+            entity.HasKey(c => c.Id);
+
+            entity.Property(c => c.Id)
+                .HasColumnName("id")
+                .ValueGeneratedNever();
+
+            entity.Property(c => c.WorkshopId)
+                .HasColumnName("workshop_id")
+                .IsRequired();
+
+            entity.Property(c => c.FirstName)
+                .HasColumnName("first_name")
+                .HasMaxLength(100)
+                .IsRequired();
+
+            entity.Property(c => c.LastName)
+                .HasColumnName("last_name")
+                .HasMaxLength(100)
+                .IsRequired();
+
+            entity.Property(c => c.Email)
+                .HasColumnName("email")
+                .HasMaxLength(256)
+                .IsRequired();
+
+            entity.Property(c => c.Phone)
+                .HasColumnName("phone")
+                .HasMaxLength(20)
+                .IsRequired();
+
+            entity.Property(c => c.SecondaryPhone)
+                .HasColumnName("secondary_phone")
+                .HasMaxLength(20);
+
+            entity.Property(c => c.Address)
+                .HasColumnName("address")
+                .HasMaxLength(200);
+
+            entity.Property(c => c.City)
+                .HasColumnName("city")
+                .HasMaxLength(100);
+
+            entity.Property(c => c.PostalCode)
+                .HasColumnName("postal_code")
+                .HasMaxLength(20);
+
+            entity.Property(c => c.IdentificationNumber)
+                .HasColumnName("identification_number")
+                .HasMaxLength(50);
+
+            entity.Property(c => c.CompanyName)
+                .HasColumnName("company_name")
+                .HasMaxLength(200);
+
+            entity.Property(c => c.TaxId)
+                .HasColumnName("tax_id")
+                .HasMaxLength(50);
+
+            entity.Property(c => c.BirthDate)
+                .HasColumnName("birth_date");
+
+            entity.Property(c => c.PreferredContactMethod)
+                .HasColumnName("preferred_contact_method")
+                .HasMaxLength(50);
+
+            entity.Property(c => c.Notes)
+                .HasColumnName("notes")
+                .HasMaxLength(1000);
+
+            entity.Property(c => c.IsActive)
+                .HasColumnName("is_active")
+                .HasDefaultValue(true)
+                .IsRequired();
+
+            entity.Property(c => c.CreatedAtUtc)
+                .HasColumnName("created_at_utc")
+                .HasDefaultValueSql("NOW()")
+                .ValueGeneratedOnAdd();
+
+            entity.Property(c => c.UpdatedAtUtc)
+                .HasColumnName("updated_at_utc");
+
+            entity.HasIndex(c => c.WorkshopId)
+                .HasDatabaseName("ix_clients_workshop_id");
+
+            entity.HasIndex(c => new { c.WorkshopId, c.Email })
+                .IsUnique()
+                .HasDatabaseName("ix_clients_workshop_id_email");
         });
     }
 }
