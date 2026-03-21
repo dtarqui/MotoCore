@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using MotoCore.Domain.Auth;
 using MotoCore.Domain.Clients;
 using MotoCore.Domain.Inventory;
+using MotoCore.Domain.MaintenanceHistory;
 using MotoCore.Domain.Motorcycles;
 using MotoCore.Domain.WorkOrders;
 using MotoCore.Domain.Workshops;
@@ -20,6 +21,7 @@ public sealed class MotoCoreDbContext(DbContextOptions<MotoCoreDbContext> option
     public DbSet<WorkOrder> WorkOrders => Set<WorkOrder>();
     public DbSet<Part> Parts => Set<Part>();
     public DbSet<PartMovement> PartMovements => Set<PartMovement>();
+    public DbSet<MaintenanceHistoryEntry> MaintenanceHistoryEntries => Set<MaintenanceHistoryEntry>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -33,6 +35,7 @@ public sealed class MotoCoreDbContext(DbContextOptions<MotoCoreDbContext> option
         ConfigureWorkOrders(modelBuilder);
         ConfigureParts(modelBuilder);
         ConfigurePartMovements(modelBuilder);
+        ConfigureMaintenanceHistory(modelBuilder);
     }
 
     private static void ConfigureUsers(ModelBuilder modelBuilder)
@@ -587,6 +590,100 @@ public sealed class MotoCoreDbContext(DbContextOptions<MotoCoreDbContext> option
 
             entity.HasIndex(pm => pm.MovementType)
                 .HasDatabaseName("ix_part_movements_movement_type");
+        });
+    }
+
+    private static void ConfigureMaintenanceHistory(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<MaintenanceHistoryEntry>(entity =>
+        {
+            entity.ToTable("maintenance_history");
+
+            entity.HasKey(mh => mh.Id);
+
+            entity.Property(mh => mh.Id)
+                .HasColumnName("id")
+                .ValueGeneratedNever();
+
+            entity.Property(mh => mh.WorkshopId)
+                .HasColumnName("workshop_id")
+                .IsRequired();
+
+            entity.Property(mh => mh.MotorcycleId)
+                .HasColumnName("motorcycle_id")
+                .IsRequired();
+
+            entity.Property(mh => mh.ClientId)
+                .HasColumnName("client_id")
+                .IsRequired();
+
+            entity.Property(mh => mh.WorkOrderId)
+                .HasColumnName("work_order_id");
+
+            entity.Property(mh => mh.Title)
+                .HasColumnName("title")
+                .HasMaxLength(200)
+                .IsRequired();
+
+            entity.Property(mh => mh.Description)
+                .HasColumnName("description")
+                .HasMaxLength(2000)
+                .IsRequired();
+
+            entity.Property(mh => mh.MileageAtService)
+                .HasColumnName("mileage_at_service");
+
+            entity.Property(mh => mh.TotalCost)
+                .HasColumnName("total_cost")
+                .HasColumnType("decimal(18,2)")
+                .HasDefaultValue(0);
+
+            entity.Property(mh => mh.ServiceDate)
+                .HasColumnName("service_date")
+                .IsRequired();
+
+            entity.Property(mh => mh.PerformedByUserId)
+                .HasColumnName("performed_by_user_id")
+                .IsRequired();
+
+            entity.Property(mh => mh.ServicesPerformed)
+                .HasColumnName("services_performed")
+                .HasMaxLength(2000);
+
+            entity.Property(mh => mh.PartsUsed)
+                .HasColumnName("parts_used")
+                .HasMaxLength(2000);
+
+            entity.Property(mh => mh.Recommendations)
+                .HasColumnName("recommendations")
+                .HasMaxLength(2000);
+
+            entity.Property(mh => mh.Notes)
+                .HasColumnName("notes")
+                .HasMaxLength(2000);
+
+            entity.Property(mh => mh.CreatedAtUtc)
+                .HasColumnName("created_at_utc")
+                .HasDefaultValueSql("NOW()")
+                .ValueGeneratedOnAdd();
+
+            entity.Property(mh => mh.UpdatedAtUtc)
+                .HasColumnName("updated_at_utc");
+
+            entity.HasIndex(mh => mh.WorkshopId)
+                .HasDatabaseName("ix_maintenance_history_workshop_id");
+
+            entity.HasIndex(mh => mh.MotorcycleId)
+                .HasDatabaseName("ix_maintenance_history_motorcycle_id");
+
+            entity.HasIndex(mh => mh.ClientId)
+                .HasDatabaseName("ix_maintenance_history_client_id");
+
+            entity.HasIndex(mh => mh.WorkOrderId)
+                .HasDatabaseName("ix_maintenance_history_work_order_id");
+
+            entity.HasIndex(mh => mh.ServiceDate)
+                .HasDatabaseName("ix_maintenance_history_service_date");
         });
     }
 }
