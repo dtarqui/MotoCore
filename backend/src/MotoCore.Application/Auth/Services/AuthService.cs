@@ -1,8 +1,8 @@
 using MotoCore.Application.Auth.Contracts;
 using MotoCore.Application.Auth.Models;
 using MotoCore.Application.Common.Results;
+using MotoCore.Application.Common.Utilities;
 using MotoCore.Domain.Auth;
-using System.Net.Mail;
 using System.Security.Cryptography;
 
 namespace MotoCore.Application.Auth.Services;
@@ -22,7 +22,7 @@ public sealed class AuthService(
 
     public async Task<Result<AuthResponse>> RegisterAsync(RegisterAccountRequest request, string? ipAddress, CancellationToken cancellationToken = default)
     {
-        if (!IsValidEmail(request.Email))
+        if (!EmailValidator.IsValidEmail(request.Email))
         {
             return Result<AuthResponse>.Failure("auth.invalid_email", "The email address is not valid.");
         }
@@ -32,7 +32,7 @@ public sealed class AuthService(
             return Result<AuthResponse>.Failure("auth.invalid_password", "Password must be at least 8 characters long.");
         }
 
-        var normalizedEmail = NormalizeEmail(request.Email);
+        var normalizedEmail = EmailValidator.NormalizeEmail(request.Email);
         var existingUser = await userIdentityRepository.GetByEmailAsync(normalizedEmail, cancellationToken);
 
         if (existingUser is not null)
@@ -71,7 +71,7 @@ public sealed class AuthService(
 
     public async Task<Result<AuthResponse>> LoginAsync(LoginRequest request, string? ipAddress, CancellationToken cancellationToken = default)
     {
-        var normalizedEmail = NormalizeEmail(request.Email);
+        var normalizedEmail = EmailValidator.NormalizeEmail(request.Email);
         var userAccount = await userIdentityRepository.GetByEmailAsync(normalizedEmail, cancellationToken);
 
         if (userAccount is null || !passwordHashingService.VerifyPassword(userAccount, request.Password))
@@ -195,26 +195,6 @@ public sealed class AuthService(
         return new GeneratedRefreshToken(rawToken, refreshToken.ExpiresAtUtc, refreshToken);
     }
 
-    private static string NormalizeEmail(string email) => email.Trim().ToUpperInvariant();
-
-    private static bool IsValidEmail(string email)
-    {
-        if (string.IsNullOrWhiteSpace(email))
-        {
-            return false;
-        }
-
-        try
-        {
-            _ = new MailAddress(email);
-            return true;
-        }
-        catch
-        {
-            return false;
-        }
-    }
-
     private static string? ResolveRole(string? requestedRole, bool isFirstUser)
     {
         if (string.IsNullOrWhiteSpace(requestedRole))
@@ -260,7 +240,7 @@ public sealed class AuthService(
 
     public async Task<Result> ForgotPasswordAsync(ForgotPasswordRequest request, CancellationToken cancellationToken = default)
     {
-        var normalizedEmail = NormalizeEmail(request.Email);
+        var normalizedEmail = EmailValidator.NormalizeEmail(request.Email);
         var userAccount = await userIdentityRepository.GetByEmailAsync(normalizedEmail, cancellationToken);
 
         if (userAccount is null)
@@ -285,7 +265,7 @@ public sealed class AuthService(
             return Result.Failure("auth.invalid_password", "Password must be at least 8 characters long.");
         }
 
-        var normalizedEmail = NormalizeEmail(request.Email);
+        var normalizedEmail = EmailValidator.NormalizeEmail(request.Email);
         var userAccount = await userIdentityRepository.GetByEmailAsync(normalizedEmail, cancellationToken);
 
         if (userAccount is null || string.IsNullOrWhiteSpace(userAccount.PasswordResetToken))
@@ -315,7 +295,7 @@ public sealed class AuthService(
 
     public async Task<Result> ConfirmEmailAsync(ConfirmEmailRequest request, CancellationToken cancellationToken = default)
     {
-        var normalizedEmail = NormalizeEmail(request.Email);
+        var normalizedEmail = EmailValidator.NormalizeEmail(request.Email);
         var userAccount = await userIdentityRepository.GetByEmailAsync(normalizedEmail, cancellationToken);
 
         if (userAccount is null || string.IsNullOrWhiteSpace(userAccount.EmailConfirmationToken))
@@ -345,7 +325,7 @@ public sealed class AuthService(
 
     public async Task<Result> ResendConfirmationAsync(ResendConfirmationRequest request, CancellationToken cancellationToken = default)
     {
-        var normalizedEmail = NormalizeEmail(request.Email);
+        var normalizedEmail = EmailValidator.NormalizeEmail(request.Email);
         var userAccount = await userIdentityRepository.GetByEmailAsync(normalizedEmail, cancellationToken);
 
         if (userAccount is null)

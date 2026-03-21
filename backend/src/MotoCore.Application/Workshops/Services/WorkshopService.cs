@@ -1,10 +1,10 @@
 using MotoCore.Application.Auth.Contracts;
 using MotoCore.Application.Common.Results;
+using MotoCore.Application.Common.Utilities;
 using MotoCore.Application.Workshops.Contracts;
 using MotoCore.Application.Workshops.Models;
 using MotoCore.Domain.Auth;
 using MotoCore.Domain.Workshops;
-using System.Net.Mail;
 
 namespace MotoCore.Application.Workshops.Services;
 
@@ -166,12 +166,12 @@ public sealed class WorkshopService(
             return Result.Failure("workshop.invalid_role", "Invalid role for invitation.");
         }
 
-        if (!IsValidEmail(request.Email))
+        if (!EmailValidator.IsValidEmail(request.Email))
         {
             return Result.Failure("workshop.invalid_email", "Invalid email address.");
         }
 
-        var normalizedEmail = NormalizeEmail(request.Email);
+        var normalizedEmail = EmailValidator.NormalizeEmail(request.Email);
         var targetUser = await userIdentityRepository.GetByEmailAsync(normalizedEmail, cancellationToken);
 
         if (targetUser is null)
@@ -282,23 +282,4 @@ public sealed class WorkshopService(
             workshop.IsActive,
             workshop.CreatedAtUtc);
 
-    private static string NormalizeEmail(string email) => email.Trim().ToUpperInvariant();
-
-    private static bool IsValidEmail(string email)
-    {
-        if (string.IsNullOrWhiteSpace(email))
-        {
-            return false;
-        }
-
-        try
-        {
-            var mailAddress = new MailAddress(email);
-            return mailAddress.Address == email.Trim();
-        }
-        catch
-        {
-            return false;
-        }
     }
-}
