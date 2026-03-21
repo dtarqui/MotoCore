@@ -26,6 +26,6 @@ export type RegisterRequest = {
   password: string
   firstName: string
   lastName: string
-  role?: UserRole
-  workshopName?: string
+  role: 'Owner'
+  workshopName: string
 }

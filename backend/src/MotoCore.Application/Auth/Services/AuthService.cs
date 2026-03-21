@@ -40,12 +40,9 @@ public sealed class AuthService(
             return Result<AuthResponse>.Failure("auth.email_in_use", "An account with this email already exists.");
         }
 
-        var totalUsers = await userIdentityRepository.CountAsync(cancellationToken);
-        var resolvedRole = ResolveRole(request.Role, totalUsers == 0);
-
-        if (resolvedRole is null)
+        if (string.IsNullOrWhiteSpace(request.WorkshopName))
         {
-            return Result<AuthResponse>.Failure("auth.invalid_role", "The selected role is not supported.");
+            return Result<AuthResponse>.Failure("auth.invalid_workshop_name", "Workshop name is required.");
         }
 
         var userAccount = new UserAccount
@@ -54,7 +51,7 @@ public sealed class AuthService(
             NormalizedEmail = normalizedEmail,
             FirstName = request.FirstName.Trim(),
             LastName = request.LastName.Trim(),
-            Role = resolvedRole,
+            Role = SystemRoles.Owner,
             EmailConfirmed = false,
             EmailConfirmationToken = GenerateSecureToken(),
             EmailConfirmationTokenExpiresAt = DateTimeOffset.UtcNow.AddHours(EmailConfirmationTokenExpirationHours),
@@ -193,19 +190,6 @@ public sealed class AuthService(
         };
 
         return new GeneratedRefreshToken(rawToken, refreshToken.ExpiresAtUtc, refreshToken);
-    }
-
-    private static string? ResolveRole(string? requestedRole, bool isFirstUser)
-    {
-        if (string.IsNullOrWhiteSpace(requestedRole))
-        {
-            return isFirstUser ? SystemRoles.Owner : SystemRoles.Receptionist;
-        }
-
-        var normalizedRole = SystemRoles.All.FirstOrDefault(role =>
-            role.Equals(requestedRole.Trim(), StringComparison.OrdinalIgnoreCase));
-
-        return normalizedRole;
     }
 
     private static UserAccountResponse MapUser(UserAccount userAccount) =>

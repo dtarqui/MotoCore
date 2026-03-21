@@ -20,25 +20,14 @@ namespace MotoCore.Application.Auth.Models;
 /// Example: "Doe"
 /// </param>
 /// <param name="Role">
-/// Optional. User role. If not specified, defaults to "Owner".
-/// Valid values: "Owner", "Mechanic", "Receptionist"
+/// Optional in request payload, but registration only allows "Owner".
 /// </param>
 /// <param name="WorkshopName">
-/// Optional. Name of the workshop to create. If provided, a new workshop will be created
-/// and the user will be assigned as the owner. Maximum 200 characters.
+/// Required. Name of the workshop to create. Maximum 200 characters.
 /// Example: "Joe's Motorcycle Shop"
 /// </param>
 /// <remarks>
-/// <para><strong>Example Request (Basic):</strong></para>
-/// <code>
-/// {
-///   "email": "john.doe@example.com",
-///   "password": "SecurePass123!",
-///   "firstName": "John",
-///   "lastName": "Doe"
-/// }
-/// </code>
-/// <para><strong>Example Request (With Workshop):</strong></para>
+/// <para><strong>Example Request:</strong></para>
 /// <code>
 /// {
 ///   "email": "john.doe@example.com",
@@ -81,7 +70,7 @@ namespace MotoCore.Application.Auth.Models;
 /// <list type="bullet">
 /// <item><description>After registration, a confirmation email will be sent to verify the email address</description></item>
 /// <item><description>User can login immediately, but some features may require email confirmation</description></item>
-/// <item><description>If workshopName is provided, the user will automatically be assigned as the workshop owner</description></item>
+/// <item><description>New public registrations are always created with the Owner role</description></item>
 /// </list>
 /// </remarks>
 public sealed record RegisterAccountRequest(

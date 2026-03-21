@@ -11,14 +11,6 @@ import {
 } from '@/shared/ui/card'
 import { Input } from '@/shared/ui/input'
 import { useAuth } from '../hooks/useAuth'
-import type { UserRole } from '../types'
-
-const roleOptions: Array<{ value: '' | UserRole; label: string }> = [
-  { value: '', label: 'Sin rol explícito (default backend)' },
-  { value: 'Owner', label: 'Owner' },
-  { value: 'Mechanic', label: 'Mechanic' },
-  { value: 'Receptionist', label: 'Receptionist' },
-]
 
 export function RegisterPage() {
   const { isAuthenticated, isRegistering, register } = useAuth()
@@ -28,7 +20,6 @@ export function RegisterPage() {
   const [lastName, setLastName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [role, setRole] = useState<'' | UserRole>('')
   const [workshopName, setWorkshopName] = useState('')
   const [error, setError] = useState<string | null>(null)
 
@@ -46,8 +37,8 @@ export function RegisterPage() {
         lastName: lastName.trim(),
         email: email.trim(),
         password,
-        role: role || undefined,
-        workshopName: workshopName.trim() || undefined,
+        role: 'Owner',
+        workshopName: workshopName.trim(),
       })
 
       navigate('/', { replace: true })
@@ -141,34 +132,14 @@ export function RegisterPage() {
 
               <div className="space-y-2">
                 <label
-                  htmlFor="role"
-                  className="text-sm font-medium text-gray-900 dark:text-gray-100"
-                >
-                  Rol (opcional)
-                </label>
-                <select
-                  id="role"
-                  className="flex h-10 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 dark:border-gray-800 dark:bg-gray-950 dark:text-gray-50"
-                  value={role}
-                  onChange={(event) => setRole(event.target.value as '' | UserRole)}
-                >
-                  {roleOptions.map((option) => (
-                    <option key={option.value || 'default'} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="space-y-2">
-                <label
                   htmlFor="workshopName"
                   className="text-sm font-medium text-gray-900 dark:text-gray-100"
                 >
-                  Nombre del taller (opcional)
+                  Nombre del taller
                 </label>
                 <Input
                   id="workshopName"
+                  required
                   value={workshopName}
                   onChange={(event) => setWorkshopName(event.target.value)}
                 />

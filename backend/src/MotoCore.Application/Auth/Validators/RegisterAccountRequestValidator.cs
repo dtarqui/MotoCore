@@ -41,7 +41,13 @@ public sealed class RegisterAccountRequestValidator : AbstractValidator<Register
             .WithMessage("Last name must not exceed 100 characters.");
 
         RuleFor(x => x.Role)
-            .Must(role => string.IsNullOrWhiteSpace(role) || SystemRoles.IsSupported(role))
-            .WithMessage($"Role must be one of: {string.Join(", ", SystemRoles.All)}.");
+            .Must(role => string.IsNullOrWhiteSpace(role) || role.Trim().Equals(SystemRoles.Owner, StringComparison.OrdinalIgnoreCase))
+            .WithMessage("Role must be Owner for public registration.");
+
+        RuleFor(x => x.WorkshopName)
+            .NotEmpty()
+            .WithMessage("Workshop name is required.")
+            .MaximumLength(200)
+            .WithMessage("Workshop name must not exceed 200 characters.");
     }
 }

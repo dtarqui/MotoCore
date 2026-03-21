@@ -12,8 +12,8 @@ export type AuthContextValue = {
     password: string
     firstName: string
     lastName: string
-    role?: UserRole
-    workshopName?: string
+    role: 'Owner'
+    workshopName: string
   }) => Promise<void>
   logout: () => void
   hasAnyRole: (roles: UserRole[]) => boolean
