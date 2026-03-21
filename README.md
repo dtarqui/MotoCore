@@ -30,6 +30,8 @@ MotoCore está orientado a:
 
 Incluye soporte para múltiples talleres bajo arquitectura SaaS.
 
+En este modelo, cada `Owner` administra su propio taller con su equipo (`Mechanic` y `Receptionist`), manteniendo clientes y motocicletas aislados por taller (sin compartición entre talleres).
+
 ## Arquitectura (alto nivel)
 
 ```text
@@ -85,9 +87,9 @@ Distribución multiplataforma:
 
 Roles contemplados:
 
-- Administrador.
-- Mecánico.
-- Recepcionista.
+- Owner.
+- Mechanic.
+- Receptionist.
 
 ## Estado del proyecto
 

@@ -78,6 +78,7 @@ Este proyecto implementa **Clean Architecture** (Arquitectura Limpia) con separa
 - **IP Tracking** - Auditoría de tokens por dirección IP
 - **Password Hashing** - Usando ASP.NET Core Identity
 - **Role-Based Authorization** - 3 roles del sistema
+- **Aislamiento por taller** - Datos operativos segmentados por workshop
 
 ### Flujo de Autenticación
 
@@ -87,8 +88,7 @@ Este proyecto implementa **Clean Architecture** (Arquitectura Limpia) con separa
    ↓
    - Valida email y contraseña (min 8 caracteres)
    - Hash de contraseña
-   - Primer usuario → Owner (dueño único del taller)
-   - Usuarios subsecuentes → Receptionist (rol por defecto)
+  - Crea usuario con rol según política de negocio
    - Genera Access Token (15 min) + Refresh Token (7 días)
 
 2. LOGIN
@@ -152,9 +152,11 @@ Este proyecto implementa **Clean Architecture** (Arquitectura Limpia) con separa
 
 ## 🎭 Roles del Sistema
 
-- **Owner** - Dueño único del taller, primer usuario registrado
+- **Owner** - Propietario del taller con control administrativo
 - **Mechanic** - Mecánico del taller (múltiples permitidos)
 - **Receptionist** - Recepcionista (múltiples permitidos, rol por defecto)
+
+MotoCore opera con un modelo multi-taller: cada `Owner` administra su propio taller y los datos (clientes, motocicletas, órdenes, inventario, historial) se mantienen aislados por taller.
 
 ## 🗄️ Base de Datos
 

@@ -1,5 +1,12 @@
 # Módulos Funcionales
 
+## Contexto multi-taller
+
+- Cada taller pertenece a un `Owner`.
+- Un taller puede operar con varios `Mechanic` y varios `Receptionist`.
+- La información operativa (clientes, motocicletas, órdenes, inventario e historial) es privada por taller.
+- No se comparten clientes ni motocicletas entre talleres.
+
 ## 1) Gestión de clientes
 
 Permite registrar y administrar clientes del taller.

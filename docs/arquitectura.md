@@ -12,6 +12,13 @@ Backend API (ASP.NET Core)
 Base de datos (PostgreSQL)
 ```
 
+## Modelo multi-tenant por taller
+
+- Cada taller se gestiona como una unidad lógica aislada.
+- Cada `Owner` administra su propio taller y equipo (`Mechanic`, `Receptionist`).
+- Los datos de clientes y motocicletas se mantienen aislados por taller.
+- Las consultas y operaciones del backend deben filtrarse por el contexto del taller.
+
 ## Enfoque multiplataforma
 
 Un mismo frontend se reutiliza para múltiples objetivos de despliegue:
