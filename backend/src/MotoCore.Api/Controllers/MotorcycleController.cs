@@ -10,7 +10,7 @@ public static class MotorcycleController
 {
     public static RouteGroupBuilder MapMotorcycleEndpoints(this IEndpointRouteBuilder endpoints)
     {
-        var group = endpoints.MapGroup("/workshops/{workshopId:guid}/motorcycles")
+        var group = endpoints.MapGroup("/api/workshops/{workshopId:guid}/motorcycles")
             .WithTags("Motorcycles")
             .RequireAuthorization();
 
@@ -50,7 +50,7 @@ public static class MotorcycleController
 
         if (result.IsSuccess)
         {
-            return Results.Created($"/workshops/{workshopId}/motorcycles/{result.Value!.Id}", result.Value);
+            return Results.Created($"/api/workshops/{workshopId}/motorcycles/{result.Value!.Id}", result.Value);
         }
 
         return result.ToHttpResult();
