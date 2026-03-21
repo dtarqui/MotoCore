@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using MotoCore.Domain.Auth;
 using MotoCore.Domain.Clients;
+using MotoCore.Domain.Motorcycles;
 using MotoCore.Domain.Workshops;
 
 namespace MotoCore.Infrastructure.Persistence;
@@ -13,6 +14,7 @@ public sealed class MotoCoreDbContext(DbContextOptions<MotoCoreDbContext> option
     public DbSet<Workshop> Workshops => Set<Workshop>();
     public DbSet<WorkshopMembership> WorkshopMemberships => Set<WorkshopMembership>();
     public DbSet<Client> Clients => Set<Client>();
+    public DbSet<Motorcycle> Motorcycles => Set<Motorcycle>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -22,6 +24,7 @@ public sealed class MotoCoreDbContext(DbContextOptions<MotoCoreDbContext> option
         ConfigureWorkshops(modelBuilder);
         ConfigureWorkshopMemberships(modelBuilder);
         ConfigureClients(modelBuilder);
+        ConfigureMotorcycles(modelBuilder);
     }
 
     private static void ConfigureUsers(ModelBuilder modelBuilder)
@@ -211,6 +214,89 @@ public sealed class MotoCoreDbContext(DbContextOptions<MotoCoreDbContext> option
             entity.HasIndex(c => new { c.WorkshopId, c.Email })
                 .IsUnique()
                 .HasDatabaseName("ix_clients_workshop_id_email");
+        });
+    }
+
+    private static void ConfigureMotorcycles(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Motorcycle>(entity =>
+        {
+            entity.ToTable("motorcycles");
+
+            entity.HasKey(m => m.Id);
+
+            entity.Property(m => m.Id)
+                .HasColumnName("id")
+                .ValueGeneratedNever();
+
+            entity.Property(m => m.WorkshopId)
+                .HasColumnName("workshop_id")
+                .IsRequired();
+
+            entity.Property(m => m.ClientId)
+                .HasColumnName("client_id")
+                .IsRequired();
+
+            entity.Property(m => m.Brand)
+                .HasColumnName("brand")
+                .HasMaxLength(100)
+                .IsRequired();
+
+            entity.Property(m => m.Model)
+                .HasColumnName("model")
+                .HasMaxLength(100)
+                .IsRequired();
+
+            entity.Property(m => m.Year)
+                .HasColumnName("year")
+                .IsRequired();
+
+            entity.Property(m => m.LicensePlate)
+                .HasColumnName("license_plate")
+                .HasMaxLength(20)
+                .IsRequired();
+
+            entity.Property(m => m.Vin)
+                .HasColumnName("vin")
+                .HasMaxLength(50);
+
+            entity.Property(m => m.Color)
+                .HasColumnName("color")
+                .HasMaxLength(50);
+
+            entity.Property(m => m.Mileage)
+                .HasColumnName("mileage");
+
+            entity.Property(m => m.EngineSize)
+                .HasColumnName("engine_size")
+                .HasMaxLength(50);
+
+            entity.Property(m => m.Notes)
+                .HasColumnName("notes")
+                .HasMaxLength(2000);
+
+            entity.Property(m => m.IsActive)
+                .HasColumnName("is_active")
+                .HasDefaultValue(true)
+                .IsRequired();
+
+            entity.Property(m => m.CreatedAtUtc)
+                .HasColumnName("created_at_utc")
+                .HasDefaultValueSql("NOW()")
+                .ValueGeneratedOnAdd();
+
+            entity.Property(m => m.UpdatedAtUtc)
+                .HasColumnName("updated_at_utc");
+
+            entity.HasIndex(m => m.WorkshopId)
+                .HasDatabaseName("ix_motorcycles_workshop_id");
+
+            entity.HasIndex(m => m.ClientId)
+                .HasDatabaseName("ix_motorcycles_client_id");
+
+            entity.HasIndex(m => new { m.WorkshopId, m.LicensePlate })
+                .IsUnique()
+                .HasDatabaseName("ix_motorcycles_workshop_id_license_plate");
         });
     }
 }

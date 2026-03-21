@@ -4,6 +4,8 @@ using MotoCore.Application.Auth.Contracts;
 using MotoCore.Application.Auth.Services;
 using MotoCore.Application.Clients.Contracts;
 using MotoCore.Application.Clients.Services;
+using MotoCore.Application.Motorcycles.Contracts;
+using MotoCore.Application.Motorcycles.Services;
 using MotoCore.Application.Users.Contracts;
 using MotoCore.Application.Users.Services;
 using MotoCore.Application.Workshops.Contracts;
@@ -19,6 +21,7 @@ public static class DependencyInjection
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IWorkshopService, WorkshopService>();
         services.AddScoped<IClientService, ClientService>();
+        services.AddScoped<IMotorcycleService, MotorcycleService>();
 
         services.AddValidatorsFromAssemblyContaining<IAuthService>(ServiceLifetime.Scoped);
 

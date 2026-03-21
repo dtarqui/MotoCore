@@ -130,6 +130,7 @@ app.MapAuthEndpoints();
 app.MapUserEndpoints();
 app.MapWorkshopEndpoints();
 app.MapClientEndpoints();
+app.MapMotorcycleEndpoints();
 
 app.Run();
 
