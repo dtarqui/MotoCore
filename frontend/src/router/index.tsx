@@ -2,8 +2,10 @@ import { createBrowserRouter } from 'react-router-dom'
 import { AppShell } from '../app/layouts/AppShell'
 import { DashboardPage } from '../modules/dashboard/pages/DashboardPage'
 import { ClientesPage } from '../modules/clientes/pages/ClientesPage'
+import { MotocicletasPage } from '../modules/motocicletas/pages/MotocicletasPage'
 import { OrdenesPage } from '../modules/ordenes/pages/OrdenesPage'
 import { InventarioPage } from '../modules/inventario/pages/InventarioPage'
+import { TalleresPage } from '../modules/talleres/pages/TalleresPage'
 import { LoginPage } from '../modules/auth/pages/LoginPage'
 import { RegisterPage } from '../modules/auth/pages/RegisterPage'
 import { UnauthorizedPage } from '../modules/auth/pages/UnauthorizedPage'
@@ -42,6 +44,14 @@ export const appRouter = createBrowserRouter([
             ),
           },
           {
+            path: 'motocicletas',
+            element: (
+              <RoleRoute allowedRoles={['Owner', 'Mechanic', 'Receptionist']}>
+                <MotocicletasPage />
+              </RoleRoute>
+            ),
+          },
+          {
             path: 'ordenes',
             element: (
               <RoleRoute allowedRoles={['Owner', 'Mechanic', 'Receptionist']}>
@@ -56,6 +66,10 @@ export const appRouter = createBrowserRouter([
                 <InventarioPage />
               </RoleRoute>
             ),
+          },
+          {
+            path: 'taller',
+            element: <TalleresPage />,
           },
         ],
       },

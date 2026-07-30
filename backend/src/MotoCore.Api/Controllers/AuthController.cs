@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.RateLimiting;
 using MotoCore.Api.Extensions;
 using MotoCore.Api.Filters;
 using MotoCore.Application.Auth.Contracts;
@@ -19,17 +20,20 @@ public static class AuthController
         group.MapPost("/register", Register)
             .WithName("RegisterAccount")
             .WithSummary("Create a local account and issue access/refresh tokens.")
-            .WithValidation<RegisterAccountRequest>();
+            .WithValidation<RegisterAccountRequest>()
+            .RequireRateLimiting("auth");
 
         group.MapPost("/login", Login)
             .WithName("Login")
             .WithSummary("Authenticate a user with email and password.")
-            .WithValidation<LoginRequest>();
+            .WithValidation<LoginRequest>()
+            .RequireRateLimiting("auth");
 
         group.MapPost("/refresh-token", RefreshToken)
             .WithName("RefreshToken")
             .WithSummary("Rotate the refresh token and issue a new access token.")
-            .WithValidation<RefreshTokenRequest>();
+            .WithValidation<RefreshTokenRequest>()
+            .RequireRateLimiting("auth");
 
         group.MapPost("/logout", Logout)
             .WithName("Logout")
@@ -44,12 +48,14 @@ public static class AuthController
         group.MapPost("/forgot-password", ForgotPassword)
             .WithName("ForgotPassword")
             .WithSummary("Request a password reset token.")
-            .WithValidation<ForgotPasswordRequest>();
+            .WithValidation<ForgotPasswordRequest>()
+            .RequireRateLimiting("auth");
 
         group.MapPost("/reset-password", ResetPassword)
             .WithName("ResetPassword")
             .WithSummary("Reset password using a reset token.")
-            .WithValidation<ResetPasswordRequest>();
+            .WithValidation<ResetPasswordRequest>()
+            .RequireRateLimiting("auth");
 
         group.MapPost("/confirm-email", ConfirmEmail)
             .WithName("ConfirmEmail")
@@ -59,7 +65,8 @@ public static class AuthController
         group.MapPost("/resend-confirmation", ResendConfirmation)
             .WithName("ResendConfirmation")
             .WithSummary("Resend email confirmation token.")
-            .WithValidation<ResendConfirmationRequest>();
+            .WithValidation<ResendConfirmationRequest>()
+            .RequireRateLimiting("auth");
 
         return app;
     }

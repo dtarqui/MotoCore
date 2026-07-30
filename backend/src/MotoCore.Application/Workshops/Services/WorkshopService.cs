@@ -1,3 +1,4 @@
+using MotoCore.Application.Audit.Contracts;
 using MotoCore.Application.Auth.Contracts;
 using MotoCore.Application.Common.Results;
 using MotoCore.Application.Common.Utilities;
@@ -10,7 +11,8 @@ namespace MotoCore.Application.Workshops.Services;
 
 public sealed class WorkshopService(
     IWorkshopRepository workshopRepository,
-    IUserIdentityRepository userIdentityRepository) : IWorkshopService
+    IUserIdentityRepository userIdentityRepository,
+    IAuditLogService auditLogService) : IWorkshopService
 {
     public async Task<Result<WorkshopDto>> CreateWorkshopAsync(Guid ownerId, CreateWorkshopRequest request, CancellationToken cancellationToken = default)
     {
@@ -123,6 +125,9 @@ public sealed class WorkshopService(
         await workshopRepository.DeleteAsync(workshop, cancellationToken);
         await workshopRepository.SaveChangesAsync(cancellationToken);
 
+        await auditLogService.LogAsync(
+            workshopId, requestingUserId, "workshop.deleted", "Workshop", workshopId, null, cancellationToken);
+
         return Result.Success();
     }
 
@@ -229,6 +234,10 @@ public sealed class WorkshopService(
         await workshopRepository.UpdateMembershipAsync(memberMembership, cancellationToken);
         await workshopRepository.SaveChangesAsync(cancellationToken);
 
+        await auditLogService.LogAsync(
+            workshopId, requestingUserId, "workshop.member_removed", "WorkshopMembership", memberMembership.Id,
+            $"Removed member {memberId} (role {memberMembership.Role}).", cancellationToken);
+
         return Result.Success();
     }
 
@@ -261,11 +270,16 @@ public sealed class WorkshopService(
             return Result.Failure("workshop.cannot_change_owner_role", "Cannot change the role of the workshop owner.");
         }
 
+        var previousRole = memberMembership.Role;
         memberMembership.Role = newRole;
         memberMembership.UpdatedAtUtc = DateTimeOffset.UtcNow;
 
         await workshopRepository.UpdateMembershipAsync(memberMembership, cancellationToken);
         await workshopRepository.SaveChangesAsync(cancellationToken);
+
+        await auditLogService.LogAsync(
+            workshopId, requestingUserId, "workshop.member_role_changed", "WorkshopMembership", memberMembership.Id,
+            $"Changed member {memberId} role from {previousRole} to {newRole}.", cancellationToken);
 
         return Result.Success();
     }

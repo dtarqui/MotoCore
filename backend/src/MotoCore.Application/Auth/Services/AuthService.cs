@@ -15,7 +15,8 @@ public sealed class AuthService(
     IJwtTokenGenerator jwtTokenGenerator,
     IRefreshTokenProtector refreshTokenProtector,
     IExternalAuthProviderCatalog externalAuthProviderCatalog,
-    IWorkshopRepository workshopRepository
+    IWorkshopRepository workshopRepository,
+    IEmailSender emailSender
     ) : IAuthService
 {
     private const int MinimumPasswordLength = 8;
@@ -64,6 +65,9 @@ public sealed class AuthService(
 
         await userIdentityRepository.AddAsync(userAccount, cancellationToken);
         await userIdentityRepository.SaveChangesAsync(cancellationToken);
+
+        await emailSender.SendEmailConfirmationAsync(
+            userAccount.Email, userAccount.FirstName, userAccount.EmailConfirmationToken, cancellationToken);
 
         // Create default workshop for the owner
         var workshop = new Workshop
@@ -270,6 +274,8 @@ public sealed class AuthService(
 
         await userIdentityRepository.SaveChangesAsync(cancellationToken);
 
+        await emailSender.SendPasswordResetAsync(userAccount.Email, userAccount.FirstName, token, cancellationToken);
+
         return Result.Success();
     }
 
@@ -359,6 +365,8 @@ public sealed class AuthService(
         userAccount.UpdatedAtUtc = DateTimeOffset.UtcNow;
 
         await userIdentityRepository.SaveChangesAsync(cancellationToken);
+
+        await emailSender.SendEmailConfirmationAsync(userAccount.Email, userAccount.FirstName, token, cancellationToken);
 
         return Result.Success();
     }

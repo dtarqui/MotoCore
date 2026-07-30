@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using MotoCore.Domain.Audit;
 using MotoCore.Domain.Auth;
 using MotoCore.Domain.Clients;
 using MotoCore.Domain.Inventory;
@@ -22,6 +23,7 @@ public sealed class MotoCoreDbContext(DbContextOptions<MotoCoreDbContext> option
     public DbSet<Part> Parts => Set<Part>();
     public DbSet<PartMovement> PartMovements => Set<PartMovement>();
     public DbSet<MaintenanceHistoryEntry> MaintenanceHistoryEntries => Set<MaintenanceHistoryEntry>();
+    public DbSet<AuditLogEntry> AuditLogEntries => Set<AuditLogEntry>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -36,6 +38,7 @@ public sealed class MotoCoreDbContext(DbContextOptions<MotoCoreDbContext> option
         ConfigureParts(modelBuilder);
         ConfigurePartMovements(modelBuilder);
         ConfigureMaintenanceHistory(modelBuilder);
+        ConfigureAuditLog(modelBuilder);
     }
 
     private static void ConfigureUsers(ModelBuilder modelBuilder)
@@ -684,6 +687,56 @@ public sealed class MotoCoreDbContext(DbContextOptions<MotoCoreDbContext> option
 
             entity.HasIndex(mh => mh.ServiceDate)
                 .HasDatabaseName("ix_maintenance_history_service_date");
+        });
+    }
+
+    private static void ConfigureAuditLog(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<AuditLogEntry>(entity =>
+        {
+            entity.ToTable("audit_log_entries");
+
+            entity.HasKey(a => a.Id);
+
+            entity.Property(a => a.Id)
+                .HasColumnName("id")
+                .ValueGeneratedNever();
+
+            entity.Property(a => a.WorkshopId)
+                .HasColumnName("workshop_id")
+                .IsRequired();
+
+            entity.Property(a => a.PerformedByUserId)
+                .HasColumnName("performed_by_user_id")
+                .IsRequired();
+
+            entity.Property(a => a.Action)
+                .HasColumnName("action")
+                .HasMaxLength(100)
+                .IsRequired();
+
+            entity.Property(a => a.EntityType)
+                .HasColumnName("entity_type")
+                .HasMaxLength(100)
+                .IsRequired();
+
+            entity.Property(a => a.EntityId)
+                .HasColumnName("entity_id");
+
+            entity.Property(a => a.Details)
+                .HasColumnName("details")
+                .HasMaxLength(2000);
+
+            entity.Property(a => a.CreatedAtUtc)
+                .HasColumnName("created_at_utc")
+                .HasDefaultValueSql("NOW()")
+                .ValueGeneratedOnAdd();
+
+            entity.HasIndex(a => a.WorkshopId)
+                .HasDatabaseName("ix_audit_log_entries_workshop_id");
+
+            entity.HasIndex(a => a.CreatedAtUtc)
+                .HasDatabaseName("ix_audit_log_entries_created_at_utc");
         });
     }
 }

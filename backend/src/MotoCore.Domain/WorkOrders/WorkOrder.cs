@@ -2,7 +2,7 @@ namespace MotoCore.Domain.WorkOrders;
 
 public sealed class WorkOrder
 {
-    public Guid Id { get; set; }
+    public Guid Id { get; set; } = Guid.NewGuid();
     public Guid WorkshopId { get; set; }
     public Guid MotorcycleId { get; set; }
     public string OrderNumber { get; set; } = string.Empty;

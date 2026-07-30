@@ -2,7 +2,7 @@ namespace MotoCore.Domain.Inventory;
 
 public sealed class Part
 {
-    public Guid Id { get; set; }
+    public Guid Id { get; set; } = Guid.NewGuid();
     public Guid WorkshopId { get; set; }
     public string PartNumber { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;

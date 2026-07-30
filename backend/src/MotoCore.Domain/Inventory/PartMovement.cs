@@ -25,7 +25,7 @@ public static class PartMovementType
 
 public sealed class PartMovement
 {
-    public Guid Id { get; set; }
+    public Guid Id { get; set; } = Guid.NewGuid();
     public Guid WorkshopId { get; set; }
     public Guid PartId { get; set; }
     public string MovementType { get; set; } = PartMovementType.Purchase;

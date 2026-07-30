@@ -14,6 +14,11 @@ export const navigationItems: NavigationItem[] = [
     allowedRoles: ['Owner', 'Receptionist'],
   },
   {
+    to: '/motocicletas',
+    label: 'Motocicletas',
+    allowedRoles: ['Owner', 'Mechanic', 'Receptionist'],
+  },
+  {
     to: '/ordenes',
     label: 'Órdenes',
     allowedRoles: ['Owner', 'Mechanic', 'Receptionist'],
@@ -22,5 +27,9 @@ export const navigationItems: NavigationItem[] = [
     to: '/inventario',
     label: 'Inventario',
     allowedRoles: ['Owner', 'Receptionist'],
+  },
+  {
+    to: '/taller',
+    label: 'Taller',
   },
 ]

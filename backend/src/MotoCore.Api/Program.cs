@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using MotoCore.Api.Controllers;
+using MotoCore.Api.HealthChecks;
 using MotoCore.Api.Middleware;
 using MotoCore.Application;
 using MotoCore.Infrastructure;
@@ -10,6 +12,7 @@ using MotoCore.Infrastructure.Auth;
 using MotoCore.Infrastructure.Configuration;
 using MotoCore.Infrastructure.Persistence;
 using System.Text;
+using System.Threading.RateLimiting;
 
 EnvironmentFileLoader.LoadFromStandardLocations(Directory.GetCurrentDirectory(), AppContext.BaseDirectory);
 
@@ -21,8 +24,34 @@ var configuredCorsOrigins = builder.Configuration
     .Get<string[]>()
     ?? [];
 
+builder.Logging.ClearProviders();
+builder.Logging.AddJsonConsole(options =>
+{
+    options.IncludeScopes = true;
+    options.TimestampFormat = "yyyy-MM-ddTHH:mm:ss.fffZ";
+    options.UseUtcTimestamp = true;
+});
+
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
+
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+    options.AddPolicy("auth", httpContext => RateLimitPartition.GetFixedWindowLimiter(
+        partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+        factory: _ => new FixedWindowRateLimiterOptions
+        {
+            PermitLimit = 10,
+            Window = TimeSpan.FromMinutes(1),
+            QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+            QueueLimit = 0,
+        }));
+});
+
+builder.Services.AddHealthChecks()
+    .AddCheck<DatabaseHealthCheck>("database");
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(corsPolicyName, policy =>
@@ -130,6 +159,7 @@ if (app.Environment.IsDevelopment())
 app.UseGlobalExceptionHandling();
 app.UseCors(corsPolicyName);
 app.UseHttpsRedirection();
+app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -140,6 +170,8 @@ app.MapGet("/health", () => Results.Ok(new
     utc = DateTimeOffset.UtcNow,
 })).WithTags("System");
 
+app.MapHealthChecks("/health/db").WithTags("System");
+
 app.MapAuthEndpoints();
 app.MapUserEndpoints();
 app.MapWorkshopEndpoints();
@@ -148,6 +180,7 @@ app.MapMotorcycleEndpoints();
 app.MapWorkOrderEndpoints();
 app.MapInventoryEndpoints();
 app.MapMaintenanceHistoryEndpoints();
+app.MapAuditLogEndpoints();
 
 app.Run();
 

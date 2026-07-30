@@ -2,7 +2,7 @@ namespace MotoCore.Domain.MaintenanceHistory;
 
 public sealed class MaintenanceHistoryEntry
 {
-    public Guid Id { get; set; }
+    public Guid Id { get; set; } = Guid.NewGuid();
     public Guid WorkshopId { get; set; }
     public Guid MotorcycleId { get; set; }
     public Guid ClientId { get; set; }

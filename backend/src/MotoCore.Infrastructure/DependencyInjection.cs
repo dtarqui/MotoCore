@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using MotoCore.Application.Audit.Contracts;
 using MotoCore.Application.Auth.Contracts;
 using MotoCore.Application.Clients.Contracts;
 using MotoCore.Application.Inventory.Contracts;
@@ -49,10 +50,12 @@ public static class DependencyInjection
         services.AddScoped<IPartRepository, PartRepository>();
         services.AddScoped<IPartMovementRepository, PartMovementRepository>();
         services.AddScoped<IMaintenanceHistoryRepository, MaintenanceHistoryRepository>();
+        services.AddScoped<IAuditLogRepository, AuditLogRepository>();
         services.AddScoped<IPasswordHashingService, PasswordHashingService>();
         services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
         services.AddScoped<IRefreshTokenProtector, RefreshTokenProtector>();
         services.AddSingleton<IExternalAuthProviderCatalog, ExternalAuthProviderCatalog>();
+        services.AddScoped<IEmailSender, LoggingEmailSender>();
 
         return services;
     }

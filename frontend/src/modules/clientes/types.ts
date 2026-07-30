@@ -1,15 +1,3 @@
-export type Workshop = {
-  id: string
-  name: string
-  description: string | null
-  address: string | null
-  phoneNumber: string | null
-  email: string | null
-  ownerId: string
-  isActive: boolean
-  createdAtUtc: string
-}
-
 export type Client = {
   id: string
   workshopId: string
@@ -29,6 +17,14 @@ export type Client = {
   notes: string | null
   isActive: boolean
   createdAtUtc: string
+}
+
+export type ClientStatistics = {
+  totalClients: number
+  activeClients: number
+  inactiveClients: number
+  newClientsThisMonth: number
+  clientsWithPendingOrders: number
 }
 
 export type ClientUpsertPayload = {

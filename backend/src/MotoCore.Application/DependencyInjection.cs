@@ -1,5 +1,7 @@
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
+using MotoCore.Application.Audit.Contracts;
+using MotoCore.Application.Audit.Services;
 using MotoCore.Application.Auth.Contracts;
 using MotoCore.Application.Auth.Services;
 using MotoCore.Application.Clients.Contracts;
@@ -31,6 +33,7 @@ public static class DependencyInjection
         services.AddScoped<IWorkOrderService, WorkOrderService>();
         services.AddScoped<IInventoryService, InventoryService>();
         services.AddScoped<IMaintenanceHistoryService, MaintenanceHistoryService>();
+        services.AddScoped<IAuditLogService, AuditLogService>();
 
         services.AddValidatorsFromAssemblyContaining<IAuthService>(ServiceLifetime.Scoped);
 
