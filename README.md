@@ -48,6 +48,18 @@ Distribución multiplataforma:
 - Móvil: empaquetado con Capacitor.
 - Escritorio: empaquetado con Electron.
 
+## Estructura del repositorio
+
+```
+backend/             ASP.NET Core (.NET 10), Clean Architecture — ver backend/README.md
+frontend/            React 19 + Vite — ver frontend/README.md
+docs/                Documentación de producto (objetivos, arquitectura, módulos, seguridad, roadmap)
+.github/workflows/   Pipeline de CI
+docker-compose.yml   Stack completo (Postgres + backend + frontend)
+CLAUDE.md            Guía de contexto técnico para trabajar en el repo con Claude Code
+mejoras.md           Recomendaciones de mejora vigentes
+```
+
 ## Stack tecnológico
 
 **Frontend**
@@ -71,19 +83,30 @@ Distribución multiplataforma:
 
 ## Módulos principales
 
+**Implementados** (backend + frontend conectados):
+
+- Gestión de talleres y equipo (multi-tenant): datos del taller, invitar miembros, cambiar roles.
 - Gestión de clientes.
 - Gestión de motocicletas.
-- Órdenes de trabajo.
-- Inventario de repuestos.
-- Historial de mantenimiento.
-- Recordatorios de servicio.
-- Dashboard de métricas.
+- Órdenes de trabajo (estados, diagnóstico, cierre, entrega).
+- Inventario de repuestos (stock, movimientos, alertas de bajo stock).
+- Historial de mantenimiento por motocicleta.
+- Dashboard de métricas (servicios del mes, ingresos, alertas).
+- Auditoría de acciones críticas (cambios de rol, remoción de miembros/talleres).
+
+**Planeados** (ver [docs/roadmap.md](docs/roadmap.md) y [mejoras.md](mejoras.md)):
+
+- Recordatorios automáticos de servicio (por kilometraje/tiempo).
+- 2FA y login con Google/Facebook (el catálogo de proveedores existe, el flujo OAuth no).
+- Empaquetado nativo real (Capacitor/Electron hoy son solo scaffolds documentados).
 
 ## Seguridad
 
-- Autenticación basada en tokens.
-- Control de acceso por roles.
-- Protección de endpoints API.
+- Autenticación basada en JWT (access + refresh token con rotación).
+- Control de acceso por roles y aislamiento de datos por taller (multi-tenant), cubierto por tests dedicados.
+- Rate limiting en endpoints de autenticación (por IP).
+- Auditoría de acciones críticas (cambios de rol, remoción de miembros/talleres).
+- Confirmación de email y reset de password: la lógica está implementada; el envío de correo hoy es un stub que solo registra en logs (ver [mejoras.md](mejoras.md)).
 
 Roles contemplados:
 
@@ -93,7 +116,81 @@ Roles contemplados:
 
 ## Estado del proyecto
 
-Proyecto en fase de definición y estructuración funcional/técnica.
+**Backend** (`ASP.NET Core` + `Clean Architecture`): implementado. Los 8 módulos de dominio (Auth, Users, Workshops, Clients, Motorcycles, WorkOrders, Inventory, MaintenanceHistory) cuentan con entidades, servicios, validadores (FluentValidation) y controllers expuestos vía API REST documentada con Swagger. Incluye rate limiting, auditoría de acciones críticas, health checks y logging estructurado. Cuenta con una suite de tests (xUnit, 25/25 en verde) que cubre reglas de negocio y aislamiento multi-tenant, y un pipeline de CI (`.github/workflows/ci.yml`). Todo validado end-to-end con Docker (build, tests, y el stack completo corriendo contra PostgreSQL real).
+
+**Frontend** (`React` + `Vite`): autenticación, Clientes, Motocicletas, Órdenes de trabajo, Inventario, Talleres (administración de equipo), Historial de mantenimiento y Dashboard están conectados a la API real. PWA básica instalable (manifest); scaffolds de Capacitor/Electron listos para cuando se invierta en esas plataformas.
+
+Ver [mejoras.md](mejoras.md) para el detalle de próximos pasos recomendados.
+
+## Cómo ejecutar
+
+### Opción 1: Docker Compose (stack completo)
+
+```bash
+docker compose up --build
+# Backend:  http://localhost:8080  (Swagger en /swagger)
+# Frontend: http://localhost:8081
+```
+
+Levanta PostgreSQL, backend y frontend juntos, con la migración de base de datos aplicándose automáticamente al arrancar.
+
+### Opción 2: Backend y frontend por separado
+
+```bash
+cd backend
+dotnet restore
+# Con PostgreSQL (docker compose incluido para desarrollo local)
+docker compose -f compose.local.yml up -d
+dotnet ef database update --project src/MotoCore.Infrastructure --startup-project src/MotoCore.Api
+dotnet run --project src/MotoCore.Api
+# Swagger UI: https://localhost:7222/swagger
+```
+
+Ver [backend/README.md](backend/README.md) para el detalle completo (arquitectura, endpoints, configuración).
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Configura `VITE_API_BASE_URL` en `frontend/.env` apuntando a la URL del backend (por defecto `https://localhost:7222`).
+
+### Requisitos previos
+
+| Herramienta | Necesaria para |
+|---|---|
+| .NET 10 SDK | Correr el backend fuera de Docker (`dotnet run`, `dotnet test`) |
+| Node.js 20+ | Correr el frontend fuera de Docker (`npm run dev`) |
+| Docker Desktop | Cualquiera de las dos opciones de arriba que use contenedores |
+| PostgreSQL 15+ | Solo si no usas Docker ni el provider `InMemory` |
+
+## Variables de entorno
+
+| Variable | Dónde | Default | Descripción |
+|---|---|---|---|
+| `Database:Provider` | `backend/src/MotoCore.Api/appsettings*.json` | `PostgreSql` | `PostgreSql` o `InMemory` |
+| `POSTGRES_HOST`, `POSTGRES_PORT`, `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD` | `backend/.env` | ver `.env.example` | Conexión a Postgres cuando el provider es `PostgreSql` |
+| `Jwt:SigningKey` | `appsettings.json` | clave de ejemplo | Cambiar antes de cualquier despliegue real (ver [mejoras.md](mejoras.md)) |
+| `VITE_API_BASE_URL` | `frontend/.env` | `https://localhost:7222` | URL del backend que consume el frontend |
+
+Ver la sección "Configuración" de [backend/README.md](backend/README.md) para la lista completa (CORS, proveedores externos, etc.).
+
+## Testing
+
+```bash
+# Backend
+cd backend && dotnet test
+
+# O sin instalar el SDK, usando Docker:
+docker run --rm -v "${PWD}/backend:/src" -w /src mcr.microsoft.com/dotnet/sdk:10.0 dotnet test
+```
+
+El frontend todavía no tiene suite de tests (ver [mejoras.md](mejoras.md) — es una de las recomendaciones pendientes).
+
+## CI/CD
+
+`.github/workflows/ci.yml` corre en cada push/PR a `main`: `dotnet build` + `dotnet test` para el backend, `npm run lint` + `npm run build` (incluye `tsc -b`) para el frontend.
 
 ## Documentación
 
