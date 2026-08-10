@@ -84,7 +84,9 @@ public static class MotorcycleController
 
     private static async Task<IResult> GetWorkshopMotorcycles(
         IMotorcycleService motorcycleService,
-        HttpContext httpContext)
+        HttpContext httpContext,
+        int? page = null,
+        int? pageSize = null)
     {
         var userId = httpContext.User.GetUserId();
         if (!userId.HasValue)
@@ -98,8 +100,23 @@ public static class MotorcycleController
             return Results.BadRequest(new { error = "No workshop assigned to user" });
         }
 
-        var result = await motorcycleService.GetWorkshopMotorcyclesAsync(workshopId.Value, userId.Value);
-        return result.ToHttpResult();
+        if (page is null && pageSize is null)
+        {
+            var result = await motorcycleService.GetWorkshopMotorcyclesAsync(workshopId.Value, userId.Value);
+            return result.ToHttpResult();
+        }
+
+        var pagedResult = await motorcycleService.GetWorkshopMotorcyclesPagedAsync(workshopId.Value, userId.Value, page ?? 1, pageSize ?? 20);
+        if (!pagedResult.IsSuccess)
+        {
+            return pagedResult.Error!.ToProblemResult();
+        }
+
+        httpContext.Response.Headers["X-Total-Count"] = pagedResult.Value!.TotalCount.ToString();
+        httpContext.Response.Headers["X-Page"] = pagedResult.Value.Page.ToString();
+        httpContext.Response.Headers["X-Page-Size"] = pagedResult.Value.PageSize.ToString();
+
+        return Results.Ok(pagedResult.Value.Items);
     }
 
     private static async Task<IResult> GetClientMotorcycles(

@@ -1,5 +1,7 @@
+using MotoCore.Application.Audit.Contracts;
 using MotoCore.Application.Clients.Contracts;
 using MotoCore.Application.Clients.Models;
+using MotoCore.Application.Common.Models;
 using MotoCore.Application.Common.Results;
 using MotoCore.Application.Workshops.Contracts;
 using MotoCore.Domain.Auth;
@@ -9,7 +11,8 @@ namespace MotoCore.Application.Clients.Services;
 
 public sealed class ClientService(
     IClientRepository clientRepository,
-    IWorkshopRepository workshopRepository) : IClientService
+    IWorkshopRepository workshopRepository,
+    IAuditLogService auditLogService) : IClientService
 {
     public async Task<Result<ClientDto>> CreateClientAsync(Guid workshopId, Guid requestingUserId, CreateClientRequest request, CancellationToken cancellationToken = default)
     {
@@ -86,6 +89,23 @@ public sealed class ClientService(
         var dtos = clients.Select(MapToDto).ToList().AsReadOnly();
 
         return Result<IReadOnlyList<ClientDto>>.Success(dtos);
+    }
+
+    public async Task<Result<PagedResult<ClientDto>>> GetWorkshopClientsPagedAsync(Guid workshopId, Guid requestingUserId, int page, int pageSize, CancellationToken cancellationToken = default)
+    {
+        var membership = await workshopRepository.GetMembershipAsync(workshopId, requestingUserId, cancellationToken);
+        if (membership is null || !membership.IsActive)
+        {
+            return Result<PagedResult<ClientDto>>.Failure("client.access_denied", "You don't have access to this workshop.");
+        }
+
+        var clampedPage = Math.Max(page, 1);
+        var clampedPageSize = Math.Clamp(pageSize, 1, 100);
+
+        var (clients, totalCount) = await clientRepository.GetByWorkshopIdPagedAsync(workshopId, clampedPage, clampedPageSize, cancellationToken);
+        var dtos = clients.Select(MapToDto).ToList().AsReadOnly();
+
+        return Result<PagedResult<ClientDto>>.Success(new PagedResult<ClientDto>(dtos, totalCount, clampedPage, clampedPageSize));
     }
 
     public async Task<Result<IReadOnlyList<ClientDto>>> SearchClientsAsync(Guid workshopId, string searchTerm, Guid requestingUserId, CancellationToken cancellationToken = default)
@@ -182,6 +202,9 @@ public sealed class ClientService(
 
         await clientRepository.UpdateAsync(client, cancellationToken);
         await clientRepository.SaveChangesAsync(cancellationToken);
+
+        await auditLogService.LogAsync(
+            workshopId, requestingUserId, "client.deleted", "Client", client.Id, null, cancellationToken);
 
         return Result.Success();
     }

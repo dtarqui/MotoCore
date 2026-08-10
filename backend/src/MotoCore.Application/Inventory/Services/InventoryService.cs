@@ -1,3 +1,5 @@
+using MotoCore.Application.Audit.Contracts;
+using MotoCore.Application.Common.Models;
 using MotoCore.Application.Common.Results;
 using MotoCore.Application.Inventory.Contracts;
 using MotoCore.Application.Inventory.Models;
@@ -10,7 +12,8 @@ namespace MotoCore.Application.Inventory.Services;
 public sealed class InventoryService(
     IPartRepository partRepository,
     IPartMovementRepository partMovementRepository,
-    IWorkshopRepository workshopRepository) : IInventoryService
+    IWorkshopRepository workshopRepository,
+    IAuditLogService auditLogService) : IInventoryService
 {
     public async Task<Result<PartDto>> CreatePartAsync(Guid workshopId, Guid requestingUserId, CreatePartRequest request, CancellationToken cancellationToken = default)
     {
@@ -110,6 +113,23 @@ public sealed class InventoryService(
         return Result<IReadOnlyList<PartDto>>.Success(dtos);
     }
 
+    public async Task<Result<PagedResult<PartDto>>> GetWorkshopPartsPagedAsync(Guid workshopId, Guid requestingUserId, int page, int pageSize, CancellationToken cancellationToken = default)
+    {
+        var membership = await workshopRepository.GetMembershipAsync(workshopId, requestingUserId, cancellationToken);
+        if (membership is null || !membership.IsActive)
+        {
+            return Result<PagedResult<PartDto>>.Failure("inventory.access_denied", "You don't have access to this workshop.");
+        }
+
+        var clampedPage = Math.Max(page, 1);
+        var clampedPageSize = Math.Clamp(pageSize, 1, 100);
+
+        var (parts, totalCount) = await partRepository.GetByWorkshopIdPagedAsync(workshopId, clampedPage, clampedPageSize, cancellationToken);
+        var dtos = parts.Select(MapPartToDto).ToList().AsReadOnly();
+
+        return Result<PagedResult<PartDto>>.Success(new PagedResult<PartDto>(dtos, totalCount, clampedPage, clampedPageSize));
+    }
+
     public async Task<Result<IReadOnlyList<PartDto>>> GetLowStockPartsAsync(Guid workshopId, Guid requestingUserId, CancellationToken cancellationToken = default)
     {
         var membership = await workshopRepository.GetMembershipAsync(workshopId, requestingUserId, cancellationToken);
@@ -193,6 +213,9 @@ public sealed class InventoryService(
         await partRepository.UpdateAsync(part, cancellationToken);
         await partRepository.SaveChangesAsync(cancellationToken);
 
+        await auditLogService.LogAsync(
+            workshopId, requestingUserId, "inventory.part_deleted", "Part", part.Id, null, cancellationToken);
+
         return Result.Success();
     }
 
@@ -267,6 +290,28 @@ public sealed class InventoryService(
         var dtos = movements.Select(MapMovementToDto).ToList().AsReadOnly();
 
         return Result<IReadOnlyList<PartMovementDto>>.Success(dtos);
+    }
+
+    public async Task<Result<PagedResult<PartMovementDto>>> GetWorkshopMovementsPagedAsync(Guid workshopId, Guid requestingUserId, int page, int pageSize, CancellationToken cancellationToken = default)
+    {
+        var membership = await workshopRepository.GetMembershipAsync(workshopId, requestingUserId, cancellationToken);
+        if (membership is null || !membership.IsActive)
+        {
+            return Result<PagedResult<PartMovementDto>>.Failure("inventory.access_denied", "You don't have access to this workshop.");
+        }
+
+        if (!CanManageParts(membership.Role))
+        {
+            return Result<PagedResult<PartMovementDto>>.Failure("inventory.insufficient_permissions", "Only Owner and Receptionist can view movements.");
+        }
+
+        var clampedPage = Math.Max(page, 1);
+        var clampedPageSize = Math.Clamp(pageSize, 1, 100);
+
+        var (movements, totalCount) = await partMovementRepository.GetByWorkshopIdPagedAsync(workshopId, clampedPage, clampedPageSize, cancellationToken);
+        var dtos = movements.Select(MapMovementToDto).ToList().AsReadOnly();
+
+        return Result<PagedResult<PartMovementDto>>.Success(new PagedResult<PartMovementDto>(dtos, totalCount, clampedPage, clampedPageSize));
     }
 
     private static int CalculateNewStock(int currentStock, string movementType, int quantity)

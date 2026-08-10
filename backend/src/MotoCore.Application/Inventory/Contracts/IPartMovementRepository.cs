@@ -6,6 +6,7 @@ public interface IPartMovementRepository
 {
     Task<PartMovement?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<PartMovement>> GetByWorkshopIdAsync(Guid workshopId, CancellationToken cancellationToken = default);
+    Task<(IReadOnlyList<PartMovement> Items, int TotalCount)> GetByWorkshopIdPagedAsync(Guid workshopId, int page, int pageSize, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<PartMovement>> GetByPartIdAsync(Guid partId, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<PartMovement>> GetByWorkOrderIdAsync(Guid workOrderId, CancellationToken cancellationToken = default);
     Task AddAsync(PartMovement movement, CancellationToken cancellationToken = default);

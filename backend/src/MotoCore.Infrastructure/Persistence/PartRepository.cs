@@ -26,6 +26,20 @@ public sealed class PartRepository(MotoCoreDbContext context) : IPartRepository
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<(IReadOnlyList<Part> Items, int TotalCount)> GetByWorkshopIdPagedAsync(Guid workshopId, int page, int pageSize, CancellationToken cancellationToken = default)
+    {
+        var query = context.Parts.Where(p => p.WorkshopId == workshopId && p.IsActive);
+
+        var totalCount = await query.CountAsync(cancellationToken);
+        var items = await query
+            .OrderBy(p => p.Name)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+
+        return (items, totalCount);
+    }
+
     public async Task<IReadOnlyList<Part>> GetLowStockPartsAsync(Guid workshopId, CancellationToken cancellationToken = default)
     {
         return await context.Parts

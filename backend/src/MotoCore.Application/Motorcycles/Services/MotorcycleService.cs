@@ -1,4 +1,6 @@
+using MotoCore.Application.Audit.Contracts;
 using MotoCore.Application.Clients.Contracts;
+using MotoCore.Application.Common.Models;
 using MotoCore.Application.Common.Results;
 using MotoCore.Application.Motorcycles.Contracts;
 using MotoCore.Application.Motorcycles.Models;
@@ -11,7 +13,8 @@ namespace MotoCore.Application.Motorcycles.Services;
 public sealed class MotorcycleService(
     IMotorcycleRepository motorcycleRepository,
     IWorkshopRepository workshopRepository,
-    IClientRepository clientRepository) : IMotorcycleService
+    IClientRepository clientRepository,
+    IAuditLogService auditLogService) : IMotorcycleService
 {
     public async Task<Result<MotorcycleDto>> CreateMotorcycleAsync(Guid workshopId, Guid requestingUserId, CreateMotorcycleRequest request, CancellationToken cancellationToken = default)
     {
@@ -100,6 +103,23 @@ public sealed class MotorcycleService(
         var dtos = motorcycles.Select(MapToDto).ToList().AsReadOnly();
 
         return Result<IReadOnlyList<MotorcycleDto>>.Success(dtos);
+    }
+
+    public async Task<Result<PagedResult<MotorcycleDto>>> GetWorkshopMotorcyclesPagedAsync(Guid workshopId, Guid requestingUserId, int page, int pageSize, CancellationToken cancellationToken = default)
+    {
+        var membership = await workshopRepository.GetMembershipAsync(workshopId, requestingUserId, cancellationToken);
+        if (membership is null || !membership.IsActive)
+        {
+            return Result<PagedResult<MotorcycleDto>>.Failure("motorcycle.access_denied", "You don't have access to this workshop.");
+        }
+
+        var clampedPage = Math.Max(page, 1);
+        var clampedPageSize = Math.Clamp(pageSize, 1, 100);
+
+        var (motorcycles, totalCount) = await motorcycleRepository.GetByWorkshopIdPagedAsync(workshopId, clampedPage, clampedPageSize, cancellationToken);
+        var dtos = motorcycles.Select(MapToDto).ToList().AsReadOnly();
+
+        return Result<PagedResult<MotorcycleDto>>.Success(new PagedResult<MotorcycleDto>(dtos, totalCount, clampedPage, clampedPageSize));
     }
 
     public async Task<Result<IReadOnlyList<MotorcycleDto>>> GetClientMotorcyclesAsync(Guid workshopId, Guid clientId, Guid requestingUserId, CancellationToken cancellationToken = default)
@@ -207,6 +227,9 @@ public sealed class MotorcycleService(
 
         await motorcycleRepository.UpdateAsync(motorcycle, cancellationToken);
         await motorcycleRepository.SaveChangesAsync(cancellationToken);
+
+        await auditLogService.LogAsync(
+            workshopId, requestingUserId, "motorcycle.deleted", "Motorcycle", motorcycle.Id, null, cancellationToken);
 
         return Result.Success();
     }

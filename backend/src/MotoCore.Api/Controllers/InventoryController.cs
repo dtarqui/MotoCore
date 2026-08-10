@@ -91,7 +91,9 @@ public static class InventoryController
 
     private static async Task<IResult> GetWorkshopParts(
         IInventoryService inventoryService,
-        HttpContext httpContext)
+        HttpContext httpContext,
+        int? page = null,
+        int? pageSize = null)
     {
         var userId = httpContext.User.GetUserId();
         if (!userId.HasValue)
@@ -105,8 +107,23 @@ public static class InventoryController
             return Results.BadRequest(new { error = "No workshop assigned to user" });
         }
 
-        var result = await inventoryService.GetWorkshopPartsAsync(workshopId.Value, userId.Value);
-        return result.ToHttpResult();
+        if (page is null && pageSize is null)
+        {
+            var result = await inventoryService.GetWorkshopPartsAsync(workshopId.Value, userId.Value);
+            return result.ToHttpResult();
+        }
+
+        var pagedResult = await inventoryService.GetWorkshopPartsPagedAsync(workshopId.Value, userId.Value, page ?? 1, pageSize ?? 20);
+        if (!pagedResult.IsSuccess)
+        {
+            return pagedResult.Error!.ToProblemResult();
+        }
+
+        httpContext.Response.Headers["X-Total-Count"] = pagedResult.Value!.TotalCount.ToString();
+        httpContext.Response.Headers["X-Page"] = pagedResult.Value.Page.ToString();
+        httpContext.Response.Headers["X-Page-Size"] = pagedResult.Value.PageSize.ToString();
+
+        return Results.Ok(pagedResult.Value.Items);
     }
 
     private static async Task<IResult> GetLowStockParts(
@@ -201,7 +218,9 @@ public static class InventoryController
 
     private static async Task<IResult> GetWorkshopMovements(
         IInventoryService inventoryService,
-        HttpContext httpContext)
+        HttpContext httpContext,
+        int? page = null,
+        int? pageSize = null)
     {
         var userId = httpContext.User.GetUserId();
         if (!userId.HasValue)
@@ -215,7 +234,22 @@ public static class InventoryController
             return Results.BadRequest(new { error = "No workshop assigned to user" });
         }
 
-        var result = await inventoryService.GetWorkshopMovementsAsync(workshopId.Value, userId.Value);
-        return result.ToHttpResult();
+        if (page is null && pageSize is null)
+        {
+            var result = await inventoryService.GetWorkshopMovementsAsync(workshopId.Value, userId.Value);
+            return result.ToHttpResult();
+        }
+
+        var pagedResult = await inventoryService.GetWorkshopMovementsPagedAsync(workshopId.Value, userId.Value, page ?? 1, pageSize ?? 20);
+        if (!pagedResult.IsSuccess)
+        {
+            return pagedResult.Error!.ToProblemResult();
+        }
+
+        httpContext.Response.Headers["X-Total-Count"] = pagedResult.Value!.TotalCount.ToString();
+        httpContext.Response.Headers["X-Page"] = pagedResult.Value.Page.ToString();
+        httpContext.Response.Headers["X-Page-Size"] = pagedResult.Value.PageSize.ToString();
+
+        return Results.Ok(pagedResult.Value.Items);
     }
 }

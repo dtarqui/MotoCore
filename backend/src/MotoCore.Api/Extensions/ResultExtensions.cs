@@ -37,19 +37,26 @@ public static class ResultExtensions
 
     private static int GetStatusCode(string errorCode) => errorCode switch
     {
-        // Authentication errors
+        // Explicit overrides where the generic suffix rules below would pick the wrong code
         "auth.invalid_credentials" => StatusCodes.Status401Unauthorized,
         "auth.invalid_refresh_token" => StatusCodes.Status401Unauthorized,
         "auth.email_in_use" => StatusCodes.Status409Conflict,
-        "auth.invalid_email" => StatusCodes.Status400BadRequest,
-        "auth.invalid_password" => StatusCodes.Status400BadRequest,
-        "auth.invalid_role" => StatusCodes.Status400BadRequest,
 
-        // User errors
-        "user.not_found" => StatusCodes.Status404NotFound,
-        "user.invalid_role" => StatusCodes.Status400BadRequest,
+        // Generic suffix rules — every module's error codes follow "<module>.<reason>"
+        // naming, so matching on the reason suffix covers Clients/Motorcycles/WorkOrders/
+        // Inventory/Workshops/MaintenanceHistory/Audit without enumerating every one by hand.
+        _ when errorCode.EndsWith("not_found", StringComparison.Ordinal) => StatusCodes.Status404NotFound,
+        _ when errorCode.EndsWith("access_denied", StringComparison.Ordinal) => StatusCodes.Status403Forbidden,
+        _ when errorCode.EndsWith("insufficient_permissions", StringComparison.Ordinal) => StatusCodes.Status403Forbidden,
+        _ when errorCode.EndsWith("cannot_remove_owner", StringComparison.Ordinal) => StatusCodes.Status403Forbidden,
+        _ when errorCode.EndsWith("cannot_change_owner_role", StringComparison.Ordinal) => StatusCodes.Status403Forbidden,
+        _ when errorCode.EndsWith("already_exists", StringComparison.Ordinal) => StatusCodes.Status409Conflict,
+        _ when errorCode.EndsWith("already_member", StringComparison.Ordinal) => StatusCodes.Status409Conflict,
+        _ when errorCode.EndsWith("already_closed", StringComparison.Ordinal) => StatusCodes.Status409Conflict,
+        _ when errorCode.EndsWith("already_confirmed", StringComparison.Ordinal) => StatusCodes.Status409Conflict,
+        _ when errorCode.EndsWith("insufficient_stock", StringComparison.Ordinal) => StatusCodes.Status409Conflict,
 
-        // Default
+        // Default: validation-style / business-rule errors (invalid_*, *_mismatch, etc.)
         _ => StatusCodes.Status400BadRequest,
     };
 }

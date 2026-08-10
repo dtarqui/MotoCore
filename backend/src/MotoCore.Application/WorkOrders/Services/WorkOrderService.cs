@@ -1,3 +1,4 @@
+using MotoCore.Application.Common.Models;
 using MotoCore.Application.Common.Results;
 using MotoCore.Application.Motorcycles.Contracts;
 using MotoCore.Application.WorkOrders.Contracts;
@@ -100,6 +101,23 @@ public sealed class WorkOrderService(
         var dtos = workOrders.Select(MapToDto).ToList().AsReadOnly();
 
         return Result<IReadOnlyList<WorkOrderDto>>.Success(dtos);
+    }
+
+    public async Task<Result<PagedResult<WorkOrderDto>>> GetWorkshopWorkOrdersPagedAsync(Guid workshopId, Guid requestingUserId, int page, int pageSize, CancellationToken cancellationToken = default)
+    {
+        var membership = await workshopRepository.GetMembershipAsync(workshopId, requestingUserId, cancellationToken);
+        if (membership is null || !membership.IsActive)
+        {
+            return Result<PagedResult<WorkOrderDto>>.Failure("workorder.access_denied", "You don't have access to this workshop.");
+        }
+
+        var clampedPage = Math.Max(page, 1);
+        var clampedPageSize = Math.Clamp(pageSize, 1, 100);
+
+        var (workOrders, totalCount) = await workOrderRepository.GetByWorkshopIdPagedAsync(workshopId, clampedPage, clampedPageSize, cancellationToken);
+        var dtos = workOrders.Select(MapToDto).ToList().AsReadOnly();
+
+        return Result<PagedResult<WorkOrderDto>>.Success(new PagedResult<WorkOrderDto>(dtos, totalCount, clampedPage, clampedPageSize));
     }
 
     public async Task<Result<IReadOnlyList<WorkOrderDto>>> GetMotorcycleWorkOrdersAsync(Guid workshopId, Guid motorcycleId, Guid requestingUserId, CancellationToken cancellationToken = default)

@@ -6,6 +6,7 @@ public interface IClientRepository
 {
     Task<Client?> GetByIdAsync(Guid clientId, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<Client>> GetByWorkshopIdAsync(Guid workshopId, CancellationToken cancellationToken = default);
+    Task<(IReadOnlyList<Client> Items, int TotalCount)> GetByWorkshopIdPagedAsync(Guid workshopId, int page, int pageSize, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<Client>> SearchAsync(Guid workshopId, string searchTerm, CancellationToken cancellationToken = default);
     Task<Client?> GetByEmailAsync(Guid workshopId, string email, CancellationToken cancellationToken = default);
     Task AddAsync(Client client, CancellationToken cancellationToken = default);

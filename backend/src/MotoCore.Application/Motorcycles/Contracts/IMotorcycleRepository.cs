@@ -6,6 +6,7 @@ public interface IMotorcycleRepository
 {
     Task<Motorcycle?> GetByIdAsync(Guid motorcycleId, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<Motorcycle>> GetByWorkshopIdAsync(Guid workshopId, CancellationToken cancellationToken = default);
+    Task<(IReadOnlyList<Motorcycle> Items, int TotalCount)> GetByWorkshopIdPagedAsync(Guid workshopId, int page, int pageSize, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<Motorcycle>> GetByClientIdAsync(Guid clientId, CancellationToken cancellationToken = default);
     Task<Motorcycle?> GetByLicensePlateAsync(Guid workshopId, string licensePlate, CancellationToken cancellationToken = default);
     Task AddAsync(Motorcycle motorcycle, CancellationToken cancellationToken = default);
