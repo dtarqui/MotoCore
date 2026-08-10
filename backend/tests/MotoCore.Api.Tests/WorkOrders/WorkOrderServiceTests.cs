@@ -155,42 +155,6 @@ public class WorkOrderServiceTests
     }
 
     [Fact]
-    public async Task GetWorkshopWorkOrdersPagedAsync_ReturnsCorrectPageAndTotalCount()
-    {
-        await using var context = InMemoryDbContextFactory.Create();
-        var ownerId = Guid.NewGuid();
-        var (workshop, _) = await WorkshopSeeder.SeedWorkshopWithMemberAsync(context, ownerId, SystemRoles.Owner);
-        var motorcycle = await SeedMotorcycleAsync(context, workshop.Id);
-        var service = CreateService(context);
-        for (var i = 0; i < 3; i++)
-        {
-            await service.CreateWorkOrderAsync(
-                workshop.Id, ownerId, new CreateWorkOrderRequest(motorcycle.Id, $"Servicio {i}", null, 0m, null, null, null));
-        }
-
-        var result = await service.GetWorkshopWorkOrdersPagedAsync(workshop.Id, ownerId, page: 1, pageSize: 2);
-
-        Assert.True(result.IsSuccess);
-        Assert.Equal(2, result.Value!.Items.Count);
-        Assert.Equal(3, result.Value.TotalCount);
-    }
-
-    [Fact]
-    public async Task GetWorkshopWorkOrdersPagedAsync_ReturnsEmptyItems_WhenPageOutOfRange()
-    {
-        await using var context = InMemoryDbContextFactory.Create();
-        var ownerId = Guid.NewGuid();
-        var (workshop, _) = await WorkshopSeeder.SeedWorkshopWithMemberAsync(context, ownerId, SystemRoles.Owner);
-        var service = CreateService(context);
-
-        var result = await service.GetWorkshopWorkOrdersPagedAsync(workshop.Id, ownerId, page: 10, pageSize: 20);
-
-        Assert.True(result.IsSuccess);
-        Assert.Empty(result.Value!.Items);
-        Assert.Equal(0, result.Value.TotalCount);
-    }
-
-    [Fact]
     public async Task GetWorkOrderByIdAsync_ReturnsNotFound_ForOrderInDifferentWorkshop()
     {
         await using var context = InMemoryDbContextFactory.Create();

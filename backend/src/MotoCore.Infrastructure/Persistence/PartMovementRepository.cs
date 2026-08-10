@@ -20,20 +20,6 @@ public sealed class PartMovementRepository(MotoCoreDbContext context) : IPartMov
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<(IReadOnlyList<PartMovement> Items, int TotalCount)> GetByWorkshopIdPagedAsync(Guid workshopId, int page, int pageSize, CancellationToken cancellationToken = default)
-    {
-        var query = context.PartMovements.Where(pm => pm.WorkshopId == workshopId);
-
-        var totalCount = await query.CountAsync(cancellationToken);
-        var items = await query
-            .OrderByDescending(pm => pm.CreatedAtUtc)
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
-            .ToListAsync(cancellationToken);
-
-        return (items, totalCount);
-    }
-
     public async Task<IReadOnlyList<PartMovement>> GetByPartIdAsync(Guid partId, CancellationToken cancellationToken = default)
     {
         return await context.PartMovements

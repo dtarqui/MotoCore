@@ -88,9 +88,7 @@ public static class ClientController
 
     private static async Task<IResult> GetWorkshopClients(
         IClientService clientService,
-        HttpContext httpContext,
-        int? page = null,
-        int? pageSize = null)
+        HttpContext httpContext)
     {
         var userId = httpContext.User.GetUserId();
         if (!userId.HasValue)
@@ -104,23 +102,8 @@ public static class ClientController
             return Results.BadRequest(new { error = "No workshop assigned to user" });
         }
 
-        if (page is null && pageSize is null)
-        {
-            var result = await clientService.GetWorkshopClientsAsync(workshopId.Value, userId.Value);
-            return result.ToHttpResult();
-        }
-
-        var pagedResult = await clientService.GetWorkshopClientsPagedAsync(workshopId.Value, userId.Value, page ?? 1, pageSize ?? 20);
-        if (!pagedResult.IsSuccess)
-        {
-            return pagedResult.Error!.ToProblemResult();
-        }
-
-        httpContext.Response.Headers["X-Total-Count"] = pagedResult.Value!.TotalCount.ToString();
-        httpContext.Response.Headers["X-Page"] = pagedResult.Value.Page.ToString();
-        httpContext.Response.Headers["X-Page-Size"] = pagedResult.Value.PageSize.ToString();
-
-        return Results.Ok(pagedResult.Value.Items);
+        var result = await clientService.GetWorkshopClientsAsync(workshopId.Value, userId.Value);
+        return result.ToHttpResult();
     }
 
     private static async Task<IResult> SearchClients(

@@ -26,20 +26,6 @@ public sealed class WorkOrderRepository(MotoCoreDbContext context) : IWorkOrderR
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<(IReadOnlyList<WorkOrder> Items, int TotalCount)> GetByWorkshopIdPagedAsync(Guid workshopId, int page, int pageSize, CancellationToken cancellationToken = default)
-    {
-        var query = context.WorkOrders.Where(wo => wo.WorkshopId == workshopId && wo.IsActive);
-
-        var totalCount = await query.CountAsync(cancellationToken);
-        var items = await query
-            .OrderByDescending(wo => wo.CreatedAtUtc)
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
-            .ToListAsync(cancellationToken);
-
-        return (items, totalCount);
-    }
-
     public async Task<IReadOnlyList<WorkOrder>> GetByMotorcycleIdAsync(Guid motorcycleId, CancellationToken cancellationToken = default)
     {
         return await context.WorkOrders

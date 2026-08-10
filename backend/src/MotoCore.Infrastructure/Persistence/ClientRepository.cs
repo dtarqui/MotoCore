@@ -21,21 +21,6 @@ public sealed class ClientRepository(MotoCoreDbContext context) : IClientReposit
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<(IReadOnlyList<Client> Items, int TotalCount)> GetByWorkshopIdPagedAsync(Guid workshopId, int page, int pageSize, CancellationToken cancellationToken = default)
-    {
-        var query = context.Clients.Where(c => c.WorkshopId == workshopId && c.IsActive);
-
-        var totalCount = await query.CountAsync(cancellationToken);
-        var items = await query
-            .OrderBy(c => c.LastName)
-            .ThenBy(c => c.FirstName)
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
-            .ToListAsync(cancellationToken);
-
-        return (items, totalCount);
-    }
-
     public async Task<IReadOnlyList<Client>> SearchAsync(Guid workshopId, string searchTerm, CancellationToken cancellationToken = default)
     {
         var normalizedSearchTerm = searchTerm.ToUpperInvariant();

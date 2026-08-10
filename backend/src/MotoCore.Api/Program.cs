@@ -18,16 +18,6 @@ EnvironmentFileLoader.LoadFromStandardLocations(Directory.GetCurrentDirectory(),
 
 var builder = WebApplication.CreateBuilder(args);
 var jwtOptions = JwtOptions.FromConfiguration(builder.Configuration);
-
-if (builder.Environment.IsProduction()
-    && jwtOptions.SigningKey == "MotoCore-Development-Signing-Key-Replace-In-Production-12345")
-{
-    Console.Error.WriteLine(
-        "WARNING: Jwt:SigningKey is still the example development key while " +
-        "ASPNETCORE_ENVIRONMENT=Production. Set JWT_SIGNING_KEY (or Jwt:SigningKey) " +
-        "to a real secret before exposing this instance publicly.");
-}
-
 var corsPolicyName = "Frontend";
 var configuredCorsOrigins = builder.Configuration
     .GetSection("Cors:AllowedOrigins")
@@ -210,7 +200,3 @@ static bool IsLocalDevelopmentOrigin(string origin)
     return uri.Host.Equals("localhost", StringComparison.OrdinalIgnoreCase)
         || uri.Host.Equals("127.0.0.1", StringComparison.OrdinalIgnoreCase);
 }
-
-// Exposes the top-level-statements Program class so WebApplicationFactory<Program>
-// can reference it from the test project.
-public partial class Program;

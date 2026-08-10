@@ -1,5 +1,4 @@
 using MotoCore.Api.Tests.TestSupport;
-using MotoCore.Application.Audit.Services;
 using MotoCore.Application.Clients.Models;
 using MotoCore.Application.Clients.Services;
 using MotoCore.Application.Motorcycles.Models;
@@ -16,13 +15,10 @@ namespace MotoCore.Api.Tests.MultiTenant;
 public class MultiTenantIsolationTests
 {
     private static ClientService CreateClientService(MotoCoreDbContext context) =>
-        new(new ClientRepository(context), new WorkshopRepository(context), CreateAuditLogService(context));
+        new(new ClientRepository(context), new WorkshopRepository(context));
 
     private static MotorcycleService CreateMotorcycleService(MotoCoreDbContext context) =>
-        new(new MotorcycleRepository(context), new WorkshopRepository(context), new ClientRepository(context), CreateAuditLogService(context));
-
-    private static AuditLogService CreateAuditLogService(MotoCoreDbContext context) =>
-        new(new AuditLogRepository(context), new WorkshopRepository(context));
+        new(new MotorcycleRepository(context), new WorkshopRepository(context), new ClientRepository(context));
 
     private static CreateClientRequest BuildClientRequest(string email) =>
         new("Juan", "Perez", email, "555-0100", null, null, null, null, null, null, null, null, null, null);

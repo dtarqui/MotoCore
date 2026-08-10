@@ -92,9 +92,7 @@ public static class WorkOrderController
 
     private static async Task<IResult> GetWorkshopWorkOrders(
         IWorkOrderService workOrderService,
-        HttpContext httpContext,
-        int? page = null,
-        int? pageSize = null)
+        HttpContext httpContext)
     {
         var userId = httpContext.User.GetUserId();
         if (!userId.HasValue)
@@ -108,23 +106,8 @@ public static class WorkOrderController
             return Results.BadRequest(new { error = "No workshop assigned to user" });
         }
 
-        if (page is null && pageSize is null)
-        {
-            var result = await workOrderService.GetWorkshopWorkOrdersAsync(workshopId.Value, userId.Value);
-            return result.ToHttpResult();
-        }
-
-        var pagedResult = await workOrderService.GetWorkshopWorkOrdersPagedAsync(workshopId.Value, userId.Value, page ?? 1, pageSize ?? 20);
-        if (!pagedResult.IsSuccess)
-        {
-            return pagedResult.Error!.ToProblemResult();
-        }
-
-        httpContext.Response.Headers["X-Total-Count"] = pagedResult.Value!.TotalCount.ToString();
-        httpContext.Response.Headers["X-Page"] = pagedResult.Value.Page.ToString();
-        httpContext.Response.Headers["X-Page-Size"] = pagedResult.Value.PageSize.ToString();
-
-        return Results.Ok(pagedResult.Value.Items);
+        var result = await workOrderService.GetWorkshopWorkOrdersAsync(workshopId.Value, userId.Value);
+        return result.ToHttpResult();
     }
 
     private static async Task<IResult> GetMotorcycleWorkOrders(

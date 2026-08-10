@@ -22,22 +22,6 @@ public sealed class MotorcycleRepository(MotoCoreDbContext context) : IMotorcycl
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<(IReadOnlyList<Motorcycle> Items, int TotalCount)> GetByWorkshopIdPagedAsync(Guid workshopId, int page, int pageSize, CancellationToken cancellationToken = default)
-    {
-        var query = context.Motorcycles.Where(m => m.WorkshopId == workshopId && m.IsActive);
-
-        var totalCount = await query.CountAsync(cancellationToken);
-        var items = await query
-            .OrderBy(m => m.Brand)
-            .ThenBy(m => m.Model)
-            .ThenBy(m => m.Year)
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
-            .ToListAsync(cancellationToken);
-
-        return (items, totalCount);
-    }
-
     public async Task<IReadOnlyList<Motorcycle>> GetByClientIdAsync(Guid clientId, CancellationToken cancellationToken = default)
     {
         return await context.Motorcycles
