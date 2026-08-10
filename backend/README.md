@@ -100,7 +100,7 @@ Todo servicio de módulo de negocio sigue el mismo patrón de entrada: valida `I
    - Valida email y contraseña (min 8 caracteres)
    - Hash de contraseña
   - Crea usuario con rol según política de negocio
-   - Genera Access Token (15 min) + Refresh Token (7 días)
+   - Genera Access Token (corta duración) + Refresh Token (duración configurable)
 
 2. LOGIN
    POST /api/auth/login
@@ -223,7 +223,7 @@ No expone un listado global por taller (solo por motocicleta o cliente) — el f
 | GET | `/health` | Health check básico | No |
 | GET | `/health/db` | Health check de conexión a base de datos | No |
 
-Los endpoints `/api/auth/register`, `/login`, `/refresh-token`, `/forgot-password`, `/reset-password` y `/resend-confirmation` tienen rate limiting (10 solicitudes/minuto por defecto, política `"auth"` en `Program.cs`).
+Los endpoints `/api/auth/register`, `/login`, `/refresh-token`, `/forgot-password`, `/reset-password` y `/resend-confirmation` tienen rate limiting (umbral configurable, política `"auth"` en `Program.cs`).
 
 ## Roles del Sistema
 
@@ -428,7 +428,7 @@ dotnet test --collect:"XPlat Code Coverage"
 ## Seguridad
 
 - Contraseñas hasheadas con ASP.NET Core Identity
-- JWT con firma HMAC-SHA256
+- JWT firmado (clave e issuer/audience configurables por despliegue)
 - Refresh token rotation
 - IP tracking para auditoría
 - CORS configurable
@@ -464,7 +464,7 @@ dotnet test --collect:"XPlat Code Coverage"
 - [x] Email confirmation (lógica y endpoints; el envío usa un `IEmailSender` que hoy solo registra en logs — swap por SendGrid/SMTP en `Infrastructure/DependencyInjection.cs` cuando se elija proveedor)
 - [x] Password reset flow (mismo estado que email confirmation)
 - [ ] Two-Factor Authentication (2FA)
-- [x] Rate limiting (10 solicitudes/minuto en endpoints de `/api/auth`)
+- [x] Rate limiting (umbral configurable en endpoints de `/api/auth`)
 - [x] Audit trail (cambios de rol y remociones en talleres; `GET /api/audit-logs`, solo Owner)
 - [ ] OAuth con Google/Facebook
 - [x] Multi-tenancy (aislamiento por taller ya implementado)

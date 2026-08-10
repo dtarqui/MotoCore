@@ -40,5 +40,5 @@ MotoCore contempla una base de seguridad orientada a aplicaciones SaaS:
 
 - Definir políticas de expiración y rotación de tokens.
 - ~~Registrar auditoría de acciones críticas.~~ Implementado para cambios de rol y remoción de miembros/talleres (`/api/audit-logs`, solo Owner); pendiente extenderlo a otras entidades (clientes, motocicletas, inventario) si se necesita trazabilidad más amplia.
-- Rate limiting en endpoints de autenticación: implementado (10 req/min por defecto en `/api/auth/*`).
+- Rate limiting en endpoints de autenticación: implementado en `/api/auth/*` (umbral configurable por despliegue).
 - Añadir controles de hardening adicionales para API y base de datos (2FA, rotación de secretos, WAF).

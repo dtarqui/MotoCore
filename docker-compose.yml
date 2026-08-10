@@ -6,7 +6,7 @@ services:
     environment:
       POSTGRES_DB: motocore
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_PASSWORD: CHANGE_ME
     ports:
       - "5432:5432"
     volumes:
@@ -33,9 +33,9 @@ services:
       POSTGRES_PORT: "5432"
       POSTGRES_DB: motocore
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_PASSWORD: CHANGE_ME
       POSTGRES_SSL_MODE: Disable
-      Jwt__SigningKey: ${JWT_SIGNING_KEY:-MotoCore-Development-Signing-Key-Replace-In-Production-12345}
+      Jwt__SigningKey: ${JWT_SIGNING_KEY:-CHANGE_ME_IN_DEPLOYMENT_USE_A_LONG_RANDOM_SECRET}
       Cors__AllowedOrigins__0: http://localhost:8081
     ports:
       - "8080:8080"
