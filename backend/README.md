@@ -1,4 +1,6 @@
-# MotoCore Backend
+# MotoCore Backend (.NET — legacy)
+
+> **Nota de estado:** este es el backend **legacy** en .NET. El proyecto está migrando su backend a **Node/TS + Supabase** (carpeta [`server/`](../server/README.md)) para desplegar en Vercel. Este backend se conserva como **referencia de la lógica de negocio** hasta que `server/` lo reemplace; el trabajo nuevo va en `server/`. Ver [CLAUDE.md](../CLAUDE.md).
 
 API REST moderna para gestión de autenticación y taller mecánico construida con .NET 10.0 siguiendo Clean Architecture.
 

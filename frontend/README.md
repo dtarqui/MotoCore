@@ -1,6 +1,8 @@
 # MotoCore Frontend
 
-SPA de React para la gestión de talleres de motocicletas. Consume la API REST del [backend](../backend/README.md).
+SPA de React para la gestión de talleres de motocicletas.
+
+> **Nota de estado:** hoy consume la API REST del backend **.NET legacy** ([backend/](../backend/README.md)). Pendiente, como parte del pivote: migrar la auth a **Supabase** y apuntar al backend nuevo en [`server/`](../server/README.md), más el **selector de organización** (multiempresa). Ver [CLAUDE.md](../CLAUDE.md).
 
 ## Stack
 
@@ -93,8 +95,8 @@ Componentes propios sobre Radix + `class-variance-authority` + `tailwind-merge`,
 
 ## Testing
 
-No hay suite de tests en el frontend todavía (ni Vitest ni React Testing Library) — ver [mejoras.md](../mejoras.md). El backend sí tiene cobertura real; esta es la asimetría más notoria del proyecto hoy.
+No hay suite de tests en el frontend todavía (ni Vitest ni React Testing Library) — ver [docs/roadmap-competitivo.md](../docs/roadmap-competitivo.md). El backend sí tiene cobertura real; esta es la asimetría más notoria del proyecto hoy.
 
 ## Estado real de las features
 
-Todos los módulos listados arriba están conectados a la API real del backend (no hay datos de ejemplo hardcodeados). Ver [../mejoras.md](../mejoras.md) para el detalle de qué falta (paginación, generar y migrar a `schema.d.ts` desde OpenAPI, service worker para PWA offline, instalar Capacitor/Electron de verdad).
+Todos los módulos listados arriba están conectados a la API real del backend (hoy el .NET; **pendiente** migrar auth a Supabase y apuntar al backend nuevo en `server/`, más el selector de organización — ver [CLAUDE.md](../CLAUDE.md)). Ver [docs/roadmap-competitivo.md](../docs/roadmap-competitivo.md) para el roadmap priorizado.

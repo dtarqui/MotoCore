@@ -2,7 +2,7 @@
 
 ## Estado actual
 
-El MVP está implementado end-to-end: backend (Clean Architecture, 8 módulos de dominio, tests, CI) y frontend (auth, clientes, motocicletas, órdenes, inventario, talleres, historial de mantenimiento, dashboard) conectados entre sí. Ver [README.md](../README.md) y [mejoras.md](../mejoras.md) para el detalle actualizado de qué queda pendiente.
+El MVP está implementado end-to-end: backend (Clean Architecture, 8 módulos de dominio, tests, CI) y frontend (auth, clientes, motocicletas, órdenes, inventario, talleres, historial de mantenimiento, dashboard) conectados entre sí. El backend está migrando a Node/TS + Supabase (ver [README.md](../README.md) y [CLAUDE.md](../CLAUDE.md)). Ver [roadmap-competitivo.md](roadmap-competitivo.md) para el roadmap priorizado enfocado en Bolivia.
 
 ## Próximas etapas sugeridas
 

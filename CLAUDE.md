@@ -4,85 +4,105 @@ Guía de contexto para Claude Code al trabajar en este repositorio.
 
 ## Qué es MotoCore
 
-SaaS multi-tenant para gestión de talleres de motocicletas. Cada `Owner` administra un taller con su equipo (`Mechanic`, `Receptionist`); los datos de clientes, motos, órdenes e inventario están aislados por taller — nunca se comparten entre talleres. Ver [README.md](README.md) y `docs/*.md` para el contexto de producto completo.
+SaaS multi-tenant para gestión de talleres de motocicletas, evolucionando a un modelo **ERP multiempresa**: una cuenta administra **varias organizaciones/empresas** (estilo QuickBooks/Zoho), con datos aislados por organización. **Mercado objetivo por ahora: Bolivia.** Ver [README.md](README.md), `docs/*.md` y sobre todo [docs/roadmap-competitivo.md](docs/roadmap-competitivo.md) para el contexto de producto y el roadmap.
 
-**Estado**: MVP funcional end-to-end. Backend (8 módulos) y frontend (8 módulos) conectados entre sí, con tests reales, CI y Docker — todo verificado corriendo, no solo escrito. Ver [mejoras.md](mejoras.md) para qué falta.
+## Estado actual: PIVOTE de backend en curso (leer primero)
+
+El backend se está reescribiendo de **.NET → Node/TypeScript + Supabase** para desplegar en **Vercel** (Vercel no ejecuta .NET). Conviven **dos backends** en el repo:
+
+- **`server/` — backend NUEVO y objetivo** (Node/TS + Hono + Supabase). Aquí va todo el trabajo nuevo. La **base multitenant** (Auth + Organizations + Membership) ya está lista y con tests.
+- **`backend/` — backend .NET legacy**, aún funcional; sirve como **referencia de la lógica de negocio** hasta que `server/` lo reemplace. El endurecimiento .NET completo (tests, paginación, healthchecks, scrub de secretos) está preservado en la rama **`feat/backend-net-hardening`**.
+- **`frontend/` — React/Vite**, hoy conectado al backend **.NET**. Pendiente: migrar auth a Supabase + agregar selector de organización.
+
+**Decisiones estratégicas ya confirmadas con el usuario:**
+- Stack nuevo: **Hono + Supabase** (Postgres + Auth + RLS + Storage) + **Zod**, desplegado en **Vercel**. El frontend React/Vite se mantiene.
+- **Multitenancy ERP**: una cuenta → N organizaciones, con organización activa por request vía header `X-Org-Id`.
+- **Mercado Bolivia**, dos features clave del roadmap: **WhatsApp** (Business API) y **facturación electrónica del SIN** (Servicio de Impuestos Nacionales: CUIS/CUFD/CUF, firma digital, XML RND 102100000011).
 
 ## Estructura del repo
 
 ```
-backend/            ASP.NET Core (.NET 10) — Clean Architecture
-frontend/           React 19 + TypeScript + Vite
-docs/                Documentación de producto (objetivos, arquitectura, módulos, seguridad, roadmap)
-docker-compose.yml   Stack completo (Postgres + backend + frontend)
-.github/workflows/   CI (build + test backend, lint + build frontend)
-mejoras.md           Recomendaciones de mejora vigentes — revisar antes de proponer trabajo nuevo
+server/     NUEVO backend — Node/TS (Hono) + Supabase. Objetivo de la reescritura.
+backend/    Backend .NET (legacy, referencia). Se elimina cuando server/ lo reemplace.
+frontend/   React 19 + TypeScript + Vite (hoy contra el backend .NET).
+docs/       Docs de producto + roadmap-competitivo.md (enfocado en Bolivia).
+docker-compose.yml   Stack .NET legacy (Postgres + backend + frontend).
+.github/workflows/   CI del backend .NET / frontend.
 ```
 
-## Backend (`backend/`)
+## Backend nuevo (`server/`) — aquí va el trabajo nuevo
 
-Clean Architecture en 4 proyectos, de adentro hacia afuera:
+Node/TS + Hono sobre Supabase. Estructura:
 
-- `MotoCore.Domain` — entidades puras, sin dependencias externas.
-- `MotoCore.Application` — casos de uso, contratos (`I*Service`, `I*Repository`), DTOs/Request models, validadores FluentValidation. Depende solo de Domain.
-- `MotoCore.Infrastructure` — EF Core (`MotoCoreDbContext`), repos, JWT, hashing de passwords, `LoggingEmailSender`. Depende de Application + Domain.
-- `MotoCore.Api` — Controllers, `Program.cs`, middleware, health checks. Depende de todo lo anterior.
+- `supabase/migrations/0001_init_multitenancy.sql` — esquema + **RLS**: `profiles`, `organizations`, `memberships`, funciones helper (`is_org_member`, `is_org_owner`), trigger de creación de perfil, y RPC `get_user_id_by_email` (para invitaciones).
+- `src/lib/` — `supabase.ts` (clientes service-role y user-scoped), `auth.ts` (middleware que verifica el JWT de Supabase), `errors.ts` (ProblemDetails + `AppError`, códigos `modulo.razon`), `memberships.ts` (`requireMembership`/`requireOwner`), `org-context.ts` (`requireActiveOrg` vía `X-Org-Id`, para módulos de negocio futuros), `env.ts`.
+- `src/modules/` — `auth.ts` (register, me), `organizations.ts` (listar por membership, crear, switch, y gestión de miembros: invite/role/remove, solo Owner).
+- `src/schemas.ts` (Zod), `src/app.ts` (arma la app Hono), `src/dev-server.ts`, `api/index.ts` (handler Vercel), `vercel.json`.
+- `test/` — Vitest: `schemas.test.ts` + `app.test.ts` corren **sin Supabase**; `integration.test.ts` corre **solo con credenciales** (registro → varias orgs → aislamiento → invitación).
 
-Módulos de negocio (misma subestructura en Application: `Contracts/`, `Models/`, `Services/`, `Validators/`): `Clients`, `Motorcycles`, `WorkOrders`, `Inventory`, `MaintenanceHistory`, `Workshops`, `Users`, `Auth`, `Audit`. Al añadir un módulo nuevo, replica ese patrón.
+**Patrones (seguirlos, no reinventar):**
+- Errores como excepciones `AppError(code, message, status)` mapeadas a **ProblemDetails** (RFC 7807). Códigos `modulo.razon` (mismo catálogo que el .NET) para que el `api-client` del frontend no cambie.
+- **Aislamiento multi-tenant en dos capas**: RLS en Postgres (defensa de fondo) + `requireMembership(orgId, userId)` explícito al inicio de cada handler (mismo espíritu que el `GetMembershipAsync` del .NET).
+- **Auth**: la maneja **Supabase Auth** (registro/login/refresh/OAuth). El API solo **verifica** el token (`Authorization: Bearer`). El login se hace en el cliente con `supabase.auth.signInWithPassword`, no en este API.
+- **Organización activa** por request vía header `X-Org-Id`, validado contra membership (habilita el cambio de organización estilo ERP).
 
-**Patrones ya en uso** (seguirlos, no reinventar):
-- Result Pattern para manejo de errores sin excepciones.
-- Repository Pattern detrás de interfaces en `Contracts/`.
-- FluentValidation para validación de requests (un validador por modelo en `Validators/`).
-- Minimal APIs / Controllers exponen, la lógica de negocio vive en `Services/`, nunca en el controller.
-- Cada servicio de módulo valida membership (`IWorkshopRepository.GetMembershipAsync(workshopId, userId)`) y rol al inicio de cada método — es el mecanismo de aislamiento multi-tenant. Replicalo en cualquier servicio nuevo.
-
-**Base de datos**: PostgreSQL en producción, InMemory para desarrollo/testing (`Database:Provider` en `appsettings.json`).
-
-**Al agregar una entidad o campo nuevo al modelo de EF Core, genera la migración de inmediato** (`dotnet ef migrations add NombreMigracion --project src/MotoCore.Infrastructure --startup-project src/MotoCore.Api`). El provider InMemory (usado en dev/tests) no detecta cambios de modelo pendientes — el error solo aparece al arrancar contra PostgreSQL real (`PendingModelChangesWarning`). Ya pasó una vez con la entidad `AuditLogEntry`; no asumas que "compila y los tests pasan" significa que la migración existe.
-
-**Toda entidad nueva con clave `Guid` necesita `Id { get; set; } = Guid.NewGuid();`** como valor por defecto (mismo patrón que `Client`, `Motorcycle`, `Workshop`). Sin eso, con `ValueGeneratedNever()` configurado en `MotoCoreDbContext`, cualquier fila creada sin asignar `Id` explícitamente cae en `Guid.Empty` — funciona para la primera fila y choca con la clave primaria en la segunda. Ya fue un bug real en `WorkOrder`, `Part`, `PartMovement` y `MaintenanceHistoryEntry`.
-
-**Comandos útiles**:
+**Comandos (`server/`):**
 ```bash
-dotnet run --project src/MotoCore.Api        # levantar API (Swagger en /swagger)
-dotnet test                                   # correr tests
-docker compose -f compose.local.yml up -d     # Postgres local (solo DB)
-docker compose up --build                     # stack completo (Postgres + backend + frontend)
+npm install
+npm run dev        # dev-server local en http://localhost:8787
+npm run typecheck
+npm test           # unit + HTTP; la integración corre solo con credenciales de Supabase
 ```
+**Setup Supabase**: crear proyecto → aplicar `supabase/migrations/0001_init_multitenancy.sql` en el SQL Editor → copiar `.env.example` a `.env` con las claves (`SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `AUTH_AUTO_CONFIRM_EMAIL=true` en dev). Detalle en [server/README.md](server/README.md).
 
-## Testing (backend)
+**Hecho vs. pendiente en `server/`:**
+- **Hecho**: base multitenant (register que crea cuenta + 1ª organización + Owner; `me`; organizations CRUD + switch; members invite/role/remove con las reglas del .NET), RLS, y tests (13 unit/HTTP verdes; 5 de integración gated por credenciales). Typecheck limpio.
+- **Pendiente**: portar los módulos de negocio (`Clients → Motorcycles → WorkOrders → Inventory → MaintenanceHistory → Audit`) con tablas + RLS por `organization_id`; integrar el frontend (Supabase Auth + selector de organización); features Bolivia (WhatsApp, facturación SIN). No hay verificación end-to-end todavía porque requiere un proyecto Supabase real.
 
-`tests/MotoCore.Api.Tests` tiene cobertura real (xUnit) sobre `AuthService`, `WorkOrderService`, `InventoryService`, `AuditLogService`, y aislamiento multi-tenant explícito en `MultiTenant/`. Patrón: `InMemoryDbContextFactory.Create()` da un `MotoCoreDbContext` fresco por test, se construyen los repositorios EF reales (no mocks) directamente sobre ese contexto, y `WorkshopSeeder` siembra workshop + membership + `UserAccount`.
+## Modelo multitenancy ERP (el cambio conceptual central)
 
-**Si escribes un test nuevo que pasa por `WorkshopRepository.GetMembershipAsync`, usa `WorkshopSeeder.SeedWorkshopWithMemberAsync`** en vez de crear la `WorkshopMembership` a mano. Esa consulta hace `.Include(m => m.UserAccount)` sobre una relación requerida; si el `UserAccountId` no corresponde a una fila real en `Users`, el provider InMemory descarta la fila entera y la membership "no existe" — resultando en `access_denied` en todos lados sin ninguna pista de por qué. Ya costó depurar 18 tests fallando por esto.
+- `auth.users` (Supabase) = identidad global; `profiles` = datos de perfil 1:1.
+- `organizations` (renombra "workshop") = empresa/compañía. **Una cuenta puede crear y pertenecer a varias.**
+- `memberships` = `user ↔ organization` con rol (`owner`/`mechanic`/`receptionist`), **N por usuario**, unique `(organization_id, user_id)`.
+- Todo dato de negocio se scopea por **`organization_id`** (renombra `workshop_id` del .NET).
+- El registro crea la **1ª organización + membership Owner**. Nuevas orgs vía `POST /api/organizations`.
 
-No confíes en que todo el backend está cubierto: `ClientService`, `MotorcycleService`, `UserService`, `WorkshopService` y `MaintenanceHistoryService` no tienen tests dedicados todavía (ver [mejoras.md](mejoras.md)).
+## Backend legacy (`backend/`) — .NET, solo referencia
+
+Clean Architecture (.NET 10): `MotoCore.Domain` (entidades) → `MotoCore.Application` (servicios, contratos, DTOs, validadores FluentValidation, Result Pattern) → `MotoCore.Infrastructure` (EF Core `MotoCoreDbContext`, repos, JWT) → `MotoCore.Api` (Minimal API endpoints en `Controllers/`, `Program.cs`). Módulos: `Clients`, `Motorcycles`, `WorkOrders`, `Inventory`, `MaintenanceHistory`, `Workshops`, `Users`, `Auth`, `Audit` — su lógica de negocio es la **especificación a portar** a `server/`. Aislamiento por `IWorkshopRepository.GetMembershipAsync(workshopId, userId)` + rol.
+
+Reglas de negocio a preservar al portar (viven en los `Services/` del .NET): numeración de órdenes `WO-{año}-{secuencia}`, matemática de stock por tipo de movimiento (Purchase/Sale/Adjustment/…), transiciones de estado de la orden, y audit log. Los secretos de config están reemplazados por placeholders (`CHANGE_ME`) tras el scrub de seguridad.
+
+> Nota: en `main` este backend ya **no** debe recibir features nuevas — el trabajo nuevo va en `server/`. Se conserva como referencia y se eliminará cuando `server/` cubra los módulos.
 
 ## Frontend (`frontend/`)
 
-React 19 + Vite + TypeScript + TailwindCSS 4 + React Query + React Router 7. Alias `@/` apunta a `src/`.
+React 19 + Vite + TypeScript + TailwindCSS 4 + React Query + React Router 7. Alias `@/` → `src/`. Módulos en `src/modules/<modulo>/` (`types.ts`, `<modulo>-api.ts` que llama a `apiRequest` de `shared/lib/api-client.ts`, `pages/`). `useAuth().hasAnyRole([...])` condiciona acciones por rol. UI compartida en `src/shared/ui/` (estilo shadcn/ui).
 
-Módulos en `src/modules/<modulo>/`: `types.ts`, `<modulo>-api.ts` (llama a `apiRequest` de `shared/lib/api-client.ts` — maneja el Bearer token y los `ProblemDetails` del backend), `pages/`, y opcionalmente `components/`. UI compartida en `src/shared/ui/` (Radix + class-variance-authority + tailwind-merge, estilo shadcn/ui). Módulos: `auth`, `clientes`, `motocicletas`, `ordenes`, `inventario`, `talleres`, `historial`, `dashboard`.
+Hoy apunta al backend **.NET** (`VITE_API_BASE_URL`). **Pendiente** (parte de la reescritura): adoptar `@supabase/supabase-js` para auth, apuntar al backend `server/`, y agregar el **selector de organización** que envía `X-Org-Id`.
 
-**Todos los módulos están conectados a la API real** — ya no hay datos hardcodeados en ningún componente. `clientes-api.ts` sigue siendo la referencia más clara del patrón (fetch tipado + normalización de payload). Dentro de cada página, usa `useAuth().hasAnyRole([...])` para condicionar acciones puntuales (no toda la página necesita `RoleRoute` si solo una acción es restringida).
-
-`VITE_API_BASE_URL` en `.env` apunta al backend (default `https://localhost:7222`).
-
-**Comandos útiles**:
 ```bash
-npm run dev                  # servidor de desarrollo
-npm run build                # tsc -b + vite build
+npm run dev      # servidor de desarrollo
+npm run build    # tsc -b + vite build
 npm run lint
-npm run generate:api-types   # genera src/shared/api/schema.d.ts desde el swagger.json del backend (requiere backend corriendo)
 ```
 
-**PWA/Capacitor/Electron**: hay un manifest PWA real e instalable (`public/manifest.webmanifest`, sin service worker todavía). `capacitor.config.ts` y `electron/main.js` son placeholders documentados sin las dependencias instaladas — no asumas que Capacitor o Electron son funcionales hasta que alguien corra los pasos que esos archivos documentan.
+## Mercado Bolivia (features diferenciadoras)
+
+- **WhatsApp Business API**: presupuestos (con link de aprobación), estado de la orden y recordatorios. Canal por defecto en Bolivia.
+- **Facturación electrónica del SIN**: emitir la factura de la orden como factura en línea del SIN (XML con **CUF/CUFD**, **CUIS**, **firma digital**, RND Nº 102100000011; modalidades En Línea / Computarizada / Portal Web). Es requisito de cumplimiento. **Validar la normativa vigente del SIN antes de implementar** (las RND y los plazos cambian; el plazo de adecuación estaba extendido hasta sep-2026).
+- Prioridades completas y comparativa con software del mismo objetivo usado en Bolivia (AutoSoft Taller, ServitechApp, TuneraTaller, Appli-Car) en [docs/roadmap-competitivo.md](docs/roadmap-competitivo.md).
 
 ## Convenciones al proponer cambios
 
-- Backend y frontend usan roles en inglés (`Owner`, `Mechanic`, `Receptionist`) pero el copy de UI y los docs de producto están en español — mantén esa mezcla, no traduzcas los roles ni anglicices el copy visible al usuario.
-- Antes de crear un módulo/feature nuevo en cualquiera de los dos lados, revisa cómo está resuelto un módulo existente análogo y replica la estructura en vez de improvisar una nueva.
-- Si vas a tocar autenticación o el aislamiento multi-tenant, hay tests reales que lo cubren (`MultiTenantIsolationTests`, `WorkOrderServiceTests`, etc.) — corre `dotnet test` después de cualquier cambio ahí, no asumas que "se ve bien" es suficiente.
-- El envío de emails (confirmación, reset de password) hoy es un stub que solo registra en logs (`LoggingEmailSender`). No asumas que un usuario realmente recibe un correo — si una tarea depende de eso, hay que conectar un proveedor real primero.
-- Antes de agregar infraestructura nueva (otro pipeline de CI, otro Dockerfile, otra herramienta de observabilidad), revisa [mejoras.md](mejoras.md) — puede que ya exista una decisión tomada al respecto (por ejemplo: se optó por logging JSON nativo en vez de Serilog para no agregar dependencias sin poder validarlas en su momento).
+- **El trabajo nuevo de backend va en `server/`** (Node/Supabase), no en `backend/` (.NET legacy), salvo que el usuario lo pida explícitamente.
+- Roles en inglés (`Owner`/`Mechanic`/`Receptionist`); copy de UI y docs en español — mantén esa mezcla, no traduzcas los roles ni anglicices el copy visible.
+- Antes de crear un módulo/feature nuevo, revisa cómo está resuelto un módulo análogo (en `server/` el patrón es `organizations.ts`; la lógica de negocio de referencia está en los `Services/` del .NET) y replícalo.
+- Al tocar multitenancy/auth en `server/`, corre `npm test` (incluye aislamiento) — no asumas que "se ve bien" es suficiente.
+- Supabase/Vercel: nunca commitear la `SUPABASE_SERVICE_ROLE_KEY` ni ningún secreto; van en variables de entorno.
+
+## Git / ramas
+
+- **`main`** — línea del nuevo rumbo (backend `server/` Node/Supabase, docs de Bolivia). Los secretos de la config .NET están scrubbeados.
+- **`feat/backend-net-hardening`** — snapshot del backend .NET endurecido (vulnerabilidades NuGet, 103 tests, paginación, healthchecks), pusheado a origin. Es de donde se recupera cualquier detalle de la implementación .NET.
+- Commitea/pushea solo cuando el usuario lo pida.
