@@ -1,0 +1,184 @@
+# 1. Definición y Alcance del Proyecto
+
+*(Sesión 1 del Seminario: Tema → Problema → Pregunta/Objetivo General → Objetivos Específicos → Alcance. Formato según la rúbrica del módulo — ver §1.9.)*
+
+## 1.1 Tema
+
+**Diseño, implementación y validación de una arquitectura multi-tenant jerárquica (empresa → sucursales) sobre infraestructura serverless, con aislamiento de datos aplicado en el motor de base de datos mediante Row-Level Security, para la gestión centralizada de empresas de servicio de motocicletas en Bolivia.**
+
+## 1.2 El problema
+
+### Síntoma
+Un operador que administra **una o varias empresas de servicio de motocicletas, cada una con una o varias sucursales**, no dispone en Bolivia de una plataforma que le permita gestionarlas desde una sola cuenta con una visión consolidada. Hoy debe elegir entre dos malas opciones: llevar cada local como una cuenta independiente —perdiendo la vista unificada del cliente y su historial— o recurrir a hojas de cálculo y software genérico no especializado.
+
+### Causa
+El software de gestión de talleres relevado con presencia en Bolivia (AutoSoft Taller, ServitechApp, TuneraTaller) y el regional (Appli-Car, Garage App) está construido sobre arquitecturas de **un solo inquilino** (*single-tenant*): asumen un taller por cuenta. No modelan ni la pertenencia de varias empresas a una misma cuenta, ni la de varias sucursales a una misma empresa. Cuando existe algún aislamiento entre clientes del sistema, se resuelve **únicamente en el código de la aplicación**: basta que una consulta omita el filtro correspondiente para que se produzca una fuga de datos, porque no hay ningún control por debajo que lo impida.
+
+### Impacto
+- **Pérdida de la visión consolidada**: el historial de un cliente queda fragmentado entre sucursales de la misma empresa, que es precisamente lo que se busca al centralizar.
+- **Riesgo de fuga de datos entre empresas**: al depender el aislamiento de que cada consulta esté correctamente escrita, un solo error de programación expone información de un cliente del sistema a otro.
+- **Barrera de costo**: la infraestructura tradicional (servidor propio, despliegue manual) eleva el costo de entrada, un factor crítico en un sector con alta informalidad y bajo presupuesto de TI en Bolivia (contexto ampliado en §2, Antecedentes).
+
+## 1.3 Delimitación del problema
+
+| Dimensión | Delimitación |
+|---|---|
+| **Espacial / Organizacional** | Empresas de servicio y reparación de motocicletas en Bolivia; específicamente, operadores que administran —o planean administrar— más de una empresa y/o más de una sucursal. |
+| **Temporal** | Desarrollo y validación entre **septiembre y diciembre de 2026** (cuatro meses). El cronograma detallado por fases e hitos está en [plan-trabajo.md](../plan-trabajo.md). |
+| **Técnica** | El componente abordado es la **capa de identidad, jerarquía organizacional y aislamiento de datos**: cuentas, empresas, sucursales, membresías con rol, y las políticas de seguridad que las hacen cumplir en la base de datos. **No** abarca la totalidad de los módulos operativos (ver Exclusiones, §1.8.3). |
+
+## 1.4 Pregunta general
+
+> **¿De qué manera el diseño e implementación de una arquitectura multi-tenant jerárquica sobre infraestructura serverless, con aislamiento aplicado mediante Row-Level Security, mejora la gestión centralizada y la seguridad de los datos de operadores de varias empresas y sucursales de servicio de motocicletas en Bolivia?**
+
+## 1.5 Preguntas específicas
+
+*(Una por cada objetivo específico de §1.7, en el mismo orden.)*
+
+1. ¿Qué estrategias de aislamiento multi-tenant documenta la literatura y qué ventajas y limitaciones presenta cada una? *(Análisis)*
+2. ¿Qué capacidades ofrecen las soluciones de gestión de talleres disponibles en Bolivia y qué carencias presentan frente al modelo multiempresa? *(Análisis)*
+3. ¿Qué modelo de datos permite representar la jerarquía empresa → sucursales sin fragmentar la información del cliente entre locales? *(Diseño)*
+4. ¿Qué políticas de seguridad a nivel de fila sostienen un único límite de aislamiento cuando el inquilino tiene una subdivisión interna? *(Diseño)*
+5. ¿Cómo se implementa la identidad, la jerarquía organizacional y el control de acceso por rol sobre una plataforma serverless? *(Implementación)*
+6. ¿Cómo se comporta el alcance diferenciado de datos al implementar entidades de nivel empresa y de nivel sucursal? *(Implementación)*
+7. ¿Cómo se automatiza la verificación continua de tipos y pruebas para sostener la calidad durante el desarrollo? *(Implementación)*
+8. ¿Cómo se comprueba, con evidencia reproducible, que el aislamiento entre empresas se cumple incluso ante fallos de la capa de aplicación? *(Validación)*
+
+## 1.6 Objetivo general
+
+> **Diseñar, implementar y validar una arquitectura multi-tenant jerárquica (empresa → sucursales) sobre infraestructura serverless —Node.js/TypeScript con Supabase (PostgreSQL) y despliegue continuo en Vercel—, que aplique el aislamiento de datos en el motor de base de datos mediante Row-Level Security, para permitir la gestión centralizada de varias empresas de servicio de motocicletas en Bolivia garantizando la separación verificable de sus datos.**
+
+Verificación contra la fórmula del módulo (Qué + Cómo, para Qué):
+
+| Componente | En el objetivo |
+|---|---|
+| **Qué** (verbos medibles) | Diseñar, implementar y **validar** una arquitectura multi-tenant jerárquica con aislamiento verificable |
+| **Cómo** (tecnología central) | Serverless (Vercel), Node.js/TypeScript, Supabase/PostgreSQL, Row-Level Security, despliegue continuo |
+| **Para qué** (resultado) | Gestión centralizada de varias empresas y sucursales de servicio de motocicletas en Bolivia, con separación de datos garantizada |
+
+## 1.7 Objetivos específicos
+
+*(Todos con verbo de ingeniería, en secuencia. Cada uno responde a la pregunta específica correlativa de §1.5.)*
+
+**Fase de análisis**
+
+1. **Analizar** las estrategias de aislamiento multi-tenant documentadas en la literatura —base por inquilino, esquema por inquilino y esquema compartido con seguridad a nivel de fila— para fundamentar la selección arquitectónica.
+
+2. **Comparar** las soluciones de gestión de talleres con presencia en Bolivia frente a los requisitos del modelo multiempresa, para identificar el vacío funcional y tecnológico que justifica el proyecto.
+
+**Fase de diseño**
+
+3. **Diseñar** el modelo de datos de la jerarquía empresa → sucursales, definiendo el alcance de cada entidad según su nivel y las restricciones de integridad que se derivan de él.
+
+4. **Especificar** las políticas de seguridad a nivel de fila que sostienen un único límite de aislamiento entre empresas, junto con las funciones auxiliares de verificación de membresía.
+
+**Fase de implementación**
+
+5. **Implementar** la capa de identidad, la jerarquía organizacional y el control de acceso por rol sobre infraestructura serverless.
+
+6. **Desarrollar** el corte vertical de demostración del modelo jerárquico: el módulo de clientes como entidad de nivel empresa y el de inventario como entidad de nivel sucursal.
+
+7. **Automatizar** un pipeline de integración continua que ejecute verificación estática de tipos y la suite de pruebas en cada integración al ramal principal.
+
+**Fase de validación**
+
+8. **Validar** el aislamiento de datos mediante pruebas automatizadas de seguridad que comprueben, tanto a través de la interfaz de programación como accediendo directamente a la base de datos, que una empresa no puede acceder a datos de otra aun cuando la capa de aplicación omita sus controles.
+
+### Trazabilidad objetivo → evidencia
+
+| # | Objetivo | Entregable verificable |
+|---|---|---|
+| 1 | Analizar estrategias de aislamiento | Matriz de extracción del estado del arte (§2.2) |
+| 2 | Comparar soluciones en Bolivia | Análisis competitivo y vacío identificado (§2.3) |
+| 3 | Diseñar el modelo jerárquico | Modelo entidad-relación con alcance por nivel y restricciones de unicidad |
+| 4 | Especificar las políticas de aislamiento | Migración con políticas RLS y funciones de verificación de membresía |
+| 5 | Implementar identidad y jerarquía | Backend serverless con registro, empresas, sucursales, miembros y roles operativos |
+| 6 | Desarrollar el corte vertical | Módulos de clientes (nivel empresa) e inventario (nivel sucursal) funcionando |
+| 7 | Automatizar la integración continua | Pipeline ejecutándose en verde en cada integración |
+| 8 | Validar el aislamiento | Suite de pruebas de seguridad que demuestra la separación por API y por acceso directo a la base de datos |
+
+> **Nota sobre la cantidad de objetivos.** El módulo sugiere entre tres y cuatro objetivos específicos. Aquí se optó por **ocho objetivos más granulares** para que cada uno tenga un entregable verificable e independiente, conservando la secuencia metodológica exigida: **Analizar** (1–2) → **Diseñar** (3–4) → **Implementar** (5–7) → **Validar** (8). Si el tribunal prefiere el formato de cuatro, los objetivos se agrupan directamente por fase sin perder contenido. *Confirmar el formato preferido con el asesor.*
+
+## 1.8 Delimitación y alcance
+
+### 1.8.1 Alcance funcional
+- Registro que crea una cuenta, su primera empresa y su primera sucursal, con el usuario como Owner.
+- Creación de empresas adicionales bajo la misma cuenta, y de sucursales adicionales dentro de cada empresa.
+- Listado de las empresas del usuario (según su membresía) y cambio de empresa activa; selección de sucursal activa dentro de la empresa.
+- Gestión de miembros por empresa: invitar, cambiar rol, remover (reservado al rol Owner), y asignación operativa de miembros a sucursales.
+- **Corte vertical de demostración**: dos módulos de negocio implementados como prueba del modelo jerárquico — **Clientes** (entidad de nivel empresa, visible desde cualquier sucursal) e **Inventario de repuestos** (entidad de nivel sucursal, acotada a su local). Son el mínimo necesario para demostrar y validar que el alcance por nivel funciona; se eligen estos dos porque no dependen de otros módulos de negocio.
+- Verificación de aislamiento: una cuenta sin membresía activa en una empresa no puede leer ni escribir sus datos por ninguna vía.
+
+### 1.8.2 Alcance técnico
+- **Backend**: Node.js, TypeScript, Hono (framework de API), Zod (validación).
+- **Datos y autenticación**: Supabase (PostgreSQL, Supabase Auth, Row-Level Security).
+- **Despliegue**: Vercel (funciones serverless).
+- **Frontend**: React 19 + Vite (existente; su integración con Supabase Auth es parte del alcance técnico, pendiente de implementación — ver §1.8.3).
+- **Pruebas**: Vitest (pruebas unitarias, HTTP y de aislamiento multi-tenant).
+- **CI/CD**: pipeline automatizado (GitHub Actions, `.github/workflows/ci.yml`, job `server`) que ejecuta typecheck y pruebas en cada push/PR a `main` — cumple el estándar de "Full Stack" exigido en el módulo (§1.10).
+
+### 1.8.3 Exclusiones (lo que explícitamente NO cubre este proyecto)
+
+El objeto de estudio es la **arquitectura**, no la suite funcional completa. En consecuencia, **no** forman parte de este proyecto:
+
+- **Los módulos operativos fuera del corte vertical**: motocicletas, órdenes de trabajo, historial de mantenimiento, auditoría y dashboard. Se implementan solo Clientes e Inventario, por ser suficientes para demostrar los dos niveles de la jerarquía (§1.8.1); el resto queda como trabajo posterior reutilizando el mismo patrón.
+- **La integración con WhatsApp Business API.**
+- **La emisión de factura electrónica del SIN** de Bolivia. Se documenta como requisito del mercado (ver análisis competitivo), pero su implementación excede el alcance temporal.
+- **Aplicaciones móviles o de escritorio nativas**: solo web responsiva/PWA.
+- **Migración de datos productivos** desde sistemas anteriores (no existen datos productivos previos).
+- **Pruebas de carga o rendimiento a escala productiva**: la validación se centra en el aislamiento y la corrección funcional, no en el desempeño bajo alta concurrencia.
+
+## 1.9 Autoevaluación (rúbrica del módulo)
+
+| Pregunta de la rúbrica | Respuesta |
+|---|---|
+| ¿El problema describe un "dolor operativo/técnico" real y no solo la "falta de un software"? | Sí — el dolor es doble y concreto: pérdida de la visión consolidada del cliente entre sucursales, y riesgo de fuga de datos por depender el aislamiento de que cada consulta esté bien escrita. |
+| ¿El Objetivo General comienza con un verbo en infinitivo medible e incluye la tecnología principal? | Sí — "Diseñar, implementar y validar", con Node.js/TypeScript + Supabase/PostgreSQL + RLS + Vercel explícitos. |
+| ¿Los Objetivos Específicos son pasos técnicos secuenciales (Analizar → Diseñar → Implementar → Validar)? | Sí — los ocho objetivos siguen esa secuencia, agrupados por fase: Analizar (1–2), Diseñar (3–4), Implementar (5–7), Validar (8). Ver la nota al pie de §1.7 sobre la cantidad. |
+| ¿Incluye un párrafo de "Exclusiones" explícito? | Sí (§1.8.3), con seis exclusiones cerradas y justificadas. |
+| ¿La propuesta integra conceptos avanzados de nivel maestría (Cloud, CI/CD, Microservicios/Serverless, Seguridad)? | Sí — arquitectura serverless en Vercel, base de datos cloud gestionada (Supabase), seguridad por Row-Level Security, y CI/CD automatizado para `server/` (ver §1.10). |
+
+## 1.10 Validación de nivel de maestría (evidencia comparativa)
+
+*(Respuesta directa a la pregunta de la diapositiva 5, Sesión 1: "¿Qué diferencia a un proyecto de Maestría de uno de Pregrado?" — con evidencia buscada y verificada por texto completo, no solo afirmada.)*
+
+### 1.10.1 Sobre la UCB "San Pablo" — búsqueda exhaustiva, resultado honesto: no hay precedente propio
+
+Se buscó en el repositorio institucional (`repositorio.ucb.edu.bo`, DSpace), el repositorio histórico de tesis (`tesis.ucb.edu.bo`, por sede y carrera) y los sitios de postgrado de las tres sedes (La Paz, Santa Cruz, Cochabamba):
+
+- La **Maestría en Full Stack Development** (`lpz.ucb.edu.bo/maestria-en-full-stack/`) es un programa nuevo (publicado dic-2024, 100% online) — no tiene todavía cohortes graduadas ni tesis públicas.
+- El **repositorio de tesis de la UCB** (`tesis.ucb.edu.bo`) sí indexa trabajos de **Ingeniería de Sistemas**, pero son **tesis de licenciatura/pregrado** (ej. un "Proyecto de Grado" de 2008 sobre implementación de SharePoint, Unidad Académica Santa Cruz — verificado por extracción de texto completa), no de maestría.
+- El postgrado de la sede Cochabamba (`posgrado.cba.ucb.edu.bo`) lista una sola maestría activa ("Marketing digital & eBusiness"), sin relación con ingeniería de software.
+- **Maestrías para el Desarrollo (MpD)**, el postgrado histórico de la UCB desde 1994, está orientado a gestión/desarrollo económico y educación, no a ingeniería de software.
+
+**Conclusión honesta**: no existe, hoy, una tesis de maestría de la UCB en ingeniería de sistemas/software contra la cual comparar directamente este proyecto — el programa es demasiado nuevo. Esto **no es una debilidad que haya que ocultar**; es la razón por la que la validación se apoya en (a) el criterio explícito del propio módulo (diapositivas del profesor) y (b) comparables internacionales verificados, no en jurisprudencia local inexistente.
+
+### 1.10.2 Evidencia internacional verificada (texto completo revisado, no solo resumen de buscador)
+
+| Referencia | Universidad / Programa | Relación con MotoCore |
+|---|---|---|
+| Andriianenko, O. (2026). *"Design and evaluation of multi-tenant architectures in microservice based project management systems"*. `repository.utm.md/handle/5014/35481` | Universitatea Tehnică a Moldovei | **Dentro de la ventana de 5 años** — candidata directa para la Matriz de Extracción del Estado del Arte (§2). Diseña, implementa y **evalúa** shared-schema vs. database-per-tenant en un SaaS. |
+| Gomezcoello Yépez, A. (2017). *"Multitenencia Cloud: Una Revisión Sistemática de la literatura"* (TFM). `oa.upm.es/44935/` | **Universidad Politécnica de Madrid** — Escuela Técnica Superior de **Ingeniería de Sistemas Informáticos**, Máster Universitario en Ciencias y Tecnologías de la Computación | Fuera de la ventana de 5 años exigida para el Estado del Arte (2017) — **no** entra en la Matriz de Extracción de §2, pero es prueba verificada de que "arquitectura multi-tenant" es tema de tesis de maestría real en un programa de **Ingeniería de Sistemas** (no solo "Full Stack"), en una universidad de referencia. Su revisión sistemática identifica la **seguridad y privacidad de datos compartidos entre tenants** como un problema abierto de la literatura hasta 2016 — precisamente el problema que Row-Level Security (mecanismo central de MotoCore) aborda. Da pie a una línea narrativa defendible: *"el problema que Gomezcoello (2017) identificaba como abierto, este proyecto lo resuelve con RLS."* |
+
+*(Verificación: ambos documentos se descargaron y se extrajo su texto completo — título, autor, universidad, programa y resumen confirmados directamente, no inferidos de un snippet de búsqueda.)*
+
+### 1.10.3 Cómo queda MotoCore frente a ambos criterios
+
+| Exigencia (profesor / comparables verificados) | Estado en MotoCore |
+|---|---|
+| Arquitectura cloud/distribuida, no monolito local | Cumple — serverless en Vercel + Supabase (PostgreSQL gestionado) |
+| Seguridad desde el diseño | Cumple — Row-Level Security + verificación en API (defensa en profundidad) |
+| CI/CD automatizado | Cumple — pipeline agregado en `.github/workflows/ci.yml` (job `server`) |
+| Tema con precedente de maestría verificado (nacional o internacional) | Cumple internacionalmente (UPM 2017, UTM 2026); **no** hay precedente propio de la UCB — ver §1.10.1 |
+| Evaluación explícita de arquitecturas alternativas (como hace la tesis de UTM) | Incorporado como **objetivo específico 1** (§1.7): analizar base-por-inquilino, esquema-por-inquilino y esquema compartido con RLS. Se materializa en el Estado del Arte (§2) y en las decisiones de arquitectura registradas. |
+| Problema delimitado y medible, no "falta de software" | Cumple (§1.2-1.3) |
+
+### 1.10.4 Qué aporta la jerarquía empresa → sucursales
+
+La decisión de que una empresa pueda tener varias sucursales (registrada como ADR-006) eleva el nivel del trabajo en tres sentidos concretos:
+
+1. **De multi-tenancy plana a jerárquica.** Los comparables verificados (UTM 2026, UPM 2017) tratan la multi-tenancy como un único nivel: inquilino contra inquilino. Aquí hay dos niveles con reglas distintas, lo que obliga a responder una pregunta de diseño que esos trabajos no abordan: *¿dónde se pone el límite de aislamiento cuando existe una subdivisión interna?*
+
+2. **Una decisión de diseño no trivial y defendible.** Se optó por **un único límite de seguridad** (la empresa), tratando la sucursal como criterio de alcance operativo y no como segunda frontera. La alternativa —anidar el aislamiento también por sucursal— se consideró y se descartó porque impediría compartir clientes e historial entre locales de la misma empresa, que es el beneficio central de centralizar. Esa tensión entre *aislamiento* y *consolidación*, resuelta con argumentos y no por omisión, es exactamente el tipo de razonamiento arquitectónico que distingue un trabajo de maestría.
+
+3. **Alcance de datos diferenciado por tipo de entidad.** No todo el dato vive en el mismo nivel: clientes, motocicletas e historial son de empresa; órdenes de trabajo e inventario, de sucursal. Definir y justificar ese mapa —y sostenerlo con las políticas de seguridad correspondientes— es un aporte concreto de modelado, no solo de implementación.

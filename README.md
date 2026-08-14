@@ -157,16 +157,21 @@ cd backend && dotnet test
 
 ## CI/CD
 
-`.github/workflows/ci.yml` corre en cada push/PR a `main` para el backend .NET y el frontend. El pipeline del backend nuevo (`server/`) se agregará al integrarlo en el flujo de despliegue a Vercel.
+`.github/workflows/ci.yml` corre en cada push/PR a `main`: build+test del backend .NET legacy, lint+build del frontend, y typecheck+test del backend nuevo (`server/`). El despliegue continuo a Vercel se agrega cuando el proyecto tenga un entorno Supabase de destino.
 
 ## Documentación
 
-- [Roadmap competitivo (Bolivia)](docs/roadmap-competitivo.md)
-- [Objetivos del proyecto](docs/objetivos.md)
-- [Arquitectura y plataforma](docs/arquitectura.md)
-- [Módulos funcionales](docs/modulos.md)
-- [Seguridad y roles](docs/seguridad.md)
-- [Roadmap y extensiones futuras](docs/roadmap.md)
+**[Índice completo de la documentación](docs/README.md)** — incluye el mapa de qué documento manda sobre cada tema.
+
+**Anteproyecto de maestría**
+- [Definición y alcance](docs/tesis/01-definicion-y-alcance.md) · [Antecedentes y estado del arte](docs/tesis/02-antecedentes-y-estado-del-arte.md)
+
+**Planificación e ingeniería**
+- [Requisitos (RF y RNF)](docs/requisitos.md) · [Historias de usuario](docs/historias-usuario.md) · [Plan de trabajo](docs/plan-trabajo.md)
+- [Modelo de datos](docs/modelo-datos.md) · [Arquitectura](docs/arquitectura.md) · [Decisiones de arquitectura (ADR)](docs/decisiones-arquitectura.md)
+- [Seguridad y roles](docs/seguridad.md) · [Glosario](docs/glosario.md) · [Análisis competitivo (Bolivia)](docs/roadmap-competitivo.md)
+
+**Repositorio**
 - [Guía técnica para Claude Code](CLAUDE.md)
 
 ## Licencia

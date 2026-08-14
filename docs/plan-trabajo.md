@@ -1,0 +1,98 @@
+# Plan de trabajo
+
+Metodología, cronograma, hitos y gestión de riesgos del proyecto de grado. Período: **septiembre a diciembre de 2026**.
+
+> Objetivos y alcance: [tesis/01-definicion-y-alcance.md](tesis/01-definicion-y-alcance.md) · Requisitos: [requisitos.md](requisitos.md) · Historias: [historias-usuario.md](historias-usuario.md)
+
+## 1. Metodología
+
+**Desarrollo iterativo e incremental**, organizado en iteraciones de dos semanas. Cada iteración cierra con software funcionando y verificado —no con documentación de avance— y ninguna se da por terminada mientras el pipeline de integración continua no esté en verde.
+
+Prácticas adoptadas:
+
+| Práctica | Aplicación |
+|---|---|
+| Iteraciones de 2 semanas | Ocho iteraciones en total, cada una con un incremento demostrable. |
+| Definición de terminado | Código tipado sin errores, pruebas automatizadas en verde, requisito trazado y documentación actualizada. |
+| Decisiones registradas | Toda decisión estructural se documenta como ADR antes de implementarse. |
+| Integración continua | Verificación de tipos y pruebas en cada integración al ramal principal. |
+| Verificación sobre afirmación | Cada requisito `Must` tiene una prueba que lo respalda; no se declara cumplido lo que no se puede ejecutar. |
+
+**Por qué no Scrum formal**: el proyecto lo desarrolla una sola persona, por lo que las ceremonias de coordinación de equipo (planificación conjunta, diarias, retrospectiva grupal) no aplican. Se conserva lo que sí aporta valor en un contexto individual: iteraciones cortas, incremento demostrable y definición de terminado explícita.
+
+## 2. Fases y cronograma
+
+Cuatro fases alineadas con los cuatro objetivos específicos.
+
+| Fase | Período | Objetivo específico | Resultado |
+|---|---|---|---|
+| **F1 · Análisis** | Septiembre (sem. 1–2) | 1. Analizar | Estado del arte con matriz de extracción y vacío de investigación |
+| **F2 · Diseño** | Septiembre (sem. 3–4) | 2. Diseñar | Modelo de datos jerárquico, políticas de aislamiento y ADR |
+| **F3 · Implementación** | Octubre – Noviembre | 3. Implementar | Arquitectura funcional con el corte vertical y CI operativo |
+| **F4 · Validación y cierre** | Diciembre | 4. Validar | Evidencia de aislamiento, documento final y defensa |
+
+### Detalle por iteración
+
+| Iteración | Fechas | Contenido | Entregable |
+|---|---|---|---|
+| **I1** | 1–14 sep | Búsqueda en bases académicas; criterios de inclusión y exclusión; lectura de fuentes | Matriz de extracción con 3–5 fuentes revisadas por pares |
+| **I2** | 15–28 sep | Comparación de estrategias de aislamiento; diseño del modelo jerárquico y las políticas | Vacío de investigación redactado · Modelo de datos y ADR-006 cerrados |
+| **I3** | 29 sep – 12 oct | Migración de esquema: sucursales, asignaciones y políticas; contexto de sucursal activa | HU-06, HU-07, HU-08 · Esquema jerárquico operativo |
+| **I4** | 13–26 oct | Ajuste de cuentas, empresas y miembros al modelo jerárquico | HU-01 a HU-05, HU-09 a HU-12 |
+| **I5** | 27 oct – 9 nov | Módulo Clientes (nivel empresa) | HU-13, HU-14, HU-15 |
+| **I6** | 10–23 nov | Módulo Inventario y movimientos (nivel sucursal) | HU-16 a HU-19 (HU-20 si hay margen) |
+| **I7** | 24 nov – 7 dic | Integración del frontend: autenticación, selectores de empresa y sucursal | Aplicación utilizable de extremo a extremo |
+| **I8** | 8–21 dic | Pruebas de aislamiento, redacción final y preparación de la defensa | HU-21, HU-22 · Documento final |
+
+*Reserva: del 22 al 31 de diciembre queda como margen para correcciones posteriores a la revisión del asesor.*
+
+### Distribución de esfuerzo
+
+| Fase | Puntos de historia | Proporción |
+|---|---|---|
+| F1 · Análisis | — | Investigación |
+| F2 · Diseño | — | Modelado |
+| F3 · Implementación | 65 | 86 % |
+| F4 · Validación | 11 | 14 % |
+
+## 3. Hitos
+
+| Hito | Fecha objetivo | Criterio de cumplimiento |
+|---|---|---|
+| **H1 · Anteproyecto aprobado** | 28 de septiembre | Definición, alcance y estado del arte revisados por el asesor |
+| **H2 · Jerarquía operativa** | 12 de octubre | Una empresa gestiona varias sucursales; el aislamiento sigue vigente |
+| **H3 · Corte vertical completo** | 23 de noviembre | Clientes (nivel empresa) e Inventario (nivel sucursal) funcionando y probados |
+| **H4 · Sistema integrado** | 7 de diciembre | Frontend conectado; flujo completo desde el registro hasta la operación |
+| **H5 · Validación concluida** | 21 de diciembre | Evidencia de aislamiento reproducible; documento final entregado |
+
+## 4. Riesgos
+
+Probabilidad e impacto en escala baja / media / alta. Ordenados por exposición.
+
+| ID | Riesgo | Prob. | Impacto | Mitigación | Plan de contingencia |
+|---|---|---|---|---|---|
+| **R1** | La migración a la jerarquía rompe el aislamiento ya validado | Media | **Alto** | Escribir las pruebas de aislamiento **antes** de migrar, y ejecutarlas después de cada cambio de esquema | Revertir la migración; el esquema plano sigue siendo funcional |
+| **R2** | El alcance crece más allá de lo planificado (querer implementar más módulos) | **Alta** | Medio | Exclusiones cerradas y explícitas en §1.8.3; el corte vertical está definido | Congelar alcance en H3; lo demás pasa a trabajo futuro |
+| **R3** | Dependencia de un proveedor externo (Supabase/Vercel): cambios de API, límites de plan gratuito o indisponibilidad | Media | Medio | Aislar el acceso al proveedor tras una capa propia; no usar funciones exclusivas innecesarias | Ejecutar PostgreSQL local para desarrollo y pruebas; el aislamiento por RLS no depende del proveedor |
+| **R4** | Las políticas de aislamiento resultan más complejas de lo previsto al añadir el segundo nivel | Media | Medio | Decisión de ADR-006: un solo criterio de aislamiento (`organization_id`) en todas las tablas | Mantener el nivel sucursal solo en la capa de aplicación si RLS se vuelve inmanejable |
+| **R5** | Tiempo insuficiente por carga laboral o académica paralela | Media | Medio | Iteraciones cortas con entregable demostrable; reserva de 10 días en diciembre | Reducir a `Could` las historias no esenciales (HU-20, HU-22) |
+| **R6** | No conseguir fuentes académicas suficientes de los últimos 5 años sobre RLS multi-tenant | Media | Bajo | Ampliar a arquitecturas comparables de otros rubros; usar tesis de maestría además de artículos | Documentar la escasez de literatura como hallazgo del estado del arte |
+| **R7** | Pérdida de trabajo por fallo de equipo | Baja | Alto | Control de versiones con repositorio remoto; integración frecuente | Recuperar desde el repositorio remoto |
+
+## 5. Recursos
+
+| Tipo | Detalle | Costo |
+|---|---|---|
+| Desarrollo | Equipo personal; editor y herramientas de código abierto | — |
+| Base de datos y autenticación | Supabase, plan gratuito | Sin costo en el alcance del proyecto |
+| Despliegue | Vercel, plan gratuito | Sin costo en el alcance del proyecto |
+| Control de versiones e integración continua | GitHub y GitHub Actions | Sin costo para repositorios personales |
+| Fuentes académicas | Google Scholar, IEEE Xplore, ACM, Scopus, BASE, OATD | Acceso institucional |
+
+El costo de infraestructura es cero dentro del alcance del proyecto: los planes gratuitos cubren un entorno de desarrollo y demostración. Esto es coherente con RNF-302 (costo proporcional al uso).
+
+## 6. Antecedente del proyecto
+
+Antes del período de este proyecto de grado existió una **etapa previa**: un MVP con backend en ASP.NET Core y arquitectura de un solo taller por cuenta, con frontend en React conectado a la API. Esa etapa evidenció tres limitaciones que motivan el trabajo actual: no soportaba el modelo multiempresa, el aislamiento vivía solo en el código de aplicación, y su runtime no era desplegable en la plataforma serverless elegida.
+
+Ese trabajo se conserva como referencia funcional en el repositorio y como antecedente institucional del proyecto (ver [tesis/02-antecedentes-y-estado-del-arte.md](tesis/02-antecedentes-y-estado-del-arte.md)).

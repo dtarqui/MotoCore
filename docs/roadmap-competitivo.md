@@ -28,7 +28,9 @@ No compiten en Bolivia, pero marcan el estándar de features (inspección digita
 
 ## Qué tiene MotoCore hoy
 
-Clientes, motocicletas, órdenes de trabajo (con estados Pending → InDiagnosis → InRepair → Completed → Delivered), inventario con movimientos de stock, historial de mantenimiento, talleres con membresías y roles (Owner / Mechanic / Receptionist), autenticación, audit trail parcial (roles y talleres) y dashboard. El aislamiento por taller ya existe; el registro crea **un** taller por Owner.
+**Backend nuevo (Node/TS + Supabase, en construcción)**: cuentas, organizaciones (empresas) y membresías con rol, aislamiento entre empresas por Row-Level Security, y cambio de organización activa.
+
+**Backend legacy (.NET, referencia funcional)**: clientes, motocicletas, órdenes de trabajo (estados Pendiente → En diagnóstico → En reparación → Finalizado → Entregado), inventario con movimientos de stock, historial de mantenimiento, autenticación, auditoría parcial y dashboard — construidos sobre el modelo anterior de un solo taller por cuenta, y pendientes de portar al modelo multiempresa jerárquico.
 
 ## Tabla comparativa (resumen)
 

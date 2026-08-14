@@ -6,6 +6,8 @@ Guía de contexto para Claude Code al trabajar en este repositorio.
 
 SaaS multi-tenant para gestión de talleres de motocicletas, evolucionando a un modelo **ERP multiempresa**: una cuenta administra **varias organizaciones/empresas** (estilo QuickBooks/Zoho), con datos aislados por organización. **Mercado objetivo por ahora: Bolivia.** Ver [README.md](README.md), `docs/*.md` y sobre todo [docs/roadmap-competitivo.md](docs/roadmap-competitivo.md) para el contexto de producto y el roadmap.
 
+El proyecto también es el **Anteproyecto de un Seminario de Maestría** (Full Stack Development), documentado en [docs/tesis/](docs/tesis/README.md) **estrictamente alineado sesión por sesión** con las diapositivas del curso en `docs/diapositivas/*.pptx`. Regla dura: **solo se escribe contenido hasta donde el seminario ya cubrió** — no adelantar capítulos de sesiones futuras, y borrar/rehacer si una sesión nueva cambia el formato exigido. El Estado del Arte debe usar únicamente fuentes revisadas por pares (Google Scholar, IEEE, ACM, Scopus, OATD, BASE) — nunca blogs/Medium/YouTube/Wikipedia. Si el usuario trae una nueva sesión (nuevo `.pptx` en `docs/diapositivas/`), léela primero con la misma técnica que se usó para las anteriores (extraer texto del `.pptx` vía `python3` + `zipfile`, ya que el `.pptx` es binario) antes de escribir nada.
+
 ## Estado actual: PIVOTE de backend en curso (leer primero)
 
 El backend se está reescribiendo de **.NET → Node/TypeScript + Supabase** para desplegar en **Vercel** (Vercel no ejecuta .NET). Conviven **dos backends** en el repo:
@@ -25,7 +27,8 @@ El backend se está reescribiendo de **.NET → Node/TypeScript + Supabase** par
 server/     NUEVO backend — Node/TS (Hono) + Supabase. Objetivo de la reescritura.
 backend/    Backend .NET (legacy, referencia). Se elimina cuando server/ lo reemplace.
 frontend/   React 19 + TypeScript + Vite (hoy contra el backend .NET).
-docs/       Docs de producto + roadmap-competitivo.md (enfocado en Bolivia).
+docs/       Documentación. Empieza por docs/README.md (índice + qué doc manda sobre cada tema)
+            y docs/glosario.md (terminología: organización vs. taller vs. tenant).
 docker-compose.yml   Stack .NET legacy (Postgres + backend + frontend).
 .github/workflows/   CI del backend .NET / frontend.
 ```
@@ -57,15 +60,20 @@ npm test           # unit + HTTP; la integración corre solo con credenciales de
 
 **Hecho vs. pendiente en `server/`:**
 - **Hecho**: base multitenant (register que crea cuenta + 1ª organización + Owner; `me`; organizations CRUD + switch; members invite/role/remove con las reglas del .NET), RLS, y tests (13 unit/HTTP verdes; 5 de integración gated por credenciales). Typecheck limpio.
-- **Pendiente**: portar los módulos de negocio (`Clients → Motorcycles → WorkOrders → Inventory → MaintenanceHistory → Audit`) con tablas + RLS por `organization_id`; integrar el frontend (Supabase Auth + selector de organización); features Bolivia (WhatsApp, facturación SIN). No hay verificación end-to-end todavía porque requiere un proyecto Supabase real.
+- **Pendiente inmediato**: implementar la **jerarquía empresa → sucursales** (ADR-006) — tablas `workshops` y `workshop_assignments`, taller activo por header `X-Workshop-Id`, y ajuste de unicidades. El código actual asume el modelo plano.
+- **Pendiente después**: el corte vertical del proyecto de grado (`clients` a nivel empresa, `parts`/`part_movements` a nivel sucursal); integrar el frontend (Supabase Auth + selectores de organización y taller). Fuera de alcance del proyecto de grado: resto de módulos, WhatsApp y facturación SIN. No hay verificación end-to-end todavía porque requiere un proyecto Supabase real.
 
-## Modelo multitenancy ERP (el cambio conceptual central)
+## Modelo multitenancy jerárquico (el cambio conceptual central)
+
+Dos niveles, **un solo límite de seguridad**. Detalle en [docs/modelo-datos.md](docs/modelo-datos.md) y [docs/glosario.md](docs/glosario.md).
 
 - `auth.users` (Supabase) = identidad global; `profiles` = datos de perfil 1:1.
-- `organizations` (renombra "workshop") = empresa/compañía. **Una cuenta puede crear y pertenecer a varias.**
-- `memberships` = `user ↔ organization` con rol (`owner`/`mechanic`/`receptionist`), **N por usuario**, unique `(organization_id, user_id)`.
-- Todo dato de negocio se scopea por **`organization_id`** (renombra `workshop_id` del .NET).
-- El registro crea la **1ª organización + membership Owner**. Nuevas orgs vía `POST /api/organizations`.
+- `organizations` = **empresa**, la unidad de aislamiento (tenant). **Una cuenta puede crear y pertenecer a varias.**
+- `workshops` = **sucursal**, N por organización. **No** es una frontera de seguridad: indica dónde ocurre la operación, no quién puede verla.
+- `memberships` = `user ↔ organization` con rol (`owner`/`mechanic`/`receptionist`), unique `(organization_id, user_id)`. El rol es **por organización**, nunca por sucursal.
+- **Toda** tabla de negocio lleva `organization_id` (para que RLS evalúe siempre el mismo criterio); las de nivel sucursal llevan **además** `workshop_id`.
+- Nivel empresa: clientes, motocicletas, historial, auditoría. Nivel sucursal: órdenes de trabajo, inventario.
+- El registro crea la **1ª organización + 1ª sucursal + membership Owner**.
 
 ## Backend legacy (`backend/`) — .NET, solo referencia
 
@@ -95,6 +103,7 @@ npm run lint
 
 ## Convenciones al proponer cambios
 
+- **Antes de escribir documentación**, revisa [docs/README.md](docs/README.md): cada tema tiene un documento dueño. Enlaza en vez de duplicar, y usa la terminología de [docs/glosario.md](docs/glosario.md). Ojo: **organización = empresa = tenant** (unidad de aislamiento) y **taller/workshop = sucursal** dentro de una empresa — el significado de "workshop" cambió respecto al modelo .NET, donde era el tenant.
 - **El trabajo nuevo de backend va en `server/`** (Node/Supabase), no en `backend/` (.NET legacy), salvo que el usuario lo pida explícitamente.
 - Roles en inglés (`Owner`/`Mechanic`/`Receptionist`); copy de UI y docs en español — mantén esa mezcla, no traduzcas los roles ni anglicices el copy visible.
 - Antes de crear un módulo/feature nuevo, revisa cómo está resuelto un módulo análogo (en `server/` el patrón es `organizations.ts`; la lógica de negocio de referencia está en los `Services/` del .NET) y replícalo.
