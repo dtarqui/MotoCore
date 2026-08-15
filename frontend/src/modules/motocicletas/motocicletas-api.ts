@@ -30,22 +30,19 @@ function normalizeUpdatePayload(payload: MotorcycleUpsertPayload) {
   };
 }
 
-export function getMotorcycles(accessToken: string) {
-  return apiRequest<Motorcycle[]>("/api/motorcycles", accessToken);
+export function getMotorcycles() {
+  return apiRequest<Motorcycle[]>("/api/motorcycles");
 }
 
-export function getMotorcyclesByClient(clientId: string, accessToken: string) {
+export function getMotorcyclesByClient(clientId: string) {
   return apiRequest<Motorcycle[]>(
     `/api/motorcycles/by-client/${clientId}`,
-    accessToken,
   );
 }
 
 export function createMotorcycle(
-  payload: MotorcycleUpsertPayload,
-  accessToken: string,
-) {
-  return apiRequest<Motorcycle>("/api/motorcycles", accessToken, {
+  payload: MotorcycleUpsertPayload) {
+  return apiRequest<Motorcycle>("/api/motorcycles", {
     method: "POST",
     body: JSON.stringify(normalizeCreatePayload(payload)),
   });
@@ -53,17 +50,15 @@ export function createMotorcycle(
 
 export function updateMotorcycle(
   motorcycleId: string,
-  payload: MotorcycleUpsertPayload,
-  accessToken: string,
-) {
-  return apiRequest<Motorcycle>(`/api/motorcycles/${motorcycleId}`, accessToken, {
+  payload: MotorcycleUpsertPayload) {
+  return apiRequest<Motorcycle>(`/api/motorcycles/${motorcycleId}`, {
     method: "PUT",
     body: JSON.stringify(normalizeUpdatePayload(payload)),
   });
 }
 
-export function deleteMotorcycle(motorcycleId: string, accessToken: string) {
-  return apiRequest<void>(`/api/motorcycles/${motorcycleId}`, accessToken, {
+export function deleteMotorcycle(motorcycleId: string) {
+  return apiRequest<void>(`/api/motorcycles/${motorcycleId}`, {
     method: "DELETE",
   });
 }

@@ -1,15 +1,13 @@
 import { apiRequest, toNullable } from "@/shared/lib/api-client";
 import type { CreateWorkOrderPayload, WorkOrder } from "./types";
 
-export function getWorkOrders(accessToken: string) {
-  return apiRequest<WorkOrder[]>("/api/work-orders", accessToken);
+export function getWorkOrders() {
+  return apiRequest<WorkOrder[]>("/api/work-orders");
 }
 
 export function createWorkOrder(
-  payload: CreateWorkOrderPayload,
-  accessToken: string,
-) {
-  return apiRequest<WorkOrder>("/api/work-orders", accessToken, {
+  payload: CreateWorkOrderPayload) {
+  return apiRequest<WorkOrder>("/api/work-orders", {
     method: "POST",
     body: JSON.stringify({
       motorcycleId: payload.motorcycleId,
@@ -25,10 +23,8 @@ export function createWorkOrder(
 
 export function updateWorkOrderStatus(
   workOrderId: string,
-  status: string,
-  accessToken: string,
-) {
-  return apiRequest<WorkOrder>(`/api/work-orders/${workOrderId}/status`, accessToken, {
+  status: string) {
+  return apiRequest<WorkOrder>(`/api/work-orders/${workOrderId}/status`, {
     method: "PATCH",
     body: JSON.stringify({ status }),
   });
@@ -36,10 +32,8 @@ export function updateWorkOrderStatus(
 
 export function updateWorkOrderDiagnosis(
   workOrderId: string,
-  diagnosis: string,
-  accessToken: string,
-) {
-  return apiRequest<WorkOrder>(`/api/work-orders/${workOrderId}/diagnosis`, accessToken, {
+  diagnosis: string) {
+  return apiRequest<WorkOrder>(`/api/work-orders/${workOrderId}/diagnosis`, {
     method: "PATCH",
     body: JSON.stringify({ diagnosis }),
   });
@@ -48,17 +42,15 @@ export function updateWorkOrderDiagnosis(
 export function closeWorkOrder(
   workOrderId: string,
   finalCost: number,
-  notes: string | undefined,
-  accessToken: string,
-) {
-  return apiRequest<WorkOrder>(`/api/work-orders/${workOrderId}/close`, accessToken, {
+  notes: string | undefined) {
+  return apiRequest<WorkOrder>(`/api/work-orders/${workOrderId}/close`, {
     method: "PATCH",
     body: JSON.stringify({ finalCost, notes: toNullable(notes) }),
   });
 }
 
-export function deliverWorkOrder(workOrderId: string, accessToken: string) {
-  return apiRequest<WorkOrder>(`/api/work-orders/${workOrderId}/deliver`, accessToken, {
+export function deliverWorkOrder(workOrderId: string) {
+  return apiRequest<WorkOrder>(`/api/work-orders/${workOrderId}/deliver`, {
     method: "PATCH",
   });
 }

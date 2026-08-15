@@ -1,57 +1,37 @@
 import { API_BASE_URL } from '@/shared/config/api'
-import type { AuthSession, LoginRequest, RegisterRequest } from './types'
+import { apiRequest, ApiError } from '@/shared/lib/api-client'
+import type { MeResponse, RegisterRequest } from './types'
 
-type ProblemDetails = {
-  title?: string
-  detail?: string
-}
-
-function buildApiUrl(path: string) {
-  const normalizedBase = API_BASE_URL.replace(/\/$/, '')
-  return `${normalizedBase}${path}`
-}
-
-async function parseProblemDetails(response: Response) {
-  try {
-    const problem = (await response.json()) as ProblemDetails
-    return problem.detail ?? problem.title ?? 'No fue posible completar la operación.'
-  } catch {
-    return 'No fue posible completar la operación.'
-  }
-}
-
-export async function loginRequest(payload: LoginRequest) {
-  const response = await fetch(buildApiUrl('/api/auth/login'), {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(payload),
-  })
-
-  if (!response.ok) {
-    const message = await parseProblemDetails(response)
-    throw new Error(message)
-  }
-
-  const data = (await response.json()) as AuthSession
-  return data
-}
-
+/**
+ * El registro es la única operación de identidad que pasa por nuestra API: crea
+ * la cuenta y, en el mismo acto, la primera empresa, su primera sucursal y la
+ * membresía propietaria (RF-101). El resto —inicio de sesión, renovación,
+ * recuperación de contraseña— lo hace el cliente contra Supabase Auth.
+ */
 export async function registerRequest(payload: RegisterRequest) {
-  const response = await fetch(buildApiUrl('/api/auth/register'), {
+  const response = await fetch(`${API_BASE_URL.replace(/\/$/, '')}/api/auth/register`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
   })
 
   if (!response.ok) {
-    const message = await parseProblemDetails(response)
-    throw new Error(message)
+    const problem = (await response.json().catch(() => ({}))) as { title?: string; detail?: string }
+    throw new ApiError(
+      problem.title ?? 'auth.register_failed',
+      problem.detail ?? 'No fue posible completar el registro.',
+      response.status,
+    )
   }
 
-  const data = (await response.json()) as AuthSession
-  return data
+  return (await response.json()) as {
+    userId: string
+    organization: { id: string; name: string }
+    workshop: { id: string; name: string }
+  }
+}
+
+/** Perfil y empresas de la cuenta autenticada, con su rol en cada una (RF-104). */
+export function fetchMe() {
+  return apiRequest<MeResponse>('/api/auth/me')
 }

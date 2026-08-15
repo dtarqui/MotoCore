@@ -1,18 +1,15 @@
 import { apiRequest, toNullable } from "@/shared/lib/api-client";
 import type { CreateMaintenanceHistoryEntryPayload, MaintenanceHistoryEntry } from "./types";
 
-export function getMotorcycleHistory(motorcycleId: string, accessToken: string) {
+export function getMotorcycleHistory(motorcycleId: string) {
   return apiRequest<MaintenanceHistoryEntry[]>(
     `/api/maintenance-history/motorcycles/${motorcycleId}`,
-    accessToken,
   );
 }
 
 export function createMaintenanceHistoryEntry(
-  payload: CreateMaintenanceHistoryEntryPayload,
-  accessToken: string,
-) {
-  return apiRequest<MaintenanceHistoryEntry>("/api/maintenance-history", accessToken, {
+  payload: CreateMaintenanceHistoryEntryPayload) {
+  return apiRequest<MaintenanceHistoryEntry>("/api/maintenance-history", {
     method: "POST",
     body: JSON.stringify({
       motorcycleId: payload.motorcycleId,

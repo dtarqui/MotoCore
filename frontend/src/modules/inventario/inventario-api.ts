@@ -1,89 +1,71 @@
-import { apiRequest, toNullable } from "@/shared/lib/api-client";
-import type {
-  CreatePartMovementPayload,
-  CreatePartPayload,
-  Part,
-  PartMovement,
-  UpdatePartPayload,
-} from "./types";
+import { apiRequest } from '@/shared/lib/api-client'
+import type { CreateMovementPayload, CreatePartPayload, Part, PartMovement } from './types'
 
-export function getParts(accessToken: string) {
-  return apiRequest<Part[]>("/api/inventory/parts", accessToken);
+/**
+ * Inventario: nivel sucursal. TODAS las llamadas usan `withWorkshop`, porque el
+ * servidor exige la sucursal activa y rechaza la petición sin ella (RF-303).
+ */
+const withWorkshop = { withWorkshop: true } as const
+
+export function getParts(options?: { search?: string; lowStock?: boolean }) {
+  const params = new URLSearchParams()
+  if (options?.search?.trim()) params.set('search', options.search.trim())
+  if (options?.lowStock) params.set('lowStock', 'true')
+  const query = params.toString() ? `?${params.toString()}` : ''
+
+  return apiRequest<{ parts: Part[] }>(`/api/inventory/parts${query}`, withWorkshop).then(
+    (r) => r.parts,
+  )
 }
 
-export function getLowStockParts(accessToken: string) {
-  return apiRequest<Part[]>("/api/inventory/low-stock", accessToken);
+/** RF-607: repuestos en o por debajo del mínimo. */
+export function getLowStockParts() {
+  return getParts({ lowStock: true })
 }
 
-export function createPart(payload: CreatePartPayload, accessToken: string) {
-  return apiRequest<Part>("/api/inventory/parts", accessToken, {
-    method: "POST",
-    body: JSON.stringify({
-      partNumber: payload.partNumber.trim(),
-      name: payload.name.trim(),
-      description: toNullable(payload.description),
-      brand: toNullable(payload.brand),
-      category: toNullable(payload.category),
-      initialStock: payload.initialStock,
-      minimumStock: payload.minimumStock,
-      maximumStock: payload.maximumStock,
-      unitCost: payload.unitCost,
-      salePrice: payload.salePrice,
-      location: toNullable(payload.location),
-      supplierName: toNullable(payload.supplierName),
-      supplierContact: toNullable(payload.supplierContact),
-      notes: toNullable(payload.notes),
-    }),
-  });
+export function createPart(payload: CreatePartPayload) {
+  const body: Record<string, unknown> = {
+    partNumber: payload.partNumber.trim(),
+    name: payload.name.trim(),
+  }
+  if (payload.description?.trim()) body.description = payload.description.trim()
+  if (payload.brand?.trim()) body.brand = payload.brand.trim()
+  if (payload.category?.trim()) body.category = payload.category.trim()
+  if (payload.initialStock !== undefined) body.initialStock = payload.initialStock
+  if (payload.minimumStock !== undefined) body.minimumStock = payload.minimumStock
+  if (payload.maximumStock !== undefined) body.maximumStock = payload.maximumStock
+  if (payload.unitCost !== undefined) body.unitCost = payload.unitCost
+
+  return apiRequest<{ part: Part }>('/api/inventory/parts', {
+    ...withWorkshop,
+    method: 'POST',
+    body: JSON.stringify(body),
+  }).then((r) => r.part)
 }
 
-export function updatePart(
-  partId: string,
-  payload: UpdatePartPayload,
-  accessToken: string,
-) {
-  return apiRequest<Part>(`/api/inventory/parts/${partId}`, accessToken, {
-    method: "PUT",
-    body: JSON.stringify({
-      name: payload.name.trim(),
-      description: toNullable(payload.description),
-      brand: toNullable(payload.brand),
-      category: toNullable(payload.category),
-      minimumStock: payload.minimumStock,
-      maximumStock: payload.maximumStock,
-      unitCost: payload.unitCost,
-      salePrice: payload.salePrice,
-      location: toNullable(payload.location),
-      supplierName: toNullable(payload.supplierName),
-      supplierContact: toNullable(payload.supplierContact),
-      notes: toNullable(payload.notes),
-    }),
-  });
+export function getMovements(partId: string) {
+  return apiRequest<{ movements: PartMovement[] }>(
+    `/api/inventory/parts/${partId}/movements`,
+    withWorkshop,
+  ).then((r) => r.movements)
 }
 
-export function deletePart(partId: string, accessToken: string) {
-  return apiRequest<void>(`/api/inventory/parts/${partId}`, accessToken, {
-    method: "DELETE",
-  });
-}
+/**
+ * Registra un movimiento. El recálculo de la existencia ocurre en el servidor,
+ * dentro de una transacción (ADR-007): el cliente nunca calcula el stock.
+ */
+export function createMovement(partId: string, payload: CreateMovementPayload) {
+  const body: Record<string, unknown> = {
+    movementType: payload.movementType,
+    quantity: payload.quantity,
+  }
+  if (payload.unitCost !== undefined) body.unitCost = payload.unitCost
+  if (payload.reference?.trim()) body.reference = payload.reference.trim()
+  if (payload.notes?.trim()) body.notes = payload.notes.trim()
 
-export function getMovements(accessToken: string) {
-  return apiRequest<PartMovement[]>("/api/inventory/movements", accessToken);
-}
-
-export function createMovement(
-  payload: CreatePartMovementPayload,
-  accessToken: string,
-) {
-  return apiRequest<PartMovement>("/api/inventory/movements", accessToken, {
-    method: "POST",
-    body: JSON.stringify({
-      partId: payload.partId,
-      movementType: payload.movementType,
-      quantity: payload.quantity,
-      unitCost: payload.unitCost ?? null,
-      reference: toNullable(payload.reference),
-      notes: toNullable(payload.notes),
-    }),
-  });
+  return apiRequest<{ movement: PartMovement }>(`/api/inventory/parts/${partId}/movements`, {
+    ...withWorkshop,
+    method: 'POST',
+    body: JSON.stringify(body),
+  }).then((r) => r.movement)
 }

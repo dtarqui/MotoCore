@@ -1,238 +1,193 @@
-import { useMemo, useState, type FormEvent } from 'react'
+import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '@/modules/auth/hooks/useAuth'
-import { PageHeader } from '../../../shared/ui/PageHeader'
-import { Card, CardContent } from '../../../shared/ui/card'
-import { Button } from '../../../shared/ui/button'
-import { Input } from '../../../shared/ui/input'
-import { Alert, AlertDescription, AlertTitle } from '../../../shared/ui/alert'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '../../../shared/ui/table'
-import {
-  createClient,
-  deleteClient,
-  getClients,
-  updateClient,
-} from '../clientes-api'
-import type { ClientUpsertPayload } from '../types'
+import { PageHeader } from '@/shared/ui/PageHeader'
+import { Button } from '@/shared/ui/button'
+import { Input } from '@/shared/ui/input'
+import { Alert } from '@/shared/ui/alert'
+import { Badge } from '@/shared/ui/badge'
+import { createClient, deactivateClient, getClients, updateClient } from '../clientes-api'
+import type { Client, ClientUpsertPayload } from '../types'
 
-const initialForm: ClientUpsertPayload = {
-  firstName: '',
-  lastName: '',
-  email: '',
-  phone: '',
-  secondaryPhone: '',
-  address: '',
-  city: '',
-  postalCode: '',
-  identificationNumber: '',
-  companyName: '',
-  taxId: '',
-  birthDate: '',
-  preferredContactMethod: '',
-  notes: '',
-}
+const EMPTY: ClientUpsertPayload = { firstName: '', lastName: '', email: '', phone: '', documentId: '', address: '', notes: '' }
 
+/**
+ * Clientes — nivel empresa. Se listan según la empresa activa, sin importar la
+ * sucursal seleccionada: es la demostración visible de RF-502.
+ */
 export function ClientesPage() {
+  const { hasAnyRole } = useAuth()
   const queryClient = useQueryClient()
-  const { session } = useAuth()
-  const accessToken = session?.accessToken ?? ''
 
-  const [form, setForm] = useState<ClientUpsertPayload>(initialForm)
-  const [editingClientId, setEditingClientId] = useState<string | null>(null)
-  const [formError, setFormError] = useState<string | null>(null)
+  const canWrite = hasAnyRole(['owner', 'receptionist'])
+
+  const [search, setSearch] = useState('')
+  const [editing, setEditing] = useState<Client | null>(null)
+  const [form, setForm] = useState<ClientUpsertPayload>(EMPTY)
+  const [error, setError] = useState<string | null>(null)
 
   const clientsQuery = useQuery({
-    queryKey: ['clients'],
-    queryFn: () => getClients(accessToken),
-    enabled: Boolean(accessToken),
+    queryKey: ['clients', search],
+    queryFn: () => getClients(search),
   })
 
-  const upsertMutation = useMutation({
-    mutationFn: async (payload: ClientUpsertPayload) => {
-      if (editingClientId) {
-        return updateClient(editingClientId, payload, accessToken)
-      }
+  const invalidate = () => queryClient.invalidateQueries({ queryKey: ['clients'] })
 
-      return createClient(payload, accessToken)
-    },
+  const saveMutation = useMutation({
+    mutationFn: (payload: ClientUpsertPayload) =>
+      editing ? updateClient(editing.id, payload) : createClient(payload),
     onSuccess: async () => {
-      setForm(initialForm)
-      setEditingClientId(null)
-      await queryClient.invalidateQueries({ queryKey: ['clients'] })
+      setForm(EMPTY)
+      setEditing(null)
+      setError(null)
+      await invalidate()
     },
-    onError: (error) => {
-      setFormError(error instanceof Error ? error.message : 'No fue posible guardar el cliente.')
-    },
+    onError: (err: Error) => setError(err.message),
   })
 
-  const deleteMutation = useMutation({
-    mutationFn: async (clientId: string) => {
-      return deleteClient(clientId, accessToken)
-    },
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['clients'] })
-    },
+  const deactivateMutation = useMutation({
+    mutationFn: (clientId: string) => deactivateClient(clientId),
+    onSuccess: invalidate,
+    onError: (err: Error) => setError(err.message),
   })
 
-  const clients = useMemo(() => clientsQuery.data ?? [], [clientsQuery.data])
-
-  function handleChange<K extends keyof ClientUpsertPayload>(field: K, value: string) {
-    setForm((current) => ({ ...current, [field]: value }))
-  }
-
-  function handleEdit(clientId: string) {
-    const client = clients.find((item) => item.id === clientId)
-
-    if (!client) {
-      return
-    }
-
-    setEditingClientId(clientId)
-    setFormError(null)
+  function startEdit(client: Client) {
+    setEditing(client)
     setForm({
-      firstName: client.firstName,
-      lastName: client.lastName,
-      email: client.email,
-      phone: client.phone,
-      secondaryPhone: client.secondaryPhone ?? '',
+      firstName: client.first_name,
+      lastName: client.last_name,
+      email: client.email ?? '',
+      phone: client.phone ?? '',
+      documentId: client.document_id ?? '',
       address: client.address ?? '',
-      city: client.city ?? '',
-      postalCode: client.postalCode ?? '',
-      identificationNumber: client.identificationNumber ?? '',
-      companyName: client.companyName ?? '',
-      taxId: client.taxId ?? '',
-      birthDate: client.birthDate ? client.birthDate.slice(0, 10) : '',
-      preferredContactMethod: client.preferredContactMethod ?? '',
       notes: client.notes ?? '',
     })
   }
 
-  function handleCancelEdit() {
-    setEditingClientId(null)
-    setFormError(null)
-    setForm(initialForm)
-  }
-
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    setFormError(null)
-    await upsertMutation.mutateAsync(form)
-  }
+  const clients = clientsQuery.data ?? []
 
   return (
-    <section>
+    <div className="space-y-6">
       <PageHeader
-        title="Gestión de Clientes"
-        description="Administra clientes del taller y datos de contacto."
+        title="Clientes"
+        description="Los clientes pertenecen a la empresa y se atienden desde cualquiera de sus sucursales."
       />
 
-      <Card>
-        <CardContent className="pt-6">
-          <form className="grid grid-cols-1 gap-3 mb-6 md:grid-cols-2" onSubmit={handleSubmit}>
-            <Input
-              placeholder="Nombre"
-              required
-              value={form.firstName}
-              onChange={(event) => handleChange('firstName', event.target.value)}
-            />
-            <Input
-              placeholder="Apellido"
-              required
-              value={form.lastName}
-              onChange={(event) => handleChange('lastName', event.target.value)}
-            />
-            <Input
-              placeholder="Correo"
-              type="email"
-              required
-              value={form.email}
-              onChange={(event) => handleChange('email', event.target.value)}
-            />
-            <Input
-              placeholder="Teléfono"
-              required
-              value={form.phone}
-              onChange={(event) => handleChange('phone', event.target.value)}
-            />
+      {error ? <Alert variant="destructive">{error}</Alert> : null}
 
-            <div className="md:col-span-2 flex gap-2">
-              <Button type="submit" disabled={upsertMutation.isPending}>
-                {editingClientId ? 'Guardar cambios' : 'Nuevo cliente'}
+      <div className="flex gap-2">
+        <Input
+          placeholder="Buscar por nombre, email o documento"
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+        />
+      </div>
+
+      {canWrite ? (
+        <form
+          className="grid gap-3 rounded-lg border border-slate-200 p-4 sm:grid-cols-2"
+          onSubmit={(event) => {
+            event.preventDefault()
+            saveMutation.mutate(form)
+          }}
+        >
+          <h2 className="sm:col-span-2 text-sm font-semibold text-slate-700">
+            {editing ? `Editando: ${editing.first_name} ${editing.last_name}` : 'Nuevo cliente'}
+          </h2>
+
+          <Input
+            required
+            placeholder="Nombre"
+            value={form.firstName}
+            onChange={(e) => setForm({ ...form, firstName: e.target.value })}
+          />
+          <Input
+            required
+            placeholder="Apellido"
+            value={form.lastName}
+            onChange={(e) => setForm({ ...form, lastName: e.target.value })}
+          />
+          <Input
+            type="email"
+            placeholder="Email (único dentro de la empresa)"
+            value={form.email}
+            onChange={(e) => setForm({ ...form, email: e.target.value })}
+          />
+          <Input
+            placeholder="Teléfono"
+            value={form.phone}
+            onChange={(e) => setForm({ ...form, phone: e.target.value })}
+          />
+          <Input
+            placeholder="Documento de identidad"
+            value={form.documentId}
+            onChange={(e) => setForm({ ...form, documentId: e.target.value })}
+          />
+          <Input
+            placeholder="Dirección"
+            value={form.address}
+            onChange={(e) => setForm({ ...form, address: e.target.value })}
+          />
+
+          <div className="sm:col-span-2 flex gap-2">
+            <Button type="submit" disabled={saveMutation.isPending}>
+              {editing ? 'Guardar cambios' : 'Registrar cliente'}
+            </Button>
+            {editing ? (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setEditing(null)
+                  setForm(EMPTY)
+                }}
+              >
+                Cancelar
               </Button>
-              {editingClientId ? (
-                <Button type="button" variant="outline" onClick={handleCancelEdit}>
-                  Cancelar
-                </Button>
-              ) : null}
-            </div>
-          </form>
-
-          {formError ? (
-            <Alert variant="destructive" className="mb-4">
-              <AlertTitle>Error en cliente</AlertTitle>
-              <AlertDescription>{formError}</AlertDescription>
-            </Alert>
-          ) : null}
-
-          <div className="flex justify-between items-center mb-4">
-            <p className="text-sm text-muted-foreground">
-              {clients.length} clientes registrados
-            </p>
-            {clientsQuery.isLoading ? <p className="text-sm text-muted-foreground">Cargando...</p> : null}
+            ) : null}
           </div>
+        </form>
+      ) : (
+        <Alert>Tu rol permite consultar clientes, pero no crearlos ni editarlos.</Alert>
+      )}
 
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>ID</TableHead>
-                <TableHead>Nombre</TableHead>
-                <TableHead>Correo</TableHead>
-                <TableHead>Teléfono</TableHead>
-                <TableHead>Estado</TableHead>
-                <TableHead>Acciones</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {clients.map((client) => (
-                <TableRow key={client.id}>
-                  <TableCell className="font-medium">{client.id.slice(0, 8)}</TableCell>
-                  <TableCell>{client.firstName} {client.lastName}</TableCell>
-                  <TableCell>{client.email}</TableCell>
-                  <TableCell>{client.phone}</TableCell>
-                  <TableCell>{client.isActive ? 'Activo' : 'Inactivo'}</TableCell>
-                  <TableCell className="flex gap-2">
-                    <Button variant="outline" size="sm" onClick={() => handleEdit(client.id)}>
-                      Editar
-                    </Button>
+      {clientsQuery.isLoading ? (
+        <p className="text-sm text-slate-500">Cargando clientes…</p>
+      ) : clients.length === 0 ? (
+        <p className="text-sm text-slate-500">No hay clientes registrados en esta empresa.</p>
+      ) : (
+        <ul className="divide-y divide-slate-200 rounded-lg border border-slate-200">
+          {clients.map((client) => (
+            <li key={client.id} className="flex flex-wrap items-center justify-between gap-2 p-3">
+              <div>
+                <p className="font-medium text-slate-800">
+                  {client.first_name} {client.last_name}{' '}
+                  {client.is_active ? null : <Badge variant="secondary">Inactivo</Badge>}
+                </p>
+                <p className="text-xs text-slate-500">
+                  {[client.email, client.phone, client.document_id].filter(Boolean).join(' · ') || '—'}
+                </p>
+              </div>
+              {canWrite ? (
+                <div className="flex gap-2">
+                  <Button size="sm" variant="outline" onClick={() => startEdit(client)}>
+                    Editar
+                  </Button>
+                  {client.is_active ? (
                     <Button
-                      variant="outline"
                       size="sm"
-                      onClick={() => deleteMutation.mutate(client.id)}
-                      disabled={deleteMutation.isPending}
+                      variant="outline"
+                      onClick={() => deactivateMutation.mutate(client.id)}
                     >
-                      Eliminar
+                      Dar de baja
                     </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-              {!clientsQuery.isLoading && clients.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={6} className="text-center text-sm text-gray-500">
-                    No hay clientes registrados.
-                  </TableCell>
-                </TableRow>
+                  ) : null}
+                </div>
               ) : null}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
-    </section>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
   )
 }

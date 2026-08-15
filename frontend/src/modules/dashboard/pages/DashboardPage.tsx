@@ -1,111 +1,86 @@
-import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '@/modules/auth/hooks/useAuth'
-import { getParts } from '@/modules/inventario/inventario-api'
-import { getWorkOrders } from '@/modules/ordenes/ordenes-api'
 import { PageHeader } from '@/shared/ui/PageHeader'
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
-import { Badge } from '@/shared/ui/badge'
+import { Card } from '@/shared/ui/card'
+import { getActiveOrgId, getActiveWorkshopId } from '@/shared/lib/active-context'
+import { ROLE_LABELS } from '@/modules/auth/types'
+import { getWorkshops } from '@/modules/organizaciones/organizaciones-api'
+import { getClients } from '@/modules/clientes/clientes-api'
+import { getParts } from '@/modules/inventario/inventario-api'
 
-function isSameMonth(dateIso: string | null, reference: Date) {
-  if (!dateIso) {
-    return false
-  }
-
-  const date = new Date(dateIso)
-  return date.getFullYear() === reference.getFullYear() && date.getMonth() === reference.getMonth()
-}
-
+/**
+ * Inicio: resumen del contexto activo. Muestra a la vez un dato de nivel
+ * empresa (clientes) y uno de nivel sucursal (inventario), que es la forma más
+ * directa de ver la diferencia entre ambos niveles.
+ */
 export function DashboardPage() {
-  const { session } = useAuth()
-  const accessToken = session?.accessToken ?? ''
+  const { me } = useAuth()
+  const orgId = getActiveOrgId()
+  const workshopId = getActiveWorkshopId()
 
-  const workOrdersQuery = useQuery({
-    queryKey: ['work-orders'],
-    queryFn: () => getWorkOrders(accessToken),
-    enabled: Boolean(accessToken),
+  const membership = me?.organizations.find((m) => m.organization.id === orgId)
+
+  const workshopsQuery = useQuery({
+    queryKey: ['workshops', orgId],
+    queryFn: () => getWorkshops(orgId!),
+    enabled: Boolean(orgId),
+  })
+
+  const clientsQuery = useQuery({
+    queryKey: ['clients', ''],
+    queryFn: () => getClients(),
+    enabled: Boolean(orgId),
   })
 
   const partsQuery = useQuery({
-    queryKey: ['parts'],
-    queryFn: () => getParts(accessToken),
-    enabled: Boolean(accessToken),
+    queryKey: ['parts', workshopId, false],
+    queryFn: () => getParts(),
+    enabled: Boolean(workshopId),
   })
 
-  const now = useMemo(() => new Date(), [])
-
-  const servicesThisMonth = useMemo(() => {
-    const orders = workOrdersQuery.data ?? []
-    return orders.filter(
-      (order) =>
-        (order.status === 'Completed' || order.status === 'Delivered') &&
-        (isSameMonth(order.completedAtUtc, now) || isSameMonth(order.deliveredAtUtc, now)),
-    ).length
-  }, [workOrdersQuery.data, now])
-
-  const revenueThisMonth = useMemo(() => {
-    const orders = workOrdersQuery.data ?? []
-    return orders
-      .filter(
-        (order) =>
-          (order.status === 'Completed' || order.status === 'Delivered') &&
-          (isSameMonth(order.completedAtUtc, now) || isSameMonth(order.deliveredAtUtc, now)),
-      )
-      .reduce((total, order) => total + order.finalCost, 0)
-  }, [workOrdersQuery.data, now])
-
-  const lowStockCount = useMemo(() => {
-    const parts = partsQuery.data ?? []
-    return parts.filter((part) => part.currentStock <= part.minimumStock).length
-  }, [partsQuery.data])
-
-  const isLoading = workOrdersQuery.isLoading || partsQuery.isLoading
+  const parts = partsQuery.data ?? []
+  const lowStock = parts.filter((p) => p.current_stock <= p.minimum_stock).length
+  const activeWorkshop = (workshopsQuery.data ?? []).find((w) => w.id === workshopId)
 
   return (
-    <section>
+    <div className="space-y-6">
       <PageHeader
-        title="Dashboard"
-        description="Vista general de operación del taller y métricas clave."
+        title={membership?.organization.name ?? 'MotoCore'}
+        description={
+          membership
+            ? `Tu rol en esta empresa: ${ROLE_LABELS[membership.role]}`
+            : 'Selecciona una empresa para comenzar.'
+        }
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">Servicios del mes</CardTitle>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Órdenes completadas</p>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">{isLoading ? '—' : servicesThisMonth}</div>
-          </CardContent>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <Card className="p-4">
+          <p className="text-xs uppercase tracking-wide text-slate-500">Empresas</p>
+          <p className="mt-1 text-2xl font-semibold">{me?.organizations.length ?? 0}</p>
+          <p className="text-xs text-slate-500">donde tienes membresía activa</p>
         </Card>
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">Ingresos estimados</CardTitle>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Mes actual</p>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">
-              {isLoading ? '—' : `$${revenueThisMonth.toFixed(2)}`}
-            </div>
-          </CardContent>
+        <Card className="p-4">
+          <p className="text-xs uppercase tracking-wide text-slate-500">Sucursales</p>
+          <p className="mt-1 text-2xl font-semibold">{workshopsQuery.data?.length ?? 0}</p>
+          <p className="text-xs text-slate-500">en la empresa activa</p>
         </Card>
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">Alertas críticas</CardTitle>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Repuestos bajo stock</p>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-baseline gap-2">
-              <div className="text-3xl font-bold">{isLoading ? '—' : lowStockCount}</div>
-              <Badge variant={lowStockCount > 0 ? 'destructive' : 'outline'}>
-                {lowStockCount > 0 ? 'Atención' : 'Normal'}
-              </Badge>
-            </div>
-          </CardContent>
+        <Card className="p-4">
+          <p className="text-xs uppercase tracking-wide text-slate-500">Clientes</p>
+          <p className="mt-1 text-2xl font-semibold">{clientsQuery.data?.length ?? 0}</p>
+          <p className="text-xs text-slate-500">nivel empresa · visibles desde toda sucursal</p>
+        </Card>
+
+        <Card className="p-4">
+          <p className="text-xs uppercase tracking-wide text-slate-500">Repuestos</p>
+          <p className="mt-1 text-2xl font-semibold">{parts.length}</p>
+          <p className="text-xs text-slate-500">
+            {activeWorkshop ? `en ${activeWorkshop.name}` : 'sin sucursal activa'}
+            {lowStock > 0 ? ` · ${lowStock} bajo mínimo` : ''}
+          </p>
         </Card>
       </div>
-    </section>
+    </div>
   )
 }

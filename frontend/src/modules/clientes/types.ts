@@ -1,45 +1,31 @@
+/**
+ * Cliente — entidad de NIVEL EMPRESA. No lleva sucursal: se atiende en
+ * cualquiera de los locales de la empresa (RF-502).
+ *
+ * Los campos llegan tal como los devuelve la API, en snake_case, para no
+ * introducir una capa de traducción que haya que mantener en dos sitios.
+ */
 export type Client = {
   id: string
-  workshopId: string
-  firstName: string
-  lastName: string
-  email: string
-  phone: string
-  secondaryPhone: string | null
+  organization_id: string
+  first_name: string
+  last_name: string
+  email: string | null
+  phone: string | null
+  document_id: string | null
   address: string | null
-  city: string | null
-  postalCode: string | null
-  identificationNumber: string | null
-  companyName: string | null
-  taxId: string | null
-  birthDate: string | null
-  preferredContactMethod: string | null
   notes: string | null
-  isActive: boolean
-  createdAtUtc: string
-}
-
-export type ClientStatistics = {
-  totalClients: number
-  activeClients: number
-  inactiveClients: number
-  newClientsThisMonth: number
-  clientsWithPendingOrders: number
+  is_active: boolean
+  created_at: string
+  updated_at: string | null
 }
 
 export type ClientUpsertPayload = {
   firstName: string
   lastName: string
-  email: string
-  phone: string
-  secondaryPhone?: string
+  email?: string
+  phone?: string
+  documentId?: string
   address?: string
-  city?: string
-  postalCode?: string
-  identificationNumber?: string
-  companyName?: string
-  taxId?: string
-  birthDate?: string
-  preferredContactMethod?: string
   notes?: string
 }

@@ -17,7 +17,6 @@ type HistoryFormState = {
 type Props = {
   motorcycleId: string
   motorcycleLabel: string
-  accessToken: string
   onClose: () => void
 }
 
@@ -32,20 +31,20 @@ const initialForm: HistoryFormState = {
   serviceDate: todayIso(),
 }
 
-export function MaintenanceHistoryPanel({ motorcycleId, motorcycleLabel, accessToken, onClose }: Props) {
+export function MaintenanceHistoryPanel({ motorcycleId, motorcycleLabel, onClose }: Props) {
   const queryClient = useQueryClient()
   const [form, setForm] = useState<HistoryFormState>(initialForm)
   const [formError, setFormError] = useState<string | null>(null)
 
   const historyQuery = useQuery({
     queryKey: ['maintenance-history', motorcycleId],
-    queryFn: () => getMotorcycleHistory(motorcycleId, accessToken),
-    enabled: Boolean(accessToken) && Boolean(motorcycleId),
+    queryFn: () => getMotorcycleHistory(motorcycleId),
+    enabled: Boolean(motorcycleId),
   })
 
   const createMutation = useMutation({
     mutationFn: async () =>
-      createMaintenanceHistoryEntry({ motorcycleId, ...form }, accessToken),
+      createMaintenanceHistoryEntry({ motorcycleId, ...form }),
     onSuccess: async () => {
       setForm(initialForm)
       await queryClient.invalidateQueries({ queryKey: ['maintenance-history', motorcycleId] })

@@ -6,30 +6,35 @@ type NavigationItem = {
   allowedRoles?: UserRole[]
 }
 
+/**
+ * Navegación del alcance construido: el corte vertical (clientes e inventario)
+ * más la administración de la jerarquía (sucursales y equipo).
+ *
+ * Los módulos de motocicletas, órdenes e historial existen como interfaz pero
+ * todavía no tienen respaldo en el backend nuevo; se incorporan cuando se
+ * porten sus endpoints.
+ */
 export const navigationItems: NavigationItem[] = [
-  { to: '/', label: 'Dashboard' },
+  { to: '/', label: 'Inicio' },
   {
     to: '/clientes',
     label: 'Clientes',
-    allowedRoles: ['Owner', 'Receptionist'],
-  },
-  {
-    to: '/motocicletas',
-    label: 'Motocicletas',
-    allowedRoles: ['Owner', 'Mechanic', 'Receptionist'],
-  },
-  {
-    to: '/ordenes',
-    label: 'Órdenes',
-    allowedRoles: ['Owner', 'Mechanic', 'Receptionist'],
+    // El Mechanic los consulta aunque no pueda editarlos (RF-505).
+    allowedRoles: ['owner', 'mechanic', 'receptionist'],
   },
   {
     to: '/inventario',
     label: 'Inventario',
-    allowedRoles: ['Owner', 'Receptionist'],
+    allowedRoles: ['owner', 'mechanic', 'receptionist'],
   },
   {
-    to: '/taller',
-    label: 'Taller',
+    to: '/sucursales',
+    label: 'Sucursales',
+    allowedRoles: ['owner', 'mechanic', 'receptionist'],
+  },
+  {
+    to: '/equipo',
+    label: 'Equipo',
+    allowedRoles: ['owner', 'mechanic', 'receptionist'],
   },
 ]

@@ -1,21 +1,25 @@
 import { createContext } from 'react'
-import type { AuthSession, UserRole } from './types'
+import type { Session } from '@supabase/supabase-js'
+import type { MeResponse, RegisterRequest, UserRole } from './types'
 
 export type AuthContextValue = {
-  session: AuthSession | null
+  /** Sesión de Supabase. `null` mientras no haya inicio de sesión. */
+  session: Session | null
+  /** Perfil y empresas del usuario; se carga tras autenticarse. */
+  me: MeResponse | null
   isAuthenticated: boolean
+  /** `true` mientras se restaura la sesión al arrancar: evita parpadear al login. */
+  isLoading: boolean
   isLoggingIn: boolean
   isRegistering: boolean
   login: (email: string, password: string) => Promise<void>
-  register: (payload: {
-    email: string
-    password: string
-    firstName: string
-    lastName: string
-    role: 'Owner'
-    workshopName: string
-  }) => Promise<void>
-  logout: () => void
+  register: (payload: RegisterRequest) => Promise<void>
+  logout: () => Promise<void>
+  reloadMe: () => Promise<void>
+  /**
+   * Comprueba el rol **en la empresa activa**. El rol no es global: la misma
+   * cuenta puede ser propietaria en una empresa y mecánica en otra.
+   */
   hasAnyRole: (roles: UserRole[]) => boolean
 }
 

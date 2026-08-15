@@ -20,6 +20,8 @@ export function RegisterPage() {
   const [lastName, setLastName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  // RF-101: el registro crea la empresa y su primera sucursal en un solo acto.
+  const [organizationName, setOrganizationName] = useState('')
   const [workshopName, setWorkshopName] = useState('')
   const [error, setError] = useState<string | null>(null)
 
@@ -37,8 +39,9 @@ export function RegisterPage() {
         lastName: lastName.trim(),
         email: email.trim(),
         password,
-        role: 'Owner',
-        workshopName: workshopName.trim(),
+        organizationName: organizationName.trim(),
+        // Si se omite, el servidor nombra la sucursal como la empresa.
+        workshopName: workshopName.trim() || undefined,
       })
 
       navigate('/', { replace: true })
@@ -132,14 +135,30 @@ export function RegisterPage() {
 
               <div className="space-y-2">
                 <label
+                  htmlFor="organizationName"
+                  className="text-sm font-medium text-gray-900 dark:text-gray-100"
+                >
+                  Nombre de la empresa
+                </label>
+                <Input
+                  id="organizationName"
+                  required
+                  value={organizationName}
+                  onChange={(event) => setOrganizationName(event.target.value)}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label
                   htmlFor="workshopName"
                   className="text-sm font-medium text-gray-900 dark:text-gray-100"
                 >
-                  Nombre del taller
+                  Nombre de la primera sucursal{' '}
+                  <span className="font-normal text-gray-500">(opcional)</span>
                 </label>
                 <Input
                   id="workshopName"
-                  required
+                  placeholder="Si lo dejas vacío, toma el nombre de la empresa"
                   value={workshopName}
                   onChange={(event) => setWorkshopName(event.target.value)}
                 />

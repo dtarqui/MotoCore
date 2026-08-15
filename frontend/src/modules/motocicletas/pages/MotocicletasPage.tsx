@@ -39,9 +39,8 @@ const initialForm: MotorcycleUpsertPayload = {
 
 export function MotocicletasPage() {
   const queryClient = useQueryClient()
-  const { session, hasAnyRole } = useAuth()
-  const accessToken = session?.accessToken ?? ''
-  const canManageMotorcycles = hasAnyRole(['Owner', 'Receptionist'])
+  const { hasAnyRole } = useAuth()
+  const canManageMotorcycles = hasAnyRole(['owner', 'receptionist'])
 
   const [form, setForm] = useState<MotorcycleUpsertPayload>(initialForm)
   const [editingMotorcycleId, setEditingMotorcycleId] = useState<string | null>(null)
@@ -50,20 +49,18 @@ export function MotocicletasPage() {
 
   const motorcyclesQuery = useQuery({
     queryKey: ['motorcycles'],
-    queryFn: () => getMotorcycles(accessToken),
-    enabled: Boolean(accessToken),
-  })
+    queryFn: () => getMotorcycles(),
+      })
 
   const clientsQuery = useQuery({
     queryKey: ['clients'],
-    queryFn: () => getClients(accessToken),
-    enabled: Boolean(accessToken),
-  })
+    queryFn: () => getClients(),
+      })
 
   const clientNameById = useMemo(() => {
     const map = new Map<string, string>()
     for (const client of clientsQuery.data ?? []) {
-      map.set(client.id, `${client.firstName} ${client.lastName}`)
+      map.set(client.id, `${client.first_name} ${client.last_name}`)
     }
     return map
   }, [clientsQuery.data])
@@ -71,10 +68,10 @@ export function MotocicletasPage() {
   const upsertMutation = useMutation({
     mutationFn: async (payload: MotorcycleUpsertPayload) => {
       if (editingMotorcycleId) {
-        return updateMotorcycle(editingMotorcycleId, payload, accessToken)
+        return updateMotorcycle(editingMotorcycleId, payload)
       }
 
-      return createMotorcycle(payload, accessToken)
+      return createMotorcycle(payload)
     },
     onSuccess: async () => {
       setForm(initialForm)
@@ -88,7 +85,7 @@ export function MotocicletasPage() {
 
   const deleteMutation = useMutation({
     mutationFn: async (motorcycleId: string) => {
-      return deleteMotorcycle(motorcycleId, accessToken)
+      return deleteMotorcycle(motorcycleId)
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['motorcycles'] })
@@ -161,7 +158,7 @@ export function MotocicletasPage() {
                 <option value="">Seleccionar cliente...</option>
                 {clients.map((client) => (
                   <option key={client.id} value={client.id}>
-                    {client.firstName} {client.lastName}
+                    {client.first_name} {client.last_name}
                   </option>
                 ))}
               </select>
@@ -277,7 +274,7 @@ export function MotocicletasPage() {
                         Editar
                       </Button>
                     ) : null}
-                    {hasAnyRole(['Owner']) ? (
+                    {hasAnyRole(['owner']) ? (
                       <Button
                         variant="outline"
                         size="sm"
@@ -308,7 +305,6 @@ export function MotocicletasPage() {
           motorcycleLabel={
             motorcycles.find((item) => item.id === historyMotorcycleId)?.licensePlate ?? ''
           }
-          accessToken={accessToken}
           onClose={() => setHistoryMotorcycleId(null)}
         />
       ) : null}

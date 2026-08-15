@@ -1,72 +1,57 @@
-import { apiRequest, toNullable } from "@/shared/lib/api-client";
-import type { Client, ClientStatistics, ClientUpsertPayload } from "./types";
+import { apiRequest } from '@/shared/lib/api-client'
+import type { Client, ClientUpsertPayload } from './types'
 
-function normalizePayload(payload: ClientUpsertPayload) {
-  return {
+/**
+ * Clientes: nivel empresa. Ninguna llamada usa `withWorkshop`, y esa ausencia
+ * es intencional — el cliente se ve igual desde cualquier sucursal (RF-502).
+ */
+
+/** Omite las cadenas vacías para no enviar un email vacío que falle la validación. */
+function normalize(payload: ClientUpsertPayload) {
+  const body: Record<string, string> = {
     firstName: payload.firstName.trim(),
     lastName: payload.lastName.trim(),
-    email: payload.email.trim(),
-    phone: payload.phone.trim(),
-    secondaryPhone: toNullable(payload.secondaryPhone),
-    address: toNullable(payload.address),
-    city: toNullable(payload.city),
-    postalCode: toNullable(payload.postalCode),
-    identificationNumber: toNullable(payload.identificationNumber),
-    companyName: toNullable(payload.companyName),
-    taxId: toNullable(payload.taxId),
-    birthDate: toNullable(payload.birthDate),
-    preferredContactMethod: toNullable(payload.preferredContactMethod),
-    notes: toNullable(payload.notes),
-  };
+  }
+  const optional: Array<[string, string | undefined]> = [
+    ['email', payload.email],
+    ['phone', payload.phone],
+    ['documentId', payload.documentId],
+    ['address', payload.address],
+    ['notes', payload.notes],
+  ]
+  for (const [key, value] of optional) {
+    const trimmed = value?.trim()
+    if (trimmed) body[key] = trimmed
+  }
+  return body
 }
 
-export function getClients(accessToken: string) {
-  return apiRequest<Client[]>("/api/clients", accessToken);
+export function getClients(search?: string) {
+  const query = search?.trim() ? `?search=${encodeURIComponent(search.trim())}` : ''
+  return apiRequest<{ clients: Client[] }>(`/api/clients${query}`).then((r) => r.clients)
 }
 
-export function createClient(
-  payload: ClientUpsertPayload,
-  accessToken: string,
-) {
-  return apiRequest<Client>("/api/clients", accessToken, {
-    method: "POST",
-    body: JSON.stringify(normalizePayload(payload)),
-  });
+export function getClientById(clientId: string) {
+  return apiRequest<{ client: Client }>(`/api/clients/${clientId}`).then((r) => r.client)
 }
 
-export function updateClient(
-  clientId: string,
-  payload: ClientUpsertPayload,
-  accessToken: string,
-) {
-  return apiRequest<Client>(`/api/clients/${clientId}`, accessToken, {
-    method: "PUT",
-    body: JSON.stringify(normalizePayload(payload)),
-  });
+export function createClient(payload: ClientUpsertPayload) {
+  return apiRequest<{ client: Client }>('/api/clients', {
+    method: 'POST',
+    body: JSON.stringify(normalize(payload)),
+  }).then((r) => r.client)
 }
 
-export function deleteClient(clientId: string, accessToken: string) {
-  return apiRequest<void>(`/api/clients/${clientId}`, accessToken, {
-    method: "DELETE",
-  });
+export function updateClient(clientId: string, payload: ClientUpsertPayload) {
+  return apiRequest<{ client: Client }>(`/api/clients/${clientId}`, {
+    method: 'PATCH',
+    body: JSON.stringify(normalize(payload)),
+  }).then((r) => r.client)
 }
 
-export function getClientById(clientId: string, accessToken: string) {
-  return apiRequest<Client>(`/api/clients/${clientId}`, accessToken);
-}
-
-export function searchClients(query: string, accessToken: string) {
-  const search = new URLSearchParams({ query });
-  return apiRequest<Client[]>(
-    `/api/clients/search?${search.toString()}`,
-    accessToken,
-  );
-}
-
-export function getClientSummary(clientId: string, accessToken: string) {
-  return apiRequest(`/api/clients/${clientId}/summary`, accessToken);
-}
-
-export function getClientStatistics(accessToken: string) {
-  return apiRequest<ClientStatistics>("/api/clients/statistics", accessToken);
+/** Baja lógica: conserva el registro y su historial (RF-504). */
+export function deactivateClient(clientId: string) {
+  return apiRequest<{ client: Client }>(`/api/clients/${clientId}/deactivate`, {
+    method: 'PATCH',
+  }).then((r) => r.client)
 }

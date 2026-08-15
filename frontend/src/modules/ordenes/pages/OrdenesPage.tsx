@@ -48,12 +48,11 @@ const initialForm: CreateWorkOrderPayload = {
 
 export function OrdenesPage() {
   const queryClient = useQueryClient()
-  const { session, hasAnyRole } = useAuth()
-  const accessToken = session?.accessToken ?? ''
+  const { hasAnyRole } = useAuth()
 
-  const canManageOrders = hasAnyRole(['Owner', 'Receptionist'])
-  const canUpdateOrders = hasAnyRole(['Owner', 'Mechanic'])
-  const canDeliverOrders = hasAnyRole(['Owner', 'Receptionist'])
+  const canManageOrders = hasAnyRole(['owner', 'receptionist'])
+  const canUpdateOrders = hasAnyRole(['owner', 'mechanic'])
+  const canDeliverOrders = hasAnyRole(['owner', 'receptionist'])
 
   const [form, setForm] = useState<CreateWorkOrderPayload>(initialForm)
   const [formError, setFormError] = useState<string | null>(null)
@@ -61,15 +60,13 @@ export function OrdenesPage() {
 
   const workOrdersQuery = useQuery({
     queryKey: ['work-orders'],
-    queryFn: () => getWorkOrders(accessToken),
-    enabled: Boolean(accessToken),
-  })
+    queryFn: () => getWorkOrders(),
+      })
 
   const motorcyclesQuery = useQuery({
     queryKey: ['motorcycles'],
-    queryFn: () => getMotorcycles(accessToken),
-    enabled: Boolean(accessToken),
-  })
+    queryFn: () => getMotorcycles(),
+      })
 
   const motorcycleLabelById = useMemo(() => {
     const map = new Map<string, string>()
@@ -80,7 +77,7 @@ export function OrdenesPage() {
   }, [motorcyclesQuery.data])
 
   const createMutation = useMutation({
-    mutationFn: async (payload: CreateWorkOrderPayload) => createWorkOrder(payload, accessToken),
+    mutationFn: async (payload: CreateWorkOrderPayload) => createWorkOrder(payload),
     onSuccess: async () => {
       setForm(initialForm)
       await queryClient.invalidateQueries({ queryKey: ['work-orders'] })
@@ -92,7 +89,7 @@ export function OrdenesPage() {
 
   const statusMutation = useMutation({
     mutationFn: async ({ workOrderId, status }: { workOrderId: string; status: string }) =>
-      updateWorkOrderStatus(workOrderId, status, accessToken),
+      updateWorkOrderStatus(workOrderId, status),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['work-orders'] })
     },
@@ -100,14 +97,14 @@ export function OrdenesPage() {
 
   const closeMutation = useMutation({
     mutationFn: async ({ workOrderId, finalCost }: { workOrderId: string; finalCost: number }) =>
-      closeWorkOrder(workOrderId, finalCost, undefined, accessToken),
+      closeWorkOrder(workOrderId, finalCost, undefined),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['work-orders'] })
     },
   })
 
   const deliverMutation = useMutation({
-    mutationFn: async (workOrderId: string) => deliverWorkOrder(workOrderId, accessToken),
+    mutationFn: async (workOrderId: string) => deliverWorkOrder(workOrderId),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['work-orders'] })
     },
