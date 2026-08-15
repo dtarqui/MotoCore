@@ -164,7 +164,7 @@ cd backend && dotnet test
 **[Índice y orden de lectura](docs/README.md)** — la documentación está numerada para leerse en secuencia.
 
 **Anteproyecto**
-- [1. Definición y alcance](docs/anteproyecto/01-definicion-y-alcance.md) · [2. Antecedentes y estado del arte](docs/anteproyecto/02-antecedentes-y-estado-del-arte.md)
+- [1. Definición y alcance](docs/anteproyecto/01-definicion-y-alcance.md) · [2. Antecedentes y estado del arte](docs/anteproyecto/02-antecedentes-y-estado-del-arte.md) · [3. Marco teórico y conceptual](docs/anteproyecto/03-marco-teorico-y-conceptual.md)
 
 **Especificación**
 - [1. Glosario](docs/01-glosario.md) · [2. Requisitos](docs/02-requisitos.md) · [3. Historias de usuario](docs/03-historias-usuario.md)

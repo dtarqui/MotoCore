@@ -39,7 +39,7 @@ Fuentes revisadas por pares, dentro de la ventana 2021–2026, seleccionadas por
 | Referencia (Autor, Año) | Solución tecnológica (arquitectura) | Resultados clave | Vacío identificado (*Research Gap*) |
 |---|---|---|---|
 | **Dar, Hershcovitch & Morrison (2023)** · *Proc. ACM on Management of Data* (SIGMOD), art. 89 · DOI 10.1145/3588943 | Seguridad a nivel de fila (RLS) sobre PostgreSQL y SQL Server; proponen un esquema de consulta *data-oblivious* como defensa | Demuestran que RLS impide devolver datos no autorizados, **pero el tiempo de ejecución de la consulta filtra información**: mediante consultas que usan índices, un atacante determina si existe un valor que no está autorizado a ver y, en ciertos casos, cuántas veces existe. El ataque tuvo éxito contra instancias gestionadas en AWS. Su defensa alcanza seguridad con impacto mínimo en rendimiento para claves únicas | Su análisis se sitúa en un modelo de inquilinos **plano y de un solo nivel**: aborda el ataque y la defensa en la capa de consulta, no la **decisión arquitectónica** de dónde ubicar el límite de aislamiento cuando el inquilino tiene una subdivisión interna. Señalan además que los *benchmarks* establecidos (YCSB) no soportan multi-tenancy ni RLS |
-| **Almutairi & Sheldon (2026)** · *IoT* (MDPI), 7(1), art. 21 · DOI 10.3390/iot7010021 | Revisión sistemática guiada por PRISMA de marcos de seguridad para entornos multi-inquilino IoT–nube | Categorizan las amenazas de intersección entre inquilinos: **fuga de datos entre inquilinos, ataques de canal lateral y escalamiento de privilegios**. Evalúan marcos de nueva generación que buscan imponer aislamiento sin violar los límites estrictos de latencia y energía de sensores ligeros | Al ser una revisión, **identifica amenazas pero no propone ni valida una arquitectura concreta**. Su contexto son dispositivos IoT con restricciones de latencia y energía, no aplicaciones SaaS de gestión empresarial con estructura organizacional jerárquica |
+| **Alobaywi et al. (2026)** · *IoT* (MDPI), 7(1), art. 21 · DOI 10.3390/iot7010021 | Revisión sistemática guiada por PRISMA de marcos de seguridad para entornos multi-inquilino IoT–nube | Categorizan las amenazas de intersección entre inquilinos: **fuga de datos entre inquilinos, ataques de canal lateral y escalamiento de privilegios**. Evalúan marcos de nueva generación que buscan imponer aislamiento sin violar los límites estrictos de latencia y energía de sensores ligeros | Al ser una revisión, **identifica amenazas pero no propone ni valida una arquitectura concreta**. Su contexto son dispositivos IoT con restricciones de latencia y energía, no aplicaciones SaaS de gestión empresarial con estructura organizacional jerárquica |
 | **Andriianenko (2026)** · Tesis de maestría, Universitatea Tehnică a Moldovei | Sistema SaaS de gestión de proyectos basado en microservicios; diseña, implementa y evalúa **esquema compartido** frente a **base de datos por inquilino** | El esquema compartido reduce el consumo de recursos pero incrementa la complejidad y los riesgos de aislamiento; la base por inquilino ofrece separación superior a costa de mayor sobrecarga operativa. Entrega recomendaciones prácticas para arquitectos | Evalúa ambos modelos como **alternativas planas y excluyentes**, sin considerar la seguridad a nivel de fila como refuerzo *dentro* del esquema compartido, ni una jerarquía de dos niveles con reglas de alcance distintas por tipo de entidad |
 
 ### Fichas analíticas de las fuentes primarias
@@ -60,11 +60,11 @@ Desarrollo de cada entrada de la matriz, con el detalle que la tabla no permite 
 | **Vacío frente a este proyecto** | Trabajan sobre un modelo de inquilinos **plano y de un solo nivel**, en la capa de consulta. No abordan la decisión arquitectónica previa: dónde ubicar el límite de aislamiento cuando el inquilino tiene una subdivisión interna con entidades de distinto alcance. |
 | **Aporte a este proyecto** | Fundamenta empíricamente que RLS, por sí solo, **no constituye una garantía absoluta**, lo que respalda la decisión de defensa en profundidad (RLS + verificación en la capa de aplicación) adoptada en el diseño. |
 
-#### Ficha 2 — Almutairi & Sheldon (2026)
+#### Ficha 2 — Alobaywi et al. (2026)
 
 | Campo | Contenido |
 |---|---|
-| **Referencia** | Almutairi, M. G., & Sheldon, F. T. (2026). Performance Trade-Offs in Multi-Tenant IoT–Cloud Security: A Systematic Review of Emerging Technologies. *IoT, 7*(1), 21. |
+| **Referencia** | Alobaywi, B., Almutairi, M. G., & Sheldon, F. T. (2026). Performance trade-offs in multi-tenant IoT–cloud security: A systematic review of emerging technologies. *IoT, 7*(1), 21. |
 | **Filiación / venue** | *IoT* (MDPI), revista de acceso abierto revisada por pares e indexada en Scopus. Publicación: 22 de febrero de 2026. |
 | **Problema abordado** | Sistematizar las amenazas de seguridad propias de entornos multi-inquilino en la intersección IoT–nube, y evaluar si los marcos de protección existentes logran imponer aislamiento sin degradar el rendimiento. |
 | **Metodología** | Revisión sistemática de literatura conducida según el protocolo **PRISMA**, con selección de estudios de alta calidad y categorización temática de amenazas. |
@@ -89,7 +89,7 @@ Desarrollo de cada entrada de la matriz, con el detalle que la tabla no permite 
 
 ### Síntesis comparativa
 
-| Criterio | Dar et al. (2023) | Almutairi & Sheldon (2026) | Andriianenko (2026) | **Este proyecto** |
+| Criterio | Dar et al. (2023) | Alobaywi et al. (2026) | Andriianenko (2026) | **Este proyecto** |
 |---|---|---|---|---|
 | Tipo de trabajo | Investigación experimental | Revisión sistemática | Tesis con implementación | Tesis con implementación |
 | Niveles de inquilino | Uno (plano) | Uno (plano) | Uno (plano) | **Dos (jerárquico)** |
@@ -115,7 +115,7 @@ Referencia: https://www.wiz.io/vulnerability-database/cve/cve-2024-10976 · http
 
 ## 2.3 Vacío de Investigación
 
-La solución propuesta por **Dar et al. (2023)** es rigurosa y demuestra empíricamente que la seguridad a nivel de fila cumple su función como control de acceso en bases de datos compartidas; **SIN EMBARGO**, su análisis se limita a un modelo de inquilinos plano y de un solo nivel, y se concentra en el ataque y la defensa en la capa de consulta, sin abordar la decisión arquitectónica previa: **dónde ubicar el límite de aislamiento cuando el inquilino posee una subdivisión interna** cuyas entidades no comparten el mismo alcance. **Almutairi & Sheldon (2026)** sistematizan las amenazas de fuga entre inquilinos y de canal lateral, **PERO**, al tratarse de una revisión centrada en entornos IoT–nube con restricciones de latencia y energía, identifican riesgos sin proponer ni validar una arquitectura aplicable a un SaaS de gestión empresarial. **Andriianenko (2026)**, por su parte, compara esquema compartido frente a base por inquilino, **NO OBSTANTE** los evalúa como alternativas planas y mutuamente excluyentes, sin considerar la seguridad a nivel de fila como refuerzo dentro del esquema compartido. A ello se suma que la serie de vulnerabilidades registradas en la aplicación de políticas RLS (CVE-2016-2193, CVE-2023-2455 y CVE-2024-10976) evidencia que confiar en una sola capa de aislamiento resulta insuficiente en la práctica.
+La solución propuesta por **Dar et al. (2023)** es rigurosa y demuestra empíricamente que la seguridad a nivel de fila cumple su función como control de acceso en bases de datos compartidas; **SIN EMBARGO**, su análisis se limita a un modelo de inquilinos plano y de un solo nivel, y se concentra en el ataque y la defensa en la capa de consulta, sin abordar la decisión arquitectónica previa: **dónde ubicar el límite de aislamiento cuando el inquilino posee una subdivisión interna** cuyas entidades no comparten el mismo alcance. **Alobaywi et al. (2026)** sistematizan las amenazas de fuga entre inquilinos y de canal lateral, **PERO**, al tratarse de una revisión centrada en entornos IoT–nube con restricciones de latencia y energía, identifican riesgos sin proponer ni validar una arquitectura aplicable a un SaaS de gestión empresarial. **Andriianenko (2026)**, por su parte, compara esquema compartido frente a base por inquilino, **NO OBSTANTE** los evalúa como alternativas planas y mutuamente excluyentes, sin considerar la seguridad a nivel de fila como refuerzo dentro del esquema compartido. A ello se suma que la serie de vulnerabilidades registradas en la aplicación de políticas RLS (CVE-2016-2193, CVE-2023-2455 y CVE-2024-10976) evidencia que confiar en una sola capa de aislamiento resulta insuficiente en la práctica.
 
 El presente proyecto aborda esta deficiencia mediante el **diseño, implementación y validación de una arquitectura multi-tenant jerárquica (empresa → sucursales)** que mantiene un **único límite de aislamiento verificable** a nivel de empresa, tratando la sucursal como criterio de alcance operativo y no como segunda frontera de seguridad; refuerza la seguridad a nivel de fila con **verificación de membresía en la capa de aplicación** (defensa en profundidad), en respuesta directa al patrón de fallos evidenciado por los CVE; y **valida empíricamente la separación de datos** por dos vías independientes —a través de la interfaz de programación y mediante acceso directo a la base de datos—, demostrando que el aislamiento se sostiene aun cuando la capa de aplicación omita sus controles.
 
@@ -123,57 +123,47 @@ El presente proyecto aborda esta deficiencia mediante el **diseño, implementaci
 
 ## 2.4 Referencias
 
-**Literatura revisada por pares**
+Se separan en tres bloques según **cómo se verifica cada uno**: los libros por ISBN en catálogo editorial, los artículos por DOI, y los enlaces por consulta directa de la página. El estado de comprobación de cada entrada está en [Verificación de referencias](verificacion-referencias.md).
 
-1. Dar, C., Hershcovitch, M., & Morrison, A. (2023). RLS Side Channels: Investigating Leakage of Row-Level Security Protected Data Through Query Execution Time. *Proceedings of the ACM on Management of Data*, 1(1), Artículo 89, 25 pp. https://doi.org/10.1145/3588943
+### A. Libros publicados
 
-2. Almutairi, M. G., & Sheldon, F. T. (2026). Performance Trade-Offs in Multi-Tenant IoT–Cloud Security: A Systematic Review of Emerging Technologies. *IoT*, 7(1), 21. https://doi.org/10.3390/iot7010021
+*Se verifican por ISBN. No llevan URL: la fuente es la obra impresa o su edición electrónica en catálogo.*
 
-3. Andriianenko, O. (2026). *Design and evaluation of multi-tenant architectures in microservice based project management systems* [Tesis de maestría, Universitatea Tehnică a Moldovei]. https://repository.utm.md/handle/5014/35481
+| # | Referencia (APA 7) | ISBN |
+|---|---|---|
+| L1 | Bass, L., Clements, P., & Kazman, R. (2021). *Software architecture in practice* (4.ª ed.). Addison-Wesley Professional. | 978-0-13-688609-9 |
+| L2 | Richards, M., & Ford, N. (2020). *Fundamentals of software architecture: An engineering approach*. O'Reilly Media. | 978-1-4920-4345-4 |
+| L3 | Evans, E. (2003). *Domain-driven design: Tackling complexity in the heart of software*. Addison-Wesley Professional. | 978-0-321-12521-7 |
+| L4 | Newman, S. (2021). *Building microservices: Designing fine-grained systems* (2.ª ed.). O'Reilly Media. | 978-1-4920-3402-5 |
+| L5 | Kleppmann, M. (2017). *Designing data-intensive applications: The big ideas behind reliable, scalable, and maintainable systems*. O'Reilly Media. | 978-1-4493-7332-0 |
+| L6 | Obe, R. O., & Hsu, L. S. (2017). *PostgreSQL: Up and running. A practical guide to the advanced open source database* (3.ª ed.). O'Reilly Media. | 978-1-4919-6341-8 |
+| L7 | Sbarski, P., Cui, Y., & Nair, A. (2022). *Serverless architectures on AWS* (2.ª ed.). Manning Publications. | 978-1-61729-542-3 |
+| L8 | Humble, J., & Farley, D. (2010). *Continuous delivery: Reliable software releases through build, test, and deployment automation*. Addison-Wesley Professional. | 978-0-321-60191-9 |
+| L9 | Forsgren, N., Humble, J., & Kim, G. (2018). *Accelerate: The science of lean software and DevOps. Building and scaling high performing technology organizations*. IT Revolution Press. | 978-1-942788-33-1 |
+| L10 | Cohn, M. (2004). *User stories applied: For agile software development*. Addison-Wesley Professional. | 978-0-321-20568-1 |
+| L11 | Hernández-Sampieri, R., & Mendoza Torres, C. P. (2018). *Metodología de la investigación: Las rutas cuantitativa, cualitativa y mixta*. McGraw-Hill Education. | 978-1-4562-6096-5 |
+| L12 | Hernández Sampieri, R., Fernández Collado, C., & Baptista Lucio, M. P. (2014). *Metodología de la investigación* (6.ª ed.). McGraw-Hill Interamericana. | 978-1-4562-2396-0 |
 
-**Libros — arquitectura de software**
+### B. Artículos y tesis con identificador permanente
 
-4. Bass, L., Clements, P., & Kazman, R. (2021). *Software architecture in practice* (4.ª ed.). Addison-Wesley Professional. ISBN 978-0-13-688609-9
+*Se verifican por DOI o por el identificador del repositorio institucional.*
 
-5. Richards, M., & Ford, N. (2020). *Fundamentals of software architecture: An engineering approach*. O'Reilly Media. ISBN 978-1-4920-4345-4
+| # | Referencia (APA 7) | Identificador |
+|---|---|---|
+| A1 | Dar, C., Hershcovitch, M., & Morrison, A. (2023). RLS side channels: Investigating leakage of row-level security protected data through query execution time. *Proceedings of the ACM on Management of Data, 1*(1), Artículo 89, 1–25. | https://doi.org/10.1145/3588943 |
+| A2 | Alobaywi, B., Almutairi, M. G., & Sheldon, F. T. (2026). Performance trade-offs in multi-tenant IoT–cloud security: A systematic review of emerging technologies. *IoT, 7*(1), 21. | https://doi.org/10.3390/iot7010021 |
+| A3 | Andriianenko, O. (2026). *Design and evaluation of multi-tenant architectures in microservice based project management systems* [Tesis de maestría, Universitatea Tehnică a Moldovei]. Repositorio institucional UTM. | https://repository.utm.md/handle/5014/35481 |
 
-6. Evans, E. (2003). *Domain-driven design: Tackling complexity in the heart of software*. Addison-Wesley Professional. ISBN 978-0-321-12521-7
+### C. Enlaces — fuentes estadísticas y registros oficiales
 
-7. Newman, S. (2021). *Building microservices: Designing fine-grained systems* (2.ª ed.). O'Reilly Media. ISBN 978-1-4920-3402-5
+*Se verifican consultando la página. Al no tener identificador permanente, requieren fecha de recuperación.*
 
-**Libros — datos, persistencia y bases de datos**
-
-8. Kleppmann, M. (2017). *Designing data-intensive applications: The big ideas behind reliable, scalable, and maintainable systems*. O'Reilly Media. ISBN 978-1-4493-7332-0
-
-9. Obe, R. O., & Hsu, L. S. (2017). *PostgreSQL: Up and running. A practical guide to the advanced open source database* (3.ª ed.). O'Reilly Media. ISBN 978-1-4919-6341-8
-
-**Libros — computación en la nube y arquitecturas serverless**
-
-10. Sbarski, P., Cui, Y., & Nair, A. (2022). *Serverless architectures on AWS* (2.ª ed.). Manning Publications. ISBN 978-1-61729-542-3
-
-**Libros — ingeniería de software, entrega continua y requisitos**
-
-11. Humble, J., & Farley, D. (2010). *Continuous delivery: Reliable software releases through build, test, and deployment automation*. Addison-Wesley Professional. ISBN 978-0-321-60191-9
-
-12. Forsgren, N., Humble, J., & Kim, G. (2018). *Accelerate: The science of lean software and DevOps. Building and scaling high performing technology organizations*. IT Revolution Press. ISBN 978-1-942788-33-1
-
-13. Cohn, M. (2004). *User stories applied: For agile software development*. Addison-Wesley Professional. ISBN 978-0-321-20568-1
-
-**Libros — metodología de la investigación**
-
-14. Hernández-Sampieri, R., & Mendoza Torres, C. P. (2018). *Metodología de la investigación: Las rutas cuantitativa, cualitativa y mixta*. McGraw-Hill Education. ISBN 978-1-4562-6096-5
-
-15. Hernández Sampieri, R., Fernández Collado, C., & Baptista Lucio, M. P. (2014). *Metodología de la investigación* (6.ª ed.). McGraw-Hill Interamericana. ISBN 978-1-4562-2396-0
-
-**Fuentes estadísticas oficiales**
-
-16. Instituto Nacional de Estadística de Bolivia. (s. f.). *Parque automotor — Cuadros estadísticos*. https://www.ine.gob.bo/index.php/estadisticas-economicas/transportes/parque-automotor-cuadros-estadisticos/
-
-17. Instituto Nacional de Estadística de Bolivia. (2023). *Boletín estadístico parque automotor 2023*. https://www.ine.gob.bo/index.php/boletin-estadistico-parque-automotor-2023/
-
-**Registros de vulnerabilidad**
-
-18. *CVE-2024-10976: PostgreSQL incomplete tracking of tables with row security*. (2024). https://www.wiz.io/vulnerability-database/cve/cve-2024-10976
+| # | Referencia (APA 7) | Enlace |
+|---|---|---|
+| E1 | Instituto Nacional de Estadística de Bolivia. (s. f.). *Parque automotor — Cuadros estadísticos*. | https://www.ine.gob.bo/index.php/estadisticas-economicas/transportes/parque-automotor-cuadros-estadisticos/ |
+| E2 | Instituto Nacional de Estadística de Bolivia. (2023). *Boletín estadístico parque automotor 2023*. | https://www.ine.gob.bo/index.php/boletin-estadistico-parque-automotor-2023/ |
+| E3 | Instituto Nacional de Estadística de Bolivia. (s. f.). *Estadísticas del parque automotor 2003–2022*. | https://www.ine.gob.bo/index.php/estadisticas-del-parque-automotor-2003-2022/ |
+| E4 | *CVE-2024-10976: PostgreSQL incomplete tracking of tables with row security*. (2024). Wiz Vulnerability Database. | https://www.wiz.io/vulnerability-database/cve/cve-2024-10976 |
 
 ### Uso previsto de la bibliografía de libros
 
@@ -193,6 +183,6 @@ Cada obra sustenta una parte concreta del trabajo; no se incluyen como relleno b
 | Cohn (2004) | Formato y criterios de aceptación de las historias de usuario |
 | Hernández-Sampieri & Mendoza (2018); Hernández Sampieri et al. (2014) | Marco metodológico: tipo y enfoque de investigación, y diseño de la validación |
 
-> **Formato**: todas las referencias siguen el estilo **APA (7.ª edición)**. Falta añadir las citas dentro del cuerpo del texto conforme se redacten los capítulos siguientes; las de este capítulo ya están incorporadas.
+> **Formato**: todas las referencias siguen el estilo **APA (7.ª edición)**. Las obras de esta lista que se emplean como sustento teórico se citan en el cuerpo del [capítulo 3](03-marco-teorico-y-conceptual.md), donde figuran además sus propias referencias; las que sustentan el estado del arte ya están citadas en este capítulo.
 
-> **Nota de verificación**: la referencia 1 fue verificada mediante **extracción del texto completo** del artículo (título, autores, filiación, venue, DOI y resumen confirmados directamente del documento). Las referencias 2 y 3 se verificaron contra la ficha del editor y del repositorio institucional respectivamente; **antes de la defensa conviene acceder a su texto completo** para citar resultados concretos y no solo lo declarado en sus resúmenes. Los datos bibliográficos de los libros (autoría, edición, año, editorial e ISBN) se verificaron contra catálogos editoriales y de distribución.
+> **Estado de comprobación**: los identificadores de A1–A3 y los ISBN de L1–L12 fueron contrastados contra los metadatos del editor. El detalle —qué se comprobó, contra qué fuente y qué queda pendiente— está en [Verificación de referencias](verificacion-referencias.md). Dos advertencias que afectan a la redacción: **A2 tiene tres autores y el primero es Alobaywi**, no Almutairi (se cita como *Alobaywi et al.*); y de A1 conviene acceder al texto completo antes de la defensa para citar resultados concretos.

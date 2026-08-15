@@ -75,6 +75,8 @@ Esta redundancia responde a que la seguridad a nivel de fila, aun siendo un cont
 | Pruebas | Vitest | — |
 | Despliegue | Funciones serverless | ADR-001 |
 
+La definición formal de cada tecnología y la teoría que respalda su elección están en el [Marco teórico y conceptual](anteproyecto/03-marco-teorico-y-conceptual.md): §3.1 para las definiciones, §3.2 para el fundamento y §3.3 para las limitaciones asumidas.
+
 ## Integración continua
 
 Cada integración al ramal principal ejecuta de forma automatizada la verificación estática de tipos y la suite de pruebas; un fallo impide la integración (RNF-203). El diseño del pipeline forma parte del objetivo específico 7.

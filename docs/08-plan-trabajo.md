@@ -8,6 +8,8 @@ Metodología, cronograma, hitos y gestión de riesgos del proyecto de grado. Per
 
 **Desarrollo iterativo e incremental**, organizado en iteraciones de dos semanas. Cada iteración cierra con software funcionando y verificado —no con documentación de avance— y ninguna se da por terminada mientras el pipeline de integración continua no esté en verde.
 
+> El sustento teórico de esta metodología —desarrollo iterativo, integración continua y pruebas como especificación previa, con sus fuentes— está en el [Marco teórico](anteproyecto/03-marco-teorico-y-conceptual.md) §3.2.5. Aquí se documenta su **aplicación**, no su justificación.
+
 Prácticas adoptadas:
 
 | Práctica | Aplicación |
@@ -20,6 +22,8 @@ Prácticas adoptadas:
 
 **Por qué no Scrum formal**: el proyecto lo desarrolla una sola persona, por lo que las ceremonias de coordinación de equipo (planificación conjunta, diarias, retrospectiva grupal) no aplican. Se conserva lo que sí aporta valor en un contexto individual: iteraciones cortas, incremento demostrable y definición de terminado explícita.
 
+**Orden de escritura de las pruebas**: las pruebas de aislamiento se escriben **antes** que la funcionalidad que protegen, de modo que actúen como especificación ejecutable del comportamiento esperado. Es la medida de mitigación del riesgo R1.
+
 ## 2. Fases y cronograma
 
 Cuatro fases que agrupan los ocho objetivos específicos.
@@ -27,7 +31,7 @@ Cuatro fases que agrupan los ocho objetivos específicos.
 | Fase | Período | Objetivos | Resultado |
 |---|---|---|---|
 | **F1 · Análisis** | Septiembre (sem. 1–2) | 1 y 2 | Estado del arte con matriz de extracción, análisis del mercado y vacío de investigación |
-| **F2 · Diseño** | Septiembre (sem. 3–4) | 3 y 4 | Modelo de datos jerárquico, políticas de aislamiento y decisiones registradas |
+| **F2 · Diseño** | Septiembre (sem. 3–4) | 3 y 4 | Marco teórico y conceptual, modelo de datos jerárquico, políticas de aislamiento y decisiones registradas |
 | **F3 · Construcción** | Octubre – noviembre | 5, 6 y 7 | Sistema funcional con el corte vertical e integración continua operativa |
 | **F4 · Validación y cierre** | Diciembre | 8 | Evidencia de aislamiento, documento final y defensa |
 
@@ -36,7 +40,7 @@ Cuatro fases que agrupan los ocho objetivos específicos.
 | Iteración | Fechas | Contenido | Entregable |
 |---|---|---|---|
 | **I1** | 1–14 sep | Búsqueda en bases académicas; aplicación de criterios de inclusión y exclusión; lectura de fuentes | Matriz de extracción con fuentes revisadas por pares |
-| **I2** | 15–28 sep | Análisis del mercado; comparación de estrategias de aislamiento; diseño del modelo jerárquico y de las políticas | Vacío de investigación redactado · Modelo de datos y decisiones de diseño cerrados |
+| **I2** | 15–28 sep | Análisis del mercado; comparación de estrategias de aislamiento; redacción del marco teórico y conceptual con revisión crítica; diseño del modelo jerárquico y de las políticas | Vacío de investigación redactado · Marco teórico y conceptual · Modelo de datos y decisiones de diseño cerrados |
 | **I3** | 29 sep – 12 oct | Construcción del esquema: identidad, empresas, sucursales, membresías y políticas de aislamiento; selección de contexto activo | HU-06, HU-07, HU-08 · Esquema jerárquico operativo |
 | **I4** | 13–26 oct | Cuentas, registro, gestión de empresas y de miembros con control de acceso por rol | HU-01 a HU-05, HU-09 a HU-12 |
 | **I5** | 27 oct – 9 nov | Módulo de clientes — entidad de nivel empresa | HU-13, HU-14, HU-15 |
@@ -59,7 +63,7 @@ Cuatro fases que agrupan los ocho objetivos específicos.
 
 | Hito | Fecha objetivo | Criterio de cumplimiento |
 |---|---|---|
-| **H1 · Anteproyecto aprobado** | 28 de septiembre | Definición, alcance y estado del arte revisados por el asesor |
+| **H1 · Anteproyecto aprobado** | 28 de septiembre | Definición y alcance, estado del arte, y marco teórico y conceptual revisados por el asesor |
 | **H2 · Jerarquía operativa** | 12 de octubre | Una empresa gestiona varias sucursales; el aislamiento sigue vigente |
 | **H3 · Corte vertical completo** | 23 de noviembre | Clientes (nivel empresa) e Inventario (nivel sucursal) funcionando y probados |
 | **H4 · Sistema integrado** | 7 de diciembre | Frontend conectado; flujo completo desde el registro hasta la operación |

@@ -20,6 +20,7 @@ Documentos que gobiernan el trabajo técnico:
 | Qué debe hacer el sistema | [docs/02-requisitos.md](docs/02-requisitos.md) |
 | Entidades, claves y políticas | [docs/05-modelo-datos.md](docs/05-modelo-datos.md) |
 | Por qué está diseñado así | [docs/07-decisiones-diseno.md](docs/07-decisiones-diseno.md) |
+| Qué teoría o estándar respalda una tecnología | [docs/anteproyecto/03-marco-teorico-y-conceptual.md](docs/anteproyecto/03-marco-teorico-y-conceptual.md) |
 | Qué construir y en qué orden | [docs/08-plan-trabajo.md](docs/08-plan-trabajo.md) |
 
 ## Anteproyecto académico

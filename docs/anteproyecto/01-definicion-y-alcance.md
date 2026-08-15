@@ -113,9 +113,11 @@ Verificación contra la fórmula del módulo (Qué + Cómo, para Qué):
 - **Backend**: Node.js, TypeScript, Hono (framework de API), Zod (validación).
 - **Datos y autenticación**: Supabase (PostgreSQL, Supabase Auth, Row-Level Security).
 - **Despliegue**: Vercel (funciones serverless).
-- **Frontend**: React 19 + Vite (existente; su integración con Supabase Auth es parte del alcance técnico, pendiente de implementación — ver §1.8.3).
+- **Frontend**: React con TypeScript, incluida su integración con el proveedor de identidad y los selectores de empresa y sucursal activas.
 - **Pruebas**: Vitest (pruebas unitarias, HTTP y de aislamiento multi-tenant).
-- **CI/CD**: pipeline automatizado (GitHub Actions, `.github/workflows/ci.yml`, job `server`) que ejecuta typecheck y pruebas en cada push/PR a `main` — cumple el estándar de "Full Stack" exigido en el módulo (§1.10).
+- **CI/CD**: pipeline automatizado en GitHub Actions que ejecuta la verificación de tipos y la suite de pruebas en cada integración al ramal principal — cubre el componente de automatización exigido por el módulo (§1.9).
+
+> Las teorías, modelos y estándares que justifican cada una de estas elecciones se desarrollan en el [Marco teórico y conceptual](03-marco-teorico-y-conceptual.md); las alternativas evaluadas y descartadas, en [Decisiones de diseño](../07-decisiones-diseno.md).
 
 ### 1.8.3 Exclusiones (lo que explícitamente NO cubre este proyecto)
 

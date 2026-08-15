@@ -24,7 +24,7 @@ Del relevamiento se desprenden dos capacidades determinantes para el mercado bol
 ### Referentes de producto (internacionales — solo como inspiración de features)
 No compiten en Bolivia, pero marcan el estándar de features (inspección digital, booking, portal del cliente): **Shopmonkey** (https://www.shopmonkey.io), **Tekmetric** (https://www.tekmetric.com), **AutoLeap** (https://www.autoleap.com) y **Blackpurl** (https://www.blackpurl.com, powersports).
 
-> El modelo multiempresa (una cuenta → varias organizaciones) está inspirado en ERPs como QuickBooks/Zoho, pero esas herramientas **no** son del mismo objetivo y quedan fuera de la comparativa.
+> **Criterio de la comparativa**: se relevan únicamente plataformas del **mismo objetivo** —gestión de talleres de servicio vehicular—. El software administrativo o contable de propósito general queda fuera, por no resolver la operación del taller.
 
 ## Cobertura de la oferta existente
 

@@ -16,6 +16,8 @@ La documentación está numerada para leerse en secuencia: cada documento asume 
 |---|---|---|
 | 1 | [Definición y alcance](anteproyecto/01-definicion-y-alcance.md) | Tema, problema, preguntas, objetivos y fronteras del proyecto |
 | 2 | [Antecedentes y estado del arte](anteproyecto/02-antecedentes-y-estado-del-arte.md) | Contexto del sector, literatura revisada y vacío de investigación |
+| 3 | [Marco teórico y conceptual](anteproyecto/03-marco-teorico-y-conceptual.md) | Definiciones formales, teorías que justifican cada decisión y revisión crítica |
+| — | [Verificación de referencias](anteproyecto/verificacion-referencias.md) | Anexo: estado de comprobación de cada fuente citada |
 
 ### Especificación — qué debe hacer el sistema
 
@@ -48,6 +50,8 @@ La documentación está numerada para leerse en secuencia: cada documento asume 
 ```
 Anteproyecto  ──>  define el problema y los objetivos
       │
+      ├──> Marco teórico y conceptual  (fundamenta las decisiones que vienen después)
+      │
       v
 Glosario      ──>  fija el lenguaje
       │
@@ -71,7 +75,9 @@ Antes de escribir sobre un tema, verificar quién es su responsable. Si ya lo ti
 
 | Tema | Documento responsable |
 |---|---|
-| Terminología | [01-glosario.md](01-glosario.md) |
+| Terminología del dominio | [01-glosario.md](01-glosario.md) |
+| Definición formal de una tecnología, con su fuente | [anteproyecto/03-marco-teorico-y-conceptual.md](anteproyecto/03-marco-teorico-y-conceptual.md) §3.1 |
+| Teoría o modelo que justifica una decisión | [anteproyecto/03-marco-teorico-y-conceptual.md](anteproyecto/03-marco-teorico-y-conceptual.md) §3.2 |
 | Objetivos, alcance y exclusiones | [anteproyecto/01-definicion-y-alcance.md](anteproyecto/01-definicion-y-alcance.md) |
 | Qué debe hacer el sistema | [02-requisitos.md](02-requisitos.md) |
 | Cómo lo vive quien lo usa | [03-historias-usuario.md](03-historias-usuario.md) |

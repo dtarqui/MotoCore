@@ -1,6 +1,6 @@
 # Seguridad y control de acceso
 
-> Terminología: [Glosario](01-glosario.md). Arquitectura general: [Arquitectura](04-arquitectura.md).
+> Terminología: [Glosario](01-glosario.md). Arquitectura general: [Arquitectura](04-arquitectura.md). Modelos de seguridad que fundamentan este enfoque —principios de Saltzer y Schroeder, control de acceso basado en roles, confianza cero y defensa en profundidad—: [Marco teórico](anteproyecto/03-marco-teorico-y-conceptual.md) §3.2.4.
 >
 > Este documento describe **el enfoque de seguridad a alto nivel**. Deliberadamente no incluye umbrales exactos, tiempos de expiración ni detalles de configuración que faciliten un ataque: esos viven en la configuración del despliegue.
 

@@ -124,7 +124,7 @@ Cada RNF define un **criterio verificable**: si no se puede comprobar, no es un 
 | RNF-201 | El código está tipado estáticamente y sin errores de tipo. | `npm run typecheck` finaliza sin errores. | ✔ |
 | RNF-202 | Toda regla de aislamiento y de negocio tiene prueba automatizada. | La suite cubre los RF marcados `Must` con alcance `✔`; ejecuta en verde. | ✔ |
 | RNF-203 | Cada integración al ramal principal ejecuta verificación de tipos y pruebas de forma automatizada. | El pipeline de CI corre en cada push y pull request; un fallo bloquea la integración. | ✔ |
-| RNF-204 | Los errores se devuelven en un formato uniforme y con códigos estables. | Todas las respuestas de error siguen ProblemDetails (RFC 7807) con código `modulo.razon`. | ✔ |
+| RNF-204 | Los errores se devuelven en un formato uniforme y con códigos estables. | Todas las respuestas de error siguen Problem Details (RFC 9457, que sustituye al RFC 7807) con código `modulo.razon`. | ✔ |
 | RNF-205 | La entrada de toda operación de escritura se valida antes de tocar la base de datos. | Petición con cuerpo inválido devuelve `400` con el detalle por campo, sin efectos secundarios. | ✔ |
 | RNF-206 | Las decisiones de arquitectura quedan registradas con alternativas y consecuencias. | Existe un ADR por cada decisión estructural tomada. | ✔ |
 
