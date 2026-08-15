@@ -3,7 +3,12 @@ import { serviceClient } from '../lib/supabase.js';
 import { requireAuth } from '../lib/auth.js';
 import { requireMembership, requireOwner, getMembership } from '../lib/memberships.js';
 import { badRequest, conflict, notFound } from '../lib/errors.js';
-import { createOrganizationSchema, inviteMemberSchema, updateRoleSchema } from '../schemas.js';
+import {
+  createOrganizationSchema,
+  updateOrganizationSchema,
+  inviteMemberSchema,
+  updateRoleSchema,
+} from '../schemas.js';
 import type { AppBindings, Organization } from '../types.js';
 
 export const organizationRoutes = new Hono<AppBindings>();
@@ -79,8 +84,8 @@ organizationRoutes.get('/:orgId', async (c) => {
 
 /**
  * Cambiar de organizacion activa: valida la membership y devuelve org + rol.
- * El cliente guarda el orgId activo y lo envia como X-Org-Id en llamadas de
- * negocio (estilo QuickBooks/Zoho).
+ * El cliente guarda el orgId activo y lo envia como X-Org-Id en las llamadas
+ * de negocio (RF-203, ADR-005).
  */
 organizationRoutes.post('/:orgId/switch', async (c) => {
   const orgId = c.req.param('orgId');
@@ -96,6 +101,25 @@ organizationRoutes.post('/:orgId/switch', async (c) => {
   if (!org) throw notFound('organization.not_found', 'Organizacion no encontrada.');
 
   return c.json({ organization: org, role });
+});
+
+/** Editar los datos de la organizacion (solo Owner) — RF-204. */
+organizationRoutes.patch('/:orgId', async (c) => {
+  const orgId = c.req.param('orgId');
+  await requireOwner(orgId, c.get('userId'));
+  const input = updateOrganizationSchema.parse(await c.req.json());
+
+  const { data: org, error } = await serviceClient()
+    .from('organizations')
+    .update({ ...input, updated_at: new Date().toISOString() })
+    .eq('id', orgId)
+    .select(ORG_COLUMNS)
+    .maybeSingle();
+
+  if (error) throw badRequest('organization.update_failed', error.message);
+  if (!org) throw notFound('organization.not_found', 'Organizacion no encontrada.');
+
+  return c.json({ organization: org });
 });
 
 /** Lista los miembros de la organizacion (requiere membership). */

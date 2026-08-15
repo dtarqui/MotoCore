@@ -4,11 +4,13 @@ import { badRequest } from './errors.js';
 import type { AppBindings, Role } from '../types.js';
 
 /**
- * Contexto de organizacion activa para modulos de negocio (clients, motos,
- * ordenes, etc. — se portan en iteraciones siguientes). Lee el header
+ * Contexto de organizacion activa para los modulos de negocio. Lee el header
  * `X-Org-Id`, valida la membership activa y deja orgId + orgRole en el
- * contexto. Es el equivalente al GetFirstWorkshopId del .NET, pero con
- * seleccion explicita de organizacion (estilo ERP multiempresa).
+ * contexto (ADR-005).
+ *
+ * El servidor NUNCA asume una organizacion por defecto: si falta la cabecera,
+ * la peticion se rechaza de forma explicita. Es el principio de valores por
+ * defecto seguros aplicado al contexto de trabajo.
  */
 export type OrgBindings = { Variables: AppBindings['Variables'] & { orgId: string; orgRole: Role } };
 

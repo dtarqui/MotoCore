@@ -9,10 +9,16 @@ import type { AppBindings } from '../types.js';
 export const authRoutes = new Hono<AppBindings>();
 
 /**
- * Registro: crea la cuenta (Supabase Auth), su primera organizacion y la
- * membership Owner, de forma atomica-a-nivel-de-aplicacion (mismo contrato que
- * el backend .NET). El login se hace desde el cliente con Supabase Auth
- * (signInWithPassword), no aqui.
+ * Registro (RF-101): crea la cuenta y, en un mismo acto, su primera empresa,
+ * su primera sucursal y la membresia Owner.
+ *
+ * Los tres ultimos pasos ocurren dentro de la funcion `register_account`, que
+ * es una sola transaccion en Postgres (ADR-007). La cuenta en auth.users es lo
+ * unico que queda fuera —solo la API de administracion puede crearla—, asi que
+ * si la transaccion falla, se elimina la cuenta para no dejarla huerfana.
+ *
+ * El login NO se hace aqui: lo hace el cliente con Supabase Auth
+ * (signInWithPassword). Esta API solo verifica el token que recibe (ADR-004).
  */
 authRoutes.post('/register', async (c) => {
   const input = registerSchema.parse(await c.req.json());
@@ -43,27 +49,39 @@ authRoutes.post('/register', async (c) => {
     last_name: input.lastName,
   });
 
-  const { data: org, error: orgErr } = await db
-    .from('organizations')
-    .insert({ name: input.organizationName, owner_id: userId })
-    .select('id, name, description, address, phone, email, owner_id, is_active, created_at, updated_at')
-    .single();
+  // Empresa + sucursal + membresia Owner, en una sola transaccion.
+  const { data: created2, error: rpcErr } = await db.rpc('register_account', {
+    p_user_id: userId,
+    p_org_name: input.organizationName,
+    p_workshop_name: input.workshopName ?? input.organizationName,
+  });
 
-  if (orgErr || !org) {
-    // Evita cuenta huerfana si falla la creacion de la organizacion.
+  const provisioned = Array.isArray(created2) ? created2[0] : created2;
+
+  if (rpcErr || !provisioned) {
+    // La transaccion no dejo nada a medias; solo queda revertir la cuenta.
     await db.auth.admin.deleteUser(userId).catch(() => undefined);
-    throw badRequest('organization.create_failed', orgErr?.message ?? 'No se pudo crear la organizacion.');
+    throw badRequest('organization.create_failed', rpcErr?.message ?? 'No se pudo crear la organizacion.');
   }
 
-  const { error: memErr } = await db
-    .from('memberships')
-    .insert({ organization_id: org.id, user_id: userId, role: 'owner' });
+  const { organization_id: orgId, workshop_id: workshopId } = provisioned as {
+    organization_id: string;
+    workshop_id: string;
+  };
 
-  if (memErr) {
-    throw badRequest('membership.create_failed', memErr.message);
-  }
+  const { data: org } = await db
+    .from('organizations')
+    .select('id, name, description, address, phone, email, owner_id, is_active, created_at, updated_at')
+    .eq('id', orgId)
+    .maybeSingle();
 
-  return c.json({ userId, organization: org }, 201);
+  const { data: workshop } = await db
+    .from('workshops')
+    .select('id, organization_id, name, address, phone, is_active, created_at, updated_at')
+    .eq('id', workshopId)
+    .maybeSingle();
+
+  return c.json({ userId, organization: org, workshop }, 201);
 });
 
 /** Perfil + organizaciones (con rol) del usuario autenticado. Alimenta el selector de organizacion. */

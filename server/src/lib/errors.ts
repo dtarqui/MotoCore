@@ -2,9 +2,9 @@ import type { Context } from 'hono';
 import { ZodError } from 'zod';
 
 /**
- * Error de negocio con codigo `modulo.razon` (mismo catalogo que el backend
- * .NET original) y un status HTTP asociado. Se serializa como ProblemDetails
- * (RFC 7807) para que el api-client del frontend lo maneje sin cambios.
+ * Error de negocio con codigo `modulo.razon` y un status HTTP asociado.
+ * Se serializa como Problem Details (RFC 9457) para cumplir RNF-204: formato
+ * uniforme y codigos estables en todas las respuestas de error.
  */
 export class AppError extends Error {
   constructor(
@@ -23,6 +23,7 @@ export const forbidden = (code: string, message: string) => new AppError(code, m
 export const notFound = (code: string, message: string) => new AppError(code, message, 404);
 export const conflict = (code: string, message: string) => new AppError(code, message, 409);
 
+/** Problem Details for HTTP APIs (RFC 9457). `title` transporta el codigo `modulo.razon`. */
 interface ProblemDetails {
   type: string;
   title: string;
@@ -31,13 +32,17 @@ interface ProblemDetails {
   errors?: Record<string, string[]>;
 }
 
+/**
+ * RFC 9457 §4.2.1: cuando no se dispone de una URI que documente el tipo de
+ * problema, se usa "about:blank" y el codigo viaja en `title`.
+ */
 function problem(status: number, title: string, detail: string, errors?: Record<string, string[]>): ProblemDetails {
-  return { type: `https://httpstatuses.com/${status}`, title, status, detail, errors };
+  return { type: 'about:blank', title, status, detail, errors };
 }
 
 /**
  * Handler central de errores para Hono. Mapea AppError, ZodError y fallos
- * inesperados a ProblemDetails.
+ * inesperados a Problem Details.
  */
 export function handleError(err: unknown, c: Context): Response {
   if (err instanceof AppError) {

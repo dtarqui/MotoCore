@@ -18,6 +18,18 @@ export interface Membership {
   is_active: boolean;
 }
 
+/** Sucursal: subdivision operativa de la empresa, no unidad de aislamiento (ADR-006). */
+export interface Workshop {
+  id: string;
+  organization_id: string;
+  name: string;
+  address: string | null;
+  phone: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string | null;
+}
+
 export interface Organization {
   id: string;
   name: string;

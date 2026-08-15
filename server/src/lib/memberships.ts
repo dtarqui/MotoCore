@@ -16,8 +16,9 @@ export async function getMembership(orgId: string, userId: string): Promise<Memb
 }
 
 /**
- * Exige que el usuario sea miembro activo de la organizacion. Es el gate de
- * aislamiento multi-tenant (mismo patron que el backend .NET). Devuelve su rol.
+ * Exige que el usuario sea miembro activo de la organizacion. Es la capa de
+ * aplicacion del aislamiento multi-tenant (ADR-002): se ejecuta al inicio de
+ * cada handler, por encima de las politicas RLS. Devuelve su rol.
  */
 export async function requireMembership(orgId: string, userId: string): Promise<Role> {
   const membership = await getMembership(orgId, userId);
@@ -33,4 +34,17 @@ export async function requireOwner(orgId: string, userId: string): Promise<void>
   if (role !== 'owner') {
     throw forbidden('organization.insufficient_permissions', 'Solo el Owner puede realizar esta accion.');
   }
+}
+
+/**
+ * Exige que el rol del usuario en la organizacion sea uno de los admitidos.
+ * El rol es por organizacion, nunca por sucursal: la asignacion a sucursales
+ * es operativa y no altera permisos (ADR-006).
+ */
+export async function requireRole(orgId: string, userId: string, roles: readonly Role[]): Promise<Role> {
+  const role = await requireMembership(orgId, userId);
+  if (!roles.includes(role)) {
+    throw forbidden('organization.insufficient_permissions', 'Tu rol no permite realizar esta accion.');
+  }
+  return role;
 }
