@@ -24,7 +24,7 @@ El software de gestión de talleres relevado con presencia en Bolivia (AutoSoft 
 | Dimensión | Delimitación |
 |---|---|
 | **Espacial / Organizacional** | Empresas de servicio y reparación de motocicletas en Bolivia; específicamente, operadores que administran —o planean administrar— más de una empresa y/o más de una sucursal. |
-| **Temporal** | Desarrollo y validación entre **septiembre y diciembre de 2026** (cuatro meses). El cronograma detallado por fases e hitos está en [plan-trabajo.md](../plan-trabajo.md). |
+| **Temporal** | Desarrollo y validación entre **septiembre y diciembre de 2026** (cuatro meses). El cronograma detallado por fases e hitos está en [Plan de trabajo](../08-plan-trabajo.md). |
 | **Técnica** | El componente abordado es la **capa de identidad, jerarquía organizacional y aislamiento de datos**: cuentas, empresas, sucursales, membresías con rol, y las políticas de seguridad que las hacen cumplir en la base de datos. **No** abarca la totalidad de los módulos operativos (ver Exclusiones, §1.8.3). |
 
 ## 1.4 Pregunta general
@@ -136,49 +136,4 @@ El objeto de estudio es la **arquitectura**, no la suite funcional completa. En 
 | ¿El Objetivo General comienza con un verbo en infinitivo medible e incluye la tecnología principal? | Sí — "Diseñar, implementar y validar", con Node.js/TypeScript + Supabase/PostgreSQL + RLS + Vercel explícitos. |
 | ¿Los Objetivos Específicos son pasos técnicos secuenciales (Analizar → Diseñar → Implementar → Validar)? | Sí — los ocho objetivos siguen esa secuencia, agrupados por fase: Analizar (1–2), Diseñar (3–4), Implementar (5–7), Validar (8). Ver la nota al pie de §1.7 sobre la cantidad. |
 | ¿Incluye un párrafo de "Exclusiones" explícito? | Sí (§1.8.3), con seis exclusiones cerradas y justificadas. |
-| ¿La propuesta integra conceptos avanzados de nivel maestría (Cloud, CI/CD, Microservicios/Serverless, Seguridad)? | Sí — arquitectura serverless en Vercel, base de datos cloud gestionada (Supabase), seguridad por Row-Level Security, y CI/CD automatizado para `server/` (ver §1.10). |
-
-## 1.10 Validación de nivel de maestría (evidencia comparativa)
-
-*(Respuesta directa a la pregunta de la diapositiva 5, Sesión 1: "¿Qué diferencia a un proyecto de Maestría de uno de Pregrado?" — con evidencia buscada y verificada por texto completo, no solo afirmada.)*
-
-### 1.10.1 Sobre la UCB "San Pablo" — búsqueda exhaustiva, resultado honesto: no hay precedente propio
-
-Se buscó en el repositorio institucional (`repositorio.ucb.edu.bo`, DSpace), el repositorio histórico de tesis (`tesis.ucb.edu.bo`, por sede y carrera) y los sitios de postgrado de las tres sedes (La Paz, Santa Cruz, Cochabamba):
-
-- La **Maestría en Full Stack Development** (`lpz.ucb.edu.bo/maestria-en-full-stack/`) es un programa nuevo (publicado dic-2024, 100% online) — no tiene todavía cohortes graduadas ni tesis públicas.
-- El **repositorio de tesis de la UCB** (`tesis.ucb.edu.bo`) sí indexa trabajos de **Ingeniería de Sistemas**, pero son **tesis de licenciatura/pregrado** (ej. un "Proyecto de Grado" de 2008 sobre implementación de SharePoint, Unidad Académica Santa Cruz — verificado por extracción de texto completa), no de maestría.
-- El postgrado de la sede Cochabamba (`posgrado.cba.ucb.edu.bo`) lista una sola maestría activa ("Marketing digital & eBusiness"), sin relación con ingeniería de software.
-- **Maestrías para el Desarrollo (MpD)**, el postgrado histórico de la UCB desde 1994, está orientado a gestión/desarrollo económico y educación, no a ingeniería de software.
-
-**Conclusión honesta**: no existe, hoy, una tesis de maestría de la UCB en ingeniería de sistemas/software contra la cual comparar directamente este proyecto — el programa es demasiado nuevo. Esto **no es una debilidad que haya que ocultar**; es la razón por la que la validación se apoya en (a) el criterio explícito del propio módulo (diapositivas del profesor) y (b) comparables internacionales verificados, no en jurisprudencia local inexistente.
-
-### 1.10.2 Evidencia internacional verificada (texto completo revisado, no solo resumen de buscador)
-
-| Referencia | Universidad / Programa | Relación con MotoCore |
-|---|---|---|
-| Andriianenko, O. (2026). *"Design and evaluation of multi-tenant architectures in microservice based project management systems"*. `repository.utm.md/handle/5014/35481` | Universitatea Tehnică a Moldovei | **Dentro de la ventana de 5 años** — candidata directa para la Matriz de Extracción del Estado del Arte (§2). Diseña, implementa y **evalúa** shared-schema vs. database-per-tenant en un SaaS. |
-| Gomezcoello Yépez, A. (2017). *"Multitenencia Cloud: Una Revisión Sistemática de la literatura"* (TFM). `oa.upm.es/44935/` | **Universidad Politécnica de Madrid** — Escuela Técnica Superior de **Ingeniería de Sistemas Informáticos**, Máster Universitario en Ciencias y Tecnologías de la Computación | Fuera de la ventana de 5 años exigida para el Estado del Arte (2017) — **no** entra en la Matriz de Extracción de §2, pero es prueba verificada de que "arquitectura multi-tenant" es tema de tesis de maestría real en un programa de **Ingeniería de Sistemas** (no solo "Full Stack"), en una universidad de referencia. Su revisión sistemática identifica la **seguridad y privacidad de datos compartidos entre tenants** como un problema abierto de la literatura hasta 2016 — precisamente el problema que Row-Level Security (mecanismo central de MotoCore) aborda. Da pie a una línea narrativa defendible: *"el problema que Gomezcoello (2017) identificaba como abierto, este proyecto lo resuelve con RLS."* |
-
-*(Verificación: ambos documentos se descargaron y se extrajo su texto completo — título, autor, universidad, programa y resumen confirmados directamente, no inferidos de un snippet de búsqueda.)*
-
-### 1.10.3 Cómo queda MotoCore frente a ambos criterios
-
-| Exigencia (profesor / comparables verificados) | Estado en MotoCore |
-|---|---|
-| Arquitectura cloud/distribuida, no monolito local | Cumple — serverless en Vercel + Supabase (PostgreSQL gestionado) |
-| Seguridad desde el diseño | Cumple — Row-Level Security + verificación en API (defensa en profundidad) |
-| CI/CD automatizado | Cumple — pipeline agregado en `.github/workflows/ci.yml` (job `server`) |
-| Tema con precedente de maestría verificado (nacional o internacional) | Cumple internacionalmente (UPM 2017, UTM 2026); **no** hay precedente propio de la UCB — ver §1.10.1 |
-| Evaluación explícita de arquitecturas alternativas (como hace la tesis de UTM) | Incorporado como **objetivo específico 1** (§1.7): analizar base-por-inquilino, esquema-por-inquilino y esquema compartido con RLS. Se materializa en el Estado del Arte (§2) y en las decisiones de arquitectura registradas. |
-| Problema delimitado y medible, no "falta de software" | Cumple (§1.2-1.3) |
-
-### 1.10.4 Qué aporta la jerarquía empresa → sucursales
-
-La decisión de que una empresa pueda tener varias sucursales (registrada como ADR-006) eleva el nivel del trabajo en tres sentidos concretos:
-
-1. **De multi-tenancy plana a jerárquica.** Los comparables verificados (UTM 2026, UPM 2017) tratan la multi-tenancy como un único nivel: inquilino contra inquilino. Aquí hay dos niveles con reglas distintas, lo que obliga a responder una pregunta de diseño que esos trabajos no abordan: *¿dónde se pone el límite de aislamiento cuando existe una subdivisión interna?*
-
-2. **Una decisión de diseño no trivial y defendible.** Se optó por **un único límite de seguridad** (la empresa), tratando la sucursal como criterio de alcance operativo y no como segunda frontera. La alternativa —anidar el aislamiento también por sucursal— se consideró y se descartó porque impediría compartir clientes e historial entre locales de la misma empresa, que es el beneficio central de centralizar. Esa tensión entre *aislamiento* y *consolidación*, resuelta con argumentos y no por omisión, es exactamente el tipo de razonamiento arquitectónico que distingue un trabajo de maestría.
-
-3. **Alcance de datos diferenciado por tipo de entidad.** No todo el dato vive en el mismo nivel: clientes, motocicletas e historial son de empresa; órdenes de trabajo e inventario, de sucursal. Definir y justificar ese mapa —y sostenerlo con las políticas de seguridad correspondientes— es un aporte concreto de modelado, no solo de implementación.
+| ¿La propuesta integra conceptos avanzados (nube, integración continua, arquitecturas distribuidas, seguridad)? | Sí — despliegue serverless, base de datos gestionada en la nube, seguridad aplicada en el motor de base de datos e integración continua automatizada. |

@@ -1,8 +1,8 @@
 # Modelo de datos
 
-Diseño de datos de la arquitectura multi-tenant jerárquica. Corresponde al objetivo específico 2 ([tesis/01](tesis/01-definicion-y-alcance.md) §1.7).
+Diseño de datos de la arquitectura multi-tenant jerárquica. Corresponde al objetivo específico 2 ([anteproyecto/01](anteproyecto/01-definicion-y-alcance.md) §1.7).
 
-> Terminología: [glosario.md](glosario.md) · Decisión de fondo: [ADR-006](decisiones-arquitectura.md) · Aislamiento: [seguridad.md](seguridad.md)
+> Terminología: [Glosario](01-glosario.md) · Decisión de fondo: [ADR-006](07-decisiones-diseno.md) · Aislamiento: [Seguridad](06-seguridad.md)
 
 ## Diagrama entidad-relación
 
@@ -153,7 +153,7 @@ Todas las tablas de negocio activan Row-Level Security. Las políticas se apoyan
 | Escritura de datos de negocio | `is_org_member(organization_id)` + verificación de rol en la capa de aplicación |
 | Administración (sucursales, miembros) | `is_org_owner(organization_id)` |
 
-Las tablas de nivel sucursal usan **la misma condición sobre `organization_id`**: la pertenencia del `workshop_id` a la empresa activa se valida en la API, no en la política. Esta separación mantiene las políticas simples y auditables (ver [ADR-006](decisiones-arquitectura.md)).
+Las tablas de nivel sucursal usan **la misma condición sobre `organization_id`**: la pertenencia del `workshop_id` a la empresa activa se valida en la API, no en la política. Esta separación mantiene las políticas simples y auditables (ver [ADR-006](07-decisiones-diseno.md)).
 
 ## Reglas de negocio con impacto en los datos
 
@@ -165,14 +165,6 @@ Las tablas de nivel sucursal usan **la misma condición sobre `organization_id`*
 | Protección del propietario | No se puede cambiar el rol ni remover al `owner_id` de la empresa. |
 | Transferencia entre sucursales | Genera dos movimientos vinculados (salida en origen, entrada en destino), ambos en la misma transacción y dentro de la misma empresa. |
 
-## Estado de implementación
+## Evolución del esquema
 
-| Componente | Estado |
-|---|---|
-| `profiles`, `organizations`, `memberships` + RLS | Implementado |
-| `workshops`, `workshop_assignments` | **Diseñado, pendiente de implementar** (migración de ADR-006) |
-| `clients` | Pendiente |
-| `parts`, `part_movements` | Pendiente |
-| `audit_log` | Pendiente |
-
-La migración que introduce la jerarquía es la primera tarea técnica del cronograma ([plan-trabajo.md](plan-trabajo.md)).
+El esquema se construye mediante **migraciones versionadas** (RNF-304): cada cambio es un archivo aplicable de forma reproducible, lo que permite reconstruir la base desde cero y mantener alineados los entornos de desarrollo y despliegue. El orden de construcción sigue la dependencia entre entidades —identidad y jerarquía primero, entidades de negocio después— y se detalla en el cronograma ([08-plan-trabajo.md](08-plan-trabajo.md)).

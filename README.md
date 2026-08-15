@@ -50,7 +50,7 @@ Supabase (PostgreSQL + Auth + RLS + Storage)
 server/              NUEVO backend — Node/TS (Hono) + Supabase — ver server/README.md
 backend/             Backend .NET legacy (referencia) — ver backend/README.md
 frontend/            React 19 + Vite — ver frontend/README.md
-docs/                Documentación de producto + roadmap-competitivo.md (Bolivia)
+docs/                Documentación del proyecto de grado — empezar por docs/README.md
 .github/workflows/   Pipeline de CI (backend .NET / frontend)
 docker-compose.yml   Stack .NET legacy (Postgres + backend + frontend)
 CLAUDE.md            Guía de contexto técnico para trabajar el repo con Claude Code
@@ -79,7 +79,7 @@ CLAUDE.md            Guía de contexto técnico para trabajar el repo con Claude
 
 **Base multitenant nueva** (ya en `server/`): registro que crea cuenta + 1ª organización, gestión de organizaciones y miembros, aislamiento por RLS.
 
-**Roadmap priorizado para Bolivia** (ver [docs/roadmap-competitivo.md](docs/roadmap-competitivo.md)): presupuestos con aprobación del cliente, facturación y pagos online, **mensajería/presupuestos por WhatsApp**, **facturación electrónica del SIN**, agendamiento, inspección digital (DVI), portal del cliente.
+**Funcionalidades identificadas para el mercado boliviano** (ver [docs/09-analisis-mercado.md](docs/09-analisis-mercado.md)): facturación electrónica del SIN, mensajería por WhatsApp, presupuestos con aprobación del cliente, facturación y cobro en línea, agendamiento, inspección digital y portal del cliente.
 
 ## Seguridad
 
@@ -161,15 +161,19 @@ cd backend && dotnet test
 
 ## Documentación
 
-**[Índice completo de la documentación](docs/README.md)** — incluye el mapa de qué documento manda sobre cada tema.
+**[Índice y orden de lectura](docs/README.md)** — la documentación está numerada para leerse en secuencia.
 
-**Anteproyecto de maestría**
-- [Definición y alcance](docs/tesis/01-definicion-y-alcance.md) · [Antecedentes y estado del arte](docs/tesis/02-antecedentes-y-estado-del-arte.md)
+**Anteproyecto**
+- [1. Definición y alcance](docs/anteproyecto/01-definicion-y-alcance.md) · [2. Antecedentes y estado del arte](docs/anteproyecto/02-antecedentes-y-estado-del-arte.md)
 
-**Planificación e ingeniería**
-- [Requisitos (RF y RNF)](docs/requisitos.md) · [Historias de usuario](docs/historias-usuario.md) · [Plan de trabajo](docs/plan-trabajo.md)
-- [Modelo de datos](docs/modelo-datos.md) · [Arquitectura](docs/arquitectura.md) · [Decisiones de arquitectura (ADR)](docs/decisiones-arquitectura.md)
-- [Seguridad y roles](docs/seguridad.md) · [Glosario](docs/glosario.md) · [Análisis competitivo (Bolivia)](docs/roadmap-competitivo.md)
+**Especificación**
+- [1. Glosario](docs/01-glosario.md) · [2. Requisitos](docs/02-requisitos.md) · [3. Historias de usuario](docs/03-historias-usuario.md)
+
+**Diseño**
+- [4. Arquitectura](docs/04-arquitectura.md) · [5. Modelo de datos](docs/05-modelo-datos.md) · [6. Seguridad](docs/06-seguridad.md) · [7. Decisiones de diseño](docs/07-decisiones-diseno.md)
+
+**Ejecución y contexto**
+- [8. Plan de trabajo](docs/08-plan-trabajo.md) · [9. Análisis del mercado](docs/09-analisis-mercado.md)
 
 **Repositorio**
 - [Guía técnica para Claude Code](CLAUDE.md)

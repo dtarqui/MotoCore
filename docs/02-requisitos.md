@@ -1,8 +1,8 @@
 # Requisitos
 
-Requisitos funcionales (RF) y no funcionales (RNF) del proyecto. Cada requisito tiene identificador estable, prioridad, criterio de verificación y trazabilidad al objetivo específico que lo sustenta ([tesis/01-definicion-y-alcance.md](tesis/01-definicion-y-alcance.md) §1.7).
+Requisitos funcionales (RF) y no funcionales (RNF) del proyecto. Cada requisito tiene identificador estable, prioridad, criterio de verificación y trazabilidad al objetivo específico que lo sustenta ([anteproyecto/01-definicion-y-alcance.md](anteproyecto/01-definicion-y-alcance.md) §1.7).
 
-> Terminología: [glosario.md](glosario.md) · Modelo de datos: [modelo-datos.md](modelo-datos.md) · Historias de usuario: [historias-usuario.md](historias-usuario.md)
+> Terminología: [Glosario](01-glosario.md) · Modelo de datos: [Modelo de datos](05-modelo-datos.md) · Historias de usuario: [Historias de usuario](03-historias-usuario.md)
 
 ## Convenciones
 
@@ -87,7 +87,7 @@ Requisitos funcionales (RF) y no funcionales (RNF) del proyecto. Cada requisito 
 
 ### RF-800 · Fuera del alcance del proyecto de grado
 
-Documentados para dar contexto al diseño; su implementación es trabajo posterior (ver [roadmap-competitivo.md](roadmap-competitivo.md)).
+Documentados para dar contexto al diseño; su implementación es trabajo posterior (ver [Análisis del mercado](09-analisis-mercado.md)).
 
 | ID | Requisito | Prioridad | Alcance |
 |---|---|---|---|
@@ -155,7 +155,7 @@ Cada RNF define un **criterio verificable**: si no se puede comprobar, no es un 
 
 ## 3. Trazabilidad requisito → objetivo
 
-| # | Objetivo específico ([§1.7](tesis/01-definicion-y-alcance.md)) | Requisitos que lo materializan |
+| # | Objetivo específico ([§1.7](anteproyecto/01-definicion-y-alcance.md)) | Requisitos que lo materializan |
 |---|---|---|
 | 1 | **Analizar** estrategias de aislamiento multi-tenant | — (fundamenta RNF-101 y RNF-102) |
 | 2 | **Comparar** soluciones con presencia en Bolivia | — (fundamenta el alcance funcional y los RF-800) |

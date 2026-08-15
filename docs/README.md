@@ -1,61 +1,91 @@
-# Documentación — Proyecto de grado de maestría
+# Documentación del proyecto de grado
 
-**MotoCore** · Arquitectura multi-tenant jerárquica con aislamiento a nivel de base de datos, para la gestión de empresas de servicio de motocicletas en Bolivia.
+**Arquitectura multi-tenant jerárquica con aislamiento a nivel de base de datos, para la gestión centralizada de empresas de servicio de motocicletas en Bolivia.**
 
-Maestría en Full Stack Development · Universidad Católica Boliviana "San Pablo" · Septiembre – Diciembre 2026
+Maestría en Full Stack Development · Universidad Católica Boliviana "San Pablo" · Septiembre – diciembre de 2026
 
 ---
 
-## Documento del anteproyecto
+## Orden de lectura
 
-Avanza **sesión por sesión** junto al Seminario de Maestría (material fuente en [diapositivas/](diapositivas/)). No se escriben capítulos que el seminario aún no cubrió.
+La documentación está numerada para leerse en secuencia: cada documento asume lo establecido en los anteriores.
 
-| # | Capítulo | Estado |
+### Punto de partida — el anteproyecto
+
+| # | Documento | Qué establece |
 |---|---|---|
-| 1 | [Definición y Alcance](tesis/01-definicion-y-alcance.md) | Borrador completo |
-| 2 | [Antecedentes y Estado del Arte](tesis/02-antecedentes-y-estado-del-arte.md) | Estructura lista, contenido pendiente de búsqueda académica |
+| 1 | [Definición y alcance](anteproyecto/01-definicion-y-alcance.md) | Tema, problema, preguntas, objetivos y fronteras del proyecto |
+| 2 | [Antecedentes y estado del arte](anteproyecto/02-antecedentes-y-estado-del-arte.md) | Contexto del sector, literatura revisada y vacío de investigación |
 
-Ver [tesis/README.md](tesis/README.md) para las reglas del seminario que rigen estos capítulos.
+### Especificación — qué debe hacer el sistema
 
-## Planificación e ingeniería
+| # | Documento | Qué establece |
+|---|---|---|
+| 1 | [Glosario](01-glosario.md) | Terminología del dominio y de la arquitectura. **Leer antes que el resto** |
+| 2 | [Requisitos](02-requisitos.md) | Requisitos funcionales y no funcionales, con criterios de verificación |
+| 3 | [Historias de usuario](03-historias-usuario.md) | Los requisitos desde la perspectiva de quien usa el sistema |
 
-Artefactos que sustentan el desarrollo y alimentan los capítulos posteriores del documento.
+### Diseño — cómo se resuelve
 
-| Documento | Contenido |
-|---|---|
-| [requisitos.md](requisitos.md) | Requisitos funcionales y no funcionales, con criterios de verificación y trazabilidad a los objetivos |
-| [historias-usuario.md](historias-usuario.md) | 22 historias en 6 épicas, con criterios de aceptación y estimación |
-| [plan-trabajo.md](plan-trabajo.md) | Metodología, cronograma por iteraciones, hitos, riesgos y recursos |
-| [modelo-datos.md](modelo-datos.md) | Diagrama entidad-relación, tablas, restricciones y políticas de aislamiento |
-| [arquitectura.md](arquitectura.md) | Stack, capas, despliegue y modelo jerárquico |
-| [decisiones-arquitectura.md](decisiones-arquitectura.md) | Registro de decisiones (ADR) con alternativas y consecuencias |
-| [seguridad.md](seguridad.md) | Autenticación, roles y aislamiento en dos capas |
-| [glosario.md](glosario.md) | Terminología unificada |
-| [roadmap-competitivo.md](roadmap-competitivo.md) | Análisis de soluciones existentes en Bolivia (insumo del estado del arte) |
+| # | Documento | Qué establece |
+|---|---|---|
+| 4 | [Arquitectura](04-arquitectura.md) | Estructura general, capas, tecnologías y modelo jerárquico |
+| 5 | [Modelo de datos](05-modelo-datos.md) | Entidades, relaciones, restricciones y políticas de aislamiento |
+| 6 | [Seguridad](06-seguridad.md) | Autenticación, control de acceso y aislamiento en dos capas |
+| 7 | [Decisiones de diseño](07-decisiones-diseno.md) | Por qué se eligió cada opción, con las alternativas evaluadas |
+
+### Ejecución y contexto
+
+| # | Documento | Qué establece |
+|---|---|---|
+| 8 | [Plan de trabajo](08-plan-trabajo.md) | Metodología, cronograma por iteraciones, hitos y riesgos |
+| 9 | [Análisis del mercado](09-analisis-mercado.md) | Soluciones existentes en Bolivia y funcionalidades desatendidas |
+
+---
+
+## Cómo se relacionan
+
+```
+Anteproyecto  ──>  define el problema y los objetivos
+      │
+      v
+Glosario      ──>  fija el lenguaje
+      │
+      v
+Requisitos    ──>  traducen los objetivos en condiciones verificables
+      │
+      ├──> Historias de usuario   (los mismos requisitos, en lenguaje de uso)
+      │
+      v
+Diseño        ──>  arquitectura, datos y seguridad resuelven los requisitos
+      │
+      ├──> Decisiones de diseño   (registran por qué se resolvió así)
+      │
+      v
+Plan de trabajo ──> ordena la construcción en el tiempo
+```
 
 ## Fuente de verdad por tema
 
-Antes de escribir sobre un tema, verifica quién es su dueño. Si ya tiene dueño, **enlaza** en lugar de duplicar.
+Antes de escribir sobre un tema, verificar quién es su responsable. Si ya lo tiene, **enlazar** en lugar de duplicar.
 
 | Tema | Documento responsable |
 |---|---|
-| Terminología | [glosario.md](glosario.md) |
-| Objetivos, alcance y exclusiones | [tesis/01-definicion-y-alcance.md](tesis/01-definicion-y-alcance.md) |
-| Qué debe hacer el sistema | [requisitos.md](requisitos.md) |
-| Cómo lo vive el usuario | [historias-usuario.md](historias-usuario.md) |
-| Cuándo se hace cada cosa | [plan-trabajo.md](plan-trabajo.md) |
-| Estructura de datos y restricciones | [modelo-datos.md](modelo-datos.md) |
-| Cómo está construido | [arquitectura.md](arquitectura.md) |
-| Por qué se construyó así | [decisiones-arquitectura.md](decisiones-arquitectura.md) |
-| Aislamiento y control de acceso | [seguridad.md](seguridad.md) |
-| Prioridades de producto y mercado | [roadmap-competitivo.md](roadmap-competitivo.md) |
-| Estado técnico del repositorio | [../CLAUDE.md](../CLAUDE.md) |
-| Instalación y ejecución | [../README.md](../README.md) |
+| Terminología | [01-glosario.md](01-glosario.md) |
+| Objetivos, alcance y exclusiones | [anteproyecto/01-definicion-y-alcance.md](anteproyecto/01-definicion-y-alcance.md) |
+| Qué debe hacer el sistema | [02-requisitos.md](02-requisitos.md) |
+| Cómo lo vive quien lo usa | [03-historias-usuario.md](03-historias-usuario.md) |
+| Cómo está estructurado | [04-arquitectura.md](04-arquitectura.md) |
+| Entidades y restricciones | [05-modelo-datos.md](05-modelo-datos.md) |
+| Aislamiento y control de acceso | [06-seguridad.md](06-seguridad.md) |
+| Por qué se diseñó así | [07-decisiones-diseno.md](07-decisiones-diseno.md) |
+| Cuándo se hace cada cosa | [08-plan-trabajo.md](08-plan-trabajo.md) |
+| Contexto de mercado | [09-analisis-mercado.md](09-analisis-mercado.md) |
 
-## Contexto que rige toda la documentación
+## Premisas que rigen toda la documentación
 
 - **Mercado objetivo**: Bolivia.
-- **Modelo jerárquico**: una cuenta administra varias **empresas**; cada empresa tiene varias **sucursales**. La empresa es la unidad de aislamiento; la sucursal, una subdivisión operativa.
-- **Corte vertical del proyecto**: se implementan Clientes (nivel empresa) e Inventario (nivel sucursal) como demostración del modelo. El resto de módulos está fuera de alcance.
-- **Backend en migración**: `server/` (Node/TS + Supabase) reemplaza a `backend/` (.NET, referencia funcional).
-- Ante una contradicción entre documentos, gana el dueño del tema según la tabla anterior — y se corrige el otro.
+- **Modelo jerárquico**: una cuenta administra varias **empresas**; cada empresa opera varias **sucursales**. La empresa es la unidad de aislamiento; la sucursal, una subdivisión operativa.
+- **Aislamiento en dos capas**: políticas en el motor de base de datos, más verificación en la capa de aplicación.
+- **Alcance acotado**: se especifica el sistema completo, pero se construye y valida el corte vertical que demuestra el modelo jerárquico. Lo excluido está declarado de forma explícita.
+- **La documentación precede a la construcción**: define el sistema a construir; no describe un estado de avance.

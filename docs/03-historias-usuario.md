@@ -1,6 +1,6 @@
 # Historias de usuario
 
-Historias organizadas por épica, con criterios de aceptación verificables y trazabilidad a los requisitos ([requisitos.md](requisitos.md)).
+Historias organizadas por épica, con criterios de aceptación verificables y trazabilidad a los requisitos ([Requisitos](02-requisitos.md)).
 
 > Solo se detallan las historias **dentro del alcance** del proyecto de grado. Las funcionalidades excluidas (§1.8.3) están en `requisitos.md` como RF-800.
 
@@ -12,7 +12,7 @@ Historias organizadas por épica, con criterios de aceptación verificables y tr
 | **Recepcionista** (`Receptionist`) | Atiende al cliente: lo registra y consulta su información. |
 | **Mecánico** (`Mechanic`) | Trabajo técnico; consulta clientes e inventario de su sucursal. |
 
-Los roles se nombran en inglés en el sistema (ver [glosario.md](glosario.md)); aquí se usa la traducción para legibilidad de la narrativa.
+Los roles se nombran en inglés en el sistema (ver [Glosario](01-glosario.md)); aquí se usa la traducción para legibilidad de la narrativa.
 
 ## Estimación
 
@@ -330,4 +330,4 @@ Escala de puntos de historia (Fibonacci): `1` trivial · `2` sencilla · `3` mod
 | 6 · Aislamiento y trazabilidad | HU-21, HU-22 | 11 |
 | **Total** | **22 historias** | **76 puntos** |
 
-La distribución por fases y el cronograma están en [plan-trabajo.md](plan-trabajo.md).
+La distribución por fases y el cronograma están en [Plan de trabajo](08-plan-trabajo.md).

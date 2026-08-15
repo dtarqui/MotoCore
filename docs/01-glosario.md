@@ -39,7 +39,7 @@ Cuenta (auth.users)
 
 ## Roles
 
-Se escriben **en inglés** en código, interfaz y documentación — no traducirlos (ver [convenciones en CLAUDE.md](../CLAUDE.md)).
+Los identificadores de rol se mantienen **en inglés** en el modelo de datos y en la interfaz de programación; en la documentación y en el texto visible al usuario se emplea su equivalente en español.
 
 | Rol | Alcance |
 |---|---|
@@ -68,10 +68,12 @@ El rol es **por organización**, no global: la misma cuenta puede ser Owner en u
 | **CUF** | Código Único de Facturación, se genera por cada factura emitida. |
 | **RND** | Resolución Normativa de Directorio — la normativa del SIN. Cambia con el tiempo: **verificar la vigente antes de implementar**. |
 
-## Términos obsoletos (no usar)
+## Precisiones de uso
 
-| Término obsoleto | Reemplazo | Por qué |
+Términos que conviene emplear con exactitud para no confundir los dos niveles de la jerarquía:
+
+| En lugar de | Usar | Motivo |
 |---|---|---|
-| **`workshop_id` como unidad de aislamiento** | `organization_id` | En el backend .NET legacy el tenant era el taller. Ahora el tenant es la organización, y `workshop` pasó a significar **sucursal** (una organización tiene varias). Atención: el término "workshop" **sigue vigente**, pero con otro significado. |
-| "Cada Owner administra **su** taller" | "Una cuenta puede administrar **varias** organizaciones, cada una con **varios** talleres" | Describe el modelo anterior de un solo tenant por usuario. |
-| "Multi-taller" | "**Multiempresa**" (varias organizaciones por cuenta) o "**multi-sucursal**" (varios talleres por organización) | Ambiguo: confundía dos niveles distintos de la jerarquía. Usar el término preciso según el nivel. |
+| "Multi-taller" | **"Multiempresa"** (varias empresas por cuenta) o **"multi-sucursal"** (varias sucursales por empresa) | Es ambiguo: confunde dos niveles distintos. Emplear el término correspondiente al nivel del que se habla. |
+| "Taller" como sinónimo de la unidad de aislamiento | **"Empresa"** u **"organización"** | La unidad de aislamiento es la empresa; el taller es una sucursal dentro de ella. |
+| "Usuario de la empresa" | **"Miembro"** | El acceso lo otorga la membresía, no la mera existencia de la cuenta. |

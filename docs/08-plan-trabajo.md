@@ -2,7 +2,7 @@
 
 Metodología, cronograma, hitos y gestión de riesgos del proyecto de grado. Período: **septiembre a diciembre de 2026**.
 
-> Objetivos y alcance: [tesis/01-definicion-y-alcance.md](tesis/01-definicion-y-alcance.md) · Requisitos: [requisitos.md](requisitos.md) · Historias: [historias-usuario.md](historias-usuario.md)
+> Objetivos y alcance: [anteproyecto/01-definicion-y-alcance.md](anteproyecto/01-definicion-y-alcance.md) · Requisitos: [Requisitos](02-requisitos.md) · Historias: [Historias de usuario](03-historias-usuario.md)
 
 ## 1. Metodología
 
@@ -22,26 +22,26 @@ Prácticas adoptadas:
 
 ## 2. Fases y cronograma
 
-Cuatro fases alineadas con los cuatro objetivos específicos.
+Cuatro fases que agrupan los ocho objetivos específicos.
 
-| Fase | Período | Objetivo específico | Resultado |
+| Fase | Período | Objetivos | Resultado |
 |---|---|---|---|
-| **F1 · Análisis** | Septiembre (sem. 1–2) | 1. Analizar | Estado del arte con matriz de extracción y vacío de investigación |
-| **F2 · Diseño** | Septiembre (sem. 3–4) | 2. Diseñar | Modelo de datos jerárquico, políticas de aislamiento y ADR |
-| **F3 · Implementación** | Octubre – Noviembre | 3. Implementar | Arquitectura funcional con el corte vertical y CI operativo |
-| **F4 · Validación y cierre** | Diciembre | 4. Validar | Evidencia de aislamiento, documento final y defensa |
+| **F1 · Análisis** | Septiembre (sem. 1–2) | 1 y 2 | Estado del arte con matriz de extracción, análisis del mercado y vacío de investigación |
+| **F2 · Diseño** | Septiembre (sem. 3–4) | 3 y 4 | Modelo de datos jerárquico, políticas de aislamiento y decisiones registradas |
+| **F3 · Construcción** | Octubre – noviembre | 5, 6 y 7 | Sistema funcional con el corte vertical e integración continua operativa |
+| **F4 · Validación y cierre** | Diciembre | 8 | Evidencia de aislamiento, documento final y defensa |
 
 ### Detalle por iteración
 
 | Iteración | Fechas | Contenido | Entregable |
 |---|---|---|---|
-| **I1** | 1–14 sep | Búsqueda en bases académicas; criterios de inclusión y exclusión; lectura de fuentes | Matriz de extracción con 3–5 fuentes revisadas por pares |
-| **I2** | 15–28 sep | Comparación de estrategias de aislamiento; diseño del modelo jerárquico y las políticas | Vacío de investigación redactado · Modelo de datos y ADR-006 cerrados |
-| **I3** | 29 sep – 12 oct | Migración de esquema: sucursales, asignaciones y políticas; contexto de sucursal activa | HU-06, HU-07, HU-08 · Esquema jerárquico operativo |
-| **I4** | 13–26 oct | Ajuste de cuentas, empresas y miembros al modelo jerárquico | HU-01 a HU-05, HU-09 a HU-12 |
-| **I5** | 27 oct – 9 nov | Módulo Clientes (nivel empresa) | HU-13, HU-14, HU-15 |
-| **I6** | 10–23 nov | Módulo Inventario y movimientos (nivel sucursal) | HU-16 a HU-19 (HU-20 si hay margen) |
-| **I7** | 24 nov – 7 dic | Integración del frontend: autenticación, selectores de empresa y sucursal | Aplicación utilizable de extremo a extremo |
+| **I1** | 1–14 sep | Búsqueda en bases académicas; aplicación de criterios de inclusión y exclusión; lectura de fuentes | Matriz de extracción con fuentes revisadas por pares |
+| **I2** | 15–28 sep | Análisis del mercado; comparación de estrategias de aislamiento; diseño del modelo jerárquico y de las políticas | Vacío de investigación redactado · Modelo de datos y decisiones de diseño cerrados |
+| **I3** | 29 sep – 12 oct | Construcción del esquema: identidad, empresas, sucursales, membresías y políticas de aislamiento; selección de contexto activo | HU-06, HU-07, HU-08 · Esquema jerárquico operativo |
+| **I4** | 13–26 oct | Cuentas, registro, gestión de empresas y de miembros con control de acceso por rol | HU-01 a HU-05, HU-09 a HU-12 |
+| **I5** | 27 oct – 9 nov | Módulo de clientes — entidad de nivel empresa | HU-13, HU-14, HU-15 |
+| **I6** | 10–23 nov | Módulo de inventario y movimientos de existencias — entidad de nivel sucursal | HU-16 a HU-19 (HU-20 si hay margen) |
+| **I7** | 24 nov – 7 dic | Interfaz de usuario: autenticación y selección de empresa y sucursal | Aplicación utilizable de extremo a extremo |
 | **I8** | 8–21 dic | Pruebas de aislamiento, redacción final y preparación de la defensa | HU-21, HU-22 · Documento final |
 
 *Reserva: del 22 al 31 de diciembre queda como margen para correcciones posteriores a la revisión del asesor.*
@@ -71,7 +71,7 @@ Probabilidad e impacto en escala baja / media / alta. Ordenados por exposición.
 
 | ID | Riesgo | Prob. | Impacto | Mitigación | Plan de contingencia |
 |---|---|---|---|---|---|
-| **R1** | La migración a la jerarquía rompe el aislamiento ya validado | Media | **Alto** | Escribir las pruebas de aislamiento **antes** de migrar, y ejecutarlas después de cada cambio de esquema | Revertir la migración; el esquema plano sigue siendo funcional |
+| **R1** | Las políticas de aislamiento resultan incorrectas o incompletas y permiten acceso cruzado entre empresas | Media | **Alto** | Escribir las pruebas de aislamiento **antes** que la funcionalidad, y ejecutarlas tras cada cambio de esquema o de política | Bloquear el avance hasta corregir; el aislamiento es requisito crítico y no admite deuda |
 | **R2** | El alcance crece más allá de lo planificado (querer implementar más módulos) | **Alta** | Medio | Exclusiones cerradas y explícitas en §1.8.3; el corte vertical está definido | Congelar alcance en H3; lo demás pasa a trabajo futuro |
 | **R3** | Dependencia de un proveedor externo (Supabase/Vercel): cambios de API, límites de plan gratuito o indisponibilidad | Media | Medio | Aislar el acceso al proveedor tras una capa propia; no usar funciones exclusivas innecesarias | Ejecutar PostgreSQL local para desarrollo y pruebas; el aislamiento por RLS no depende del proveedor |
 | **R4** | Las políticas de aislamiento resultan más complejas de lo previsto al añadir el segundo nivel | Media | Medio | Decisión de ADR-006: un solo criterio de aislamiento (`organization_id`) en todas las tablas | Mantener el nivel sucursal solo en la capa de aplicación si RLS se vuelve inmanejable |
@@ -91,8 +91,6 @@ Probabilidad e impacto en escala baja / media / alta. Ordenados por exposición.
 
 El costo de infraestructura es cero dentro del alcance del proyecto: los planes gratuitos cubren un entorno de desarrollo y demostración. Esto es coherente con RNF-302 (costo proporcional al uso).
 
-## 6. Antecedente del proyecto
+## 6. Criterio de cierre
 
-Antes del período de este proyecto de grado existió una **etapa previa**: un MVP con backend en ASP.NET Core y arquitectura de un solo taller por cuenta, con frontend en React conectado a la API. Esa etapa evidenció tres limitaciones que motivan el trabajo actual: no soportaba el modelo multiempresa, el aislamiento vivía solo en el código de aplicación, y su runtime no era desplegable en la plataforma serverless elegida.
-
-Ese trabajo se conserva como referencia funcional en el repositorio y como antecedente institucional del proyecto (ver [tesis/02-antecedentes-y-estado-del-arte.md](tesis/02-antecedentes-y-estado-del-arte.md)).
+El proyecto se considera concluido cuando los ocho objetivos específicos cuentan con su entregable verificable —según la tabla de trazabilidad de [anteproyecto/01-definicion-y-alcance.md](anteproyecto/01-definicion-y-alcance.md) §1.7— y la suite de pruebas de aislamiento se ejecuta en verde de forma reproducible. Las funcionalidades excluidas del alcance (§1.8.3) no condicionan ese cierre.

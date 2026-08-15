@@ -4,11 +4,31 @@ Guía de contexto para Claude Code al trabajar en este repositorio.
 
 ## Qué es MotoCore
 
-SaaS multi-tenant para gestión de talleres de motocicletas, evolucionando a un modelo **ERP multiempresa**: una cuenta administra **varias organizaciones/empresas** (estilo QuickBooks/Zoho), con datos aislados por organización. **Mercado objetivo por ahora: Bolivia.** Ver [README.md](README.md), `docs/*.md` y sobre todo [docs/roadmap-competitivo.md](docs/roadmap-competitivo.md) para el contexto de producto y el roadmap.
+SaaS multiempresa para gestión de talleres de motocicletas: una cuenta administra **varias empresas**, y cada empresa **varias sucursales**, con datos aislados por empresa. **Mercado objetivo: Bolivia.**
 
-El proyecto también es el **Anteproyecto de un Seminario de Maestría** (Full Stack Development), documentado en [docs/tesis/](docs/tesis/README.md) **estrictamente alineado sesión por sesión** con las diapositivas del curso en `docs/diapositivas/*.pptx`. Regla dura: **solo se escribe contenido hasta donde el seminario ya cubrió** — no adelantar capítulos de sesiones futuras, y borrar/rehacer si una sesión nueva cambia el formato exigido. El Estado del Arte debe usar únicamente fuentes revisadas por pares (Google Scholar, IEEE, ACM, Scopus, OATD, BASE) — nunca blogs/Medium/YouTube/Wikipedia. Si el usuario trae una nueva sesión (nuevo `.pptx` en `docs/diapositivas/`), léela primero con la misma técnica que se usó para las anteriores (extraer texto del `.pptx` vía `python3` + `zipfile`, ya que el `.pptx` es binario) antes de escribir nada.
+Es, además, el **proyecto de grado de una Maestría en Full Stack Development** (sep–dic 2026).
 
-## Estado actual: PIVOTE de backend en curso (leer primero)
+## Regla de oro: la documentación manda sobre el código
+
+**`docs/` define el sistema a construir; el código se amolda a esa definición, nunca al revés.** Antes de escribir o modificar código, leer [docs/README.md](docs/README.md) (índice y orden de lectura) y verificar qué establecen los requisitos, el modelo de datos y las decisiones de diseño. Si el código y la documentación difieren, **la documentación es la referencia** y el código es lo que hay que corregir — salvo que el usuario decida explícitamente cambiar la documentación.
+
+Documentos que gobiernan el trabajo técnico:
+
+| Necesitas saber | Documento |
+|---|---|
+| Terminología (empresa, sucursal, membresía) | [docs/01-glosario.md](docs/01-glosario.md) |
+| Qué debe hacer el sistema | [docs/02-requisitos.md](docs/02-requisitos.md) |
+| Entidades, claves y políticas | [docs/05-modelo-datos.md](docs/05-modelo-datos.md) |
+| Por qué está diseñado así | [docs/07-decisiones-diseno.md](docs/07-decisiones-diseno.md) |
+| Qué construir y en qué orden | [docs/08-plan-trabajo.md](docs/08-plan-trabajo.md) |
+
+## Anteproyecto académico
+
+En [docs/anteproyecto/](docs/anteproyecto/README.md), **alineado sesión por sesión** con las diapositivas del seminario en `docs/diapositivas/*.pptx`. Reglas duras: **solo se escribe hasta donde el seminario ya cubrió** — no adelantar capítulos de sesiones futuras, y rehacer si una sesión nueva cambia el formato exigido. El Estado del Arte usa únicamente fuentes revisadas por pares (Google Scholar, IEEE, ACM, Scopus, OATD, BASE) — nunca blogs/Medium/YouTube/Wikipedia, y **nunca citas sin verificar** contra el documento original. Si el usuario trae una sesión nueva (`.pptx` en `docs/diapositivas/`), léela primero extrayendo el texto vía `python3` + `zipfile` (el `.pptx` es binario) antes de escribir nada.
+
+## Estado del código (no confundir con el diseño documentado)
+
+Lo que sigue describe **lo que hay hoy en el repositorio**, que va por detrás de la documentación de diseño.
 
 El backend se está reescribiendo de **.NET → Node/TypeScript + Supabase** para desplegar en **Vercel** (Vercel no ejecuta .NET). Conviven **dos backends** en el repo:
 
@@ -27,8 +47,8 @@ El backend se está reescribiendo de **.NET → Node/TypeScript + Supabase** par
 server/     NUEVO backend — Node/TS (Hono) + Supabase. Objetivo de la reescritura.
 backend/    Backend .NET (legacy, referencia). Se elimina cuando server/ lo reemplace.
 frontend/   React 19 + TypeScript + Vite (hoy contra el backend .NET).
-docs/       Documentación. Empieza por docs/README.md (índice + qué doc manda sobre cada tema)
-            y docs/glosario.md (terminología: organización vs. taller vs. tenant).
+docs/       Documentación del proyecto de grado — define el sistema a construir.
+            Empieza por docs/README.md (índice y orden de lectura).
 docker-compose.yml   Stack .NET legacy (Postgres + backend + frontend).
 .github/workflows/   CI del backend .NET / frontend.
 ```
@@ -65,7 +85,7 @@ npm test           # unit + HTTP; la integración corre solo con credenciales de
 
 ## Modelo multitenancy jerárquico (el cambio conceptual central)
 
-Dos niveles, **un solo límite de seguridad**. Detalle en [docs/modelo-datos.md](docs/modelo-datos.md) y [docs/glosario.md](docs/glosario.md).
+Dos niveles, **un solo límite de seguridad**. Detalle en [docs/05-modelo-datos.md](docs/05-modelo-datos.md) y [docs/01-glosario.md](docs/01-glosario.md).
 
 - `auth.users` (Supabase) = identidad global; `profiles` = datos de perfil 1:1.
 - `organizations` = **empresa**, la unidad de aislamiento (tenant). **Una cuenta puede crear y pertenecer a varias.**
@@ -99,11 +119,11 @@ npm run lint
 
 - **WhatsApp Business API**: presupuestos (con link de aprobación), estado de la orden y recordatorios. Canal por defecto en Bolivia.
 - **Facturación electrónica del SIN**: emitir la factura de la orden como factura en línea del SIN (XML con **CUF/CUFD**, **CUIS**, **firma digital**, RND Nº 102100000011; modalidades En Línea / Computarizada / Portal Web). Es requisito de cumplimiento. **Validar la normativa vigente del SIN antes de implementar** (las RND y los plazos cambian; el plazo de adecuación estaba extendido hasta sep-2026).
-- Prioridades completas y comparativa con software del mismo objetivo usado en Bolivia (AutoSoft Taller, ServitechApp, TuneraTaller, Appli-Car) en [docs/roadmap-competitivo.md](docs/roadmap-competitivo.md).
+- Relevamiento de las soluciones existentes en Bolivia y funcionalidades identificadas: [docs/09-analisis-mercado.md](docs/09-analisis-mercado.md).
 
 ## Convenciones al proponer cambios
 
-- **Antes de escribir documentación**, revisa [docs/README.md](docs/README.md): cada tema tiene un documento dueño. Enlaza en vez de duplicar, y usa la terminología de [docs/glosario.md](docs/glosario.md). Ojo: **organización = empresa = tenant** (unidad de aislamiento) y **taller/workshop = sucursal** dentro de una empresa — el significado de "workshop" cambió respecto al modelo .NET, donde era el tenant.
+- **Antes de escribir documentación**, revisa [docs/README.md](docs/README.md): cada tema tiene un documento dueño. Enlaza en vez de duplicar, y usa la terminología de [docs/01-glosario.md](docs/01-glosario.md). Ojo: **empresa/organización = tenant** (unidad de aislamiento) y **sucursal/workshop = local** dentro de una empresa — en el código .NET legacy "workshop" era el tenant, hoy significa sucursal.
 - **El trabajo nuevo de backend va en `server/`** (Node/Supabase), no en `backend/` (.NET legacy), salvo que el usuario lo pida explícitamente.
 - Roles en inglés (`Owner`/`Mechanic`/`Receptionist`); copy de UI y docs en español — mantén esa mezcla, no traduzcas los roles ni anglicices el copy visible.
 - Antes de crear un módulo/feature nuevo, revisa cómo está resuelto un módulo análogo (en `server/` el patrón es `organizations.ts`; la lógica de negocio de referencia está en los `Services/` del .NET) y replícalo.
