@@ -4,6 +4,7 @@ import { requireAuth } from '../lib/auth.js';
 import { requireMembership, requireOwner, getMembership } from '../lib/memberships.js';
 import { assertWorkshopInOrg } from '../lib/workshop-context.js';
 import { badRequest, conflict, notFound } from '../lib/errors.js';
+import { recordAudit } from '../lib/audit.js';
 import { createWorkshopSchema, updateWorkshopSchema, assignMemberSchema } from '../schemas.js';
 import type { AppBindings, Workshop } from '../types.js';
 
@@ -129,6 +130,15 @@ workshopRoutes.patch('/:workshopId/deactivate', async (c) => {
 
   if (error) throw badRequest('workshop.update_failed', error.message);
   if (!data) throw notFound('workshop.not_found', 'Sucursal no encontrada.');
+
+  await recordAudit({
+    organizationId: orgId,
+    workshopId,
+    performedBy: c.get('userId'),
+    action: 'workshop.deactivated',
+    entity: 'workshop',
+    entityId: workshopId,
+  });
 
   return c.json({ workshop: data });
 });

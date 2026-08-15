@@ -3,6 +3,7 @@ import { serviceClient } from '../lib/supabase.js';
 import { requireAuth } from '../lib/auth.js';
 import { requireMembership, requireOwner, getMembership } from '../lib/memberships.js';
 import { badRequest, conflict, notFound } from '../lib/errors.js';
+import { recordAudit } from '../lib/audit.js';
 import {
   createOrganizationSchema,
   updateOrganizationSchema,
@@ -189,6 +190,15 @@ organizationRoutes.post('/:orgId/members/invite', async (c) => {
     .insert({ organization_id: orgId, user_id: targetUserId as string, role: input.role });
   if (error) throw badRequest('membership.create_failed', error.message);
 
+  await recordAudit({
+    organizationId: orgId,
+    performedBy: c.get('userId'),
+    action: 'member.invited',
+    entity: 'membership',
+    entityId: targetUserId as string,
+    details: { role: input.role },
+  });
+
   return c.json({ userId: targetUserId, role: input.role }, 201);
 });
 
@@ -215,6 +225,15 @@ organizationRoutes.patch('/:orgId/members/:userId/role', async (c) => {
     .eq('user_id', targetUserId);
   if (error) throw badRequest('membership.update_failed', error.message);
 
+  await recordAudit({
+    organizationId: orgId,
+    performedBy: c.get('userId'),
+    action: 'member.role_changed',
+    entity: 'membership',
+    entityId: targetUserId,
+    details: { from: target.role, to: input.role },
+  });
+
   return c.json({ userId: targetUserId, role: input.role });
 });
 
@@ -239,6 +258,15 @@ organizationRoutes.delete('/:orgId/members/:userId', async (c) => {
     .eq('organization_id', orgId)
     .eq('user_id', targetUserId);
   if (error) throw badRequest('membership.delete_failed', error.message);
+
+  await recordAudit({
+    organizationId: orgId,
+    performedBy: c.get('userId'),
+    action: 'member.removed',
+    entity: 'membership',
+    entityId: targetUserId,
+    details: { role: target.role },
+  });
 
   return c.body(null, 204);
 });

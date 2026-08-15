@@ -58,11 +58,11 @@ docker-compose.yml   Stack .NET legacy (Postgres + backend + frontend).
 
 Node/TS + Hono sobre Supabase. Estructura:
 
-- `supabase/migrations/0001_init_multitenancy.sql` — esquema + **RLS**: `profiles`, `organizations`, `memberships`, funciones helper (`is_org_member`, `is_org_owner`), trigger de creación de perfil, y RPC `get_user_id_by_email` (para invitaciones).
-- `src/lib/` — `supabase.ts` (clientes service-role y user-scoped), `auth.ts` (middleware que verifica el JWT de Supabase), `errors.ts` (ProblemDetails + `AppError`, códigos `modulo.razon`), `memberships.ts` (`requireMembership`/`requireOwner`), `org-context.ts` (`requireActiveOrg` vía `X-Org-Id`, para módulos de negocio futuros), `env.ts`.
-- `src/modules/` — `auth.ts` (register, me), `organizations.ts` (listar por membership, crear, switch, y gestión de miembros: invite/role/remove, solo Owner).
+- `supabase/migrations/` — **aditivas, en orden**: `0001` multitenancy (`profiles`, `organizations`, `memberships`, helpers `is_org_member`/`is_org_owner`, trigger de perfil, RPC `get_user_id_by_email`) · `0002` `workshops` + `workshop_assignments` · `0003` RPC `register_account` · `0004` `clients` · `0005` `parts`/`part_movements` + RPC `register_part_movement`/`transfer_stock` · `0006` `audit_log`. Nunca se reescribe una migración ya numerada (RNF-304).
+- `src/lib/` — `supabase.ts` (clientes service-role y user-scoped), `auth.ts` (verifica el JWT), `errors.ts` (Problem Details RFC 9457 + `AppError`), `memberships.ts` (`requireMembership`/`requireOwner`/`requireRole`), `org-context.ts` (`requireActiveOrg` vía `X-Org-Id`), `workshop-context.ts` (`requireActiveWorkshop` vía `X-Workshop-Id`, valida pertenencia a la empresa activa), `audit.ts`, `env.ts`.
+- `src/modules/` — `auth.ts` (register atómico, me), `organizations.ts` (listar/crear/editar/switch + miembros), `workshops.ts` (sucursales y asignaciones), `clients.ts` (nivel empresa), `inventory.ts` (nivel sucursal).
 - `src/schemas.ts` (Zod), `src/app.ts` (arma la app Hono), `src/dev-server.ts`, `api/index.ts` (handler Vercel), `vercel.json`.
-- `test/` — Vitest: `schemas.test.ts` + `app.test.ts` corren **sin Supabase**; `integration.test.ts` corre **solo con credenciales** (registro → varias orgs → aislamiento → invitación).
+- `test/` — Vitest. Corren **sin Supabase**: `schemas.test.ts`, `app.test.ts`, `workshops.test.ts`, `business-routes.test.ts`. Corren **solo con credenciales**: `integration.test.ts` (jerarquía, corte vertical, aritmética de stock) y **`rls.test.ts`** (aislamiento por acceso directo a la BD — el entregable del objetivo 8; nunca usar `serviceClient()` ahí, salta RLS y la prueba dejaría de demostrar nada).
 
 **Patrones (seguirlos, no reinventar):**
 - Errores como excepciones `AppError(code, message, status)` mapeadas a **ProblemDetails** (RFC 7807). Códigos `modulo.razon` (mismo catálogo que el .NET) para que el `api-client` del frontend no cambie.
@@ -80,9 +80,11 @@ npm test           # unit + HTTP; la integración corre solo con credenciales de
 **Setup Supabase**: crear proyecto → aplicar `supabase/migrations/0001_init_multitenancy.sql` en el SQL Editor → copiar `.env.example` a `.env` con las claves (`SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `AUTH_AUTO_CONFIRM_EMAIL=true` en dev). Detalle en [server/README.md](server/README.md).
 
 **Hecho vs. pendiente en `server/`:**
-- **Hecho**: base multitenant (register que crea cuenta + 1ª organización + Owner; `me`; organizations CRUD + switch; members invite/role/remove con las reglas del .NET), RLS, y tests (13 unit/HTTP verdes; 5 de integración gated por credenciales). Typecheck limpio.
-- **Pendiente inmediato**: implementar la **jerarquía empresa → sucursales** (ADR-006) — tablas `workshops` y `workshop_assignments`, taller activo por header `X-Workshop-Id`, y ajuste de unicidades. El código actual asume el modelo plano.
-- **Pendiente después**: el corte vertical del proyecto de grado (`clients` a nivel empresa, `parts`/`part_movements` a nivel sucursal); integrar el frontend (Supabase Auth + selectores de organización y taller). Fuera de alcance del proyecto de grado: resto de módulos, WhatsApp y facturación SIN. No hay verificación end-to-end todavía porque requiere un proyecto Supabase real.
+- **Hecho**: base multitenant + **jerarquía empresa → sucursales** (ADR-006) + **corte vertical completo**. Migraciones `0001`–`0006`: multitenancy, `workshops`/`workshop_assignments`, RPC de registro atómico, `clients`, `parts`/`part_movements` con RPC de stock, y `audit_log`. Módulos: `auth`, `organizations`, `workshops`, `clients`, `inventory`. Contexto activo por `X-Org-Id` + `X-Workshop-Id`. Tests: **34 unit/HTTP verdes**, 29 gated por credenciales (18 de integración + 11 de RLS). Typecheck limpio.
+- **Atomicidad (ADR-007)**: `register_account`, `register_part_movement` y `transfer_stock` son funciones plpgsql llamadas por RPC — el cliente de Supabase no soporta transacciones multi-sentencia. Sus reglas **solo se verifican contra un Supabase real**.
+- **Pendiente inmediato**: integrar el frontend (Supabase Auth + selectores de organización y sucursal, y adaptar clientes/inventario a los contratos de `server/`).
+- **Pendiente después**: resto de módulos (motocicletas, órdenes, historial, dashboard) — quedan fuera de §1.8.3, así que antes hay que aclarar en el anteproyecto qué se construye como producto y qué entra en la validación del proyecto de grado.
+- **Sin verificación end-to-end todavía**: requiere un proyecto Supabase real. Los 29 tests gated son la evidencia pendiente, y entre ellos `test/rls.test.ts` es el entregable del objetivo 8.
 
 ## Modelo multitenancy jerárquico (el cambio conceptual central)
 

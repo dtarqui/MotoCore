@@ -137,6 +137,32 @@ Registro de las decisiones estructurales del proyecto, con las alternativas eval
 
 ---
 
+## ADR-007 — Atomicidad de las operaciones compuestas en el motor de base de datos
+
+**Estado**: aceptada.
+
+**Contexto.** Tres operaciones del sistema deben ser atómicas o no ocurrir: el registro de una cuenta —que crea empresa, primera sucursal y membresía propietaria (RF-101)—, el registro de un movimiento de existencias —que inserta el movimiento y actualiza la existencia del repuesto (RF-604)— y la transferencia entre sucursales, que genera dos movimientos vinculados (RF-608). La biblioteca cliente del proveedor de datos expone cada sentencia como una petición HTTP independiente y **no admite transacciones que abarquen varias sentencias**.
+
+**Alternativas consideradas**
+
+| Alternativa | Ventajas | Inconvenientes |
+|---|---|---|
+| **Secuencia de llamadas con compensación** desde la capa de aplicación | Toda la lógica de negocio permanece en un solo lenguaje y es fácil de probar sin base de datos | No es atómica: una interrupción entre dos pasos deja el sistema en un estado intermedio. La compensación es a su vez una operación que puede fallar, y en un entorno de funciones efímeras el proceso puede terminar antes de ejecutarla |
+| **Funciones almacenadas invocadas por procedimiento remoto** | Cada función es una transacción implícita: o se completa entera o no deja rastro. Permite además bloquear la fila afectada para serializar operaciones concurrentes | Reparte la lógica de negocio entre dos lenguajes; las reglas alojadas en la base de datos solo pueden probarse contra un motor real |
+| **Relajar el requisito** y aceptar consistencia eventual | Simplifica la implementación | La existencia dejaría de poder reconstruirse desde su historial, que es justamente la garantía que el historial inmutable debe ofrecer |
+
+**Decisión**: funciones almacenadas invocadas por procedimiento remoto, restringidas a las operaciones que exigen atomicidad.
+
+**Justificación.** Es la única alternativa que satisface el requisito tal como está especificado. El caso del inventario lo ilustra: sin una transacción, dos ventas simultáneas del mismo repuesto pueden leer la misma existencia previa y dejar el stock por encima del real, con dos movimientos que no explican el saldo resultante. La función resuelve además ese caso concreto bloqueando la fila del repuesto mientras dura la operación.
+
+**Consecuencias**
+- La lógica de negocio queda repartida entre el motor de base de datos y la capa de aplicación. Se acota el reparto: en la base de datos viven **solo** las operaciones que exigen atomicidad; el resto permanece en la aplicación.
+- Las funciones se ejecutan con privilegios del creador y se conceden **únicamente** a la identidad del servidor, nunca a usuarios autenticados.
+- Las reglas alojadas en funciones **no se pueden verificar sin un motor real**. Sus pruebas quedan condicionadas a la disponibilidad de credenciales, y por tanto no cubren el requisito hasta que se ejecutan.
+- Los errores de negocio se levantan desde la función con el mismo catálogo de códigos `modulo.razon`, para que el contrato de error no dependa de dónde se aplicó la regla.
+
+---
+
 ## Decisiones abiertas
 
 Se documentan para dejar constancia de que están identificadas; su resolución corresponde a etapas posteriores al alcance actual.
@@ -145,4 +171,4 @@ Se documentan para dejar constancia de que están identificadas; su resolución 
 |---|---|
 | Proveedor de mensajería por WhatsApp | Abierta — depende de funcionalidad fuera del alcance actual (ver [09-analisis-mercado.md](09-analisis-mercado.md)) |
 | Enfoque de integración con la facturación electrónica del SIN: proveedor autorizado frente a implementación propia de firma digital y generación de XML | Abierta — requiere validar la normativa vigente antes de decidir |
-| Si la asignación de un miembro a sucursales debe restringir lo que puede ver, o mantenerse informativa | Abierta — el diseño actual la define como operativa, sin efecto sobre los permisos (ADR-006) |
+| Si la asignación de un miembro a sucursales debe restringir lo que puede ver, o mantenerse informativa | **Cerrada**: se mantiene **operativa**, sin efecto sobre los permisos. Restringir por sucursal introduciría una segunda frontera de autorización y contradiría el principio de un único límite de aislamiento (ADR-006). Si el negocio llegara a exigirlo, sería un ADR nuevo, no un ajuste de este |

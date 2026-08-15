@@ -160,10 +160,10 @@ Las tablas de nivel sucursal usan **la misma condición sobre `organization_id`*
 | Regla | Descripción |
 |---|---|
 | Cálculo de existencias | `compra`, `devolución` y `transferencia de entrada` suman; `venta` y `merma` restan; `ajuste` **fija** un valor absoluto. Una operación que dejaría la existencia negativa se rechaza. |
-| Atomicidad del movimiento | La inserción del movimiento y la actualización de la existencia del repuesto deben ocurrir en una sola transacción. |
+| Atomicidad del movimiento | La inserción del movimiento y la actualización de la existencia del repuesto deben ocurrir en una sola transacción, resuelta dentro del motor de base de datos ([ADR-007](07-decisiones-diseno.md)). |
 | Registro inicial de stock | Al crear un repuesto con existencia inicial mayor a cero, se genera automáticamente un movimiento de entrada que lo justifica. |
 | Protección del propietario | No se puede cambiar el rol ni remover al `owner_id` de la empresa. |
-| Transferencia entre sucursales | Genera dos movimientos vinculados (salida en origen, entrada en destino), ambos en la misma transacción y dentro de la misma empresa. |
+| Transferencia entre sucursales | Genera dos movimientos vinculados (salida en origen, entrada en destino), ambos en la misma transacción y dentro de la misma empresa ([ADR-007](07-decisiones-diseno.md)). |
 
 ## Evolución del esquema
 
