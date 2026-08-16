@@ -37,3 +37,6 @@ backend/**/appsettings.*.local.json
 *.nupkg
 *.snupkg
 .nuget/
+
+# Material fuente del seminario (binarios, no se versionan)
+docs/diapositivas/

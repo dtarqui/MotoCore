@@ -1,6 +1,6 @@
 # Análisis del mercado
 
-Relevamiento de las soluciones de gestión de talleres de motocicletas y automóviles disponibles en **Bolivia**, con el objeto de determinar qué capacidades cubre la oferta existente y cuáles quedan desatendidas. Constituye el insumo del objetivo específico 2 y alimenta el estado del arte ([anteproyecto/02-antecedentes-y-estado-del-arte.md](anteproyecto/02-antecedentes-y-estado-del-arte.md)).
+Relevamiento de las soluciones de gestión de talleres de motocicletas y automóviles disponibles en **Bolivia**, con el objeto de determinar qué capacidades cubre la oferta existente y cuáles quedan desatendidas. Constituye parte del insumo del objetivo específico 1 y alimenta el estado del arte ([anteproyecto/02-antecedentes-y-estado-del-arte.md](../anteproyecto/02-antecedentes-y-estado-del-arte.md)).
 
 Del relevamiento se desprenden dos capacidades determinantes para el mercado boliviano: la **mensajería con el cliente por WhatsApp** y la **facturación electrónica del Servicio de Impuestos Nacionales (SIN)**.
 
@@ -48,11 +48,11 @@ Capacidades relevadas en las soluciones disponibles, y su relevancia para el mer
 | Reportes y analítica de operación | Parcial | Media |
 | Integración contable | Escasa | Baja |
 
-**Lectura del relevamiento.** Las capacidades operativas básicas están cubiertas por la oferta existente; lo que no se encuentra resuelto es la **estructura organizativa**: ninguna de las soluciones relevadas en el mercado boliviano contempla que una cuenta administre varias empresas, ni que una empresa opere varias sucursales conservando la información del cliente consolidada. Tampoco se documenta en ellas mecanismo alguno de aislamiento verificable entre organizaciones. Esa carencia es la que fundamenta el objetivo del proyecto.
+**Lectura del relevamiento.** Las capacidades operativas básicas están cubiertas por la oferta existente; lo que no se encuentra resuelto es la **estructura organizativa** ni el aislamiento verificable entre organizaciones. La elaboración de esa carencia como vacío que justifica el proyecto corresponde al estado del arte ([§2.3](../anteproyecto/02-antecedentes-y-estado-del-arte.md)) y aquí no se repite.
 
-## Dos features nuevas decisivas para Bolivia
+## Dos capacidades decisivas para Bolivia
 
-El benchmarking revela dos capacidades que hoy MotoCore no tiene y que son determinantes en el mercado boliviano: el canal de comunicación (WhatsApp) y el cumplimiento fiscal (factura electrónica del SIN).
+El relevamiento destaca dos capacidades determinantes en el mercado boliviano: el canal de comunicación (WhatsApp) y el cumplimiento fiscal (factura electrónica del SIN).
 
 ### A. Mensajería y presupuestos por WhatsApp
 WhatsApp es el canal por defecto para hablar con el cliente en Bolivia y la región. Los productos locales/regionales lo integran de forma nativa:
@@ -72,7 +72,7 @@ Bolivia exige facturación electrónica/en línea gestionada por el **Servicio d
 
 ## Funcionalidades identificadas y su tratamiento en el proyecto
 
-El relevamiento identifica un conjunto amplio de funcionalidades. El alcance del proyecto de grado ([anteproyecto/01-definicion-y-alcance.md](anteproyecto/01-definicion-y-alcance.md) §1.9) se concentra en la estructura organizativa y el aislamiento de datos; el resto se documenta como continuación.
+El relevamiento identifica un conjunto amplio de funcionalidades. El alcance del proyecto de grado ([anteproyecto/01-definicion-y-alcance.md](../anteproyecto/01-definicion-y-alcance.md) §1.8) se concentra en la estructura organizativa y el aislamiento de datos; el resto se documenta como continuación.
 
 ### Dentro del alcance
 

@@ -120,11 +120,7 @@ Registro de las decisiones estructurales del proyecto, con las alternativas eval
 
 **Justificación.** Conserva **un único límite de seguridad** —la empresa—, lo que mantiene las políticas de aislamiento simples y auditables, y a la vez habilita la operación en varios locales. Los datos que acompañan al cliente permanecen a nivel de empresa; los que corresponden a la existencia física de un local, a nivel de sucursal.
 
-**Alcance de los datos por nivel** — tabla completa en [01-glosario.md](01-glosario.md):
-
-| Nivel empresa | Nivel sucursal |
-|---|---|
-| Clientes, motocicletas, historial de mantenimiento, miembros y roles, auditoría | Órdenes de trabajo, inventario y movimientos de existencias |
+El reparto concreto de cada entidad entre los dos niveles, que se deriva de esta decisión, está en el [Glosario](01-glosario.md).
 
 **Consecuencias**
 - El modelo incorpora una entidad de sucursal dependiente de la empresa, y una entidad de asignación de miembros a sucursales.
@@ -133,7 +129,7 @@ Registro de las decisiones estructurales del proyecto, con las alternativas eval
 - Las restricciones de unicidad se definen según el nivel de cada entidad: el número de parte de inventario es único por sucursal; el correo del cliente, único por empresa.
 - La numeración de órdenes de trabajo es correlativa por sucursal y año.
 
-**Alcance del aporte.** El modelo pasa de una multi-tenancy plana a una **jerárquica**: el reto de diseño consiste en sostener un aislamiento verificable entre empresas mientras se soporta una subdivisión interna con reglas de alcance distintas según el tipo de entidad (ver [anteproyecto/01-definicion-y-alcance.md](anteproyecto/01-definicion-y-alcance.md)).
+**Alcance del aporte.** El modelo pasa de una multi-tenancy plana a una **jerárquica**: el reto de diseño consiste en sostener un aislamiento verificable entre empresas mientras se soporta una subdivisión interna con reglas de alcance distintas según el tipo de entidad (ver [anteproyecto/01-definicion-y-alcance.md](../anteproyecto/01-definicion-y-alcance.md)).
 
 ---
 

@@ -1,6 +1,6 @@
 # Seguridad y control de acceso
 
-> Terminología: [Glosario](01-glosario.md). Arquitectura general: [Arquitectura](04-arquitectura.md). Modelos de seguridad que fundamentan este enfoque —principios de Saltzer y Schroeder, control de acceso basado en roles, confianza cero y defensa en profundidad—: [Marco teórico](anteproyecto/03-marco-teorico-y-conceptual.md) §3.2.4.
+> Terminología: [Glosario](01-glosario.md). Arquitectura general: [Arquitectura](04-arquitectura.md). Modelos de seguridad que fundamentan este enfoque —principios de Saltzer y Schroeder, control de acceso basado en roles, confianza cero y defensa en profundidad—: [Marco teórico](../anteproyecto/03-marco-teorico-y-conceptual.md) §3.2.4.
 >
 > Este documento describe **el enfoque de seguridad a alto nivel**. Deliberadamente no incluye umbrales exactos, tiempos de expiración ni detalles de configuración que faciliten un ataque: esos viven en la configuración del despliegue.
 
@@ -14,14 +14,11 @@
 
 ## Modelo de propiedad y aislamiento
 
-La jerarquía es **empresa → sucursales**, pero el **límite de seguridad es uno solo: la empresa**.
+La jerarquía es **empresa → sucursales** ([Glosario](01-glosario.md)), pero el **límite de seguridad es uno solo: la empresa**. De ahí se siguen las tres reglas que gobiernan el acceso:
 
-- Una **cuenta** puede crear y pertenecer a **varias organizaciones**.
-- El acceso a los datos de una organización lo otorga una **membresía activa**, que define además el **rol** de esa cuenta *en esa organización*.
-- Todos los datos de negocio (clientes, motocicletas, órdenes, inventario, historial) pertenecen a una organización y **no se comparten entre organizaciones**.
-- Una organización puede tener **varios talleres** (sucursales). El taller indica *dónde* ocurre una operación; **no** restringe quién puede verla dentro de la organización. Modelarlo como segunda frontera de seguridad se evaluó y se descartó — ver [ADR-006](07-decisiones-diseno.md).
-- La asignación de un miembro a uno o varios talleres es **operativa** (en qué sucursal trabaja), no un mecanismo de permisos.
-- La organización y el taller sobre los que se opera se indican explícitamente en cada request; el servidor nunca asume ninguno por defecto, y valida que el taller pertenezca a la organización activa.
+- El acceso a los datos de una empresa lo otorga una **membresía activa**, que define además el **rol** de esa cuenta *en esa empresa*. Sin membresía no hay acceso, y ningún dato de negocio se comparte entre empresas.
+- La **sucursal no restringe** quién puede ver un dato dentro de la empresa; tampoco lo hace la asignación de un miembro a sucursales, que es operativa. Modelarla como segunda frontera de seguridad se evaluó y se descartó — ver [ADR-006](07-decisiones-diseno.md).
+- El contexto activo se indica **explícitamente en cada petición**: el servidor nunca asume empresa ni sucursal por defecto, y valida que la sucursal pertenezca a la empresa activa ([ADR-005](07-decisiones-diseno.md)).
 
 ## Aislamiento en dos capas (defensa en profundidad)
 
@@ -42,6 +39,7 @@ El rol es **por empresa**: la misma cuenta puede tener roles distintos en empres
 - Administra la organización y sus datos.
 - Gestiona miembros: invitar, cambiar rol, remover.
 - Único rol que puede realizar acciones administrativas sobre la organización.
+- Único rol que puede **consultar el registro de auditoría** (RF-704).
 
 ### Mechanic
 - Trabajo técnico sobre órdenes de trabajo: diagnóstico, avance de estado, cierre.
@@ -72,7 +70,7 @@ Los errores se devuelven en un formato uniforme y normalizado, con códigos esta
 
 ## Verificación del aislamiento
 
-El cumplimiento del aislamiento se comprueba mediante pruebas automatizadas que operan por dos vías independientes (objetivo específico 8):
+El cumplimiento del aislamiento se comprueba mediante pruebas automatizadas que operan por dos vías independientes (objetivo específico 4):
 
 1. **A través de la interfaz de programación**: una cuenta sin membresía en una empresa recibe error de autorización en cualquier operación sobre sus datos.
 2. **Mediante acceso directo a la base de datos**, prescindiendo de la capa de aplicación: las consultas ejecutadas con la identidad de otra cuenta no devuelven registros ajenos.
@@ -81,4 +79,4 @@ La segunda vía es la que demuestra que el aislamiento se sostiene aun cuando la
 
 ## Fuera del alcance
 
-Se identifican como líneas de refuerzo posterior: autenticación de doble factor, políticas formales de rotación de credenciales y auditoría extendida a la totalidad de las entidades de negocio.
+Se identifican como líneas de refuerzo posterior: autenticación de doble factor, políticas formales de rotación de credenciales y auditoría extendida a la totalidad de las entidades de negocio. Esta última exclusión es la misma que registra el alcance del proyecto ([anteproyecto/01-definicion-y-alcance.md](../anteproyecto/01-definicion-y-alcance.md) §1.8.3): se audita el conjunto acotado de acciones críticas de RF-703, no toda operación del sistema.

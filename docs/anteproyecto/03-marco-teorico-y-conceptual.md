@@ -1,16 +1,8 @@
 # 3. Marco Teórico y Conceptual
 
-*(Sesión 3 del Seminario: Marco Conceptual → Marco Teórico → Revisión Crítica de la Literatura → Alineación Metodológica.)*
+El **marco conceptual** responde *«¿qué herramientas se usan?»* y el **marco teórico**, *«¿por qué se usan y cómo funcionan internamente?»*. El primero se limita a las tecnologías propias de esta solución —protocolos, motores, estilos de interfaz de programación— y no a conceptos universales; el peso del capítulo recae deliberadamente en el segundo. De cada teoría se consignan además sus limitaciones y cuellos de botella, contrastados con la realidad de una pequeña empresa boliviana (§3.3), y se deja constancia de los conceptos descartados por no contribuir a resolver el problema (§3.4.2). Toda afirmación técnica no propia lleva crédito a su autor en normas APA 7.ª edición, con autor corporativo cuando la fuente es documentación técnica sin autor humano.
 
-## Reglas del módulo aplicadas
-
-- **Marco conceptual ≠ marco teórico.** El conceptual responde *«¿qué herramientas estoy usando?»*; el teórico, *«¿por qué las uso y cómo funcionan internamente?»*.
-- **El conceptual es breve y específico.** Se definen tecnologías propias de esta solución (protocolos, motores, estilos de interfaz de programación), **no** conceptos universales. Un capítulo que sea solo un glosario extenso carece de nivel de maestría; el peso recae en el marco teórico.
-- **Toda afirmación técnica que no sea propia lleva crédito a su autor**, en normas **APA 7.ª edición**. Para documentación técnica sin autor humano se emplea **autor corporativo**.
-- **Revisión crítica**: de cada teoría o modelo se consignan también sus desventajas, limitaciones y cuellos de botella, contrastados con la realidad de una pequeña empresa boliviana.
-- **Auditoría de pertinencia**: antes de incluir un concepto se responde *«¿explicar esto ayuda a resolver el problema de esta tesis?»*. Lo que no supera la prueba se excluye y se deja constancia de la exclusión (§3.4.2).
-
-> **Relación con el glosario del proyecto.** El [Glosario](../01-glosario.md) fija el **lenguaje del dominio** (empresa, sucursal, membresía, rol) y es la fuente de verdad de esos términos. Este capítulo no lo repite: define el **vocabulario tecnológico** con su fuente formal. Cuando ambos nombran un mismo término —seguridad a nivel de fila, serverless, defensa en profundidad—, el glosario da el uso interno y §3.1 la definición citable.
+> **Relación con el glosario del proyecto.** El [Glosario](../ingenieria/01-glosario.md) fija el **lenguaje del dominio** (empresa, sucursal, membresía, rol) y es la fuente de verdad de esos términos. Este capítulo no lo repite: define el **vocabulario tecnológico** con su fuente formal. Cuando ambos nombran un mismo término —seguridad a nivel de fila, serverless, defensa en profundidad—, el glosario da el uso interno y §3.1 la definición citable.
 
 ---
 
@@ -31,7 +23,7 @@ Definiciones formales de las tecnologías que sostienen la solución. Se limita 
 | 9 | **Progressive Web App (PWA)** | Aplicación web que, mediante un manifiesto y un *service worker*, resulta instalable en el dispositivo y capaz de operar con conectividad intermitente, sin distribuirse por una tienda de aplicaciones. | World Wide Web Consortium [W3C] (2026) |
 | 10 | **Problem Details** | Formato normalizado de respuesta de error para interfaces HTTP, que transporta tipo, título, estado y detalle en un cuerpo estructurado, evitando que cada servicio invente el suyo. Estándar RFC 9457, que sustituye al RFC 7807. | Nottingham et al. (2023) |
 
-> **Nota técnica derivada de la entrada 10.** La especificación vigente es la **RFC 9457** (julio de 2023), que dejó obsoleta a la RFC 7807. El requisito RNF-204 se actualiza en consecuencia ([Requisitos](../02-requisitos.md)); el formato del cuerpo es compatible, de modo que la corrección es de referencia normativa, no de diseño.
+> **Nota técnica derivada de la entrada 10.** La especificación vigente es la **RFC 9457** (julio de 2023), que dejó obsoleta a la RFC 7807. El requisito RNF-204 se actualiza en consecuencia ([Requisitos](../ingenieria/02-requisitos.md)); el formato del cuerpo es compatible, de modo que la corrección es de referencia normativa, no de diseño.
 
 ---
 
@@ -41,7 +33,7 @@ Principios, teoremas, modelos y metodologías que gobiernan el sistema. Se organ
 
 ### 3.2.1 Teorías de arquitectura — el diseño global
 
-**Estilo arquitectónico REST y la restricción de ausencia de estado.** Fielding (2000) derivó el estilo REST imponiendo restricciones sucesivas sobre una arquitectura de red, y demostró que cada una aporta una propiedad concreta: la restricción *stateless* —cada petición contiene toda la información necesaria para ser atendida, sin que el servidor conserve contexto entre llamadas— produce visibilidad, fiabilidad y, sobre todo, **escalabilidad horizontal**. Esta restricción no es un detalle de estilo en este proyecto: es la condición que hace posible el despliegue serverless, donde la función que atiende una petición puede no ser la misma que atienda la siguiente. De ahí se sigue una consecuencia de diseño directa: el contexto activo de trabajo —empresa y sucursal— **no puede residir en memoria del servidor** y debe viajar explícitamente en cada petición, tal como se resolvió en ADR-005 ([Decisiones de diseño](../07-decisiones-diseno.md)).
+**Estilo arquitectónico REST y la restricción de ausencia de estado.** Fielding (2000) derivó el estilo REST imponiendo restricciones sucesivas sobre una arquitectura de red, y demostró que cada una aporta una propiedad concreta: la restricción *stateless* —cada petición contiene toda la información necesaria para ser atendida, sin que el servidor conserve contexto entre llamadas— produce visibilidad, fiabilidad y, sobre todo, **escalabilidad horizontal**. Esta restricción no es un detalle de estilo en este proyecto: es la condición que hace posible el despliegue serverless, donde la función que atiende una petición puede no ser la misma que atienda la siguiente. De ahí se sigue una consecuencia de diseño directa: el contexto activo de trabajo —empresa y sucursal— **no puede residir en memoria del servidor** y debe viajar explícitamente en cada petición, tal como se resolvió en ADR-005 ([Decisiones de diseño](../ingenieria/07-decisiones-diseno.md)).
 
 **Atributos de calidad y tácticas arquitectónicas.** Bass et al. (2021) sostienen que la arquitectura de un sistema se determina por sus **atributos de calidad** —seguridad, modificabilidad, disponibilidad— y no por su funcionalidad, y que cada atributo se alcanza aplicando *tácticas* deliberadas y trazables hasta un requisito. Bajo este marco, el aislamiento entre empresas de este proyecto no es una funcionalidad más: es el atributo de calidad rector (RNF-101), y las decisiones registradas en los ADR son precisamente las tácticas que lo materializan. Richards y Ford (2020) añaden que toda decisión arquitectónica es un intercambio (*trade-off*) y que su valor documental está en registrar las alternativas descartadas y sus consecuencias, criterio que este proyecto adopta como formato de sus decisiones.
 
@@ -53,7 +45,7 @@ Principios, teoremas, modelos y metodologías que gobiernan el sistema. Se organ
 
 **El modelo relacional.** Codd (1970) propuso representar los datos como relaciones matemáticas y separar su descripción lógica de su representación física, de modo que las aplicaciones no dependan de cómo estén almacenados. Esa independencia es la que permite que en este proyecto una regla de acceso se exprese como una condición lógica sobre una relación —una política— y no como código disperso en la aplicación.
 
-**Propiedades transaccionales ACID.** Haerder y Reuter (1983) formalizaron las propiedades de atomicidad, consistencia, aislamiento y durabilidad que debe garantizar una transacción para preservar la integridad de la base ante fallos. Este es el fundamento teórico de una regla de negocio concreta del sistema: el registro de un movimiento de existencias y la actualización de la existencia del repuesto **deben ocurrir en una sola transacción**, porque un fallo entre ambas operaciones dejaría el inventario en un estado inconsistente ([Modelo de datos](../05-modelo-datos.md)). Lo mismo aplica a la transferencia entre sucursales, que genera dos movimientos vinculados.
+**Propiedades transaccionales ACID.** Haerder y Reuter (1983) formalizaron las propiedades de atomicidad, consistencia, aislamiento y durabilidad que debe garantizar una transacción para preservar la integridad de la base ante fallos. Este es el fundamento teórico de una regla de negocio concreta del sistema: el registro de un movimiento de existencias y la actualización de la existencia del repuesto **deben ocurrir en una sola transacción**, porque un fallo entre ambas operaciones dejaría el inventario en un estado inconsistente ([Modelo de datos](../ingenieria/05-modelo-datos.md)). Lo mismo aplica a la transferencia entre sucursales, que genera dos movimientos vinculados.
 
 **El teorema CAP y la justificación de un motor relacional único.** Gilbert y Lynch (2002) demostraron formalmente la conjetura de Brewer: en presencia de particiones de red, un sistema distribuido no puede garantizar simultáneamente consistencia y disponibilidad. Kleppmann (2017) matiza que el teorema aplica a un modelo de fallo muy específico y que suele invocarse con excesiva ligereza, pero de él se extrae la decisión pertinente para este proyecto: dado que el aislamiento entre empresas exige **consistencia fuerte** —una lectura no puede devolver datos de una membresía revocada— y que el volumen esperado no justifica un almacén distribuido, se adopta un motor relacional único con transacciones ACID, en lugar de un sistema distribuido de consistencia eventual. La escalabilidad se obtiene, en cambio, en la capa de cómputo, que sí es sin estado (§3.2.1).
 
@@ -75,7 +67,7 @@ Principios, teoremas, modelos y metodologías que gobiernan el sistema. Se organ
 |---|---|---|
 | **Mediación completa** (*complete mediation*) | Todo acceso a todo objeto debe ser verificado | Las políticas se evalúan en el motor de base de datos, de modo que ninguna consulta —provenga de donde provenga— elude la verificación (RNF-101) |
 | **Valores por defecto seguros** (*fail-safe defaults*) | La decisión predeterminada es denegar; el acceso se concede por excepción explícita | Sin membresía activa no hay acceso; si falta la cabecera de contexto, la petición se rechaza en vez de asumir un valor (ADR-005) |
-| **Mínimo privilegio** (*least privilege*) | Cada sujeto opera con los permisos mínimos necesarios | El rol se otorga por empresa y las operaciones administrativas se reservan al propietario ([Seguridad](../06-seguridad.md)) |
+| **Mínimo privilegio** (*least privilege*) | Cada sujeto opera con los permisos mínimos necesarios | El rol se otorga por empresa y las operaciones administrativas se reservan al propietario ([Seguridad](../ingenieria/06-seguridad.md)) |
 | **Economía del mecanismo** (*economy of mechanism*) | El diseño de protección debe ser lo bastante simple para poder inspeccionarse | Un **único** criterio de aislamiento (`organization_id`) en todas las tablas, incluidas las de nivel sucursal, mantiene las políticas auditables (ADR-006) |
 
 El cuarto principio merece énfasis porque explica una decisión que, de otro modo, parecería una simplificación: modelar la sucursal como segunda frontera de seguridad habría duplicado la complejidad de las políticas, y un mecanismo de protección que no puede inspeccionarse con confianza deja de proteger.
@@ -88,11 +80,11 @@ El cuarto principio merece énfasis porque explica una decisión que, de otro mo
 
 ### 3.2.5 Metodología de desarrollo — el proceso de trabajo
 
-**Desarrollo iterativo e incremental.** Larman y Basili (2003) documentan que el desarrollo iterativo, lejos de ser una moda reciente, cuenta con evidencia de aplicación exitosa desde los años sesenta, y que su ventaja frente al modelo en cascada reside en obtener retroalimentación verificable antes de haber comprometido la totalidad del esfuerzo. El proyecto adopta iteraciones de dos semanas, cada una cerrada con software ejecutable y verificado ([Plan de trabajo](../08-plan-trabajo.md)).
+**Desarrollo iterativo e incremental.** Larman y Basili (2003) documentan que el desarrollo iterativo, lejos de ser una moda reciente, cuenta con evidencia de aplicación exitosa desde los años sesenta, y que su ventaja frente al modelo en cascada reside en obtener retroalimentación verificable antes de haber comprometido la totalidad del esfuerzo. El proyecto adopta iteraciones de dos semanas, cada una cerrada con software ejecutable y verificado ([Plan de trabajo](../ingenieria/08-plan-trabajo.md)).
 
 **Por qué no un marco de trabajo de equipo.** Scrum define roles, eventos y artefactos concebidos para la coordinación de un equipo (Schwaber & Sutherland, 2020). Al ser este un proyecto de un solo desarrollador, las ceremonias de coordinación —planificación conjunta, reunión diaria, retrospectiva grupal— carecen de contraparte y su adopción sería nominal. Se conserva, por tanto, lo que sí aporta valor en un contexto individual: iteración corta, incremento demostrable y definición de terminado explícita.
 
-**Integración continua y entrega.** Humble y Farley (2010) establecen que la automatización del ciclo de compilación, prueba y despliegue reduce el riesgo de la entrega al convertirla en una operación rutinaria y repetible, y que la retroalimentación rápida ante un cambio defectuoso es su beneficio principal. Forsgren et al. (2018) aportan la validación empírica: a partir de un estudio de varios años sobre miles de organizaciones, identifican la integración continua y la automatización de pruebas entre las prácticas que predicen estadísticamente un mayor desempeño en entrega de software. Ambas obras fundamentan el objetivo específico 7 y RNF-203.
+**Integración continua y entrega.** Humble y Farley (2010) establecen que la automatización del ciclo de compilación, prueba y despliegue reduce el riesgo de la entrega al convertirla en una operación rutinaria y repetible, y que la retroalimentación rápida ante un cambio defectuoso es su beneficio principal. Forsgren et al. (2018) aportan la validación empírica: a partir de un estudio de varios años sobre miles de organizaciones, identifican la integración continua y la automatización de pruebas entre las prácticas que predicen estadísticamente un mayor desempeño en entrega de software. Ambas obras fundamentan la parte de automatización del objetivo específico 3 y RNF-203.
 
 **Las pruebas como especificación previa.** Beck (2002) propone escribir la prueba antes que el código, de modo que la prueba actúe como especificación ejecutable del comportamiento esperado. El proyecto aplica este orden específicamente donde más importa: las **pruebas de aislamiento se escriben antes** que la funcionalidad que protegen, medida de mitigación del riesgo R1 del plan de trabajo.
 
@@ -131,7 +123,7 @@ La coherencia del documento se verifica siguiendo la cadena desde el antecedente
 | Fallos documentados del mecanismo de aislamiento en producción | Insuficiencia de una única capa de control | Defensa en profundidad; evidencia de Dar et al. (2023) y serie de CVE | Aislamiento en dos capas independientes (RNF-101, RNF-102) |
 | Alta informalidad y bajo presupuesto de tecnología en el sector | Barrera de costo de la infraestructura tradicional | Computación serverless y escalado a cero (Jonas et al., 2019) | Despliegue en funciones serverless sin costo fijo (RNF-301, RNF-302) |
 | Ausencia de una plataforma con visión consolidada | Necesidad de operar varias empresas desde una cuenta | Restricción de ausencia de estado del estilo REST (Fielding, 2000) | Contexto activo declarado por petición y validado (ADR-005) |
-| — | Verificar que la separación efectivamente se cumple | Pruebas como especificación previa (Beck, 2002); integración continua (Humble & Farley, 2010; Forsgren et al., 2018) | Suite de pruebas de aislamiento por dos vías y pipeline automatizado (objetivos 7 y 8) |
+| — | Verificar que la separación efectivamente se cumple | Pruebas como especificación previa (Beck, 2002); integración continua (Humble & Farley, 2010; Forsgren et al., 2018) | Suite de pruebas de aislamiento por dos vías y pipeline automatizado (objetivos 3 y 4) |
 
 ### 3.4.2 Auditoría de pertinencia: lo que se excluyó del marco teórico
 
@@ -146,24 +138,11 @@ Se deja constancia de los temas descartados para evidenciar que la selección fu
 | Criptografía aplicada y algoritmos de cifrado | La gestión de credenciales está delegada en el proveedor de identidad (ADR-004); el proyecto no implementa primitivas criptográficas |
 | Interoperabilidad con facturación electrónica del SIN | Excluida del alcance (§1.8.3); pertenece al trabajo futuro y su marco normativo se citaría sin uso en este documento |
 
-### 3.4.3 Normas de citación aplicadas
-
-Todo el documento sigue **APA 7.ª edición**, con las convenciones que el módulo exige:
-
-| Convención | Aplicación en este documento |
-|---|---|
-| **Cita parentética** | Cuando el peso recae en la afirmación técnica: «…el escalado a cero elimina el costo fijo (Jonas et al., 2019)». |
-| **Cita narrativa** | Cuando se resalta la autoridad: «Fielding (2000) derivó el estilo REST…». |
-| **Autor corporativo** | Para documentación técnica sin autor humano: PostgreSQL Global Development Group, Microsoft, OpenJS Foundation, World Wide Web Consortium. En la primera mención se escribe el nombre completo con su sigla entre corchetes; en las siguientes, solo la sigla. |
-| **Tres o más autores** | Se abrevia con *et al.* desde la primera mención: Jonas et al. (2019), Saltzer y Schroeder (1975) se cita completo por ser dos. |
-| **Cita directa** | Se evita: la totalidad del capítulo está parafraseada. Si se incorporara una cita textual, llevaría comillas y número de página; a partir de cuarenta palabras iría en bloque con sangría y sin comillas. |
-| **Referencia** | Toda cita del cuerpo tiene su entrada completa en §3.5, con DOI o URL para garantizar la trazabilidad. |
-
 ---
 
 ## 3.5 Referencias del capítulo
 
-Estilo **APA (7.ª edición)**. Se agrupan según **cómo se comprueba cada entrada**, para poder auditarlas una a una: los libros por ISBN, los artículos por DOI, y los enlaces consultando la página. El estado de comprobación está en [Verificación de referencias](verificacion-referencias.md).
+Estilo **APA (7.ª edición)**. Se agrupan según **cómo se comprueba cada entrada**, para poder auditarlas una a una: los libros por ISBN, los artículos por DOI, y los enlaces consultando la página. El estado de comprobación está en [Verificación de referencias](anexo-referencias.md).
 
 Las referencias del capítulo 2 no se repiten; cuando una obra de aquel capítulo se cita también en este, se marca con **(cap. 2)** y conserva allí su entrada.
 

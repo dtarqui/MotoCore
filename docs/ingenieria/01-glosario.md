@@ -2,7 +2,7 @@
 
 Terminología unificada del proyecto. **Fuente de verdad de los términos**: si otro documento usa una palabra distinta para lo mismo, se corrige ese documento, no este.
 
-> **Alcance de este documento**: fija el **lenguaje del dominio** y su uso interno. Las definiciones formales de las tecnologías, con su fuente académica o normativa citable, están en el [Marco conceptual](anteproyecto/03-marco-teorico-y-conceptual.md) §3.1 — aquí no se duplican.
+> **Alcance de este documento**: fija el **lenguaje del dominio** y su uso interno. Las definiciones formales de las tecnologías, con su fuente académica o normativa citable, están en el [Marco conceptual](../anteproyecto/03-marco-teorico-y-conceptual.md) §3.1 — aquí no se duplican.
 
 ## Términos del modelo multiempresa
 
@@ -53,7 +53,7 @@ El rol es **por organización**, no global: la misma cuenta puede ser Owner en u
 
 ## Términos de arquitectura
 
-Uso interno de cada término. La definición formal con su fuente citable está en el [Marco conceptual](anteproyecto/03-marco-teorico-y-conceptual.md) §3.1.
+Uso interno de cada término. La definición formal con su fuente citable está en el [Marco conceptual](../anteproyecto/03-marco-teorico-y-conceptual.md) §3.1.
 
 | Término | Uso en este proyecto |
 |---|---|

@@ -1,20 +1,10 @@
 # 2. Antecedentes y Estado del Arte
 
-*(Sesión 2 del Seminario: Antecedentes locales → Estado del Arte global → Matriz de Extracción → Vacío de Investigación.)*
-
-## Reglas del módulo aplicadas
-
-- **Antecedentes ≠ Estado del Arte.** Antecedentes = contexto del sector donde ocurre el problema. Estado del Arte = frontera científica global sobre la tecnología.
-- El Estado del Arte se construye **solo con fuentes revisadas por pares** (ACM, IEEE, Scopus, Google Scholar, OATD, BASE). No se cita ningún blog, tutorial de Medium/YouTube ni Wikipedia.
-- **Criterios de inclusión**: publicaciones de los últimos cinco años (2021–2026), tesis de maestría o doctorado en ciencias de la computación, y trabajos con problemas arquitectónicos similares aunque el rubro sea distinto.
-- **Criterios de exclusión**: soluciones sobre tecnologías legadas y artículos de opinión sin validación métrica.
-- De cada fuente no se busca el resumen, sino su **limitación** — el "SIN EMBARGO" que abre la oportunidad de este proyecto.
-
----
+Los **antecedentes** describen el contexto del sector donde ocurre el problema; el **estado del arte**, la frontera del conocimiento científico sobre la tecnología que lo resuelve. Este último se construye únicamente con literatura revisada por pares (ACM, IEEE, Scopus, Google Scholar, OATD, BASE) publicada entre 2021 y 2026, admitiendo tesis de maestría o doctorado en ciencias de la computación y trabajos con problemas arquitectónicos similares aunque el rubro sea distinto; se excluyen las soluciones sobre tecnologías legadas y los artículos de opinión sin validación métrica. De cada fuente se consigna su **limitación**, que es donde se abre la oportunidad de este proyecto.
 
 ## 2.1 Antecedentes
 
-**El parque de motocicletas de Bolivia y su demanda de servicio.** La motocicleta es el vehículo más numeroso del país: según el Instituto Nacional de Estadística (INE), a partir de los registros del Registro Único para la Administración Tributaria Municipal (RUAT), en 2024 se contabilizaron **872.550 motocicletas**, cifra que encabeza el parque automotor nacional por delante de vagonetas, automóviles y camionetas, sobre un total de **2.583.319 vehículos**. Su crecimiento es sostenido y superior al del parque en conjunto: pasó de **657.718 unidades en 2021** a **800.890 en 2023** y a **872.550 en 2024**, un incremento cercano al **33 % en tres años**, frente al 4,6 % de crecimiento interanual del parque total. Cada una de esas unidades requiere mantenimiento periódico y reparaciones, lo que sostiene una red amplia de talleres de servicio distribuida por todo el territorio — una base de negocio que crece año a año y que, al hacerlo, empuja a los operadores más exitosos a abrir locales adicionales.
+**El parque de motocicletas de Bolivia y su demanda de servicio.** La motocicleta es el vehículo más numeroso del país: según el Instituto Nacional de Estadística (INE), a partir de los registros del Registro Único para la Administración Tributaria Municipal (RUAT), en 2024 se contabilizaron **872.550 motocicletas**, cifra que encabeza el parque automotor nacional por delante de vagonetas, automóviles y camionetas, sobre un total de **2.583.319 vehículos**. Su crecimiento es sostenido y superior al del parque en conjunto: pasó de **657.718 unidades en 2021** a **800.890 en 2023** y a **872.550 en 2024**, un incremento cercano al **33 % en tres años**, muy por encima del ritmo al que creció el parque automotor total en el mismo período. Cada una de esas unidades requiere mantenimiento periódico y reparaciones, lo que sostiene una red amplia de talleres de servicio distribuida por todo el territorio — una base de negocio que crece año a año y que, al hacerlo, empuja a los operadores más exitosos a abrir locales adicionales.
 
 **Condiciones del sector que explican el problema.** Ese crecimiento ocurre, sin embargo, en una economía marcadamente informal: el INE reporta una **informalidad laboral del 84,2 % en 2024**, una tendencia que se ha agravado de forma sostenida durante las últimas dos décadas. Para el rubro de talleres esto se traduce en unidades de negocio pequeñas, con presupuesto de tecnología muy limitado y baja adopción de software especializado, donde la gestión se apoya todavía en registros en papel u hojas de cálculo. En ese contexto, el operador que crece —el que abre una segunda o tercera sucursal, o constituye más de una empresa— se encuentra sin herramientas que le permitan administrarlas de forma centralizada: debe optar entre llevar cada local como una instalación independiente, perdiendo la visión unificada del cliente y su historial, o renunciar a la especialización y volver a soluciones genéricas. Este es precisamente el escenario que el presente proyecto aborda.
 
@@ -123,7 +113,7 @@ El presente proyecto aborda esta deficiencia mediante el **diseño, implementaci
 
 ## 2.4 Referencias
 
-Se separan en tres bloques según **cómo se verifica cada uno**: los libros por ISBN en catálogo editorial, los artículos por DOI, y los enlaces por consulta directa de la página. El estado de comprobación de cada entrada está en [Verificación de referencias](verificacion-referencias.md).
+Se separan en tres bloques según **cómo se verifica cada uno**: los libros por ISBN en catálogo editorial, los artículos por DOI, y los enlaces por consulta directa de la página. El estado de comprobación de cada entrada está en [Verificación de referencias](anexo-referencias.md).
 
 ### A. Libros publicados
 
@@ -165,24 +155,4 @@ Se separan en tres bloques según **cómo se verifica cada uno**: los libros por
 | E3 | Instituto Nacional de Estadística de Bolivia. (s. f.). *Estadísticas del parque automotor 2003–2022*. | https://www.ine.gob.bo/index.php/estadisticas-del-parque-automotor-2003-2022/ |
 | E4 | *CVE-2024-10976: PostgreSQL incomplete tracking of tables with row security*. (2024). Wiz Vulnerability Database. | https://www.wiz.io/vulnerability-database/cve/cve-2024-10976 |
 
-### Uso previsto de la bibliografía de libros
-
-Cada obra sustenta una parte concreta del trabajo; no se incluyen como relleno bibliográfico:
-
-| Obra | Sustenta |
-|---|---|
-| Bass, Clements & Kazman (2021) | Marco conceptual de atributos de calidad y tácticas arquitectónicas; base para justificar la seguridad como atributo de calidad dirigido por el diseño |
-| Richards & Ford (2020) | Criterios de decisión arquitectónica y registro de decisiones (ADR); estilo de documentación adoptado en el proyecto |
-| Evans (2003) | Modelado del dominio: delimitación de las entidades empresa, sucursal, membresía y su lenguaje ubicuo (glosario) |
-| Newman (2021) | Contraste con el enfoque de microservicios que emplean los comparables del estado del arte |
-| Kleppmann (2017) | Fundamentos de sistemas de datos: modelos de almacenamiento, consistencia y transacciones, aplicados a las operaciones de existencias |
-| Obe & Hsu (2017) | Referencia técnica de PostgreSQL, motor sobre el que se implementan las políticas de seguridad a nivel de fila |
-| Sbarski, Cui & Nair (2022) | Fundamento del modelo de despliegue serverless y sus compromisos operativos |
-| Humble & Farley (2010) | Diseño del pipeline de integración y entrega continua |
-| Forsgren, Humble & Kim (2018) | Justificación empírica de las prácticas de entrega continua y su relación con el desempeño |
-| Cohn (2004) | Formato y criterios de aceptación de las historias de usuario |
-| Hernández-Sampieri & Mendoza (2018); Hernández Sampieri et al. (2014) | Marco metodológico: tipo y enfoque de investigación, y diseño de la validación |
-
-> **Formato**: todas las referencias siguen el estilo **APA (7.ª edición)**. Las obras de esta lista que se emplean como sustento teórico se citan en el cuerpo del [capítulo 3](03-marco-teorico-y-conceptual.md), donde figuran además sus propias referencias; las que sustentan el estado del arte ya están citadas en este capítulo.
-
-> **Estado de comprobación**: los identificadores de A1–A3 y los ISBN de L1–L12 fueron contrastados contra los metadatos del editor. El detalle —qué se comprobó, contra qué fuente y qué queda pendiente— está en [Verificación de referencias](verificacion-referencias.md). Dos advertencias que afectan a la redacción: **A2 tiene tres autores y el primero es Alobaywi**, no Almutairi (se cita como *Alobaywi et al.*); y de A1 conviene acceder al texto completo antes de la defensa para citar resultados concretos.
+> **Formato**: todas las referencias siguen el estilo **APA (7.ª edición)**. Las obras de esta lista que se emplean como sustento teórico se citan en el cuerpo del [capítulo 3](03-marco-teorico-y-conceptual.md), donde figuran además sus propias referencias; las que sustentan el estado del arte ya están citadas en este capítulo. El estado de comprobación de cada identificador está en el [Anexo de referencias](anexo-referencias.md).

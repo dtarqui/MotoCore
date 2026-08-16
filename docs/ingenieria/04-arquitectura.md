@@ -36,13 +36,7 @@ Cuenta ──membresía(rol)──> Empresa   ← unidad de aislamiento
 - El contexto activo —empresa y, cuando corresponde, sucursal— se indica explícitamente en cada petición y se valida contra la membresía (ADR-005).
 - El registro de una cuenta crea su primera empresa, su primera sucursal y la membresía con rol propietario.
 
-**Alcance de los datos por nivel** (detalle en [01-glosario.md](01-glosario.md)):
-
-| Nivel empresa | Nivel sucursal |
-|---|---|
-| Clientes, motocicletas, historial de mantenimiento, miembros, auditoría | Órdenes de trabajo, inventario y movimientos de existencias |
-
-Las entidades de nivel sucursal referencian **tanto** a la sucursal como a la empresa, de modo que las políticas de aislamiento se evalúan siempre sobre un único criterio. El modelo completo está en [05-modelo-datos.md](05-modelo-datos.md).
+Qué dato pertenece a qué nivel está fijado en el [Glosario](01-glosario.md). Las entidades de nivel sucursal referencian **tanto** a la sucursal como a la empresa, de modo que las políticas de aislamiento se evalúan siempre sobre un único criterio. El modelo completo está en [05-modelo-datos.md](05-modelo-datos.md).
 
 ## Aislamiento de datos: defensa en profundidad
 
@@ -51,7 +45,7 @@ Dos capas independientes, ambas obligatorias (detalle en [06-seguridad.md](06-se
 1. **Seguridad a nivel de fila en el motor de base de datos** — las políticas exigen que quien consulta tenga una membresía activa en la empresa propietaria del registro. Actúa aunque la capa de aplicación falle u omita un filtro.
 2. **Verificación de membresía en la capa de aplicación** — cada operación valida la membresía y, cuando corresponde, el rol, antes de actuar, y devuelve un error de negocio específico.
 
-Esta redundancia responde a que la seguridad a nivel de fila, aun siendo un control efectivo, no está exenta de vías de fuga indirectas ni de errores en la aplicación de políticas — evidencia documentada en el estado del arte ([anteproyecto/02-antecedentes-y-estado-del-arte.md](anteproyecto/02-antecedentes-y-estado-del-arte.md)).
+Esta redundancia responde a que la seguridad a nivel de fila, aun siendo un control efectivo, no está exenta de vías de fuga indirectas ni de errores en la aplicación de políticas — evidencia documentada en el estado del arte ([anteproyecto/02-antecedentes-y-estado-del-arte.md](../anteproyecto/02-antecedentes-y-estado-del-arte.md)).
 
 ## Capas y responsabilidades
 
@@ -75,12 +69,14 @@ Esta redundancia responde a que la seguridad a nivel de fila, aun siendo un cont
 | Pruebas | Vitest | — |
 | Despliegue | Funciones serverless | ADR-001 |
 
-La definición formal de cada tecnología y la teoría que respalda su elección están en el [Marco teórico y conceptual](anteproyecto/03-marco-teorico-y-conceptual.md): §3.1 para las definiciones, §3.2 para el fundamento y §3.3 para las limitaciones asumidas.
+Las filas con «—» en la columna de decisión no carecen de justificación: son selecciones **derivadas** de un ADR previo, no decisiones estructurales autónomas, y por eso no generan un ADR propio (RNF-206). Zod y Vitest se siguen de la elección de Node/TypeScript de ADR-001 —validación con inferencia de tipos y ejecutor de pruebas del mismo ecosistema—, y React se mantiene por continuidad de la interfaz existente, que la reescritura del backend no altera.
+
+La definición formal de cada tecnología y la teoría que respalda su elección están en el [Marco teórico y conceptual](../anteproyecto/03-marco-teorico-y-conceptual.md): §3.1 para las definiciones, §3.2 para el fundamento y §3.3 para las limitaciones asumidas.
 
 ## Integración continua
 
-Cada integración al ramal principal ejecuta de forma automatizada la verificación estática de tipos y la suite de pruebas; un fallo impide la integración (RNF-203). El diseño del pipeline forma parte del objetivo específico 7.
+Cada integración al ramal principal ejecuta de forma automatizada la verificación estática de tipos y la suite de pruebas; un fallo impide la integración (RNF-203). El diseño del pipeline forma parte del objetivo específico 3.
 
 ## Alcance de plataformas
 
-La plataforma soportada es **web**, con diseño responsivo para uso en escritorio y móvil (RNF-402) e instalable como aplicación web progresiva (RNF-403). Las aplicaciones nativas para móvil y escritorio están **fuera del alcance** del proyecto ([anteproyecto/01-definicion-y-alcance.md](anteproyecto/01-definicion-y-alcance.md) §1.8.3).
+La plataforma soportada es **web**, con diseño responsivo para uso en escritorio y móvil (RNF-402) e instalable como aplicación web progresiva (RNF-403). Las aplicaciones nativas para móvil y escritorio están **fuera del alcance** del proyecto ([anteproyecto/01-definicion-y-alcance.md](../anteproyecto/01-definicion-y-alcance.md) §1.8.3).

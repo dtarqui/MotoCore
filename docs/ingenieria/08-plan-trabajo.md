@@ -2,13 +2,13 @@
 
 Metodología, cronograma, hitos y gestión de riesgos del proyecto de grado. Período: **septiembre a diciembre de 2026**.
 
-> Objetivos y alcance: [anteproyecto/01-definicion-y-alcance.md](anteproyecto/01-definicion-y-alcance.md) · Requisitos: [Requisitos](02-requisitos.md) · Historias: [Historias de usuario](03-historias-usuario.md)
+> Objetivos y alcance: [anteproyecto/01-definicion-y-alcance.md](../anteproyecto/01-definicion-y-alcance.md) · Requisitos: [Requisitos](02-requisitos.md) · Historias: [Historias de usuario](03-historias-usuario.md)
 
 ## 1. Metodología
 
 **Desarrollo iterativo e incremental**, organizado en iteraciones de dos semanas. Cada iteración cierra con software funcionando y verificado —no con documentación de avance— y ninguna se da por terminada mientras el pipeline de integración continua no esté en verde.
 
-> El sustento teórico de esta metodología —desarrollo iterativo, integración continua y pruebas como especificación previa, con sus fuentes— está en el [Marco teórico](anteproyecto/03-marco-teorico-y-conceptual.md) §3.2.5. Aquí se documenta su **aplicación**, no su justificación.
+> El sustento teórico de esta metodología —desarrollo iterativo, integración continua y pruebas como especificación previa, con sus fuentes— está en el [Marco teórico](../anteproyecto/03-marco-teorico-y-conceptual.md) §3.2.5. Aquí se documenta su **aplicación**, no su justificación.
 
 Prácticas adoptadas:
 
@@ -26,14 +26,14 @@ Prácticas adoptadas:
 
 ## 2. Fases y cronograma
 
-Cuatro fases que agrupan los ocho objetivos específicos.
+Cada fase materializa uno de los cuatro objetivos específicos.
 
-| Fase | Período | Objetivos | Resultado |
+| Fase | Período | Objetivo | Resultado |
 |---|---|---|---|
-| **F1 · Análisis** | Septiembre (sem. 1–2) | 1 y 2 | Estado del arte con matriz de extracción, análisis del mercado y vacío de investigación |
-| **F2 · Diseño** | Septiembre (sem. 3–4) | 3 y 4 | Marco teórico y conceptual, modelo de datos jerárquico, políticas de aislamiento y decisiones registradas |
-| **F3 · Construcción** | Octubre – noviembre | 5, 6 y 7 | Sistema funcional con el corte vertical e integración continua operativa |
-| **F4 · Validación y cierre** | Diciembre | 8 | Evidencia de aislamiento, documento final y defensa |
+| **F1 · Análisis** | Septiembre (sem. 1–2) | 1 | Estado del arte con matriz de extracción, análisis del mercado y vacío de investigación |
+| **F2 · Diseño** | Septiembre (sem. 3–4) | 2 | Marco teórico y conceptual, modelo de datos jerárquico, políticas de aislamiento y decisiones registradas |
+| **F3 · Construcción** | 29 de septiembre – 7 de diciembre | 3 | Sistema funcional con el corte vertical e integración continua operativa |
+| **F4 · Validación y cierre** | Diciembre | 4 | Evidencia de aislamiento, documento final y defensa |
 
 ### Detalle por iteración
 
@@ -45,7 +45,7 @@ Cuatro fases que agrupan los ocho objetivos específicos.
 | **I4** | 13–26 oct | Cuentas, registro, gestión de empresas y de miembros con control de acceso por rol | HU-01 a HU-05, HU-09 a HU-12 |
 | **I5** | 27 oct – 9 nov | Módulo de clientes — entidad de nivel empresa | HU-13, HU-14, HU-15 |
 | **I6** | 10–23 nov | Módulo de inventario y movimientos de existencias — entidad de nivel sucursal | HU-16 a HU-19 (HU-20 si hay margen) |
-| **I7** | 24 nov – 7 dic | Interfaz de usuario: autenticación y selección de empresa y sucursal | Aplicación utilizable de extremo a extremo |
+| **I7** | 24 nov – 7 dic | Interfaz de usuario: autenticación, selección de empresa y sucursal, diseño responsivo y manifiesto de instalación (RNF-402, RNF-403) | Aplicación utilizable de extremo a extremo |
 | **I8** | 8–21 dic | Pruebas de aislamiento, redacción final y preparación de la defensa | HU-21, HU-22 · Documento final |
 
 *Reserva: del 22 al 31 de diciembre queda como margen para correcciones posteriores a la revisión del asesor.*
@@ -56,8 +56,8 @@ Cuatro fases que agrupan los ocho objetivos específicos.
 |---|---|---|
 | F1 · Análisis | — | Investigación |
 | F2 · Diseño | — | Modelado |
-| F3 · Implementación | 65 | 86 % |
-| F4 · Validación | 11 | 14 % |
+| F3 · Construcción | 65 | 86 % |
+| F4 · Validación y cierre | 11 | 14 % |
 
 ## 3. Hitos
 
@@ -97,4 +97,4 @@ El costo de infraestructura es cero dentro del alcance del proyecto: los planes 
 
 ## 6. Criterio de cierre
 
-El proyecto se considera concluido cuando los ocho objetivos específicos cuentan con su entregable verificable —según la tabla de trazabilidad de [anteproyecto/01-definicion-y-alcance.md](anteproyecto/01-definicion-y-alcance.md) §1.7— y la suite de pruebas de aislamiento se ejecuta en verde de forma reproducible. Las funcionalidades excluidas del alcance (§1.8.3) no condicionan ese cierre.
+El proyecto se considera concluido cuando los cuatro objetivos específicos cuentan con su entregable verificable —según la tabla de trazabilidad de [anteproyecto/01-definicion-y-alcance.md](../anteproyecto/01-definicion-y-alcance.md) §1.7— y la suite de pruebas de aislamiento se ejecuta en verde de forma reproducible. Las funcionalidades excluidas del alcance (§1.8.3) no condicionan ese cierre.

@@ -1,6 +1,6 @@
 # Modelo de datos
 
-Diseño de datos de la arquitectura multi-tenant jerárquica. Corresponde al objetivo específico 2 ([anteproyecto/01](anteproyecto/01-definicion-y-alcance.md) §1.7).
+Diseño de datos de la arquitectura multi-tenant jerárquica. Corresponde al objetivo específico **2**: diseñar el modelo jerárquico y especificar las políticas de aislamiento ([anteproyecto/01](../anteproyecto/01-definicion-y-alcance.md) §1.7).
 
 > Terminología: [Glosario](01-glosario.md) · Decisión de fondo: [ADR-006](07-decisiones-diseno.md) · Aislamiento: [Seguridad](06-seguridad.md)
 
@@ -152,6 +152,7 @@ Todas las tablas de negocio activan Row-Level Security. Las políticas se apoyan
 | Lectura | `is_org_member(organization_id)` |
 | Escritura de datos de negocio | `is_org_member(organization_id)` + verificación de rol en la capa de aplicación |
 | Administración (sucursales, miembros) | `is_org_owner(organization_id)` |
+| **Lectura del registro de auditoría** | `is_org_owner(organization_id)` — es la única tabla cuya lectura no basta con ser miembro (RF-704) |
 
 Las tablas de nivel sucursal usan **la misma condición sobre `organization_id`**: la pertenencia del `workshop_id` a la empresa activa se valida en la API, no en la política. Esta separación mantiene las políticas simples y auditables (ver [ADR-006](07-decisiones-diseno.md)).
 

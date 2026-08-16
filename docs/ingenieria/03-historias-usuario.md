@@ -10,7 +10,7 @@ Historias organizadas por épica, con criterios de aceptación verificables y tr
 |---|---|
 | **Propietario** (`Owner`) | Administra una o varias empresas: crea sucursales, gestiona miembros y roles. |
 | **Recepcionista** (`Receptionist`) | Atiende al cliente: lo registra y consulta su información. |
-| **Mecánico** (`Mechanic`) | Trabajo técnico; consulta clientes e inventario de su sucursal. |
+| **Mecánico** (`Mechanic`) | Trabajo técnico; consulta clientes de la empresa e inventario de la sucursal activa. |
 
 Los roles se nombran en inglés en el sistema (ver [Glosario](01-glosario.md)); aquí se usa la traducción para legibilidad de la narrativa.
 
@@ -238,10 +238,12 @@ Escala de puntos de historia (Fibonacci): `1` trivial · `2` sencilla · `3` mod
 - El mismo número de parte sí puede existir en otra sucursal de la empresa.
 - Si registro con stock inicial mayor a cero, se genera automáticamente un movimiento de entrada.
 
-### HU-17 · Ver solo el inventario de mi sucursal
+### HU-17 · Ver solo el inventario de la sucursal activa
 **Como** mecánico
-**quiero** ver las existencias de mi local
+**quiero** ver las existencias de la sucursal que tengo seleccionada
 **para** saber con qué cuento sin confundirme con otra sucursal.
+
+> El filtro lo determina la **sucursal activa** de la petición, no la asignación del miembro a sucursales: esa asignación es operativa y no restringe lo que puede verse ([ADR-006](07-decisiones-diseno.md)).
 
 *Requisitos*: RF-602 · *Puntos*: 3
 
@@ -309,12 +311,12 @@ Escala de puntos de historia (Fibonacci): `1` trivial · `2` sencilla · `3` mod
 **quiero** un registro de los cambios sensibles
 **para** saber quién hizo qué y cuándo.
 
-*Requisitos*: RF-703 · *Puntos*: 3
+*Requisitos*: RF-703, RF-704 · *Puntos*: 3
 
 **Criterios de aceptación**
-- Cambios de rol, remociones de miembros y bajas quedan registrados con autor, acción y fecha.
+- Quedan registradas con autor, acción y fecha las cinco acciones críticas que enumera RF-703: invitación de un miembro, cambio de rol, remoción de un miembro, desactivación de una sucursal y baja lógica de un cliente.
 - El registro sobrevive a la eliminación de la entidad o del usuario referenciado.
-- Solo el `Owner` puede consultarlo.
+- Solo el `Owner` puede consultarlo: los demás roles reciben error de permisos, y la restricción se sostiene también por acceso directo a la base de datos (RF-704).
 
 ---
 
