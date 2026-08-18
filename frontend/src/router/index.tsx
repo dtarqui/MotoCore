@@ -5,6 +5,7 @@ import { ClientesPage } from '../modules/clientes/pages/ClientesPage'
 import { InventarioPage } from '../modules/inventario/pages/InventarioPage'
 import { SucursalesPage } from '../modules/organizaciones/pages/SucursalesPage'
 import { EquipoPage } from '../modules/organizaciones/pages/EquipoPage'
+import { AuditoriaPage } from '../modules/auditoria/pages/AuditoriaPage'
 import { LoginPage } from '../modules/auth/pages/LoginPage'
 import { RegisterPage } from '../modules/auth/pages/RegisterPage'
 import { UnauthorizedPage } from '../modules/auth/pages/UnauthorizedPage'
@@ -70,6 +71,17 @@ export const appRouter = createBrowserRouter([
             element: (
               <RoleRoute allowedRoles={['owner', 'mechanic', 'receptionist']}>
                 <EquipoPage />
+              </RoleRoute>
+            ),
+          },
+          {
+            path: 'auditoria',
+            element: (
+              // Única ruta reservada al Owner (RF-704). La restricción real la
+              // aplican la API y la política de la base de datos; esto solo
+              // evita mostrar una pantalla que fallaría al cargar.
+              <RoleRoute allowedRoles={['owner']}>
+                <AuditoriaPage />
               </RoleRoute>
             ),
           },

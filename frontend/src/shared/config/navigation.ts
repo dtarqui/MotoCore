@@ -37,4 +37,10 @@ export const navigationItems: NavigationItem[] = [
     label: 'Equipo',
     allowedRoles: ['owner', 'mechanic', 'receptionist'],
   },
+  {
+    // Único elemento reservado al Owner (RF-704).
+    to: '/auditoria',
+    label: 'Auditoría',
+    allowedRoles: ['owner'],
+  },
 ]

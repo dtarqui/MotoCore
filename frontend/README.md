@@ -2,9 +2,11 @@
 
 SPA de React para la gestión de talleres de motocicletas.
 
-> **Nota de estado:** hoy consume la API REST del backend **.NET legacy** ([backend/](../backend/README.md)). Pendiente, como parte del pivote: migrar la auth a **Supabase** y apuntar al backend nuevo en [`server/`](../server/README.md), más los **selectores de empresa y sucursal** (multiempresa). Detalle del backend nuevo en [server/README.md](../server/README.md).
+> **Nota de estado:** el SPA ya consume el backend nuevo en [`server/`](../server/README.md), con **Supabase Auth** para la sesión y los **selectores de empresa y sucursal** enviando `X-Org-Id` / `X-Workshop-Id` en cada petición (ADR-005).
 >
-> **Terminología:** los módulos de este SPA conservan los nombres del modelo .NET, donde `taller` era la unidad de negocio única. En el modelo nuevo, la unidad de aislamiento es la **empresa** (`organizations`) y el taller pasa a ser una **sucursal** (`workshops`) — ver el [Glosario](../docs/ingenieria/01-glosario.md).
+> Rutas expuestas: clientes e inventario (el corte vertical), sucursales, equipo y auditoría. Los módulos de **motocicletas, órdenes e historial** conservan su interfaz en el repositorio pero **no están enrutados**: todavía no tienen endpoints en el backend nuevo, y una pantalla accesible que falla al cargar es peor que una que aún no está.
+>
+> **Terminología:** algunos módulos conservan los nombres del modelo .NET, donde `taller` era la unidad de negocio única. En el modelo nuevo la unidad de aislamiento es la **empresa** (`organizations`) y el taller pasa a ser una **sucursal** (`workshops`) — ver el [Glosario](../docs/ingenieria/01-glosario.md).
 
 ## Stack
 
@@ -24,7 +26,15 @@ npm run lint
 npm run preview   # sirve el build de producción
 ```
 
-Configura `VITE_API_BASE_URL` en `.env` apuntando al backend (por defecto `https://localhost:7222`, ver [backend/README.md](../backend/README.md)).
+Copia `.env.example` a `.env` y completa:
+
+| Variable | Para qué |
+|---|---|
+| `VITE_API_BASE_URL` | URL del backend `server/`. Por defecto `http://localhost:8787` (su dev-server) |
+| `VITE_SUPABASE_URL` | Proyecto Supabase, para el inicio de sesión |
+| `VITE_SUPABASE_ANON_KEY` | Clave anónima — es pública por diseño: el acceso lo deciden las políticas de la base de datos, no el secreto de la clave |
+
+**Nunca** pongas la clave *service-role* en este archivo: se empaqueta en el navegador y esa clave salta las políticas de aislamiento.
 
 ### Con Docker
 
@@ -36,13 +46,11 @@ docker compose up --build
 
 Multi-stage: build con `node:20-alpine`, se sirve con `nginx:alpine` (`nginx.conf` incluye fallback de rutas para el SPA).
 
-### Generar tipos desde la API (OpenAPI)
+### Generar tipos desde la API (OpenAPI) — inactivo
 
-```bash
-npm run generate:api-types
-```
+El script `generate:api-types` apunta al `swagger.json` del **backend .NET legacy** (`localhost:7222`), que ya no es el backend de este SPA. El nuevo (`server/`, Hono) no publica un documento OpenAPI, así que hoy los tipos de la API se declaran a mano en cada módulo (`<modulo>-api.ts`).
 
-Requiere el backend corriendo localmente. Ver [src/shared/api/README.md](src/shared/api/README.md) para el detalle.
+Queda pendiente decidir si se publica OpenAPI desde `server/` y se retoma la generación, o si se retira el script. Ver [src/shared/api/README.md](src/shared/api/README.md).
 
 ### Empaquetado multiplataforma (PWA / Capacitor / Electron)
 
@@ -101,4 +109,6 @@ No hay suite de tests en el frontend todavía (ni Vitest ni React Testing Librar
 
 ## Estado real de las features
 
-Todos los módulos listados arriba están conectados a la API real del backend (hoy el .NET; **pendiente** migrar auth a Supabase y apuntar al backend nuevo en [`server/`](../server/README.md), más los selectores de empresa y sucursal). Ver el [análisis del mercado](../docs/ingenieria/09-analisis-mercado.md) para el roadmap priorizado de funcionalidades.
+Enrutados y conectados al backend nuevo: **clientes**, **inventario**, **sucursales**, **equipo** y **auditoría**, más el registro e inicio de sesión con Supabase Auth y los selectores de contexto activo.
+
+Sin enrutar, a la espera de sus endpoints: **motocicletas**, **órdenes**, **historial** y el detalle del **dashboard**. Están fuera del alcance del proyecto de grado (RF-800). Ver el [análisis del mercado](../docs/ingenieria/09-analisis-mercado.md) para el roadmap priorizado de funcionalidades.
