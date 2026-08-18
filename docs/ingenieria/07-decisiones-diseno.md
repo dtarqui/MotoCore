@@ -32,7 +32,7 @@ Registro de las decisiones estructurales del proyecto, con las alternativas eval
 
 **Estado**: aceptada.
 
-**Contexto.** El aislamiento entre empresas es el requisito no funcional crítico del sistema (RNF-101). La práctica habitual en arquitecturas de esquema compartido consiste en filtrar por el identificador de inquilino en cada consulta, desde el código de aplicación; ese enfoque depende de que **ninguna** consulta omita el filtro, y un solo descuido produce una fuga de datos. La literatura reciente documenta además que la seguridad a nivel de fila, aun siendo un control efectivo, no está exenta de vías de fuga indirectas (ver estado del arte).
+**Contexto.** El aislamiento entre organizaciones es el requisito no funcional crítico del sistema (RNF-101). La práctica habitual en arquitecturas de esquema compartido consiste en filtrar por el identificador de inquilino en cada consulta, desde el código de aplicación; ese enfoque depende de que **ninguna** consulta omita el filtro, y un solo descuido produce una fuga de datos. La literatura reciente documenta además que la seguridad a nivel de fila, aun siendo un control efectivo, no está exenta de vías de fuga indirectas (ver estado del arte).
 
 **Alternativas consideradas**
 1. Aislamiento únicamente en la capa de aplicación.
@@ -90,14 +90,14 @@ Registro de las decisiones estructurales del proyecto, con las alternativas eval
 
 **Estado**: aceptada.
 
-**Contexto.** En un modelo donde una cuenta pertenece a varias empresas, cada petición debe indicar sobre cuál de ellas opera. Resolver el contexto de forma implícita —por ejemplo, tomando la primera empresa asociada a la cuenta— impide el cambio explícito de contexto y hace ambiguo el alcance de cada operación.
+**Contexto.** En un modelo donde una cuenta pertenece a varias organizaciones, cada petición debe indicar sobre cuál de ellas opera. Resolver el contexto de forma implícita —por ejemplo, tomando la primera organización asociada a la cuenta— impide el cambio explícito de contexto y hace ambiguo el alcance de cada operación.
 
 **Alternativas consideradas**
-1. Incluir la empresa activa como declaración dentro del token de sesión: obliga a reemitir el token en cada cambio de contexto.
-2. Anidar la empresa en la ruta de cada recurso (`/api/empresas/{id}/clientes`): hace explícito el contexto, pero acopla la estructura de rutas a la jerarquía y complica su evolución.
-3. Indicar la empresa activa mediante una cabecera de petición, validada contra la membresía.
+1. Incluir la organización activa como declaración dentro del token de sesión: obliga a reemitir el token en cada cambio de contexto.
+2. Anidar la organización en la ruta de cada recurso (`/api/organizaciones/{id}/clientes`): hace explícito el contexto, pero acopla la estructura de rutas a la jerarquía y complica su evolución.
+3. Indicar la organización activa mediante una cabecera de petición, validada contra la membresía.
 
-**Decisión**: opción 3 — cabecera `X-Org-Id` para la empresa activa y `X-Workshop-Id` para la sucursal activa.
+**Decisión**: opción 3 — cabecera `X-Org-Id` para la organización activa y `X-Workshop-Id` para el taller activo.
 
 **Justificación.** Permite cambiar de contexto sin reemitir el token de sesión, mantiene estables las rutas de los recursos y concentra la validación en un único punto reutilizable por todos los módulos.
 
@@ -105,31 +105,31 @@ Registro de las decisiones estructurales del proyecto, con las alternativas eval
 
 ---
 
-## ADR-006 — Jerarquía de dos niveles: empresa con varias sucursales
+## ADR-006 — Jerarquía de dos niveles: organización con varios talleres
 
 **Estado**: aceptada.
 
-**Contexto.** El operador al que se dirige el sistema puede administrar varias empresas y, dentro de cada una, **varias sucursales** (locales físicos donde se presta el servicio). La cuestión de diseño es dónde situar el límite de aislamiento cuando el inquilino tiene una subdivisión interna: si se sitúa demasiado abajo, se fragmenta la información del cliente entre locales; si no se modela la subdivisión, no puede distinguirse dónde ocurre cada operación.
+**Contexto.** El operador al que se dirige el sistema puede administrar varias organizaciones y, dentro de cada una, **varios talleres** (locales físicos donde se presta el servicio). La cuestión de diseño es dónde situar el límite de aislamiento cuando el inquilino tiene una subdivisión interna: si se sitúa demasiado abajo, se fragmenta la información del cliente entre locales; si no se modela la subdivisión, no puede distinguirse dónde ocurre cada operación.
 
 **Alternativas consideradas**
-1. **Una empresa equivale a un local.** Cada sucursal se registra como una empresa independiente. Es la opción más simple, pero fragmenta clientes e historial entre locales de un mismo operador y obliga a cambiar de contexto para atender al mismo cliente — anula el beneficio de centralizar.
-2. **La sucursal como segunda unidad de aislamiento** (inquilino anidado): las políticas de seguridad filtrarían también por sucursal. Ofrece la separación más estricta, pero impide compartir clientes e historial entre locales de la misma empresa y duplica la complejidad de las políticas, aumentando la probabilidad de error en su definición.
-3. **Jerarquía empresa → sucursales con el aislamiento situado únicamente en la empresa.** La sucursal actúa como criterio de alcance operativo: determina *dónde* ocurre una operación, no *quién* puede verla.
+1. **Una organización equivale a un local.** Cada taller se registra como una organización independiente. Es la opción más simple, pero fragmenta clientes e historial entre locales de un mismo operador y obliga a cambiar de contexto para atender al mismo cliente — anula el beneficio de centralizar.
+2. **El taller como segunda unidad de aislamiento** (inquilino anidado): las políticas de seguridad filtrarían también por taller. Ofrece la separación más estricta, pero impide compartir clientes e historial entre locales de la misma organización y duplica la complejidad de las políticas, aumentando la probabilidad de error en su definición.
+3. **Jerarquía organización → talleres con el aislamiento situado únicamente en la organización.** El taller actúa como criterio de alcance operativo: determina *dónde* ocurre una operación, no *quién* puede verla.
 
 **Decisión**: opción 3.
 
-**Justificación.** Conserva **un único límite de seguridad** —la empresa—, lo que mantiene las políticas de aislamiento simples y auditables, y a la vez habilita la operación en varios locales. Los datos que acompañan al cliente permanecen a nivel de empresa; los que corresponden a la existencia física de un local, a nivel de sucursal.
+**Justificación.** Conserva **un único límite de seguridad** —la organización—, lo que mantiene las políticas de aislamiento simples y auditables, y a la vez habilita la operación en varios locales. Los datos que acompañan al cliente permanecen a nivel de organización; los que corresponden a la existencia física de un local, a nivel de taller.
 
 El reparto concreto de cada entidad entre los dos niveles, que se deriva de esta decisión, está en el [Glosario](01-glosario.md).
 
 **Consecuencias**
-- El modelo incorpora una entidad de sucursal dependiente de la empresa, y una entidad de asignación de miembros a sucursales.
-- Las entidades de nivel sucursal referencian **tanto** a la sucursal como a la empresa; conservar la referencia a la empresa en todas las tablas permite que las políticas de aislamiento se evalúen siempre sobre un único criterio.
-- Cada petición de nivel sucursal requiere indicar la sucursal activa, validada como perteneciente a la empresa activa (ADR-005).
-- Las restricciones de unicidad se definen según el nivel de cada entidad: el número de parte de inventario es único por sucursal; el correo del cliente, único por empresa.
-- La numeración de órdenes de trabajo queda fijada como correlativa **por sucursal** (RF-802): se sigue del nivel asignado a esa entidad, aunque el módulo esté fuera del alcance actual.
+- El modelo incorpora una entidad de taller dependiente de la organización, y una entidad de asignación de miembros a talleres.
+- Las entidades de nivel taller referencian **tanto** al taller como a la organización; conservar la referencia a la organización en todas las tablas permite que las políticas de aislamiento se evalúen siempre sobre un único criterio.
+- Cada petición de nivel taller requiere indicar el taller activo, validada como perteneciente a la organización activa (ADR-005).
+- Las restricciones de unicidad se definen según el nivel de cada entidad: el número de parte de inventario es único por taller; el correo del cliente, único por organización.
+- La numeración de órdenes de trabajo queda fijada como correlativa **por taller** (RF-802): se sigue del nivel asignado a esa entidad, aunque el módulo esté fuera del alcance actual.
 
-**Alcance del aporte.** El modelo pasa de una multi-tenancy plana a una **jerárquica**: el reto de diseño consiste en sostener un aislamiento verificable entre empresas mientras se soporta una subdivisión interna con reglas de alcance distintas según el tipo de entidad (ver [anteproyecto/01-definicion-y-alcance.md](../anteproyecto/01-definicion-y-alcance.md)).
+**Alcance del aporte.** El modelo pasa de una multi-tenancy plana a una **jerárquica**: el reto de diseño consiste en sostener un aislamiento verificable entre organizaciones mientras se soporta una subdivisión interna con reglas de alcance distintas según el tipo de entidad (ver [anteproyecto/01-definicion-y-alcance.md](../anteproyecto/01-definicion-y-alcance.md)).
 
 ---
 
@@ -137,7 +137,7 @@ El reparto concreto de cada entidad entre los dos niveles, que se deriva de esta
 
 **Estado**: aceptada.
 
-**Contexto.** Tres operaciones del sistema deben ser atómicas o no ocurrir: el registro de una cuenta —que crea empresa, primera sucursal y membresía propietaria (RF-101)—, el registro de un movimiento de existencias —que inserta el movimiento y actualiza la existencia del repuesto (RF-604)— y la transferencia entre sucursales, que genera dos movimientos vinculados (RF-608). La biblioteca cliente del proveedor de datos expone cada sentencia como una petición HTTP independiente y **no admite transacciones que abarquen varias sentencias**.
+**Contexto.** Tres operaciones del sistema deben ser atómicas o no ocurrir: el registro de una cuenta —que crea organización, primer taller y membresía propietaria (RF-101)—, el registro de un movimiento de existencias —que inserta el movimiento y actualiza la existencia del repuesto (RF-604)— y la transferencia entre talleres, que genera dos movimientos vinculados (RF-608). La biblioteca cliente del proveedor de datos expone cada sentencia como una petición HTTP independiente y **no admite transacciones que abarquen varias sentencias**.
 
 **Alternativas consideradas**
 
@@ -167,4 +167,4 @@ Se documentan para dejar constancia de que están identificadas; su resolución 
 |---|---|
 | Proveedor de mensajería por WhatsApp | Abierta — depende de funcionalidad fuera del alcance actual (ver [09-analisis-mercado.md](09-analisis-mercado.md)) |
 | Enfoque de integración con la facturación electrónica del SIN: proveedor autorizado frente a implementación propia de firma digital y generación de XML | Abierta — requiere validar la normativa vigente antes de decidir |
-| Si la asignación de un miembro a sucursales debe restringir lo que puede ver, o mantenerse informativa | **Cerrada**: se mantiene **operativa**, sin efecto sobre los permisos. Restringir por sucursal introduciría una segunda frontera de autorización y contradiría el principio de un único límite de aislamiento (ADR-006). Si el negocio llegara a exigirlo, sería un ADR nuevo, no un ajuste de este |
+| Si la asignación de un miembro a talleres debe restringir lo que puede ver, o mantenerse informativa | **Cerrada**: se mantiene **operativa**, sin efecto sobre los permisos. Restringir por taller introduciría una segunda frontera de autorización y contradiría el principio de un único límite de aislamiento (ADR-006). Si el negocio llegara a exigirlo, sería un ADR nuevo, no un ajuste de este |

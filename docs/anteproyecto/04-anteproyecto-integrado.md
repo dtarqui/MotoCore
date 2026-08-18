@@ -10,7 +10,7 @@
 
 ## ANTEPROYECTO
 
-### Diseño, implementación y validación de una arquitectura multi-tenant jerárquica con aislamiento verificable en la base de datos para empresas de servicio de motocicletas en Bolivia
+### Diseño, implementación y validación de una arquitectura multi-tenant jerárquica con aislamiento verificable en la base de datos para organizaciones de servicio de motocicletas en Bolivia
 
 ---
 
@@ -31,14 +31,14 @@ La Paz – Bolivia
 
 ## 1. Título del proyecto
 
-> **Diseño, implementación y validación de una arquitectura multi-tenant jerárquica con aislamiento verificable en la base de datos para empresas de servicio de motocicletas en Bolivia**
+> **Diseño, implementación y validación de una arquitectura multi-tenant jerárquica con aislamiento verificable en la base de datos para organizaciones de servicio de motocicletas en Bolivia**
 
 | Campo | Detalle |
 |---|---|
 | **Línea de investigación** | Arquitectura de software y seguridad de datos en aplicaciones de software como servicio |
 | **Área de conocimiento** | Ingeniería de software · Bases de datos · Computación en la nube |
 | **Período de ejecución** | Septiembre a diciembre de 2026 |
-| **Ámbito de aplicación** | Empresas de servicio y reparación de motocicletas en Bolivia |
+| **Ámbito de aplicación** | Organizaciones de servicio y reparación de motocicletas en Bolivia |
 
 ---
 
@@ -46,29 +46,29 @@ La Paz – Bolivia
 
 ### 2.1 Situación problemática
 
-**Síntoma.** Un operador que administra una o varias empresas de servicio de motocicletas, cada una con una o varias sucursales, no dispone en Bolivia de una plataforma que le permita gestionarlas desde una sola cuenta con visión consolidada. Hoy debe elegir entre dos malas opciones: llevar cada local como una cuenta independiente —perdiendo la vista unificada del cliente y su historial— o recurrir a hojas de cálculo y software genérico no especializado.
+**Síntoma.** Un operador que administra una o varias organizaciones de servicio de motocicletas, cada una con uno o varios talleres, no dispone en Bolivia de una plataforma que le permita gestionarlas desde una sola cuenta con visión consolidada. Hoy debe elegir entre dos malas opciones: llevar cada local como una cuenta independiente —perdiendo la vista unificada del cliente y su historial— o recurrir a hojas de cálculo y software genérico no especializado.
 
-**Causa.** El software de gestión de talleres relevado con presencia en Bolivia (AutoSoft Taller, ServitechApp, TuneraTaller) y el regional (Appli-Car, Garage App) está construido sobre arquitecturas de **un solo inquilino** (*single-tenant*): asumen un taller por cuenta. No modelan ni la pertenencia de varias empresas a una misma cuenta, ni la de varias sucursales a una misma empresa. Cuando existe algún aislamiento entre clientes del sistema, se resuelve **únicamente en el código de la aplicación**: basta que una consulta omita el filtro correspondiente para que se produzca una fuga de datos, porque no hay ningún control por debajo que lo impida.
+**Causa.** El software de gestión de talleres relevado con presencia en Bolivia (AutoSoft Taller, ServitechApp, TuneraTaller) y el regional (Appli-Car, Garage App) está construido sobre arquitecturas de **un solo inquilino** (*single-tenant*): asumen un taller por cuenta. No modelan ni la pertenencia de varias organizaciones a una misma cuenta, ni la de varios talleres a una misma organización. Cuando existe algún aislamiento entre clientes del sistema, se resuelve **únicamente en el código de la aplicación**: basta que una consulta omita el filtro correspondiente para que se produzca una fuga de datos, porque no hay ningún control por debajo que lo impida.
 
 **Impacto.**
 
 | Efecto | Consecuencia |
 |---|---|
-| Pérdida de la visión consolidada | El historial del cliente queda fragmentado entre sucursales de la misma empresa, que es justamente lo que se busca al centralizar |
-| Riesgo de fuga de datos entre empresas | Al depender el aislamiento de que cada consulta esté correctamente escrita, un solo error de programación expone información de un cliente del sistema a otro |
+| Pérdida de la visión consolidada | El historial del cliente queda fragmentado entre talleres de la misma organización, que es justamente lo que se busca al centralizar |
+| Riesgo de fuga de datos entre organizaciones | Al depender el aislamiento de que cada consulta esté correctamente escrita, un solo error de programación expone información de un cliente del sistema a otro |
 | Barrera de costo | La infraestructura tradicional (servidor propio, despliegue manual) eleva el costo de entrada, factor crítico en un sector con alta informalidad y bajo presupuesto de tecnología |
 
 ### 2.2 Delimitación del problema
 
 | Dimensión | Delimitación |
 |---|---|
-| **Espacial / organizacional** | Empresas de servicio y reparación de motocicletas en Bolivia; específicamente, operadores que administran —o planean administrar— más de una empresa y/o más de una sucursal |
+| **Espacial / organizacional** | Organizaciones de servicio y reparación de motocicletas en Bolivia; específicamente, operadores que administran —o planean administrar— más de una organización y/o más de un taller |
 | **Temporal** | Desarrollo y validación entre septiembre y diciembre de 2026 (cuatro meses) |
-| **Técnica** | La capa de identidad, jerarquía organizacional y aislamiento de datos: cuentas, empresas, sucursales, membresías con rol, y las políticas de seguridad que las hacen cumplir en la base de datos. **No** abarca la totalidad de los módulos operativos |
+| **Técnica** | La capa de identidad, jerarquía organizacional y aislamiento de datos: cuentas, organizaciones, talleres, membresías con rol, y las políticas de seguridad que las hacen cumplir en la base de datos. **No** abarca la totalidad de los módulos operativos |
 
 ### 2.3 Formulación del problema
 
-> **¿De qué manera el diseño e implementación de una arquitectura multi-tenant jerárquica sobre infraestructura serverless, con aislamiento aplicado mediante seguridad a nivel de fila, mejora la gestión centralizada y la seguridad de los datos de operadores de varias empresas y sucursales de servicio de motocicletas en Bolivia?**
+> **¿De qué manera el diseño e implementación de una arquitectura multi-tenant jerárquica sobre infraestructura serverless, con aislamiento aplicado mediante seguridad a nivel de fila, mejora la gestión centralizada y la seguridad de los datos de operadores de varias organizaciones y talleres de servicio de motocicletas en Bolivia?**
 
 ---
 
@@ -78,10 +78,10 @@ La Paz – Bolivia
 
 **Preguntas específicas.** Una por cada objetivo específico, en el mismo orden:
 
-1. ¿Qué estrategias de aislamiento multi-tenant documenta la literatura, con qué ventajas y limitaciones, y qué carencias presentan frente al modelo multiempresa las soluciones de gestión de talleres disponibles en Bolivia? *(Análisis)*
-2. ¿Qué modelo de datos y qué políticas de seguridad a nivel de fila permiten representar la jerarquía empresa → sucursales sin fragmentar la información del cliente y sosteniendo un único límite de aislamiento? *(Diseño)*
+1. ¿Qué estrategias de aislamiento multi-tenant documenta la literatura, con qué ventajas y limitaciones, y qué carencias presentan frente al modelo multiorganización las soluciones de gestión de talleres disponibles en Bolivia? *(Análisis)*
+2. ¿Qué modelo de datos y qué políticas de seguridad a nivel de fila permiten representar la jerarquía organización → talleres sin fragmentar la información del cliente y sosteniendo un único límite de aislamiento? *(Diseño)*
 3. ¿Cómo se implementan la identidad, la jerarquía organizacional, el control de acceso por rol y el alcance diferenciado de datos sobre una plataforma serverless con verificación automatizada en cada integración? *(Implementación)*
-4. ¿Cómo se comprueba, con evidencia reproducible, que el aislamiento entre empresas se cumple incluso ante fallos de la capa de aplicación, y que el cambio de contexto entre empresas y sucursales resulta usable para el operador? *(Validación)*
+4. ¿Cómo se comprueba, con evidencia reproducible, que el aislamiento entre organizaciones se cumple incluso ante fallos de la capa de aplicación, y que el cambio de contexto entre organizaciones y talleres resulta usable para el operador? *(Validación)*
 
 ---
 
@@ -89,11 +89,11 @@ La Paz – Bolivia
 
 ### 4.1 Justificación teórica
 
-El estado del arte aborda el aislamiento entre inquilinos en modelos **planos**, de un solo nivel. Este proyecto extiende el problema a una **multi-tenancy jerárquica**, donde el inquilino posee una subdivisión interna y las entidades no comparten el mismo alcance: unas siguen al cliente y pertenecen a la empresa, otras responden a la existencia física de un local y pertenecen a la sucursal. Sostener un aislamiento verificable bajo esa asimetría, con un único límite de seguridad, es el aporte que el proyecto disputa a la literatura revisada.
+El estado del arte aborda el aislamiento entre inquilinos en modelos **planos**, de un solo nivel. Este proyecto extiende el problema a una **multi-tenancy jerárquica**, donde el inquilino posee una subdivisión interna y las entidades no comparten el mismo alcance: unas siguen al cliente y pertenecen a la organización, otras responden a la existencia física de un local y pertenecen al taller. Sostener un aislamiento verificable bajo esa asimetría, con un único límite de seguridad, es el aporte que el proyecto disputa a la literatura revisada.
 
 ### 4.2 Justificación práctica
 
-Ofrece a los operadores bolivianos de servicio de motocicletas una capacidad que hoy no existe en su mercado: administrar varias empresas desde una sola cuenta, con visión consolidada del cliente entre sucursales y con separación de datos demostrable. El relevamiento confirma que la gestión de varias empresas por cuenta está **ausente** en la oferta local, y que ninguna solución relevada documenta su aislamiento entre organizaciones.
+Ofrece a los operadores bolivianos de servicio de motocicletas una capacidad que hoy no existe en su mercado: administrar varias organizaciones desde una sola cuenta, con visión consolidada del cliente entre talleres y con separación de datos demostrable. El relevamiento confirma que la gestión de varias organizaciones por cuenta está **ausente** en la oferta local, y que ninguna solución relevada documenta su aislamiento entre organizaciones.
 
 ### 4.3 Justificación metodológica
 
@@ -101,23 +101,23 @@ Aporta un procedimiento reproducible para **verificar** el aislamiento multi-ten
 
 ### 4.4 Justificación social y económica
 
-El modelo de despliegue serverless, con escalado a cero y sin costo fijo por empresa, hace económicamente viable ofrecer software especializado a un sector con **84,2 % de informalidad laboral** y presupuesto de tecnología mínimo. La barrera de costo identificada en el planteamiento del problema es, en sí misma, una condición de diseño del proyecto.
+El modelo de despliegue serverless, con escalado a cero y sin costo fijo por organización, hace económicamente viable ofrecer software especializado a un sector con **84,2 % de informalidad laboral** y presupuesto de tecnología mínimo. La barrera de costo identificada en el planteamiento del problema es, en sí misma, una condición de diseño del proyecto.
 
 ---
 
 ## 5. Antecedentes
 
-**El parque de motocicletas y la demanda de servicio.** La motocicleta es el vehículo más numeroso de Bolivia. Según el Instituto Nacional de Estadística (INE), a partir de los registros del Registro Único para la Administración Tributaria Municipal (RUAT), en 2024 se contabilizaron **872.550 motocicletas** sobre un parque automotor total de **2.583.319 vehículos**, encabezando el parque nacional por delante de vagonetas, automóviles y camionetas. Su crecimiento es sostenido y superior al del parque en conjunto: pasó de **657.718 unidades en 2021** a **800.890 en 2023** y a **872.550 en 2024**, un incremento cercano al **33 % en tres años**. Cada una de esas unidades requiere mantenimiento periódico y reparaciones, lo que sostiene una red amplia de talleres de servicio distribuida por todo el territorio — una base de negocio que crece año a año y que, al hacerlo, empuja a los operadores más exitosos a abrir locales adicionales.
+**El parque de motocicletas y la demanda de servicio.** La motocicleta es el vehículo más numeroso de Bolivia. Según el Instituto Nacional de Estadística (INE), a partir de los registros del Registro Único para la Administración Tributaria Municipal (RUAT), en 2024 se contabilizaron **872.550 motocicletas** sobre un parque automotor total de **2.583.283 vehículos**, encabezando el parque nacional por delante de vagonetas, automóviles y camionetas. Su crecimiento es sostenido y superior al del parque en conjunto: pasó de **657.718 unidades en 2021** a **800.890 en 2023** y a **872.550 en 2024**, un incremento del **32,7 % en tres años**, frente al +16,0 % del parque automotor total en el mismo período. Cada una de esas unidades requiere mantenimiento periódico y reparaciones, lo que sostiene una red amplia de talleres de servicio distribuida por todo el territorio — una base de negocio que crece año a año y que, al hacerlo, empuja a los operadores más exitosos a abrir locales adicionales.
 
-**Condiciones del sector que explican el problema.** Ese crecimiento ocurre, sin embargo, en una economía marcadamente informal: el INE reporta una **informalidad laboral del 84,2 % en 2024**, tendencia que se ha agravado de forma sostenida durante las últimas dos décadas. Para el rubro de talleres esto se traduce en unidades de negocio pequeñas, con presupuesto de tecnología muy limitado y baja adopción de software especializado, donde la gestión se apoya todavía en registros en papel u hojas de cálculo. En ese contexto, el operador que crece —el que abre una segunda o tercera sucursal, o constituye más de una empresa— se encuentra sin herramientas que le permitan administrarlas de forma centralizada. Este es precisamente el escenario que el presente proyecto aborda.
+**Condiciones del sector que explican el problema.** Ese crecimiento ocurre, sin embargo, en una economía marcadamente informal: el INE reporta una **informalidad laboral del 84,2 % en 2024**, tendencia que se ha agravado de forma sostenida durante las últimas dos décadas. Para el rubro de talleres esto se traduce en unidades de negocio pequeñas, con presupuesto de tecnología muy limitado y baja adopción de software especializado, donde la gestión se apoya todavía en registros en papel u hojas de cálculo. En ese contexto, el operador que crece —el que abre un segundo o tercer taller, o constituye más de una organización— se encuentra sin herramientas que le permitan administrarlas de forma centralizada. Este es precisamente el escenario que el presente proyecto aborda.
 
 **Fuentes de los antecedentes**
 
 | Fuente | Tipo |
 |---|---|
-| INE — Parque Automotor, cuadros estadísticos (datos originados en el RUAT) | Primaria (oficial) |
-| INE — Boletín Estadístico Parque Automotor 2023 | Primaria (oficial) |
-| INE — Estadísticas del Parque Automotor 2003–2022 (serie histórica) | Primaria (oficial) |
+| INE — **Cuadro N.º 1.2**, *Bolivia: parque automotor por tipo de servicio y clase de vehículo, 2003–2025* (datos originados en el RUAT). Cuadro del que proceden todas las cifras | Primaria (oficial, descargable) |
+| INE — *Boletín estadístico parque automotor 2024* (28 de mayo de 2025) | Primaria (oficial) |
+| INE — *Estadísticas del parque automotor 2003–2025* (1 de julio de 2026) | Primaria (oficial) |
 
 ---
 
@@ -160,76 +160,116 @@ No constituye literatura académica —son registros oficiales de vulnerabilidad
 
 La solución de **Dar et al. (2023)** demuestra empíricamente que la seguridad a nivel de fila cumple su función como control de acceso; **sin embargo**, su análisis se limita a un modelo de inquilinos plano y se concentra en la capa de consulta, sin abordar la decisión arquitectónica previa: **dónde ubicar el límite de aislamiento cuando el inquilino posee una subdivisión interna** cuyas entidades no comparten el mismo alcance. **Alobaywi et al. (2026)** y **Olabanji et al. (2023)** sistematizan amenazas y tendencias, **pero**, al ser revisiones, identifican riesgos sin proponer ni validar una arquitectura aplicable a un SaaS de gestión empresarial. **Andriianenko (2026)** compara esquema compartido frente a base por inquilino, **no obstante** los evalúa como alternativas planas y excluyentes. **Simić et al. (2024)** sí modelan una jerarquía, **aunque** su aislamiento opera sobre recursos de infraestructura y no sobre filas de una base relacional compartida. A ello se suma que la serie de CVE evidencia que confiar en una sola capa de aislamiento resulta insuficiente en la práctica.
 
-El presente proyecto aborda esta deficiencia mediante el **diseño, implementación y validación de una arquitectura multi-tenant jerárquica (empresa → sucursales)** que mantiene un **único límite de aislamiento verificable** a nivel de empresa, tratando la sucursal como criterio de alcance operativo y no como segunda frontera de seguridad; refuerza la seguridad a nivel de fila con **verificación de membresía en la capa de aplicación**; y **valida empíricamente la separación de datos** por dos vías independientes.
+El presente proyecto aborda esta deficiencia mediante el **diseño, implementación y validación de una arquitectura multi-tenant jerárquica (organización → talleres)** que mantiene un **único límite de aislamiento verificable** a nivel de organización, tratando el taller como criterio de alcance operativo y no como segunda frontera de seguridad; refuerza la seguridad a nivel de fila con **verificación de membresía en la capa de aplicación**; y **valida empíricamente la separación de datos** por dos vías independientes.
 
 ---
 
 ## 7. Marco teórico y conceptual
 
-Conforme a la instrucción de que este punto no sea extenso y se amplíe en una fase posterior de la investigación, se presenta aquí la **estructura del marco teórico y conceptual**: las tecnologías y teorías cuya definición es obligatoria, y el orden en que se desarrollarán. Cada entrada indica entre paréntesis la fuente que la sustenta.
+El **marco conceptual** responde *«¿qué herramientas se usan?»*; el **marco teórico**, *«¿por qué se usan y cómo funcionan internamente?»*. Conforme a la instrucción de que este punto no sea extenso, se presenta condensado: diez definiciones en el conceptual y, en el teórico, el enunciado de cada teoría y la decisión de ingeniería que gobierna — su crítica se remite a §7.3 y su encadenamiento con el problema a §7.4, para no repetirlos. Las fichas analíticas por teoría se incorporan en la fase siguiente. Toda afirmación no propia lleva crédito a su autor en normas APA 7.ª edición, con autor corporativo cuando la fuente es documentación técnica sin autor humano.
 
 ### 7.1 Marco conceptual — el «qué»
 
-Definición formal de las tecnologías propias de esta solución. Se excluyen conceptos universales o básicos.
+Definición formal de las tecnologías propias de esta solución; se excluyen los conceptos universales o básicos.
 
-- 7.1.1 Node.js
-- 7.1.2 TypeScript
-- 7.1.3 API REST
-- 7.1.4 JSON Web Token (JWT)
-- 7.1.5 PostgreSQL
-- 7.1.6 Row-Level Security (RLS)
-- 7.1.7 Función serverless
-- 7.1.8 Validación por esquema
-- 7.1.9 Progressive Web App (PWA)
-- 7.1.10 Problem Details
+| # | Término | Definición formal | Fuente |
+|---|---|---|---|
+| 1 | **Node.js** | Entorno de ejecución de JavaScript del lado del servidor, sobre el motor V8, con entrada/salida no bloqueante y orientada a eventos. | OpenJS Foundation (s. f.) |
+| 2 | **TypeScript** | Lenguaje que extiende JavaScript con un sistema de tipos estático opcional, verificado en compilación y borrado en la salida ejecutable. | Microsoft (s. f.) |
+| 3 | **API REST** | Estilo arquitectónico definido por seis restricciones —cliente-servidor, **sin estado**, cacheable, interfaz uniforme, sistema por capas y código bajo demanda—, orientado a recursos identificados por URI. | Fielding (2000) |
+| 4 | **JSON Web Token (JWT)** | Formato compacto y seguro para URL que representa declaraciones como objeto JSON, verificable mediante firma digital. Estándar RFC 7519. | Jones et al. (2015) |
+| 5 | **PostgreSQL** | Gestor de bases de datos objeto-relacional de código abierto, con cumplimiento ACID y soporte extensible de tipos, funciones y políticas de acceso. | PostgreSQL Global Development Group (s. f.-a) |
+| 6 | **Row-Level Security (RLS)** | Mecanismo de PostgreSQL que restringe, **dentro del propio motor**, qué filas puede leer o modificar cada usuario, mediante políticas evaluadas en toda consulta con independencia de la aplicación que la origine. | PostgreSQL Global Development Group (s. f.-b) |
+| 7 | **Función serverless** | Unidad de cómputo desplegada sin administrar servidores, de ejecución **efímera y sin estado**, invocada por evento, facturada por consumo real y con escalado automático hasta cero. | Jonas et al. (2019) |
+| 8 | **Validación por esquema** | Declaración de la forma esperada de un dato como esquema ejecutable, que valida en tiempo de ejecución y del cual se **deriva** el tipo estático, evitando dos definiciones paralelas. | Zod (s. f.) |
+| 9 | **Progressive Web App (PWA)** | Aplicación web que, mediante un manifiesto y un *service worker*, resulta instalable en el dispositivo sin distribuirse por una tienda de aplicaciones. | World Wide Web Consortium [W3C] (2026) |
+| 10 | **Problem Details** | Formato normalizado de respuesta de error para interfaces HTTP: tipo, título, estado y detalle en un cuerpo estructurado. Estándar RFC 9457, que sustituye al RFC 7807. | Nottingham et al. (2023) |
 
 ### 7.2 Marco teórico — el «por qué» y el «cómo»
 
-Principios, teoremas, modelos y metodología que sustentan cada decisión de ingeniería.
+#### 7.2.1 Teorías de arquitectura — el diseño global
 
-**7.2.1 Teorías de arquitectura — el diseño global**
-- Estilo arquitectónico REST y restricción de ausencia de estado (Fielding, 2000)
-- Atributos de calidad y tácticas arquitectónicas (Bass et al., 2021)
-- Modelos de multi-tenancy (Krebs et al., 2012; Bezemer & Zaidman, 2010)
-- Computación serverless y escalado a cero (Jonas et al., 2019)
+**Estilo REST y ausencia de estado.** Fielding (2000) demostró que la restricción *stateless* —cada petición contiene todo lo necesario para ser atendida— produce visibilidad, fiabilidad y **escalabilidad horizontal**. Es la condición que hace posible el despliegue serverless, donde la función que atiende una petición puede no ser la que atienda la siguiente. Bass et al. (2021) añaden el criterio que ordena el conjunto: la arquitectura se determina por sus **atributos de calidad** y no por su funcionalidad, y cada uno se alcanza con tácticas trazables hasta un requisito; bajo ese marco el aislamiento entre organizaciones es el atributo rector del sistema. Richards y Ford (2020) completan que toda decisión arquitectónica es un intercambio cuyo valor documental está en registrar las alternativas descartadas.
 
-**7.2.2 Teorías de backend y persistencia — cómo se procesan y guardan los datos**
-- Modelo relacional (Codd, 1970)
-- Propiedades transaccionales ACID (Haerder & Reuter, 1983)
-- Teorema CAP (Gilbert & Lynch, 2002)
-- Sistemas de tipos como verificación estática (Pierce, 2002; Gao et al., 2017)
+**Modelos de multi-tenancy.** Se reconocen tres estrategias: base de datos por inquilino, esquema por inquilino y **esquema compartido con discriminador**. Krebs et al. (2012) sistematizan sus compromisos entre aprovechamiento de recursos y grado de aislamiento; Bezemer y Zaidman (2010) advierten que compartir instancia dispersa la conciencia de inquilino por toda la base de código, de modo que el olvido en un solo punto compromete el aislamiento. Esto fundamenta la elección del proyecto —esquema compartido, por el costo proporcional al uso que hace viable el escalado a cero de Jonas et al. (2019) en un sector de presupuesto reducido (§5)— y explica por qué **obliga a un mecanismo por debajo de la aplicación**: el punto débil que ambos identifican es el que RLS neutraliza al mover la condición de inquilino desde la consulta hacia el motor.
 
-**7.2.3 Teorías de frontend — cómo interactúa el usuario**
-- De la separación por responsabilidades a la composición por componentes (Krasner & Pope, 1988)
-- Tiempos de respuesta y percepción (Nielsen, 1993)
-- Manifiesto de aplicación web (W3C, 2026)
+**De la multi-tenancy plana a la jerárquica.** Esa taxonomía supone inquilinos **planos** e indivisibles, y el caso de este proyecto no encaja: el inquilino tiene una subdivisión interna —la organización opera varios talleres— cuyas entidades **no comparten el mismo alcance**. Simić et al. (2024) son quienes más se aproximan a formalizar una jerarquía de inquilinos, pero la suya organiza recursos de infraestructura y no filas de una base relacional compartida. Queda así planteado el problema teórico que el proyecto debe resolver por su cuenta: **dónde situar el límite de aislamiento cuando el inquilino tiene subdivisiones**. Situarlo en la subdivisión fragmenta la información que se quería centralizar; no modelarla impide distinguir dónde ocurre cada operación; situarlo en el nivel superior y tratar la subdivisión como criterio de alcance conserva ambas propiedades, a costa de que el alcance de cada entidad pase a ser una **decisión de diseño explícita**. El proyecto adopta esta última vía, y en ella reside su aporte.
 
-**7.2.4 Modelos de seguridad — cómo se protege la información**
-- Principios de diseño de sistemas protegidos (Saltzer & Schroeder, 1975)
-- Control de acceso basado en roles — RBAC (Sandhu et al., 1996)
-- Arquitectura de confianza cero (Rose et al., 2020)
-- Defensa en profundidad (Dar et al., 2023)
+#### 7.2.2 Teorías de backend y persistencia — cómo se procesan y guardan los datos
 
-**7.2.5 Metodología de desarrollo — el proceso de trabajo**
-- Desarrollo iterativo e incremental (Larman & Basili, 2003)
-- Integración continua y entrega (Humble & Farley, 2010; Forsgren et al., 2018)
-- Pruebas como especificación previa (Beck, 2002)
-- Registro de decisiones de arquitectura (Richards & Ford, 2020)
+**Modelo relacional y transaccionalidad.** Codd (1970) separó la descripción lógica de los datos de su representación física, independencia que permite expresar una regla de acceso como condición lógica sobre una relación —una política— y no como código disperso. Haerder y Reuter (1983) formalizaron las propiedades ACID, fundamento de una regla concreta del sistema: el registro de un movimiento de existencias y la actualización de la existencia del repuesto **deben ocurrir en una sola transacción**, porque un fallo entre ambas dejaría el inventario inconsistente.
+
+**Teorema CAP y consistencia fuerte.** Gilbert y Lynch (2002) demostraron que, ante particiones de red, no cabe garantizar consistencia y disponibilidad a la vez; Kleppmann (2017) matiza que su modelo de fallo es estrecho. De ahí la decisión pertinente: como el aislamiento exige **consistencia fuerte** —una lectura no puede devolver datos de una membresía revocada— y el volumen esperado no justifica un almacén distribuido, se adopta un motor relacional único, y la escalabilidad se obtiene en la capa de cómputo, que sí es sin estado.
+
+**Sistemas de tipos.** Pierce (2002) define un sistema de tipos como método sintáctico tratable para demostrar la ausencia de ciertos comportamientos erróneos: verificación formal ligera previa a la ejecución. Gao et al. (2017) acotan empíricamente su beneficio —cerca del **15 %** de los errores públicos de proyectos JavaScript habría sido detectado por un verificador estático como TypeScript—, lo que fundamenta la elección de lenguaje y a la vez delimita su alcance.
+
+#### 7.2.3 Teorías de frontend — cómo interactúa el usuario
+
+**De las responsabilidades a los componentes.** Krasner y Pope (1988) formularon el paradigma Modelo-Vista-Controlador, cuyo aporte permanente es separar el estado del dominio, su presentación y la gestión de la interacción. Las interfaces web actuales conservan el principio pero cambian la unidad de descomposición: **componentes** que encapsulan estado y presentación con flujo de datos unidireccional (Meta Open Source, s. f.). Nielsen (1993) aporta el criterio de percepción —**0,1 s** para sentir una acción instantánea, **1 s** para no romper el flujo de pensamiento, **10 s** como límite de la atención—, que el proyecto declara como criterio de diseño y **no** como objetivo medido (§17.3); y la opción de aplicación web instalable frente a aplicaciones nativas se apoya en el manifiesto de aplicación web (W3C, 2026).
+
+**Evaluación de usabilidad con muestras pequeñas.** Nielsen y Landauer (1993) modelaron el hallazgo de problemas de usabilidad y mostraron que la detección sigue una **curva de rendimientos decrecientes**. La consecuencia debe enunciarse con precisión: una muestra pequeña es adecuada **para detectar problemas**, que es el objetivo aquí, e insuficiente **para estimar un parámetro poblacional**, que no se pretende (§16.5). La satisfacción se mide con la escala de usabilidad del sistema, cuyo baremo estableció Bangor et al. (2008) sobre casi tres mil aplicaciones del instrumento; de ahí el umbral de **68 puntos**.
+
+#### 7.2.4 Modelos de seguridad — cómo se protege la información
+
+Cuatro de los principios de Saltzer y Schroeder (1975) gobiernan decisiones directas de este sistema:
+
+| Principio | Enunciado | Materialización en el proyecto |
+|---|---|---|
+| **Mediación completa** | Todo acceso a todo objeto debe ser verificado | Las políticas se evalúan en el motor: ninguna consulta, provenga de donde provenga, elude la verificación |
+| **Valores por defecto seguros** | La decisión predeterminada es denegar | Sin membresía activa no hay acceso; si falta la cabecera de contexto, la petición se rechaza en vez de asumir un valor |
+| **Mínimo privilegio** | Cada sujeto opera con los permisos mínimos necesarios | El rol se otorga por organización y las operaciones administrativas se reservan al propietario |
+| **Economía del mecanismo** | La protección debe ser lo bastante simple para inspeccionarse | Un **único** criterio de aislamiento en todas las tablas, incluidas las de nivel taller |
+
+El cuarto explica una decisión que de otro modo parecería una simplificación: modelar el taller como segunda frontera de seguridad habría duplicado la complejidad de las políticas, y un mecanismo de protección que no puede inspeccionarse con confianza deja de proteger.
+
+**Roles y confianza cero.** Sandhu et al. (1996) formalizaron el modelo en que los permisos se asignan a roles y los usuarios los adquieren por pertenencia, con el concepto de **sesión** en que se activa un subconjunto de ellos; el proyecto aplica RBAC plano con una particularidad derivada del modelo multiorganización —**el rol no es un atributo global del usuario, sino de la relación usuario-organización**— y la «sesión» se corresponde con el contexto activo enviado en cada petición. Rose et al. (2020) eliminan además la confianza implícita basada en la ubicación de red: cada solicitud se autentica y autoriza individualmente, de modo que la interfaz **no confía en el cliente** aunque la credencial sea válida y vuelve a verificar membresía y rol en cada operación.
+
+**Defensa en profundidad.** La redundancia de controles independientes no es doctrinal: Dar et al. (2023) demostraron que RLS, pese a impedir la devolución de datos no autorizados, filtra información por el **tiempo de ejecución** de la consulta, y la serie CVE-2016-2193, CVE-2023-2455 y CVE-2024-10976 evidencia fallos recurrentes del mecanismo en producción (§6.3). Confiar el aislamiento a una sola capa es, a la luz de esa evidencia, insostenible.
+
+#### 7.2.5 Metodología de desarrollo — el proceso de trabajo
+
+Larman y Basili (2003) documentan que la ventaja del desarrollo iterativo frente al modelo en cascada reside en obtener retroalimentación verificable antes de comprometer la totalidad del esfuerzo; el proyecto adopta iteraciones de dos semanas cerradas con software ejecutable y verificado. Scrum, en cambio, define roles y eventos concebidos para coordinar un equipo (Schwaber & Sutherland, 2020): en un proyecto de un solo desarrollador esas ceremonias carecen de contraparte, por lo que se conserva únicamente lo que aporta valor en contexto individual —iteración corta, incremento demostrable y definición de terminado explícita—. Sobre esa base, Humble y Farley (2010) establecen que automatizar compilación, prueba y despliegue reduce el riesgo de la entrega al volverla rutinaria y repetible, y Forsgren et al. (2018) lo validan empíricamente sobre miles de organizaciones. Beck (2002) añade el orden de escritura: la prueba antes que el código, para que actúe como especificación ejecutable — principio que el proyecto aplica donde más importa, escribiendo las **pruebas de aislamiento antes** que la funcionalidad que protegen.
 
 ### 7.3 Revisión crítica de la literatura
 
-Por cada teoría: qué promete, qué limitación documentada tiene y qué adaptación exige el contexto de una pequeña empresa boliviana con un solo desarrollador.
+Ninguna teoría se acepta como verdad absoluta. De cada una se consigna su limitación documentada y la adaptación que impone el contexto real: una organización pequeña boliviana, con presupuesto de tecnología reducido (§5) y un único desarrollador.
+
+| Teoría o modelo | Limitación documentada | Adaptación adoptada |
+|---|---|---|
+| **Serverless** (Jonas et al., 2019) | Arranque en frío, ausencia de estado entre invocaciones y dependencia del proveedor, señalados por los propios autores | Se asume el arranque en frío —uso interno, sin latencia estricta— y la dependencia se mitiga aislando el acceso al proveedor: el aislamiento reside en el motor, no en él |
+| **Row-Level Security** (PostgreSQL GDG, s. f.-b) | Fuga por canal lateral temporal (Dar et al., 2023) y fallos recurrentes de aplicación de políticas (serie de CVE) | No se usa como único control: se refuerza con verificación de membresía en la aplicación. El canal lateral se declara amenaza conocida, fuera del alcance de mitigación |
+| **Esquema compartido** (Krebs et al., 2012) | La conciencia de inquilino se dispersa por la base de código y degrada la mantenibilidad (Bezemer & Zaidman, 2010) | Se elige igualmente: una base por inquilino impone costo fijo por organización, incompatible con el mercado. La dispersión se contiene concentrando la regla en el motor y en un punto único de verificación |
+| **Microservicios** (Newman, 2021) | Complejidad operativa que el propio autor desaconseja asumir sin una organización que la sostenga | Se descartan pese a que el comparable más cercano (Andriianenko, 2026) los emplea: se adopta una aplicación modular desplegada como funciones |
+| **Confianza cero** (Rose et al., 2020) | Supone una arquitectura empresarial completa —motor de políticas, telemetría continua— inviable a esta escala | Se adopta el **principio**, no la arquitectura: verificación explícita en cada petición y ningún contexto asumido por defecto |
+| **Tipado estático** (Pierce, 2002; Gao et al., 2017) | El beneficio medido ronda el **15 %** de los errores detectables; no verifica reglas de negocio | Se combina obligatoriamente con la suite de pruebas: primera barrera, no garantía de corrección |
+| **Multi-tenancy jerárquica** (Simić et al., 2024) | Su jerarquía organiza recursos de infraestructura y no resuelve el reparto de entidades de negocio entre niveles | Se retiene el principio —el aislamiento se sostiene entre niveles— trasladándolo a la capa de datos, con el reparto como decisión de diseño explícita |
+| **Muestras pequeñas** (Nielsen & Landauer, 1993) | Vale para detectar problemas, no para estimar parámetros poblacionales | Se adopta el tamaño de 5 a 8 participantes declarando qué **no** permite concluir (§16.5) |
+
+**Sobre la viabilidad en el contexto boliviano.** La literatura de arquitectura asume condiciones —despliegue multirregión, equipos de plataforma, presupuesto de observabilidad— que no se sostienen en un sector con 84,2 % de informalidad laboral (§5). Criticar la teoría, aquí, consiste en **retener el principio y descartar la implantación** cuando esta excede los medios disponibles.
 
 ### 7.4 Alineación metodológica
 
-- 7.4.1 El hilo conductor: antecedente → problema → teoría → artefacto
-- 7.4.2 Auditoría de pertinencia: lo que se excluyó del marco teórico y por qué
+**El hilo conductor.** Si el antecedente describe un riesgo de fuga de datos y el problema busca cómo evitarlo, el marco teórico debe consistir en modelos de aislamiento y control de acceso — y en nada más.
+
+| Antecedente (§5) | Problema (§2) | Teoría que lo sustenta (§7.2) | Artefacto del proyecto |
+|---|---|---|---|
+| Operadores que abren más de un local | Pérdida de la visión consolidada del cliente entre talleres | Modelos de multi-tenancy (Krebs et al., 2012) | Jerarquía organización → talleres con alcance por nivel |
+| Aislamiento resuelto solo en el código en las soluciones relevadas | Riesgo de fuga entre organizaciones ante un solo error de programación | Mediación completa y valores por defecto seguros (Saltzer & Schroeder, 1975); RBAC (Sandhu et al., 1996) | Políticas a nivel de fila más verificación de membresía |
+| Fallos documentados del mecanismo en producción | Insuficiencia de una única capa de control | Defensa en profundidad; Dar et al. (2023) y serie de CVE | Aislamiento en dos capas independientes |
+| Alta informalidad y bajo presupuesto de tecnología | Barrera de costo de la infraestructura tradicional | Serverless y escalado a cero (Jonas et al., 2019) | Despliegue en funciones serverless sin costo fijo |
+| Ausencia de plataforma con visión consolidada | Operar varias organizaciones desde una cuenta | Ausencia de estado del estilo REST (Fielding, 2000) | Contexto activo declarado por petición y validado |
+| Operadores sin formación previa en la herramienta | Que la jerarquía resulte comprensible para quien la opera | Muestras pequeñas (Nielsen & Landauer, 1993); satisfacción (Bangor et al., 2008) | Evaluación de usabilidad del cambio de contexto |
+| — | Verificar que la separación se cumple | Pruebas como especificación previa (Beck, 2002); integración continua (Humble & Farley, 2010; Forsgren et al., 2018) | Suite de aislamiento por dos vías y pipeline automatizado |
+
+**Auditoría de pertinencia.** La prueba aplicada a cada tema fue la misma —si explicarlo no ayuda a resolver el problema de §2, se excluye—, y por ella quedaron fuera la arquitectura de microservicios en profundidad (solo figura como alternativa descartada en §7.3), el aprendizaje automático, la cadena de bloques —la trazabilidad se resuelve con historial inmutable en una tabla de solo inserción—, la teoría de colas y el modelado de rendimiento —las pruebas de carga están excluidas del alcance (§17.3)—, la criptografía aplicada —la gestión de credenciales está delegada en el proveedor de identidad— y la interoperabilidad con la facturación electrónica del SIN.
+
+> **Ampliación prevista.** En la fase siguiente este punto incorporará las fichas analíticas por teoría, la discusión extendida de los compromisos entre alternativas de multi-tenancy y la formalización del criterio de reparto de entidades por nivel jerárquico.
 
 ---
 
 ## 8. Objetivo general
 
-> **Diseñar, implementar y validar una arquitectura multi-tenant jerárquica (empresa → sucursales) sobre infraestructura serverless, que aplique el aislamiento de datos en el motor de base de datos mediante seguridad a nivel de fila, para permitir la gestión centralizada de varias empresas de servicio de motocicletas en Bolivia garantizando la separación verificable de sus datos.**
+> **Diseñar, implementar y validar una arquitectura multi-tenant jerárquica (organización → talleres) sobre infraestructura serverless, que aplique el aislamiento de datos en el motor de base de datos mediante seguridad a nivel de fila, para permitir la gestión centralizada de varias organizaciones de servicio de motocicletas en Bolivia garantizando la separación verificable de sus datos.**
 
 ---
 
@@ -240,9 +280,9 @@ Cuatro objetivos secuenciales, uno por fase —**Analizar → Diseñar → Imple
 | # | Objetivo específico | Entregable verificable |
 |---|---|---|
 | 1 | **Analizar** las estrategias de aislamiento multi-tenant documentadas en la literatura —base por inquilino, esquema por inquilino y esquema compartido con seguridad a nivel de fila— y las soluciones de gestión de talleres con presencia en Bolivia, para fundamentar la selección arquitectónica e identificar el vacío que justifica el proyecto | Matriz de extracción del estado del arte · análisis del mercado con el vacío identificado |
-| 2 | **Diseñar** el modelo de datos de la jerarquía empresa → sucursales —con el alcance de cada entidad según su nivel y las restricciones de integridad que de él se derivan— y **especificar** las políticas de seguridad a nivel de fila, junto con las funciones auxiliares de verificación de membresía, que sostienen un único límite de aislamiento | Modelo entidad-relación con alcance por nivel · contrato de la interfaz de programación · migración con políticas y funciones de verificación |
-| 3 | **Implementar** sobre infraestructura serverless la capa de identidad, la jerarquía organizacional y el control de acceso por rol, junto con el corte vertical que demuestra el alcance diferenciado de datos —clientes (nivel empresa) e inventario (nivel sucursal)—, y **automatizar** un pipeline de integración continua | Sistema con registro, empresas, sucursales, miembros, clientes e inventario operativos · pipeline en verde en cada integración |
-| 4 | **Validar** el aislamiento mediante pruebas automatizadas que comprueben, tanto por la interfaz de programación como por acceso directo a la base de datos, que una empresa no puede acceder a datos de otra aun cuando la capa de aplicación omita sus controles, y **evaluar** con operadores del rubro la usabilidad del cambio de contexto entre empresas y sucursales | Suite de pruebas de aislamiento con su matriz requisito → caso → evidencia, reproducible desde una base vacía · informe de evaluación de usabilidad con tasa de éxito por tarea y puntuación SUS |
+| 2 | **Diseñar** el modelo de datos de la jerarquía organización → talleres —con el alcance de cada entidad según su nivel y las restricciones de integridad que de él se derivan— y **especificar** las políticas de seguridad a nivel de fila, junto con las funciones auxiliares de verificación de membresía, que sostienen un único límite de aislamiento | Modelo entidad-relación con alcance por nivel · contrato de la interfaz de programación · migración con políticas y funciones de verificación |
+| 3 | **Implementar** sobre infraestructura serverless la capa de identidad, la jerarquía organizacional y el control de acceso por rol, junto con el corte vertical que demuestra el alcance diferenciado de datos —clientes (nivel organización) e inventario (nivel taller)—, y **automatizar** un pipeline de integración continua | Sistema con registro, organizaciones, talleres, miembros, clientes e inventario operativos · pipeline en verde en cada integración |
+| 4 | **Validar** el aislamiento mediante pruebas automatizadas que comprueben, tanto por la interfaz de programación como por acceso directo a la base de datos, que una organización no puede acceder a datos de otra aun cuando la capa de aplicación omita sus controles, y **evaluar** con operadores del rubro la usabilidad del cambio de contexto entre organizaciones y talleres | Suite de pruebas de aislamiento con su matriz requisito → caso → evidencia, reproducible desde una base vacía · informe de evaluación de usabilidad con tasa de éxito por tarea y puntuación SUS |
 
 ---
 
@@ -252,11 +292,11 @@ Por tratarse de una investigación explicativa que propone aplicar una arquitect
 
 ### 10.1 Hipótesis de investigación (H1)
 
-> **La implementación de una arquitectura multi-tenant jerárquica —que sitúa el límite de aislamiento en la empresa y trata la sucursal como criterio de alcance operativo, con políticas de seguridad a nivel de fila reforzadas por verificación de membresía en la capa de aplicación— eliminó el acceso cruzado de datos entre empresas, reduciendo a cero (0) las filas ajenas devueltas, y sostuvo esa separación aun con la verificación de la capa de aplicación deshabilitada.**
+> **La implementación de una arquitectura multi-tenant jerárquica —que sitúa el límite de aislamiento en la organización y trata el taller como criterio de alcance operativo, con políticas de seguridad a nivel de fila reforzadas por verificación de membresía en la capa de aplicación— eliminó el acceso cruzado de datos entre organizaciones, reduciendo a cero (0) las filas ajenas devueltas, y sostuvo esa separación aun con la verificación de la capa de aplicación deshabilitada.**
 
 ### 10.2 Hipótesis nula (H0)
 
-> La arquitectura propuesta no produce una mejora medible del aislamiento: al menos una consulta ejecutada con la identidad de una cuenta ajena devuelve filas de otra empresa, o la separación deja de sostenerse cuando la capa de aplicación omite sus controles.
+> La arquitectura propuesta no produce una mejora medible del aislamiento: al menos una consulta ejecutada con la identidad de una cuenta ajena devuelve filas de otra organización, o la separación deja de sostenerse cuando la capa de aplicación omite sus controles.
 
 ### 10.3 Criterio de decisión
 
@@ -268,17 +308,17 @@ La H0 se rechaza únicamente si **todas** las condiciones siguientes se cumplen 
 
 | Tipo | Variable | Definición conceptual |
 |---|---|---|
-| **Independiente** (causa) | **Arquitectura multi-tenant jerárquica con aislamiento en dos capas** | Modelo de organización de datos que sitúa el límite de aislamiento en la empresa y la sucursal como subdivisión operativa, con políticas de seguridad a nivel de fila en el motor de base de datos reforzadas por verificación de membresía en la capa de aplicación |
-| **Dependiente** (efecto) | **Separación verificable de datos entre empresas** | Grado en que los datos de una empresa resultan inaccesibles para cuentas sin membresía activa en ella, comprobable por vías independientes y con independencia de que la capa de aplicación aplique o no sus controles |
-| **Dependiente** (efecto) | **Gestión centralizada** | Capacidad de administrar varias empresas y sucursales desde una sola cuenta conservando la visión consolidada del cliente y su historial |
-| **Dependiente** (efecto) | **Usabilidad del cambio de contexto** | Grado en que un operador del rubro, sin formación previa, logra situarse en la empresa y la sucursal correctas y percibir el alcance de los datos que está viendo |
+| **Independiente** (causa) | **Arquitectura multi-tenant jerárquica con aislamiento en dos capas** | Modelo de organización de datos que sitúa el límite de aislamiento en la organización y el taller como subdivisión operativa, con políticas de seguridad a nivel de fila en el motor de base de datos reforzadas por verificación de membresía en la capa de aplicación |
+| **Dependiente** (efecto) | **Separación verificable de datos entre organizaciones** | Grado en que los datos de una organización resultan inaccesibles para cuentas sin membresía activa en ella, comprobable por vías independientes y con independencia de que la capa de aplicación aplique o no sus controles |
+| **Dependiente** (efecto) | **Gestión centralizada** | Capacidad de administrar varias organizaciones y talleres desde una sola cuenta conservando la visión consolidada del cliente y su historial |
+| **Dependiente** (efecto) | **Usabilidad del cambio de contexto** | Grado en que un operador del rubro, sin formación previa, logra situarse en la organización y el taller correctas y percibir el alcance de los datos que está viendo |
 | **Interviniente** | Modelo de despliegue serverless | Condición de ejecución que impone ausencia de estado entre peticiones y costo proporcional al uso; no se manipula, se mantiene constante |
 
 ---
 
 ## 12. Operacionalización de variables
 
-### 12.1 Variable dependiente: Separación verificable de datos entre empresas
+### 12.1 Variable dependiente: Separación verificable de datos entre organizaciones
 
 | Dimensión | Indicadores (unidad de medida) | Instrumento / herramienta |
 |---|---|---|
@@ -290,8 +330,8 @@ La H0 se rechaza únicamente si **todas** las condiciones siguientes se cumplen 
 
 | Dimensión | Indicadores (unidad de medida) | Instrumento / herramienta |
 |---|---|---|
-| **Alcance de datos por nivel** | • Entidades de nivel empresa accesibles desde cualquier sucursal (porcentaje %)<br>• Entidades de nivel sucursal visibles fuera de su sucursal (cantidad; esperado 0) | • Casos de prueba de alcance por nivel (Vitest) |
-| **Cambio de contexto** | • Empresas administrables por cuenta (cantidad, entero)<br>• Operaciones que exigen reautenticación al cambiar de contexto (cantidad; esperado 0) | • Pruebas de integración sobre el cambio de empresa y sucursal activas |
+| **Alcance de datos por nivel** | • Entidades de nivel organización accesibles desde cualquier taller (porcentaje %)<br>• Entidades de nivel taller visibles fuera de su taller (cantidad; esperado 0) | • Casos de prueba de alcance por nivel (Vitest) |
+| **Cambio de contexto** | • Organizaciones administrables por cuenta (cantidad, entero)<br>• Operaciones que exigen reautenticación al cambiar de contexto (cantidad; esperado 0) | • Pruebas de integración sobre el cambio de organización y taller activos |
 
 ### 12.3 Variable dependiente: Usabilidad del cambio de contexto
 
@@ -307,8 +347,8 @@ Los indicadores de eficiencia se reportan **sin umbral**: con una muestra dimens
 
 | Dimensión | Indicadores (unidad de medida) | Instrumento / herramienta |
 |---|---|---|
-| **Jerarquía organizacional** | • Niveles jerárquicos modelados (cantidad; esperado 2)<br>• Límites de aislamiento definidos (cantidad; esperado 1)<br>• Tablas de negocio que portan el identificador de empresa (porcentaje %) | • Modelo entidad-relación<br>• Migraciones versionadas del esquema |
-| **Control de acceso** | • Roles definidos por empresa (cantidad; esperado 3)<br>• Funciones de verificación de membresía (cantidad; esperado 2) | • Revisión del esquema y de las políticas declaradas |
+| **Jerarquía organizacional** | • Niveles jerárquicos modelados (cantidad; esperado 2)<br>• Límites de aislamiento definidos (cantidad; esperado 1)<br>• Tablas de negocio que portan el identificador de organización (porcentaje %) | • Modelo entidad-relación<br>• Migraciones versionadas del esquema |
+| **Control de acceso** | • Roles definidos por organización (cantidad; esperado 3)<br>• Funciones de verificación de membresía (cantidad; esperado 2) | • Revisión del esquema y de las políticas declaradas |
 | **Automatización de la verificación** | • Errores de verificación estática de tipos (cantidad; esperado 0)<br>• Integraciones con pipeline en verde (porcentaje %) | • Verificador de tipos de TypeScript<br>• Registro de ejecuciones de integración continua |
 
 ---
@@ -317,11 +357,13 @@ Los indicadores de eficiencia se reportan **sin umbral**: con una muestra dimens
 
 | Pregunta / problema | Objetivo general | Objetivos específicos | Hipótesis | Variables e indicadores |
 |---|---|---|---|---|
-| **General:** ¿De qué manera una arquitectura multi-tenant jerárquica sobre infraestructura serverless, con aislamiento mediante seguridad a nivel de fila, mejora la gestión centralizada y la seguridad de los datos de operadores de varias empresas y sucursales de servicio de motocicletas en Bolivia?<br><br>**Específicas:**<br>1. ¿Qué estrategias documenta la literatura y qué carencias presenta la oferta boliviana?<br>2. ¿Qué modelo de datos y qué políticas sostienen un único límite de aislamiento?<br>3. ¿Cómo se implementan identidad, jerarquía y control de acceso por rol con verificación automatizada?<br>4. ¿Cómo se comprueba el aislamiento aun ante fallos de la capa de aplicación? | Diseñar, implementar y validar una arquitectura multi-tenant jerárquica (empresa → sucursales) sobre infraestructura serverless, que aplique el aislamiento de datos en el motor de base de datos mediante seguridad a nivel de fila, para permitir la gestión centralizada de varias empresas de servicio de motocicletas en Bolivia garantizando la separación verificable de sus datos. | 1. **Analizar** las estrategias de aislamiento multi-tenant de la literatura y las soluciones con presencia en Bolivia.<br><br>2. **Diseñar y especificar** el modelo de datos de la jerarquía empresa → sucursales y las políticas de seguridad a nivel de fila.<br><br>3. **Implementar y automatizar** la identidad, la jerarquía y el control de acceso por rol, con el corte vertical de clientes e inventario y un pipeline de integración continua.<br><br>4. **Validar** el aislamiento con pruebas por interfaz de programación y por acceso directo a la base de datos. | La implementación de una arquitectura multi-tenant jerárquica, con políticas de seguridad a nivel de fila reforzadas por verificación de membresía en la capa de aplicación, eliminó el acceso cruzado de datos entre empresas: redujo a cero (0) las filas ajenas devueltas y sostuvo la separación aun con la verificación de la capa de aplicación deshabilitada. | **V. Independiente:** arquitectura multi-tenant jerárquica con aislamiento en dos capas.<br><br>**V. Dependiente:** separación verificable de datos entre empresas; gestión centralizada.<br><br>**Indicadores:**<br>• Filas ajenas devueltas por acceso directo: 0<br>• Tablas con políticas activas: 100 % (7 de 7)<br>• Operaciones con autorización correcta: 100 %<br>• Casos en verde sin capa de aplicación: 100 %<br>• Vías independientes de verificación: 2 |
+| **General:** ¿De qué manera una arquitectura multi-tenant jerárquica sobre infraestructura serverless, con aislamiento mediante seguridad a nivel de fila, mejora la gestión centralizada y la seguridad de los datos de operadores de varias organizaciones y talleres de servicio de motocicletas en Bolivia?<br><br>**Específicas:**<br>1. ¿Qué estrategias documenta la literatura y qué carencias presenta la oferta boliviana?<br>2. ¿Qué modelo de datos y qué políticas sostienen un único límite de aislamiento?<br>3. ¿Cómo se implementan identidad, jerarquía y control de acceso por rol con verificación automatizada?<br>4. ¿Cómo se comprueba el aislamiento aun ante fallos de la capa de aplicación, y que el cambio de contexto resulta usable? | Diseñar, implementar y validar una arquitectura multi-tenant jerárquica (organización → talleres) sobre infraestructura serverless, que aplique el aislamiento de datos en el motor de base de datos mediante seguridad a nivel de fila, para permitir la gestión centralizada de varias organizaciones de servicio de motocicletas en Bolivia garantizando la separación verificable de sus datos. | 1. **Analizar** las estrategias de aislamiento multi-tenant de la literatura y las soluciones con presencia en Bolivia.<br><br>2. **Diseñar y especificar** el modelo de datos de la jerarquía organización → talleres y las políticas de seguridad a nivel de fila.<br><br>3. **Implementar y automatizar** la identidad, la jerarquía y el control de acceso por rol, con el corte vertical de clientes e inventario y un pipeline de integración continua.<br><br>4. **Validar** el aislamiento con pruebas por interfaz de programación y por acceso directo a la base de datos, y **evaluar** la usabilidad del cambio de contexto con operadores del rubro. | La implementación de una arquitectura multi-tenant jerárquica, con políticas de seguridad a nivel de fila reforzadas por verificación de membresía en la capa de aplicación, eliminó el acceso cruzado de datos entre organizaciones: redujo a cero (0) las filas ajenas devueltas y sostuvo la separación aun con la verificación de la capa de aplicación deshabilitada. | **V. Independiente:** arquitectura multi-tenant jerárquica con aislamiento en dos capas.<br><br>**V. Dependiente:** separación verificable de datos entre organizaciones; gestión centralizada.<br><br>**Indicadores:**<br>• Filas ajenas devueltas por acceso directo: 0<br>• Tablas con políticas activas: 100 % (7 de 7)<br>• Operaciones con autorización correcta: 100 %<br>• Casos en verde sin capa de aplicación: 100 %<br>• Vías independientes de verificación: 2 |
 
 ---
 
 ## 14. Enfoque y tipo de investigación
+
+Las categorías empleadas —tipo, enfoque, alcance y método— siguen la clasificación de Hernández-Sampieri y Mendoza (2018).
 
 | Dimensión | Definición adoptada | Fundamento |
 |---|---|---|
@@ -355,9 +397,9 @@ La validación del objetivo 4 incorpora un segundo componente, de naturaleza dis
 | Elemento | Definición |
 |---|---|
 | **Diseño** | Observacional, de un solo grupo y una sola medición. No hay grupo de control: no se compara contra otra interfaz, sino contra umbrales establecidos en la literatura |
-| **Tareas** | T1 cambiar de empresa y confirmar los datos mostrados · T2 seleccionar sucursal y registrar en ella un repuesto · T3 localizar un cliente registrado en otra sucursal de la misma empresa |
+| **Tareas** | T1 cambiar de organización y confirmar los datos mostrados · T2 seleccionar taller y registrar en ella un repuesto · T3 localizar un cliente registrado en otro taller de la misma organización |
 | **Métricas** | Tasa de éxito por tarea (≥ 80 %), tiempo y errores por tarea (descriptivos), y puntuación SUS (≥ 68) |
-| **Por qué estas tres tareas** | Cada una ejercita una consecuencia distinta de la jerarquía: el nivel empresa, el nivel sucursal y el beneficio de que el cliente pertenezca a la empresa y no al local. No se evalúa la interfaz en general |
+| **Por qué estas tres tareas** | Cada una ejercita una consecuencia distinta de la jerarquía: el nivel organización, el nivel taller y el beneficio de que el cliente pertenezca a la organización y no al local. No se evalúa la interfaz en general |
 
 El componente de usabilidad **no forma parte de la hipótesis**: la afirmación sujeta a refutación es la del aislamiento (§10). La usabilidad se reporta como evidencia complementaria del objetivo 4, con sus umbrales declarados de antemano, y un resultado por debajo de ellos constituye un hallazgo que se discute, no un fallo de la tesis.
 
@@ -365,18 +407,18 @@ El componente de usabilidad **no forma parte de la hipótesis**: la afirmación 
 ### 15.4 Escenario de laboratorio
 
 ```
-Cuenta A ──owner──> Empresa 1 ──> Sucursal 1.1 (repuestos propios)
-                        │         └── Sucursal 1.2 (repuestos propios)
-                        └── clientes de la Empresa 1
+Cuenta A ──owner──> Organización 1 ──> Taller 1.1 (repuestos propios)
+                        │         └── Taller 1.2 (repuestos propios)
+                        └── clientes de la Organización 1
 
-Cuenta A ──owner──> Empresa 2          (misma cuenta, otra empresa)
+Cuenta A ──owner──> Organización 2          (misma cuenta, otra organización)
 
-Cuenta B ──owner──> Empresa 3 ──> Sucursal 3.1 · clientes propios
+Cuenta B ──owner──> Organización 3 ──> Taller 3.1 · clientes propios
 
 Cuenta C  ── sin membresía en ninguna de las anteriores
 ```
 
-Un solo montaje cubre las tres preguntas del aislamiento: **entre cuentas** (A frente a B), **entre empresas de la misma cuenta** (Empresa 1 frente a Empresa 2) y **frente a quien no es miembro de ninguna** (Cuenta C).
+Un solo montaje cubre las tres preguntas del aislamiento: **entre cuentas** (A frente a B), **entre organizaciones de la misma cuenta** (Organización 1 frente a Organización 2) y **frente a quien no es miembro de ninguna** (Cuenta C).
 
 ### 15.5 Procedimiento
 
@@ -426,9 +468,9 @@ Es la población sobre la que se mide la variable dependiente.
 | Elemento | Definición |
 |---|---|
 | **Población** | Las **tablas de negocio** del esquema de datos y las **operaciones** expuestas por la interfaz de programación del sistema construido |
-| **Muestra** | **Censo — el 100 % de la población.** Se evalúan las 7 tablas de negocio (clientes, sucursales, membresías, asignaciones, repuestos, movimientos de existencias y registro de auditoría) y la totalidad de las operaciones del contrato |
+| **Muestra** | **Censo — el 100 % de la población.** Se evalúan las 7 tablas de negocio (clientes, talleres, membresías, asignaciones, repuestos, movimientos de existencias y registro de auditoría) y la totalidad de las operaciones del contrato |
 | **Justificación de no muestrear** | En validación de aislamiento **no cabe el muestreo probabilístico**: una sola tabla sin política activa constituye una fuga, y una muestra parcial podría declarar seguro un sistema que no lo es. La cobertura total es condición del objetivo 4, no una decisión de conveniencia |
-| **Sujetos de prueba** | **3 cuentas sintéticas**, 3 empresas y 3 sucursales, generadas por la propia prueba con identificadores irrepetibles. En esta población **no intervienen personas**: los datos son generados, no reales |
+| **Sujetos de prueba** | **3 cuentas sintéticas**, 3 organizaciones y 3 talleres, generadas por la propia prueba con identificadores irrepetibles. En esta población **no intervienen personas**: los datos son generados, no reales |
 
 ### 16.4 Población de operadores *(objetivo 4 — evaluación de usabilidad)*
 
@@ -436,18 +478,18 @@ Es la única población compuesta por **personas**, y la única que impone consi
 
 | Elemento | Definición |
 |---|---|
-| **Población** | Operadores de empresas de servicio de motocicletas en Bolivia que administran —o planean administrar— más de una empresa y/o más de una sucursal: exactamente el perfil que padece el problema descrito en §2 |
+| **Población** | Operadores de organizaciones de servicio de motocicletas en Bolivia que administran —o planean administrar— más de una organización y/o más de un taller: exactamente el perfil que padece el problema descrito en §2 |
 | **Muestra** | **De 5 a 8 participantes** |
 | **Tipo de muestreo** | No probabilístico **intencional**, por criterio de perfil |
 | **Justificación del tamaño** | Nielsen y Landauer (1993) modelan matemáticamente el hallazgo de problemas de usabilidad y muestran que la curva de detección se satura pronto: cinco participantes descubren la mayoría de los problemas de una interfaz, y cada participante adicional aporta cada vez menos. El objetivo es **detectar problemas de uso**, no estimar un parámetro poblacional; por eso ampliar la muestra no mejoraría la conclusión en proporción al esfuerzo |
 | **Criterio de exclusión** | Haber participado en el desarrollo o conocer la aplicación antes de la sesión |
-| **Consideraciones éticas** | Consentimiento informado previo, con derecho a retirarse en cualquier momento; resultados reportados de forma agregada, con los participantes identificados como P1…P8; no se publica ningún dato que permita identificarlos a ellos ni a sus empresas. Se declara al participante que **se evalúa el sistema, no a la persona** |
+| **Consideraciones éticas** | Consentimiento informado previo, con derecho a retirarse en cualquier momento; resultados reportados de forma agregada, con los participantes identificados como P1…P8; no se publica ningún dato que permita identificarlos a ellos ni a sus organizaciones. Se declara al participante que **se evalúa el sistema, no a la persona** |
 
 ### 16.5 Sobre el alcance de esta muestra
 
 Conviene declarar qué **no** permite concluir. La muestra de operadores está dimensionada para detectar problemas de uso, no para sostener inferencia estadística: no se afirma representatividad del sector boliviano ni significancia sobre tiempos o puntuaciones. La caracterización del sector sigue apoyándose en fuentes estadísticas oficiales del INE (§5), no en esta muestra.
 
-Tampoco se evalúa la interfaz completa: la evaluación se acota al **cambio de contexto entre empresas y sucursales**, por ser la manifestación visible del aporte de la tesis. Las demás pantallas no se someten a prueba con usuarios.
+Tampoco se evalúa la interfaz completa: la evaluación se acota al **cambio de contexto entre organizaciones y talleres**, por ser la manifestación visible del aporte de la tesis. Las demás pantallas no se someten a prueba con usuarios.
 
 ---
 
@@ -455,12 +497,13 @@ Tampoco se evalúa la interfaz completa: la evaluación se acota al **cambio de 
 
 ### 17.1 Alcance funcional
 
-- Registro que crea una cuenta, su primera empresa y su primera sucursal, con el usuario como propietario.
-- Creación de empresas adicionales bajo la misma cuenta y de sucursales dentro de cada empresa.
-- Listado de empresas según membresía, cambio de empresa activa y selección de sucursal activa.
-- Gestión de miembros por empresa —invitar, cambiar rol, remover—, reservada al propietario, y asignación operativa de miembros a sucursales.
-- **Corte vertical de demostración**: Clientes (entidad de nivel empresa, visible desde cualquier sucursal) e Inventario de repuestos (entidad de nivel sucursal, acotada a su local).
+- Registro que crea una cuenta, su primera organización y su primer taller, con el usuario como propietario.
+- Creación de organizaciones adicionales bajo la misma cuenta y de talleres dentro de cada organización.
+- Listado de organizaciones según membresía, cambio de organización activa y selección de taller activo.
+- Gestión de miembros por organización —invitar, cambiar rol, remover—, reservada al propietario, y asignación operativa de miembros a talleres.
+- **Corte vertical de demostración**: Clientes (entidad de nivel organización, visible desde cualquier taller) e Inventario de repuestos (entidad de nivel taller, acotada a su local).
 - Verificación de aislamiento por dos vías independientes.
+- **Evaluación de usabilidad del cambio de contexto** con operadores del rubro, mediante tareas guiadas.
 
 ### 17.2 Alcance técnico
 
@@ -484,12 +527,13 @@ El objeto de estudio es la **arquitectura**, no la suite funcional completa. No 
 - Aplicaciones móviles o de escritorio nativas: solo web responsiva e instalable.
 - Migración de datos productivos desde sistemas anteriores.
 - Pruebas de carga o rendimiento a escala productiva.
+- La evaluación de usabilidad de la **totalidad** de la interfaz: se evalúa el cambio de contexto entre organizaciones y talleres, no las demás pantallas.
 
 ---
 
 ## 18. Referencias
 
-Estilo **APA (7.ª edición)**. Todos los identificadores permanentes —DOI e ISBN— fueron verificados contra el registro del editor.
+Estilo **APA (7.ª edición)**. Todos los identificadores permanentes —DOI e ISBN— fueron verificados contra el registro del editor. La documentación técnica sin autor humano se cita con **autor corporativo** y, al carecer de fecha de publicación fija, con fecha de recuperación; se emplea únicamente como sustento del marco conceptual (§7.1), nunca como sustento teórico.
 
 Alobaywi, B., Almutairi, M. G., & Sheldon, F. T. (2026). Performance trade-offs in multi-tenant IoT–cloud security: A systematic review of emerging technologies. *IoT, 7*(1), 21. https://doi.org/10.3390/iot7010021
 
@@ -521,21 +565,41 @@ Hernández-Sampieri, R., & Mendoza Torres, C. P. (2018). *Metodología de la inv
 
 Humble, J., & Farley, D. (2010). *Continuous delivery: Reliable software releases through build, test, and deployment automation*. Addison-Wesley Professional.
 
-Instituto Nacional de Estadística de Bolivia. (s. f.). *Parque automotor — Cuadros estadísticos*. https://www.ine.gob.bo/index.php/estadisticas-economicas/transportes/parque-automotor-cuadros-estadisticos/
+Instituto Nacional de Estadística de Bolivia. (2026). *Bolivia: parque automotor por tipo de servicio y clase de vehículo, 2003–2025* (Cuadro N.º 1.2) [Conjunto de datos]. Elaborado con registros del Registro Único para la Administración Tributaria Municipal. https://www.ine.gob.bo/index.php/estadisticas-economicas/transportes/parque-automotor-cuadros-estadisticos/
 
 Jonas, E., Schleier-Smith, J., Sreekanti, V., Tsai, C.-C., Khandelwal, A., Pu, Q., Shankar, V., Carreira, J., Krauth, K., Yadwadkar, N., Gonzalez, J. E., Popa, R. A., Stoica, I., & Patterson, D. A. (2019). *Cloud programming simplified: A Berkeley view on serverless computing* (Informe técnico N.º UCB/EECS-2019-3). University of California, Berkeley. https://arxiv.org/abs/1902.03383
 
 Krebs, R., Momm, C., & Kounev, S. (2012). Architectural concerns in multi-tenant SaaS applications. En *Proceedings of the 2nd International Conference on Cloud Computing and Services Science* (pp. 426–431). SciTePress. https://doi.org/10.5220/0003957604260431
 
+Jones, M., Bradley, J., & Sakimura, N. (2015). *JSON Web Token (JWT)* (RFC 7519). Internet Engineering Task Force. https://doi.org/10.17487/RFC7519
+
+Kleppmann, M. (2017). *Designing data-intensive applications: The big ideas behind reliable, scalable, and maintainable systems*. O'Reilly Media.
+
+Krasner, G. E., & Pope, S. T. (1988). A cookbook for using the model-view-controller user interface paradigm in Smalltalk-80. *Journal of Object-Oriented Programming, 1*(3), 26–49.
+
 Larman, C., & Basili, V. R. (2003). Iterative and incremental developments: A brief history. *Computer, 36*(6), 47–56. https://doi.org/10.1109/MC.2003.1204375
+
+Meta Open Source. (s. f.). *React documentation*. Recuperado el 14 de agosto de 2026, de https://react.dev/
+
+Microsoft. (s. f.). *TypeScript documentation*. Recuperado el 14 de agosto de 2026, de https://www.typescriptlang.org/docs/
+
+Newman, S. (2021). *Building microservices: Designing fine-grained systems* (2.ª ed.). O'Reilly Media.
 
 Nielsen, J. (1993). *Usability engineering*. Morgan Kaufmann.
 
 Nielsen, J., & Landauer, T. K. (1993). A mathematical model of the finding of usability problems. En *Proceedings of the INTERACT '93 and CHI '93 Conference on Human Factors in Computing Systems* (pp. 206–213). ACM. https://doi.org/10.1145/169059.169166
 
+Nottingham, M., Wilde, E., & Dalal, S. (2023). *Problem details for HTTP APIs* (RFC 9457). Internet Engineering Task Force. https://doi.org/10.17487/RFC9457
+
 Olabanji, D., Fitch, T., & Matthew, O. (2023). Multi-tenancy in cloud-native architecture: A systematic mapping study. *WSEAS Transactions on Computers, 22*, 25–43. https://doi.org/10.37394/23205.2023.22.4
 
+OpenJS Foundation. (s. f.). *Node.js documentation*. Recuperado el 14 de agosto de 2026, de https://nodejs.org/docs/latest/api/
+
 Pierce, B. C. (2002). *Types and programming languages*. MIT Press.
+
+PostgreSQL Global Development Group. (s. f.-a). *PostgreSQL documentation*. Recuperado el 14 de agosto de 2026, de https://www.postgresql.org/docs/current/
+
+PostgreSQL Global Development Group. (s. f.-b). *Row security policies*. Recuperado el 14 de agosto de 2026, de https://www.postgresql.org/docs/current/ddl-rowsecurity.html
 
 Richards, M., & Ford, N. (2020). *Fundamentals of software architecture: An engineering approach*. O'Reilly Media.
 
@@ -545,6 +609,10 @@ Saltzer, J. H., & Schroeder, M. D. (1975). The protection of information in comp
 
 Sandhu, R. S., Coyne, E. J., Feinstein, H. L., & Youman, C. E. (1996). Role-based access control models. *Computer, 29*(2), 38–47. https://doi.org/10.1109/2.485845
 
+Schwaber, K., & Sutherland, J. (2020). *The Scrum Guide: The definitive guide to Scrum*. Recuperado el 14 de agosto de 2026, de https://scrumguides.org/
+
 Simić, M., Dedeić, J., Stojkov, M., & Prokić, I. (2024). A hierarchical namespace approach for multi-tenancy in distributed clouds. *IEEE Access, 12*, 32597–32617. https://doi.org/10.1109/ACCESS.2024.3369031
 
 World Wide Web Consortium. (2026). *Web application manifest* (W3C Working Draft). https://www.w3.org/TR/appmanifest/
+
+Zod. (s. f.). *Zod documentation*. Recuperado el 14 de agosto de 2026, de https://zod.dev/

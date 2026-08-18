@@ -41,14 +41,14 @@ Cada fase materializa uno de los cuatro objetivos específicos.
 |---|---|---|---|
 | **I1** | 1–14 sep | Búsqueda en bases académicas; aplicación de criterios de inclusión y exclusión; lectura de fuentes; relevamiento de las soluciones con presencia en Bolivia | Matriz de extracción con fuentes revisadas por pares · Análisis del mercado · Vacío de investigación redactado |
 | **I2** | 15–28 sep | Comparación de estrategias de aislamiento; redacción del marco teórico y conceptual con revisión crítica; diseño del modelo jerárquico, de las políticas, del contrato de la interfaz y de la estrategia de verificación | Marco teórico y conceptual · Modelo de datos y decisiones de diseño cerrados · Contrato de la interfaz de programación · Plan de pruebas con su matriz de trazabilidad |
-| **I3** | 29 sep – 12 oct | Construcción del esquema: identidad, empresas, sucursales, membresías y políticas de aislamiento; selección de contexto activo | HU-06, HU-07, HU-08 · Esquema jerárquico operativo |
-| **I4** | 13–26 oct | Cuentas, registro, gestión de empresas y de miembros con control de acceso por rol | HU-01 a HU-05, HU-09 a HU-12 |
-| **I5** | 27 oct – 9 nov | Módulo de clientes — entidad de nivel empresa | HU-13, HU-14, HU-15 |
-| **I6** | 10–23 nov | Módulo de inventario y movimientos de existencias — entidad de nivel sucursal | HU-16 a HU-19 (HU-20 si hay margen) |
-| **I7** | 24 nov – 7 dic | Interfaz de usuario: autenticación, selección de empresa y sucursal, diseño responsivo y manifiesto de instalación (RNF-402, RNF-403) | Aplicación utilizable de extremo a extremo |
+| **I3** | 29 sep – 12 oct | Construcción del esquema: identidad, organizaciones, talleres, membresías y políticas de aislamiento; selección de contexto activo | HU-06, HU-07, HU-08 · Esquema jerárquico operativo |
+| **I4** | 13–26 oct | Cuentas, registro, gestión de organizaciones y de miembros con control de acceso por rol | HU-01 a HU-05, HU-09 a HU-12 |
+| **I5** | 27 oct – 9 nov | Módulo de clientes — entidad de nivel organización | HU-13, HU-14, HU-15 |
+| **I6** | 10–23 nov | Módulo de inventario y movimientos de existencias — entidad de nivel taller | HU-16 a HU-19 (HU-20 si hay margen) |
+| **I7** | 24 nov – 7 dic | Interfaz de usuario: autenticación, selección de organización y taller, diseño responsivo y manifiesto de instalación (RNF-402, RNF-403) | Aplicación utilizable de extremo a extremo |
 | **I8** | 8–21 dic | Pruebas de aislamiento; evaluación de usabilidad con operadores (RNF-404); redacción final y preparación de la defensa | HU-21, HU-22 · Informe de usabilidad · Documento final |
 
-*Reserva: del 22 al 31 de diciembre queda como margen para correcciones posteriores a la revisión del asesor.*
+*Reserva: del 22 al 31 de diciembre queda como margen para correcciones posteriores a la revisión del tutor.*
 
 ### Distribución de esfuerzo
 
@@ -63,9 +63,9 @@ Cada fase materializa uno de los cuatro objetivos específicos.
 
 | Hito | Fecha objetivo | Criterio de cumplimiento |
 |---|---|---|
-| **H1 · Anteproyecto aprobado** | 28 de septiembre | Definición y alcance, estado del arte, y marco teórico y conceptual revisados por el asesor |
-| **H2 · Jerarquía operativa** | 12 de octubre | Una empresa gestiona varias sucursales; el aislamiento sigue vigente |
-| **H3 · Corte vertical completo** | 23 de noviembre | Clientes (nivel empresa) e Inventario (nivel sucursal) funcionando y probados |
+| **H1 · Perfil y anteproyecto aprobados** | 28 de septiembre | Definición y alcance, estado del arte, y marco teórico y conceptual revisados por el tutor |
+| **H2 · Jerarquía operativa** | 12 de octubre | Una organización gestiona varios talleres; el aislamiento sigue vigente |
+| **H3 · Corte vertical completo** | 23 de noviembre | Clientes (nivel organización) e Inventario (nivel taller) funcionando y probados |
 | **H4 · Sistema integrado** | 7 de diciembre | Frontend conectado; flujo completo desde el registro hasta la operación |
 | **H5 · Validación concluida** | 21 de diciembre | Evidencia de aislamiento reproducible; evaluación de usabilidad ejecutada con al menos cinco operadores; documento final entregado |
 
@@ -75,10 +75,10 @@ Probabilidad e impacto en escala baja / media / alta. Ordenados por exposición.
 
 | ID | Riesgo | Prob. | Impacto | Mitigación | Plan de contingencia |
 |---|---|---|---|---|---|
-| **R1** | Las políticas de aislamiento resultan incorrectas o incompletas y permiten acceso cruzado entre empresas | Media | **Alto** | Escribir las pruebas de aislamiento **antes** que la funcionalidad, y ejecutarlas tras cada cambio de esquema o de política | Bloquear el avance hasta corregir; el aislamiento es requisito crítico y no admite deuda |
+| **R1** | Las políticas de aislamiento resultan incorrectas o incompletas y permiten acceso cruzado entre organizaciones | Media | **Alto** | Escribir las pruebas de aislamiento **antes** que la funcionalidad, y ejecutarlas tras cada cambio de esquema o de política | Bloquear el avance hasta corregir; el aislamiento es requisito crítico y no admite deuda |
 | **R2** | El alcance crece más allá de lo planificado (querer implementar más módulos) | **Alta** | Medio | Exclusiones cerradas y explícitas en §1.8.3; el corte vertical está definido | Congelar alcance en H3; lo demás pasa a trabajo futuro |
 | **R3** | Dependencia de un proveedor externo (Supabase/Vercel): cambios de API, límites de plan gratuito o indisponibilidad | Media | Medio | Aislar el acceso al proveedor tras una capa propia; no usar funciones exclusivas innecesarias | Ejecutar PostgreSQL local para desarrollo y pruebas; el aislamiento por RLS no depende del proveedor |
-| **R4** | Las políticas de aislamiento resultan más complejas de lo previsto al añadir el segundo nivel | Media | Medio | Decisión de ADR-006: un solo criterio de aislamiento (`organization_id`) en todas las tablas | Mantener el nivel sucursal solo en la capa de aplicación si RLS se vuelve inmanejable |
+| **R4** | Las políticas de aislamiento resultan más complejas de lo previsto al añadir el segundo nivel | Media | Medio | Decisión de ADR-006: un solo criterio de aislamiento (`organization_id`) en todas las tablas | Mantener el nivel taller solo en la capa de aplicación si RLS se vuelve inmanejable |
 | **R5** | Tiempo insuficiente por carga laboral o académica paralela | Media | Medio | Iteraciones cortas con entregable demostrable; reserva de 10 días en diciembre | Reducir a `Could` las historias no esenciales (HU-20, HU-22) |
 | **R8** | No conseguir operadores disponibles para la evaluación de usabilidad en la ventana de I8, o que se retiren tras aceptar | **Alta** | Medio | Contactar y confirmar a los participantes durante I6, no en I8; sobre-reclutar a 8 para asegurar 5 efectivos; permitir sesiones remotas | Reportar la evaluación con los participantes efectivamente conseguidos, declarando el tamaño alcanzado. La hipótesis del proyecto es sobre el aislamiento, de modo que una muestra menor limita este hallazgo pero no invalida la tesis |
 | **R6** | No conseguir fuentes académicas suficientes de los últimos 5 años sobre RLS multi-tenant | Media | Bajo | Ampliar a arquitecturas comparables de otros rubros; usar tesis de maestría además de artículos | Documentar la escasez de literatura como hallazgo del estado del arte |

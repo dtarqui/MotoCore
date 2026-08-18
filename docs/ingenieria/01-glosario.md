@@ -4,39 +4,39 @@ Terminología unificada del proyecto. **Fuente de verdad de los términos**: si 
 
 > **Alcance de este documento**: fija el **lenguaje del dominio** y su uso interno. Las definiciones formales de las tecnologías, con su fuente académica o normativa citable, están en el [Marco conceptual](../anteproyecto/03-marco-teorico-y-conceptual.md) §3.1 — aquí no se duplican.
 
-## Términos del modelo multiempresa
+## Términos del modelo multiorganización
 
 | Término | Definición | Notas |
 |---|---|---|
 | **Cuenta** | La identidad de una persona en la plataforma (email + contraseña). Vive en `auth.users` de Supabase, con datos de perfil en `profiles`. | Una persona = una cuenta, sin importar en cuántas organizaciones participe. |
-| **Organización** *(en el texto: **empresa**)* | La **empresa** que opera el negocio. Es la **unidad de aislamiento de datos** (el *tenant*). Tabla `organizations`. | **Una cuenta puede crear y pertenecer a varias organizaciones** — este es el cambio central del modelo ERP. |
-| **Taller** *(en el texto: **sucursal**)* | Una **sucursal o local físico** donde se presta el servicio. Pertenece a una organización. Tabla `workshops`. | **Una organización puede tener varios talleres** (relación 1:N). El taller **no** es una unidad de aislamiento: es una subdivisión operativa dentro de la organización. |
+| **Organización** | La entidad que opera el negocio de servicio de motocicletas. Es la **unidad de aislamiento de datos** (el *tenant*). Tabla `organizations`. | **Una cuenta puede crear y pertenecer a varias organizaciones** — este es el cambio central del modelo ERP. |
+| **Taller** | El **local físico** donde se presta el servicio. Pertenece a una organización. Tabla `workshops`. | **Una organización puede tener varios talleres** (relación 1:N). El taller **no** es una unidad de aislamiento: es una subdivisión operativa dentro de la organización. |
 | **Membresía** | La relación entre una cuenta y una organización, con un rol. Tabla `memberships`, única por `(organization_id, user_id)`. | Es lo que autoriza el acceso. Sin membresía activa no hay acceso a los datos de esa organización. El rol es **de organización**, no de taller. |
-| **Asignación a taller** | Vínculo operativo entre un miembro y uno o varios talleres de su organización (p. ej. en qué sucursal trabaja un mecánico). | No otorga ni restringe permisos por sí sola: los permisos vienen del rol de la membresía. Sirve para operación y reportes. |
-| **Organización activa** | La organización sobre la que opera el usuario en un momento dado. Se envía por request en el header `X-Org-Id` y se valida contra la membresía. | Permite cambiar de empresa sin cerrar sesión (RNF-401). El servidor nunca la asume por defecto. |
-| **Taller activo** | La sucursal sobre la que se está operando dentro de la organización activa. Se indica por request (header `X-Workshop-Id`) y debe pertenecer a la organización activa. | Necesario para las operaciones que ocurren en un local concreto (órdenes, inventario). |
+| **Asignación a taller** | Vínculo operativo entre un miembro y uno o varios talleres de su organización (p. ej. en qué taller trabaja un mecánico). | No otorga ni restringe permisos por sí sola: los permisos vienen del rol de la membresía. Sirve para operación y reportes. |
+| **Organización activa** | La organización sobre la que opera el usuario en un momento dado. Se envía por request en el header `X-Org-Id` y se valida contra la membresía. | Permite cambiar de organización sin cerrar sesión (RNF-401). El servidor nunca la asume por defecto. |
+| **Taller activo** | El taller sobre el que se está operando dentro de la organización activa. Se indica por request (header `X-Workshop-Id`) y debe pertenecer a la organización activa. | Necesario para las operaciones que ocurren en un local concreto (órdenes, inventario). |
 | **Tenant** | Sinónimo técnico de *organización*. Se usa al hablar de arquitectura (multi-tenant, aislamiento entre tenants). | Preferir "organización" en documentación de producto; "tenant" en documentación técnica. |
 
-> **Nombre en el modelo y nombre en el texto.** Las tablas, las cabeceras y la interfaz de programación conservan `organizations` y `workshops`; la documentación y el texto visible al usuario dicen **empresa** y **sucursal**. Son el mismo concepto en cada par, y el resto de los documentos usa la forma en español de forma consistente.
+> **Un solo nombre por concepto.** Cada nivel de la jerarquía tiene **un** término en español y **un** identificador técnico, y no se admiten sinónimos: nivel 1 es **organización** (`organizations`, cabecera `X-Org-Id`, códigos `organization.*`) y nivel 2 es **taller** (`workshops`, cabecera `X-Workshop-Id`, códigos `workshop.*`). Los identificadores se conservan en inglés porque nombran objetos del esquema y del contrato; en prosa se emplea siempre la forma en español. Los términos **empresa** y **sucursal** quedan retirados del proyecto.
 
 ## Jerarquía y alcance de los datos
 
 ```
 Cuenta (auth.users)
    └── membresía (rol) ──> Organización  ← unidad de aislamiento (tenant)
-                              └── Taller (sucursal)  ← subdivisión operativa
+                              └── Taller  ← subdivisión operativa (local físico)
 ```
 
 **Regla**: el aislamiento se aplica **siempre** a nivel de organización. El taller determina *dónde* ocurre la operación, no *quién* puede verla.
 
 | Dato | Nivel | Por qué |
 |---|---|---|
-| Clientes | **Organización** | Un cliente de la empresa puede ser atendido en cualquiera de sus sucursales; centralizarlos es el beneficio principal de tener varias. |
-| Motocicletas | **Organización** | Siguen al cliente; su historial debe ser visible en cualquier sucursal. |
-| Historial de mantenimiento | **Organización** | La trazabilidad de la moto no se pierde si el cliente cambia de sucursal. |
-| Órdenes de trabajo | **Taller** | El servicio se ejecuta en un local concreto; la numeración y la carga de trabajo son por sucursal. |
-| Inventario y movimientos de stock | **Taller** | Cada sucursal tiene existencias físicas propias. |
-| Miembros y roles | **Organización** | El rol se otorga sobre la empresa; la asignación a talleres es operativa. |
+| Clientes | **Organización** | Un cliente de la organización puede ser atendido en cualquiera de sus talleres; centralizarlos es el beneficio principal de tener varios. |
+| Motocicletas | **Organización** | Siguen al cliente; su historial debe ser visible en cualquier taller. |
+| Historial de mantenimiento | **Organización** | La trazabilidad de la moto no se pierde si el cliente cambia de taller. |
+| Órdenes de trabajo | **Taller** | El servicio se ejecuta en un local concreto; la numeración y la carga de trabajo son por taller. |
+| Inventario y movimientos de stock | **Taller** | Cada taller tiene existencias físicas propias. |
+| Miembros y roles | **Organización** | El rol se otorga sobre la organización; la asignación a talleres es operativa. |
 | Auditoría | **Organización** (con referencia al taller cuando aplica) | Debe poder revisarse de forma consolidada. |
 
 Estas asignaciones de nivel constituyen la decisión de diseño registrada en [ADR-006](07-decisiones-diseno.md); cualquier cambio en el alcance de una entidad se resuelve ahí y se refleja después en este glosario.
@@ -47,7 +47,7 @@ Los identificadores de rol se mantienen **en inglés** en el modelo de datos y e
 
 | Rol | Alcance |
 |---|---|
-| **Owner** | Administra la organización: datos de la empresa, miembros y roles. Es quien la creó. |
+| **Owner** | Administra la organización: sus datos, sus talleres, sus miembros y sus roles. Es quien la creó. |
 | **Mechanic** | Trabajo técnico: diagnósticos, avance y cierre de órdenes de trabajo. |
 | **Receptionist** | Atención: alta de clientes y motocicletas, apertura de órdenes, entrega. |
 
@@ -83,6 +83,8 @@ Términos que conviene emplear con exactitud para no confundir los dos niveles d
 
 | En lugar de | Usar | Motivo |
 |---|---|---|
-| "Multi-taller" | **"Multiempresa"** (varias empresas por cuenta) o **"multi-sucursal"** (varias sucursales por empresa) | Es ambiguo: confunde dos niveles distintos. Emplear el término correspondiente al nivel del que se habla. |
-| "Taller" como sinónimo de la unidad de aislamiento | **"Empresa"** u **"organización"** | La unidad de aislamiento es la empresa; el taller es una sucursal dentro de ella. |
-| "Usuario de la empresa" | **"Miembro"** | El acceso lo otorga la membresía, no la mera existencia de la cuenta. |
+| "Empresa" | **"Organización"** | Término retirado. La unidad de aislamiento se llama organización en todo el proyecto, igual que la tabla `organizations` y la cabecera `X-Org-Id`. |
+| "Sucursal" | **"Taller"** | Término retirado. El local físico se llama taller en todo el proyecto, igual que la tabla `workshops`. |
+| "Multi-taller" a secas | **"Multiorganización"** (varias organizaciones por cuenta) o **"varios talleres por organización"** | Es ambiguo: confunde los dos niveles. Emplear el término del nivel del que se habla. |
+| "Taller" como unidad de aislamiento | **"Organización"** | La unidad de aislamiento es la organización; el taller es un local dentro de ella y no constituye frontera de seguridad. |
+| "Usuario de la organización" | **"Miembro"** | El acceso lo otorga la membresía, no la mera existencia de la cuenta. |

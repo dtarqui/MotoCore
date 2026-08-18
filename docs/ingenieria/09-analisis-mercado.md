@@ -35,8 +35,8 @@ Capacidades relevadas en las soluciones disponibles, y su relevancia para el mer
 | Órdenes de trabajo con estados | Generalizada | Base — funcionalidad esperada |
 | Inventario de repuestos con existencias | Generalizada | Base — funcionalidad esperada |
 | Registro de clientes y vehículos | Generalizada | Base — funcionalidad esperada |
-| **Gestión de varias empresas desde una cuenta** | **Ausente** en la oferta local | **Alta** |
-| **Gestión de varias sucursales por empresa** | Escasa; presente solo en soluciones internacionales orientadas a cadenas | **Alta** |
+| **Gestión de varias organizaciones desde una cuenta** | **Ausente** en la oferta local | **Alta** |
+| **Gestión de varios talleres por organización** | Escasa; presente solo en soluciones internacionales orientadas a cadenas | **Alta** |
 | **Aislamiento de datos verificable entre organizaciones** | No documentado por ninguna solución relevada | **Alta** |
 | Mensajería con el cliente por WhatsApp | Presente en soluciones regionales | **Alta** |
 | Facturación electrónica del SIN | Presente en soluciones locales, como módulo independiente | **Alta** (obligación normativa) |
@@ -59,7 +59,7 @@ WhatsApp es el canal por defecto para hablar con el cliente en Bolivia y la regi
 - **Appli-Car** (LATAM, https://www.appli-car.com): presupuestos por WhatsApp.
 - **Oficina Integrada** (Brasil, https://www.oficinaintegrada.com.br): envío de la orden de servicio por WhatsApp — evidencia de que es estándar en la región.
 
-**Implicación para el sistema**: el envío al cliente del presupuesto, del estado de la orden y de los recordatorios de servicio debería canalizarse por WhatsApp mediante su interfaz de programación para empresas. Queda **fuera del alcance** del presente proyecto y se documenta como línea de continuación.
+**Implicación para el sistema**: el envío al cliente del presupuesto, del estado de la orden y de los recordatorios de servicio debería canalizarse por WhatsApp mediante la WhatsApp Business API. Queda **fuera del alcance** del presente proyecto y se documenta como línea de continuación.
 
 ### B. Facturación electrónica del SIN (Bolivia)
 Bolivia exige facturación electrónica/en línea gestionada por el **Servicio de Impuestos Nacionales (SIN)**; los sistemas del rubro la integran como parte central del flujo. Puntos clave:
@@ -78,10 +78,10 @@ El relevamiento identifica un conjunto amplio de funcionalidades. El alcance del
 
 | Funcionalidad | Motivo |
 |---|---|
-| Gestión de varias empresas desde una cuenta | Es el objeto central del proyecto |
-| Gestión de varias sucursales por empresa | Segundo nivel de la jerarquía a diseñar y validar |
-| Control de acceso por rol dentro de cada empresa | Condición del aislamiento |
-| Aislamiento verificable entre empresas | Requisito crítico del proyecto |
+| Gestión de varias organizaciones desde una cuenta | Es el objeto central del proyecto |
+| Gestión de varios talleres por organización | Segundo nivel de la jerarquía a diseñar y validar |
+| Control de acceso por rol dentro de cada organización | Condición del aislamiento |
+| Aislamiento verificable entre organizaciones | Requisito crítico del proyecto |
 | Clientes e inventario | Corte vertical mínimo para demostrar los dos niveles de alcance |
 
 ### Fuera del alcance — líneas de continuación
@@ -106,4 +106,4 @@ Ordenadas por prioridad para el mercado boliviano:
 
 ## Consideración de diseño
 
-Aunque las funcionalidades de continuación quedan fuera del alcance, el modelo de datos se diseña de modo que su incorporación posterior no exija rehacer la estructura: las entidades que esas funcionalidades requerirán —facturas, presupuestos, citas— pertenecen al nivel sucursal o al nivel empresa según el mismo criterio de alcance ya establecido ([01-glosario.md](01-glosario.md)), y se integran a las políticas de aislamiento existentes sin modificarlas.
+Aunque las funcionalidades de continuación quedan fuera del alcance, el modelo de datos se diseña de modo que su incorporación posterior no exija rehacer la estructura: las entidades que esas funcionalidades requerirán —facturas, presupuestos, citas— pertenecen al nivel taller o al nivel organización según el mismo criterio de alcance ya establecido ([01-glosario.md](01-glosario.md)), y se integran a las políticas de aislamiento existentes sin modificarlas.

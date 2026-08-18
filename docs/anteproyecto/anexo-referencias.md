@@ -2,74 +2,205 @@
 
 Estado de comprobación de cada fuente citada en el anteproyecto. Una referencia con datos incorrectos compromete la trazabilidad de la información tanto como una inventada, de modo que cada identificador se contrastó contra el registro del editor.
 
-**Última comprobación**: 17 de agosto de 2026 (las entradas A4 y A5 del capítulo 2 se incorporaron y verificaron en esa fecha; el resto, el 14 de agosto de 2026).
+**Última comprobación**: 18 de agosto de 2026. En esa fecha se verificaron contra el **texto completo del editor** las entradas antes marcadas `Parcial` por metadatos, y se añadió a cada fuente un **enlace de acceso** localizado en los repositorios que fija el seminario: [Google Scholar](https://scholar.google.com/), [OATD](https://oatd.org/), [BASE](https://api.base-search.net/), Scopus / Web of Science, IEEE Xplore y ACM DL.
 
 ## Cómo se verificó cada tipo de fuente
 
 | Tipo | Método | Qué demuestra |
 |---|---|---|
 | Artículos y ponencias | Consulta a la **API de Crossref** por DOI (`api.crossref.org/works/{doi}`) | Que el DOI existe y que autores, año, título, revista, volumen y páginas coinciden con lo registrado por el editor |
-| Libros | Consulta por **ISBN** al catálogo de OpenLibrary | Que el ISBN corresponde a la obra, el autor y la editorial declarados |
+| Libros | Consulta por **ISBN** al catálogo de OpenLibrary, contrastada con la **página del editor** | Que el ISBN corresponde a la obra, el autor y la editorial declarados |
 | Documentos normativos | Resolución del DOI o del identificador del organismo | Que el estándar existe con ese número y esa autoría |
 | Enlaces | Petición HTTP a la URL | Que la página está accesible en la fecha de consulta |
+| **Contenido** | **Descarga y lectura del texto completo** cuando existe copia de acceso abierto | Que la afirmación atribuida a la fuente **está efectivamente en ella** |
 
-> Estos métodos comprueban los **datos bibliográficos**, no el contenido. Que una referencia figure aquí como comprobada significa que la fuente existe y está bien citada — no que se haya leído su texto completo. Esa distinción se marca en la última columna.
+> Los cuatro primeros métodos comprueban los **datos bibliográficos**; el quinto, el **contenido**. Que una referencia figure aquí como comprobada en metadatos no significa que se haya leído su texto completo: esa distinción se marca en la columna «Contenido».
 
-**Estados empleados en las tablas siguientes**: `OK` comprobado · `Parcial` comprobado a medias, con la salvedad indicada · `Falta` no comprobado, requiere acción antes de la entrega.
+**Estados**: `OK` comprobado · `Parcial` comprobado a medias, con la salvedad indicada · `Falta` no comprobado, requiere acción antes de la entrega.
 
-## Estado por referencia
+---
 
-### Artículos y ponencias revisadas por pares
+## 1. Estado por referencia
 
-| Cap. | Ref. | Autor y año | Metadatos del editor | Contenido |
-|---|---|---|---|---|
-| 2 | A1 | Dar, Hershcovitch & Morrison (2023) | OK — *Proc. ACM Manag. Data*, 1(1), art. 89, pp. 1–25 · ACM | OK — Texto completo extraído y leído |
-| 2 | A2 | **Alobaywi**, Almutairi & Sheldon (2026) | OK — *IoT*, 7(1), 21 · MDPI · publicado 22-02-2026 | Parcial — Solo resumen |
-| 2 | A3 | Andriianenko (2026) | OK — Repositorio UTM accesible (HTTP 200) | Parcial — Solo resumen del repositorio |
-| 2 | A4 | **Simić**, Dedeić, Stojkov & Prokić (2024) | OK — *IEEE Access*, 12, pp. 32597–32617 · DOI resuelve a IEEE Xplore · cuatro autores confirmados por Crossref | Parcial — Solo resumen |
-| 2 | A5 | **Olabanji**, Fitch & Matthew (2023) | OK — *WSEAS Trans. on Computers*, 22, pp. 25–43 · DOI resuelve al PDF de acceso abierto · tres autores confirmados por Crossref | Parcial — Solo resumen |
-| 3 | A1 | Bezemer & Zaidman (2010) | OK — IWPSE-EVOL '10, pp. 88–92 · ACM | Parcial — Solo resumen |
-| 3 | A2 | Codd (1970) | OK — *CACM*, 13(6), pp. 377–387 | OK — Obra canónica |
-| 3 | A4 | Gao, Bird & Barr (2017) | OK — ICSE 2017, pp. 758–769 · IEEE/ACM | Parcial — Verificar en el texto la cifra del 15 % antes de la defensa |
-| 3 | A5 | Gilbert & Lynch (2002) | OK — *ACM SIGACT News*, 33(2), pp. 51–59 | OK — Obra canónica |
-| 3 | A6 | Haerder & Reuter (1983) | OK — *ACM Computing Surveys*, 15(4), pp. 287–317 | OK — Obra canónica |
-| 3 | A7 | Krebs, Momm & Kounev (2012) | OK — CLOSER 2012, pp. 426–431 · SciTePress | Parcial — Crossref no lista los autores (laguna del editor): confirmar la autoría en la portada del artículo |
-| 3 | A8 | Larman & Basili (2003) | OK — *Computer*, 36(6), pp. 47–56 · IEEE | OK — Obra canónica |
-| 3 | A9 | Saltzer & Schroeder (1975) | OK — *Proceedings of the IEEE*, 63(9), pp. 1278–1308 | OK — Obra canónica |
-| 3 | A10 | Sandhu, Coyne, Feinstein & Youman (1996) | OK — *Computer*, 29(2), pp. 38–47 · IEEE | OK — Obra canónica |
-| 3 | A11 | Krasner & Pope (1988) | **No comprobable** — revista descontinuada, sin DOI | Falta — requiere consulta en biblioteca |
+### 1.1 Artículos y ponencias revisadas por pares
 
-### Libros
+| Cap. | Ref. | Autor y año | Metadatos del editor | Contenido | Acceso al texto |
+|---|---|---|---|---|---|
+| 2 | A1 | Dar, Hershcovitch & Morrison (2023) | OK — *Proc. ACM Manag. Data*, 1(1), art. 89, pp. 1–25 · ACM | OK — texto completo leído | [doi.org/10.1145/3588943](https://doi.org/10.1145/3588943) |
+| 2 | A2 | Alobaywi, Almutairi & Sheldon (2026) | OK — *IoT*, 7(1), 21 · MDPI · publicado 22-02-2026 | `Parcial` — solo resumen | **Acceso abierto**: [mdpi.com/2624-831X/7/1/21](https://www.mdpi.com/2624-831X/7/1/21) |
+| 2 | A3 | Andriianenko (2026) | OK — repositorio UTM accesible; ficha confirmada: Universidad Técnica de Moldavia, Facultad de Computadores, Informática y Microelectrónica; licencia CC BY-NC-ND 3.0 | `Parcial` — solo resumen | **PDF descargable (353 KB)**: [repository.utm.md/handle/5014/35481](https://repository.utm.md/handle/5014/35481) |
+| 2 | A4 | Simić, Dedeić, Stojkov & Prokić (2024) | OK — *IEEE Access*, 12, pp. 32597–32617 · cuatro autores confirmados por Crossref | `Parcial` — solo resumen | **Acceso abierto (CC BY 4.0)**: [ieeexplore.ieee.org/document/10443611](https://ieeexplore.ieee.org/document/10443611/) |
+| 2 | A5 | Olabanji, Fitch & Matthew (2023) | OK — *WSEAS Trans. on Computers*, 22, pp. 25–43 · tres autores confirmados por Crossref | `Parcial` — solo resumen | **PDF abierto del editor**: [wseas.com/journals/computers/2023/a105105-1421.pdf](https://wseas.com/journals/computers/2023/a105105-1421.pdf) |
+| 3 | A1 | Bezemer & Zaidman (2010) | OK — IWPSE-EVOL '10, pp. 88–92 · ACM | `Parcial` — solo resumen | **PDF del propio autor**: [azaidman.github.io/publications/bezemerIWPSE2010.pdf](https://azaidman.github.io/publications/bezemerIWPSE2010.pdf) |
+| 3 | A2 | Codd (1970) | OK — *CACM*, 13(6), pp. 377–387 | OK — obra canónica | [doi.org/10.1145/362384.362685](https://doi.org/10.1145/362384.362685) |
+| 3 | A3b | **Bangor, Kortum & Miller (2008)** | OK — *Int. J. Human–Computer Interaction*, 24(6), pp. 574–594 · Taylor & Francis | `Parcial` — se toma de él el umbral SUS = 68 | [doi.org/10.1080/10447310802205776](https://doi.org/10.1080/10447310802205776) |
+| 3 | A4 | Gao, Bird & Barr (2017) | OK — ICSE 2017, pp. 758–769 · IEEE/ACM | **OK — cifra del 15 % verificada en el texto completo** (ver §2) | **PDF abierto (Microsoft Research)**: [microsoft.com/…/gao2017javascript.pdf](https://www.microsoft.com/en-us/research/wp-content/uploads/2017/09/gao2017javascript.pdf) |
+| 3 | A5 | Gilbert & Lynch (2002) | OK — *ACM SIGACT News*, 33(2), pp. 51–59 | OK — obra canónica | [doi.org/10.1145/564585.564601](https://doi.org/10.1145/564585.564601) |
+| 3 | A6 | Haerder & Reuter (1983) | OK — *ACM Computing Surveys*, 15(4), pp. 287–317 | OK — obra canónica | [doi.org/10.1145/289.291](https://doi.org/10.1145/289.291) |
+| 3 | A7 | Krebs, Momm & Kounev (2012) | **OK — autoría confirmada en la portada del PDF del editor**: «Krebs R., Momm C. and Kounev S.»; CLOSER-2012, pp. 426–431; ISBN de actas 978-989-8565-05-1 | OK — portada y resumen leídos | **PDF abierto del editor**: [scitepress.org/papers/2012/39576/39576.pdf](https://www.scitepress.org/papers/2012/39576/39576.pdf) |
+| 3 | A8 | Larman & Basili (2003) | OK — *Computer*, 36(6), pp. 47–56 · IEEE | OK — obra canónica | [doi.org/10.1109/MC.2003.1204375](https://doi.org/10.1109/MC.2003.1204375) |
+| 3 | A9 | Saltzer & Schroeder (1975) | OK — *Proceedings of the IEEE*, 63(9), pp. 1278–1308 | OK — obra canónica | [doi.org/10.1109/PROC.1975.9939](https://doi.org/10.1109/PROC.1975.9939) |
+| 3 | A10 | Sandhu, Coyne, Feinstein & Youman (1996) | OK — *Computer*, 29(2), pp. 38–47 · IEEE | OK — obra canónica | [doi.org/10.1109/2.485845](https://doi.org/10.1109/2.485845) |
+| 3 | A10b | **Nielsen & Landauer (1993)** | OK — INTERACT '93 / CHI '93, pp. 206–213 · ACM | `Parcial` — se toma de él la curva de rendimientos decrecientes | [doi.org/10.1145/169059.169166](https://doi.org/10.1145/169059.169166) |
+| 3 | A10c | Simić et al. (2024) | Ver cap. 2, A4 | — | Ver cap. 2, A4 |
+| 3 | A11 | Krasner & Pope (1988) | **OK — resuelto**: sin DOI por ser revista descontinuada, pero **indexado en ACM DL** con identificador estable `10.5555/50757.50759`; *JOOP*, 1(3), pp. 26–49; autores de ParcPlace Systems | `Parcial` — copia escaneada localizada | **ACM DL**: [dl.acm.org/doi/10.5555/50757.50759](https://dl.acm.org/doi/10.5555/50757.50759) · **PDF escaneado (UC Irvine, 18 pp.)**: [ics.uci.edu/~redmiles/…/KrasnerPope88.pdf](https://www.ics.uci.edu/~redmiles/ics227-SQ04/papers/KrasnerPope88.pdf) |
 
-Los quince ISBN listados en el anteproyecto resuelven correctamente contra el catálogo. Tres presentan discrepancias de metadatos que conviene resolver contra la **página de créditos** del ejemplar:
+### 1.2 Libros
 
-| Ref. | Obra | Discrepancia detectada | Qué hacer |
+**Las tres discrepancias de metadatos quedaron resueltas el 18 de agosto de 2026 contrastando con la página del editor. En los tres casos el error estaba en el catálogo consultado, no en la cita del anteproyecto: las citas se mantienen sin cambio.**
+
+| Ref. | Obra | Discrepancia que reportaba el catálogo | Resolución contra el editor |
 |---|---|---|---|
-| Cap. 2 L4 / Cap. 3 L6 | Newman (2021), *Building microservices*, 2.ª ed. | El catálogo fecha ese ISBN en 2020; la 2.ª edición de O'Reilly se publicó en 2021 | Tomar el año de la página de créditos del ejemplar consultado |
-| Cap. 2 L7 | Sbarski, Cui & Nair (2022), *Serverless architectures on AWS*, 2.ª ed. | El catálogo fecha 2019 y **omite a Yan Cui** entre los autores | Confirmar autoría y año en la portada de Manning |
-| Cap. 3 L2 | Beck (2002), *Test-driven development: By example* | El catálogo devuelve una reimpresión de 2006 | Citar 2002, año de la primera edición |
+| Cap. 2 L4 / Cap. 3 L6 | Newman (2021), *Building microservices*, 2.ª ed. | El catálogo fechaba ese ISBN en 2020 | **Confirmado 2021** — O'Reilly Media, 2.ª ed., publicada el 5 de octubre de 2021, ISBN 978-1-4920-3402-5. [Ficha del editor](https://www.oreilly.com/library/view/building-microservices-2nd/9781492034018/) |
+| Cap. 2 L7 | Sbarski, Cui & Nair (2022), *Serverless architectures on AWS*, 2.ª ed. | El catálogo fechaba 2019 y **omitía a Yan Cui** | **Confirmado 2022 y los tres autores** — Manning, 2.ª ed., marzo de 2022, ISBN 978-1-61729-542-3. [Ficha del editor](https://www.manning.com/books/serverless-architectures-on-aws-second-edition) |
+| Cap. 3 L2 | Beck (2002), *Test-driven development: By example* | El catálogo devolvía una reimpresión de 2006 | **Confirmado 2002** — Addison-Wesley Professional, 1.ª ed., 8 de noviembre de 2002, ISBN 978-0-321-14653-3 |
 
 Sin discrepancias: Bass et al. (2021), Richards & Ford (2020), Evans (2003), Kleppmann (2017), Obe & Hsu (2017), Humble & Farley (2010), Forsgren et al. (2018), Cohn (2004), Nielsen (1993), Pierce (2002), Hernández-Sampieri & Mendoza (2018) y Hernández Sampieri et al. (2014).
 
-### Documentos normativos
+### 1.3 Documentos normativos
 
-| Ref. | Documento | Estado |
+| Ref. | Documento | Estado | Acceso |
+|---|---|---|---|
+| N1 | RFC 7519 — JSON Web Token | OK — DOI resuelve; autores y año confirmados | [doi.org/10.17487/RFC7519](https://doi.org/10.17487/RFC7519) · [rfc-editor.org/rfc/rfc7519](https://www.rfc-editor.org/rfc/rfc7519) |
+| N2 | RFC 9457 — Problem Details for HTTP APIs | OK — DOI resuelve; confirma que **sustituye a la RFC 7807** | [doi.org/10.17487/RFC9457](https://doi.org/10.17487/RFC9457) · [rfc-editor.org/rfc/rfc9457](https://www.rfc-editor.org/rfc/rfc9457) |
+| N3 | NIST SP 800-207 — Zero Trust Architecture | OK — DOI resuelve; cuatro autores confirmados | [doi.org/10.6028/NIST.SP.800-207](https://doi.org/10.6028/NIST.SP.800-207) |
+| N4 | Jonas et al. (2019) — Berkeley View on Serverless | OK — arXiv accesible | [arxiv.org/abs/1902.03383](https://arxiv.org/abs/1902.03383) |
+| N5 | Fielding (2000) — Tesis doctoral | OK — alojada en el sitio institucional de UC Irvine | [ics.uci.edu/~fielding/pubs/dissertation/top.htm](https://ics.uci.edu/~fielding/pubs/dissertation/top.htm) |
+| N6 | W3C — Web Application Manifest | OK — accesible. **Corrección aplicada**: es un *Working Draft* fechado el 13 de agosto de 2026, no de 2023 | [w3.org/TR/appmanifest/](https://www.w3.org/TR/appmanifest/) |
+
+### 1.4 Documentación técnica con autor corporativo
+
+Incorporada al §7.1 del anteproyecto. Se admite **solo como sustento del marco conceptual**, nunca como sustento teórico. Todas requieren **fecha de recuperación** el día de la entrega.
+
+| Fuente | Enlace | Estado |
 |---|---|---|
-| N1 | RFC 7519 — JSON Web Token | OK — DOI resuelve; autores y año confirmados |
-| N2 | RFC 9457 — Problem Details for HTTP APIs | OK — DOI resuelve; confirma que **sustituye a la RFC 7807** |
-| N3 | NIST SP 800-207 — Zero Trust Architecture | OK — DOI resuelve; cuatro autores confirmados |
-| N4 | Jonas et al. (2019) — Berkeley View on Serverless | OK — arXiv accesible |
-| N5 | Fielding (2000) — Tesis doctoral | OK — Alojada en el sitio institucional de UC Irvine |
-| N6 | W3C — Web Application Manifest | OK — Accesible. **Corrección aplicada**: es un *Working Draft* fechado el **13 de agosto de 2026**, no de 2023 |
+| OpenJS Foundation — *Node.js documentation* | [nodejs.org/docs/latest/api/](https://nodejs.org/docs/latest/api/) | `Falta` — accesible el 14-08-2026; re-comprobar y fechar |
+| Microsoft — *TypeScript documentation* | [typescriptlang.org/docs/](https://www.typescriptlang.org/docs/) | `Falta` — ídem |
+| PostgreSQL Global Development Group — *PostgreSQL documentation* (s. f.-a) | [postgresql.org/docs/current/](https://www.postgresql.org/docs/current/) | `Falta` — ídem |
+| PostgreSQL Global Development Group — *Row security policies* (s. f.-b) | [postgresql.org/docs/current/ddl-rowsecurity.html](https://www.postgresql.org/docs/current/ddl-rowsecurity.html) | `Falta` — ídem |
+| Zod — *Zod documentation* | [zod.dev](https://zod.dev/) | `Falta` — ídem |
+| Meta Open Source — *React documentation* | [react.dev](https://react.dev/) | `Falta` — ídem |
+| Schwaber & Sutherland (2020) — *The Scrum Guide* | [scrumguides.org](https://scrumguides.org/) | `Falta` — ídem |
+| Chong, Carraro & Wolter (2006) — *Multi-tenant data architecture* | [Copia archivada (Wayback, 30-05-2017)](https://web.archive.org/web/20170530080303/https://msdn.microsoft.com/en-us/library/aa479086.aspx) | **Sustituida** — la URL original de MSDN devuelve 404. La atribución teórica se trasladó a Krebs et al. (2012) |
 
-### Enlaces de documentación oficial
+---
 
-Todos accesibles el 14 de agosto de 2026 (HTTP 200): react.dev · typescriptlang.org · nodejs.org · postgresql.org (documentación general y políticas de seguridad de fila) · scrumguides.org · zod.dev.
+## 2. Comprobaciones de contenido realizadas
 
-| Excepción | Detalle |
-|---|---|
-| Chong, Carraro & Wolter (2006) — *Multi-tenant data architecture* | **Sustituida** — la URL original de MSDN devuelve **404**: Microsoft retiró el contenido. Se localizó copia archivada (Wayback Machine, 30-05-2017) y es la que se cita. La atribución teórica se trasladó a Krebs et al. (2012) |
+Lo que se verificó **dentro del texto**, no solo en sus metadatos.
 
-## Pendientes antes de la entrega final
+| Afirmación del anteproyecto | Fuente | Resultado |
+|---|---|---|
+| «Aproximadamente el **15 %** de los errores públicos de proyectos JavaScript habría sido detectado por un verificador de tipos estático como TypeScript» | Gao et al. (2017) | **Confirmada**. El resumen del artículo dice literalmente: *«our central finding is that both static type systems find an important percentage of public bugs: both Flow 0.30 and TypeScript 2.0 successfully detect 15%»*. La cifra mide el porcentaje de **errores públicos corregidos** que el verificador detecta, y aplica por igual a Flow y a TypeScript |
+| Autoría de Krebs et al. (2012), que Crossref no listaba | Krebs, Momm & Kounev (2012) | **Confirmada** en la portada del PDF del editor: «Krebs R., Momm C. and Kounev S.» |
+| Que Brooke (1996) es la fuente primaria de la escala SUS | Brooke (1996) | **Confirmada**. El documento original —John Brooke, Redhatch Consulting Ltd.— se abre con «*This chapter describes the System Usability Scale (SUS)*», lo que confirma que es el capítulo del libro y no una reimpresión posterior |
 
-Se consolidaron en el registro único de pendientes del proyecto: [PENDIENTES.md](../PENDIENTES.md) §2 (verificación de fuentes) y §3 (datos estadísticos por confirmar). Este anexo mantiene el **estado por referencia**; aquel documento, la **lista de acciones** con su prioridad.
+---
+
+## 3. Referencias en formato APA 7 con enlace de acceso
+
+Lista consolidada y lista para pegar. El enlace es el **más estable y accesible** que se localizó: se prefiere el DOI; si no existe, el repositorio del editor; si tampoco, una copia institucional o del autor.
+
+### Artículos, ponencias y tesis
+
+Alobaywi, B., Almutairi, M. G., & Sheldon, F. T. (2026). Performance trade-offs in multi-tenant IoT–cloud security: A systematic review of emerging technologies. *IoT, 7*(1), 21. https://doi.org/10.3390/iot7010021
+
+Andriianenko, O. (2026). *Design and evaluation of multi-tenant architectures in microservice based project management systems* [Tesis de maestría, Universitatea Tehnică a Moldovei]. Repositorio institucional UTM. https://repository.utm.md/handle/5014/35481
+
+Bangor, A., Kortum, P. T., & Miller, J. T. (2008). An empirical evaluation of the System Usability Scale. *International Journal of Human–Computer Interaction, 24*(6), 574–594. https://doi.org/10.1080/10447310802205776
+
+Bezemer, C.-P., & Zaidman, A. (2010). Multi-tenant SaaS applications: Maintenance dream or nightmare? En *Proceedings of the Joint ERCIM Workshop on Software Evolution (EVOL) and International Workshop on Principles of Software Evolution (IWPSE)* (pp. 88–92). ACM. https://doi.org/10.1145/1862372.1862393
+
+Codd, E. F. (1970). A relational model of data for large shared data banks. *Communications of the ACM, 13*(6), 377–387. https://doi.org/10.1145/362384.362685
+
+Dar, C., Hershcovitch, M., & Morrison, A. (2023). RLS side channels: Investigating leakage of row-level security protected data through query execution time. *Proceedings of the ACM on Management of Data, 1*(1), Artículo 89, 1–25. https://doi.org/10.1145/3588943
+
+Gao, Z., Bird, C., & Barr, E. T. (2017). To type or not to type: Quantifying detectable bugs in JavaScript. En *2017 IEEE/ACM 39th International Conference on Software Engineering (ICSE)* (pp. 758–769). IEEE. https://doi.org/10.1109/ICSE.2017.75
+
+Gilbert, S., & Lynch, N. (2002). Brewer's conjecture and the feasibility of consistent, available, partition-tolerant web services. *ACM SIGACT News, 33*(2), 51–59. https://doi.org/10.1145/564585.564601
+
+Haerder, T., & Reuter, A. (1983). Principles of transaction-oriented database recovery. *ACM Computing Surveys, 15*(4), 287–317. https://doi.org/10.1145/289.291
+
+Krasner, G. E., & Pope, S. T. (1988). A cookbook for using the model-view-controller user interface paradigm in Smalltalk-80. *Journal of Object-Oriented Programming, 1*(3), 26–49. https://dl.acm.org/doi/10.5555/50757.50759
+
+Krebs, R., Momm, C., & Kounev, S. (2012). Architectural concerns in multi-tenant SaaS applications. En *Proceedings of the 2nd International Conference on Cloud Computing and Services Science (CLOSER 2012)* (pp. 426–431). SciTePress. https://doi.org/10.5220/0003957604260431
+
+Larman, C., & Basili, V. R. (2003). Iterative and incremental developments: A brief history. *Computer, 36*(6), 47–56. https://doi.org/10.1109/MC.2003.1204375
+
+Nielsen, J., & Landauer, T. K. (1993). A mathematical model of the finding of usability problems. En *Proceedings of the INTERACT '93 and CHI '93 Conference on Human Factors in Computing Systems* (pp. 206–213). ACM. https://doi.org/10.1145/169059.169166
+
+Olabanji, D., Fitch, T., & Matthew, O. (2023). Multi-tenancy in cloud-native architecture: A systematic mapping study. *WSEAS Transactions on Computers, 22*, 25–43. https://doi.org/10.37394/23205.2023.22.4
+
+Saltzer, J. H., & Schroeder, M. D. (1975). The protection of information in computer systems. *Proceedings of the IEEE, 63*(9), 1278–1308. https://doi.org/10.1109/PROC.1975.9939
+
+Sandhu, R. S., Coyne, E. J., Feinstein, H. L., & Youman, C. E. (1996). Role-based access control models. *Computer, 29*(2), 38–47. https://doi.org/10.1109/2.485845
+
+Simić, M., Dedeić, J., Stojkov, M., & Prokić, I. (2024). A hierarchical namespace approach for multi-tenancy in distributed clouds. *IEEE Access, 12*, 32597–32617. https://doi.org/10.1109/ACCESS.2024.3369031
+
+### Libros y capítulos
+
+Bass, L., Clements, P., & Kazman, R. (2021). *Software architecture in practice* (4.ª ed.). Addison-Wesley Professional.
+
+Beck, K. (2002). *Test-driven development: By example*. Addison-Wesley Professional.
+
+Brooke, J. (1996). SUS: A quick and dirty usability scale. En P. W. Jordan, B. Thomas, B. A. Weerdmeester, & I. L. McClelland (Eds.), *Usability evaluation in industry* (pp. 189–194). Taylor & Francis. https://digital.ahrq.gov/sites/default/files/docs/survey/systemusabilityscale%2528sus%2529_comp%255B1%255D.pdf
+
+Forsgren, N., Humble, J., & Kim, G. (2018). *Accelerate: The science of lean software and DevOps*. IT Revolution Press.
+
+Humble, J., & Farley, D. (2010). *Continuous delivery: Reliable software releases through build, test, and deployment automation*. Addison-Wesley Professional.
+
+Kleppmann, M. (2017). *Designing data-intensive applications: The big ideas behind reliable, scalable, and maintainable systems*. O'Reilly Media.
+
+Newman, S. (2021). *Building microservices: Designing fine-grained systems* (2.ª ed.). O'Reilly Media.
+
+Nielsen, J. (1993). *Usability engineering*. Morgan Kaufmann.
+
+Pierce, B. C. (2002). *Types and programming languages*. MIT Press.
+
+Richards, M., & Ford, N. (2020). *Fundamentals of software architecture: An engineering approach*. O'Reilly Media.
+
+### Documentos normativos e informes
+
+Fielding, R. T. (2000). *Architectural styles and the design of network-based software architectures* [Tesis doctoral, University of California, Irvine]. https://ics.uci.edu/~fielding/pubs/dissertation/top.htm
+
+Jonas, E., Schleier-Smith, J., Sreekanti, V., Tsai, C.-C., Khandelwal, A., Pu, Q., Shankar, V., Carreira, J., Krauth, K., Yadwadkar, N., Gonzalez, J. E., Popa, R. A., Stoica, I., & Patterson, D. A. (2019). *Cloud programming simplified: A Berkeley view on serverless computing* (Informe técnico N.º UCB/EECS-2019-3). University of California, Berkeley. https://arxiv.org/abs/1902.03383
+
+Jones, M., Bradley, J., & Sakimura, N. (2015). *JSON Web Token (JWT)* (RFC 7519). Internet Engineering Task Force. https://doi.org/10.17487/RFC7519
+
+Nottingham, M., Wilde, E., & Dalal, S. (2023). *Problem details for HTTP APIs* (RFC 9457). Internet Engineering Task Force. https://doi.org/10.17487/RFC9457
+
+Rose, S., Borchert, O., Mitchell, S., & Connelly, S. (2020). *Zero trust architecture* (NIST Special Publication 800-207). National Institute of Standards and Technology. https://doi.org/10.6028/NIST.SP.800-207
+
+World Wide Web Consortium. (2026). *Web application manifest* (W3C Working Draft, 13 de agosto de 2026). https://www.w3.org/TR/appmanifest/
+
+### Documentación técnica con autor corporativo
+
+*Requieren fecha de recuperación el día de la entrega (ver PENDIENTES §2.4).*
+
+Meta Open Source. (s. f.). *React documentation*. Recuperado el 14 de agosto de 2026, de https://react.dev/
+
+Microsoft. (s. f.). *TypeScript documentation*. Recuperado el 14 de agosto de 2026, de https://www.typescriptlang.org/docs/
+
+OpenJS Foundation. (s. f.). *Node.js documentation*. Recuperado el 14 de agosto de 2026, de https://nodejs.org/docs/latest/api/
+
+PostgreSQL Global Development Group. (s. f.-a). *PostgreSQL documentation*. Recuperado el 14 de agosto de 2026, de https://www.postgresql.org/docs/current/
+
+PostgreSQL Global Development Group. (s. f.-b). *Row security policies*. Recuperado el 14 de agosto de 2026, de https://www.postgresql.org/docs/current/ddl-rowsecurity.html
+
+Schwaber, K., & Sutherland, J. (2020). *The Scrum Guide: The definitive guide to Scrum*. Recuperado el 14 de agosto de 2026, de https://scrumguides.org/
+
+Zod. (s. f.). *Zod documentation*. Recuperado el 14 de agosto de 2026, de https://zod.dev/
+
+### Fuentes estadísticas oficiales
+
+Instituto Nacional de Estadística de Bolivia. (2026). *Bolivia: parque automotor por tipo de servicio y clase de vehículo, 2003–2025* (Cuadro N.º 1.2) [Conjunto de datos]. Elaborado con registros del Registro Único para la Administración Tributaria Municipal. https://www.ine.gob.bo/index.php/estadisticas-economicas/transportes/parque-automotor-cuadros-estadisticos/
+
+Instituto Nacional de Estadística de Bolivia. (2025). *Boletín estadístico parque automotor 2024*. https://www.ine.gob.bo/index.php/boletin-estadistico-parque-automotor-2024/
+
+Instituto Nacional de Estadística de Bolivia. (2026). *Estadísticas del parque automotor 2003–2025*. https://www.ine.gob.bo/index.php/estadisticas-del-parque-automotor-2003-2025/
+
+---
+
+## 4. Pendientes antes de la entrega final
+
+Se mantienen en el registro único: [PENDIENTES.md](../PENDIENTES.md) §2 (verificación de fuentes) y §3 (datos estadísticos por confirmar). Este anexo conserva el **estado por referencia**; aquel documento, la **lista de acciones** con su prioridad.

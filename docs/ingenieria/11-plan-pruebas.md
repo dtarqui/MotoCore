@@ -28,8 +28,10 @@ De ahí tres reglas de selección:
 | **N1 · Unitaria** | Reglas puras: esquemas de validación, cálculo de existencias, resolución de permisos por rol | Nada externo | Milisegundos |
 | **N2 · Contrato HTTP** | La interfaz **antes** de tocar la base: credencial ausente o inválida, contexto activo obligatorio, forma del error, validación de entrada | La aplicación en memoria | Segundos |
 | **N3 · Integración** | Flujo completo contra base de datos y proveedor de identidad reales: creación, unicidad por nivel, transiciones de estado, auditoría | Entorno con credenciales y migraciones aplicadas | Decenas de segundos |
-| **N4 · Aislamiento** | Que una empresa no accede a datos de otra, por interfaz **y** por acceso directo al motor | Igual que N3, más una identidad adicional | Decenas de segundos |
-| **N5 · Usabilidad** | Que el cambio de contexto entre empresas y sucursales resulta operable por un usuario del rubro (RNF-401, RNF-404) | Aplicación desplegada y operadores participantes | Sesión presencial o remota, por participante |
+| **N4 · Aislamiento** | Que una organización no accede a datos de otra, por interfaz **y** por acceso directo al motor | Igual que N3, más una identidad adicional | Decenas de segundos |
+| **N5 · Usabilidad** | Que el cambio de contexto entre organizaciones y talleres resulta operable por un usuario del rubro (RNF-401, RNF-404) | Aplicación desplegada y operadores participantes | Sesión presencial o remota, por participante |
+
+Además de estos seis niveles, la matriz de §4.7 emplea la marca **CI** para las propiedades que no verifica un caso de prueba sino el propio pipeline de integración continua (verificación de tipos, ejecución de la suite y bloqueo ante fallo).
 
 N1 y N2 corren siempre, en cada integración al ramal principal. N3 y N4 exigen credenciales; su tratamiento cuando faltan está en §6.2. N5 es **manual y no repetible en cada integración**: se ejecuta una vez, sobre la aplicación terminada, y su diseño está en §7.
 
@@ -39,7 +41,7 @@ N1 y N2 corren siempre, en cada integración al ramal principal. N3 y N4 exigen 
 |---|---|
 | Pruebas de carga y de rendimiento | Excluidas del alcance (§1.8.3); RNF-501 es criterio cualitativo, no objetivo medido |
 | Pruebas automatizadas de la interfaz de usuario | El objeto de validación es la arquitectura de aislamiento, que reside en el servidor y en la base de datos. RNF-402 y RNF-403 se verifican por inspección (N0); RNF-401 y RNF-404 se evalúan con operadores reales (N5, §7) |
-| Evaluación de usabilidad de la interfaz completa | La evaluación se acota al **cambio de contexto** entre empresas y sucursales, por ser la manifestación visible del aporte de la tesis. Las demás pantallas no se someten a prueba con usuarios |
+| Evaluación de usabilidad de la interfaz completa | La evaluación se acota al **cambio de contexto** entre organizaciones y talleres, por ser la manifestación visible del aporte de la tesis. Las demás pantallas no se someten a prueba con usuarios |
 | Pruebas de penetración | El alcance cubre el aislamiento entre inquilinos, no una evaluación de seguridad ofensiva del despliegue |
 | Mitigación del canal lateral temporal de RLS | Amenaza reconocida y documentada (§3.3 del marco teórico); su mitigación excede el objeto del proyecto |
 
@@ -52,21 +54,21 @@ N1 y N2 corren siempre, en cada integración al ramal principal. N3 y N4 exigen 
 Todas las pruebas de N3 y N4 parten del mismo escenario, construido por el propio caso —nunca de datos preexistentes, para que la ejecución sea reproducible desde una base vacía:
 
 ```
-Cuenta A ──owner──> Empresa 1 ──> Sucursal 1.1
+Cuenta A ──owner──> Organización 1 ──> Taller 1.1
                         │            └── repuestos de 1.1
-                        ├──> Sucursal 1.2
+                        ├──> Taller 1.2
                         │       └── repuestos de 1.2
-                        └── clientes de la Empresa 1
+                        └── clientes de la Organización 1
 
-Cuenta A ──owner──> Empresa 2          (misma cuenta, otra empresa)
+Cuenta A ──owner──> Organización 2          (misma cuenta, otra organización)
 
-Cuenta B ──owner──> Empresa 3 ──> Sucursal 3.1
-                        └── clientes de la Empresa 3
+Cuenta B ──owner──> Organización 3 ──> Taller 3.1
+                        └── clientes de la Organización 3
 
 Cuenta C  ── sin membresía en ninguna de las anteriores
 ```
 
-Con este escenario, un solo montaje cubre las tres preguntas del aislamiento: **entre cuentas** (A frente a B), **entre empresas de la misma cuenta** (Empresa 1 frente a Empresa 2) y **frente a quien no es miembro de ninguna** (Cuenta C).
+Con este escenario, un solo montaje cubre las tres preguntas del aislamiento: **entre cuentas** (A frente a B), **entre organizaciones de la misma cuenta** (Organización 1 frente a Organización 2) y **frente a quien no es miembro de ninguna** (Cuenta C).
 
 ### 2.2 Aislamiento entre ejecuciones
 
@@ -99,32 +101,32 @@ Identificación de casos: **CP-nnn**, donde `nnn` es el número del requisito qu
 
 | Req. | Caso | Nivel | Criterio ejecutable |
 |---|---|---|---|
-| RF-101 | CP-101.1 | N3 | Tras registrar, la cuenta tiene una empresa, una sucursal y membresía `owner` |
-| RF-101 | CP-101.2 | N3 | Un correo ya registrado se rechaza y **no** crea empresa alguna |
-| RF-101 | CP-101.3 | N3 | Si falla la creación de la empresa, no queda cuenta ni registro huérfano (atomicidad, ADR-007) |
+| RF-101 | CP-101.1 | N3 | Tras registrar, la cuenta tiene una organización, un taller y membresía `owner` |
+| RF-101 | CP-101.2 | N3 | Un correo ya registrado se rechaza y **no** crea organización alguna |
+| RF-101 | CP-101.3 | N3 | Si falla la creación de la organización, no queda cuenta ni registro huérfano (atomicidad, ADR-007) |
 | RF-101 | CP-101.4 | N2 | Contraseña de menos de 8 caracteres: `400` con el campo señalado |
 | RF-102 | CP-102 | N3 | Una credencial emitida por el proveedor es aceptada por la interfaz |
 | RF-103 | CP-103.1 | N2 | Petición sin credencial a un recurso protegido: `401 auth.missing_token` |
 | RF-103 | CP-103.2 | N2 | Credencial inválida: `401 auth.invalid_token` |
-| RF-104 | CP-104 | N3 | Devuelve perfil y empresas con membresía **activa**, cada una con su rol |
+| RF-104 | CP-104 | N3 | Devuelve perfil y organizaciones con membresía **activa**, cada una con su rol |
 
-### 4.2 Empresas y sucursales
+### 4.2 Organizaciones y talleres
 
 | Req. | Caso | Nivel | Criterio ejecutable |
 |---|---|---|---|
-| RF-201 | CP-201 | N3 | La segunda empresa aparece en el listado con rol `owner` |
-| RF-202 | CP-202 | N3 | Un invitado ve la empresa aunque no sea su creador; un removido deja de verla |
-| RF-203 | CP-203.1 | N3 | El cambio devuelve la empresa y el rol; las peticiones posteriores operan sobre ella |
-| RF-203 | CP-203.2 | N3 | Activar una empresa sin membresía: `403 organization.access_denied` |
+| RF-201 | CP-201 | N3 | La segunda organización aparece en el listado con rol `owner` |
+| RF-202 | CP-202 | N3 | Un invitado ve la organización aunque no sea su creador; un removido deja de verla |
+| RF-203 | CP-203.1 | N3 | El cambio devuelve la organización y el rol; las peticiones posteriores operan sobre ella |
+| RF-203 | CP-203.2 | N3 | Activar una organización sin membresía: `403 organization.access_denied` |
 | RF-204 | CP-204 | N3 | El `Owner` edita; un no-`Owner` recibe `403` |
-| RF-301 | CP-301.1 | N3 | La sucursal creada aparece en el listado de la empresa |
+| RF-301 | CP-301.1 | N3 | El taller creado aparece en el listado de la organización |
 | RF-301 | CP-301.2 | N3 | Un no-`Owner` que intenta crear recibe `403` |
-| RF-302 | CP-302 | N3 | El listado devuelve **solo** sucursales de la empresa activa |
-| RF-303 | CP-303.1 | N2 | Operación de nivel sucursal sin `X-Workshop-Id`: `400 workshop.missing_active_workshop` |
-| RF-303 | CP-303.2 | N3 | Sucursal de otra empresa en la cabecera: `404 workshop.not_found` |
+| RF-302 | CP-302 | N3 | El listado devuelve **solo** talleres de la organización activa |
+| RF-303 | CP-303.1 | N2 | Operación de nivel taller sin `X-Workshop-Id`: `400 workshop.missing_active_workshop` |
+| RF-303 | CP-303.2 | N3 | Taller de otra organización en la cabecera: `404 workshop.not_found` |
 | RF-304 | CP-304.1 | N3 | La asignación se registra y se puede retirar sin afectar la membresía |
 | RF-304 | CP-304.2 | N3 | La asignación **no** altera lo que el miembro puede ver (ADR-006) |
-| RF-305 | CP-305 | N3 | La sucursal desactivada deja de listarse como activa; sus datos siguen consultables |
+| RF-305 | CP-305 | N3 | El taller desactivado deja de listarse como activo; sus datos siguen consultables |
 
 ### 4.3 Miembros y control de acceso
 
@@ -140,26 +142,26 @@ Identificación de casos: **CP-nnn**, donde `nnn` es el número del requisito qu
 | RF-406 | CP-406 | N3 | Un `Mechanic` que intenta invitar: `403` |
 | RF-407 | CP-407 | N3 | Cualquier miembro consulta el listado, con rol y estado |
 
-### 4.4 Clientes — nivel empresa
+### 4.4 Clientes — nivel organización
 
 | Req. | Caso | Nivel | Criterio ejecutable |
 |---|---|---|---|
 | RF-501 | CP-501 | N3 | El cliente creado se recupera por identificador |
-| RF-502 | CP-502 | N3 | Un cliente creado con la sucursal A activa **se lista** con la sucursal B activa |
-| RF-503 | CP-503.1 | N3 | Correo duplicado en la misma empresa: `409 client.duplicate_email` |
-| RF-503 | CP-503.2 | N3 | El mismo correo en otra empresa se acepta |
+| RF-502 | CP-502 | N3 | Un cliente creado con el taller A activa **se lista** con el taller B activa |
+| RF-503 | CP-503.1 | N3 | Correo duplicado en la misma organización: `409 client.duplicate_email` |
+| RF-503 | CP-503.2 | N3 | El mismo correo en otra organización se acepta |
 | RF-504 | CP-504.1 | N3 | La baja conserva el registro y lo excluye de los listados activos |
-| RF-504 | CP-504.2 | N3 | La búsqueda por nombre o correo opera dentro de la empresa activa |
+| RF-504 | CP-504.2 | N3 | La búsqueda por nombre o correo opera dentro de la organización activa |
 | RF-505 | CP-505 | N3 | Un `Mechanic` que intenta crear: `403`; consultar sí puede |
 
-### 4.5 Inventario — nivel sucursal
+### 4.5 Inventario — nivel taller
 
 | Req. | Caso | Nivel | Criterio ejecutable |
 |---|---|---|---|
-| RF-601 | CP-601 | N3 | El repuesto queda asociado a la sucursal activa |
-| RF-602 | CP-602 | N3 | Un repuesto de la sucursal A **no** aparece al operar con la sucursal B |
-| RF-603 | CP-603.1 | N3 | Número de parte duplicado en la misma sucursal: `409` |
-| RF-603 | CP-603.2 | N3 | El mismo número de parte se acepta en otra sucursal |
+| RF-601 | CP-601 | N3 | El repuesto queda asociado al taller activo |
+| RF-602 | CP-602 | N3 | Un repuesto del taller A **no** aparece al operar con el taller B |
+| RF-603 | CP-603.1 | N3 | Número de parte duplicado en la mismo taller: `409` |
+| RF-603 | CP-603.2 | N3 | El mismo número de parte se acepta en otro taller |
 | RF-604 | CP-604.1 | N3 | Cada movimiento deja registro con existencia anterior y posterior — un caso por cada uno de los cinco tipos directos |
 | RF-604 | CP-604.2 | N2 | El tipo `transferencia` enviado directamente se rechaza |
 | RF-604 | CP-604.3 | N3 | Los movimientos no admiten modificación ni borrado |
@@ -168,15 +170,15 @@ Identificación de casos: **CP-nnn**, donde `nnn` es el número del requisito qu
 | RF-607 | CP-607 | N3 | El listado de bajo stock devuelve solo los que están en o bajo el mínimo |
 | RF-608 | CP-608.1 | N3 | La transferencia descuenta en origen y suma en destino de forma consistente |
 | RF-608 | CP-608.2 | N3 | Origen sin existencia suficiente: la operación se rechaza **completa** |
-| RF-608 | CP-608.3 | N3 | Destino fuera de la empresa: `403 inventory.cross_organization_transfer` |
+| RF-608 | CP-608.3 | N3 | Destino fuera de la organización: `403 inventory.cross_organization_transfer` |
 
 ### 4.6 Aislamiento y auditoría
 
 | Req. | Caso | Nivel | Criterio ejecutable |
 |---|---|---|---|
-| RF-701 | CP-701 | **N4 · vía interfaz** | Una cuenta sin membresía recibe `403` en toda operación sobre datos ajenos — lectura y escritura |
+| RF-701 | CP-701 | **N4 · vía interfaz** | Una cuenta sin membresía no obtiene dato alguno en ninguna operación — lectura y escritura —, respondiendo según §5 del [contrato](10-contrato-api.md): `403` con contexto ajeno declarado, `404` con recurso ajeno desde contexto propio |
 | RF-702 | CP-702 | **N4 · vía base de datos** | Consultas ejecutadas con la identidad de otra cuenta, sin pasar por la interfaz, no devuelven filas ajenas |
-| RF-703 | CP-703.1–.5 | N3 | Un caso por cada acción crítica: invitación, cambio de rol, remoción, desactivación de sucursal y baja de cliente |
+| RF-703 | CP-703.1–.5 | N3 | Un caso por cada acción crítica: invitación, cambio de rol, remoción, desactivación de taller y baja de cliente |
 | RF-703 | CP-703.6 | N3 | El registro persiste tras eliminar la entidad o la cuenta referenciada |
 | RF-704 | CP-704.1 | N3 | `Mechanic` o `Receptionist` que consulta la auditoría: `403` |
 | RF-704 | CP-704.2 | **N4 · vía base de datos** | La restricción se sostiene también por acceso directo: un miembro no propietario no lee el registro |
@@ -201,7 +203,7 @@ Identificación de casos: **CP-nnn**, donde `nnn` es el número del requisito qu
 | RNF-302 | CP-N302 | N0 | El modelo de despliegue escala a cero sin tráfico |
 | RNF-303 | CP-N303 | N0 | Cambiar de entorno solo requiere variables distintas, sin tocar código |
 | RNF-304 | CP-N304 | N3 | La base se reconstruye desde cero aplicando las migraciones en orden |
-| RNF-401 | CP-N401 | N0 · N5 | El cambio de empresa y de sucursal ocurre sin cerrar sesión y los datos mostrados corresponden al nuevo contexto |
+| RNF-401 | CP-N401 | N0 · N5 | El cambio de organización y de taller ocurre sin cerrar sesión y los datos mostrados corresponden al nuevo contexto |
 | RNF-402 | CP-N402 | N0 | Interfaz utilizable en anchos de escritorio y móvil |
 | RNF-403 | CP-N403 | N0 | El manifiesto permite instalar la aplicación desde el navegador |
 | RNF-404 | CP-N404.1 | **N5** | Tasa de éxito por tarea ≥ 80 % en las tres tareas de cambio de contexto (§7.2) |
@@ -217,19 +219,19 @@ Es el entregable central del proyecto. Se detalla aparte porque su diseño —no
 
 ### 5.1 Vía 1 — a través de la interfaz de programación
 
-Verifica la **capa de aplicación**. Con las credenciales de la Cuenta C (sin membresía) y de la Cuenta B (miembro de otra empresa), se intenta cada operación del contrato sobre datos de la Empresa 1:
+Verifica la **capa de aplicación**. Con las credenciales de la Cuenta C (sin membresía) y de la Cuenta B (miembro de otra organización), se intenta cada operación del contrato sobre datos de la Organización 1:
 
-- Lectura de clientes, de repuestos, de movimientos, de miembros, de sucursales y de auditoría.
+- Lectura de clientes, de repuestos, de movimientos, de miembros, de talleres y de auditoría.
 - Escritura: crear, modificar y dar de baja en cada uno de esos recursos.
-- Con contexto declarado (`X-Org-Id` de la Empresa 1) y sin él.
+- Con contexto declarado (`X-Org-Id` de la Organización 1) y sin él.
 
-**Criterio**: ninguna operación devuelve datos de la Empresa 1, y todas responden según §5 del [contrato](10-contrato-api.md) —`403` cuando se declara un contexto ajeno, `404` cuando se referencia un recurso ajeno desde un contexto propio.
+**Criterio**: ninguna operación devuelve datos de la Organización 1, y todas responden según §5 del [contrato](10-contrato-api.md) —`403` cuando se declara un contexto ajeno, `404` cuando se referencia un recurso ajeno desde un contexto propio.
 
 ### 5.2 Vía 2 — por acceso directo a la base de datos
 
-Verifica la **capa del motor**, y es la que demuestra la premisa del proyecto. Se establece una conexión con la identidad de la Cuenta B **sin pasar por la interfaz de programación**, y se consultan directamente las tablas de negocio de la Empresa 1.
+Verifica la **capa del motor**, y es la que demuestra la premisa del proyecto. Se establece una conexión con la identidad de la Cuenta B **sin pasar por la interfaz de programación**, y se consultan directamente las tablas de negocio de la Organización 1.
 
-**Criterio**: las consultas se ejecutan sin error y devuelven **cero filas** de la empresa ajena. Que no fallen es parte del resultado: RLS no rechaza la consulta, la filtra — y esa es exactamente la propiedad que se busca demostrar.
+**Criterio**: las consultas se ejecutan sin error y devuelven **cero filas** de la organización ajena. Que no fallen es parte del resultado: RLS no rechaza la consulta, la filtra — y esa es exactamente la propiedad que se busca demostrar.
 
 Debe cubrir **todas** las tablas de negocio: `clients`, `parts`, `part_movements`, `workshops`, `memberships`, `workshop_assignments` y `audit_log`. Una tabla sin política activa es una fuga, y solo esta vía la detecta: por la interfaz quedaría oculta tras la verificación de la aplicación.
 
@@ -280,7 +282,7 @@ Complementa la verificación del aislamiento. Responde a una pregunta que las pr
 
 | Elemento | Definición |
 |---|---|
-| **Población** | Operadores de empresas de servicio de motocicletas en Bolivia que administran —o planean administrar— más de una empresa y/o más de una sucursal |
+| **Población** | Operadores de organizaciones de servicio de motocicletas en Bolivia que administran —o planean administrar— más de una organización y/o más de un taller |
 | **Muestra** | **De 5 a 8 participantes** |
 | **Tipo de muestreo** | No probabilístico **intencional**, por criterio: se busca el perfil que padece el problema, no una muestra representativa del sector |
 | **Justificación del tamaño** | Nielsen y Landauer (1993) modelan matemáticamente el hallazgo de problemas de usabilidad y muestran que la curva de detección se satura pronto: cinco participantes descubren la mayoría de los problemas de una interfaz, y cada participante adicional aporta cada vez menos. El objetivo es **detectar problemas**, no estimar un parámetro poblacional, de modo que aumentar la muestra no mejoraría la conclusión en proporción al esfuerzo |
@@ -292,9 +294,9 @@ Las tres tareas se eligen porque cada una ejercita una consecuencia distinta de 
 
 | # | Tarea | Qué pone a prueba |
 |---|---|---|
-| **T1** | Cambiar a otra empresa y confirmar que los datos mostrados son los de esa empresa | Que el usuario distinga el nivel **empresa** y perciba el cambio de contexto (RNF-401) |
-| **T2** | Seleccionar una sucursal y registrar en ella un repuesto | Que distinga el nivel **sucursal** y comprenda que el inventario es local |
-| **T3** | Localizar un cliente registrado en **otra** sucursal de la misma empresa | Que perciba el beneficio central del modelo: el cliente pertenece a la empresa, no al local (RF-502) |
+| **T1** | Cambiar a otra organización y confirmar que los datos mostrados son los de esa organización | Que el usuario distinga el nivel **organización** y perciba el cambio de contexto (RNF-401) |
+| **T2** | Seleccionar un taller y registrar en ella un repuesto | Que distinga el nivel **taller** y comprenda que el inventario es local |
+| **T3** | Localizar un cliente registrado en **otra** taller de la misma organización | Que perciba el beneficio central del modelo: el cliente pertenece a la organización, no al local (RF-502) |
 
 ### 7.3 Instrumentos y métricas
 
@@ -320,7 +322,7 @@ El tiempo y los errores **no llevan umbral a propósito**: con una muestra de ci
 A diferencia del resto de la validación, aquí **sí participan personas**, lo que impone tres condiciones:
 
 - **Consentimiento informado** previo, con explicación del propósito, del uso de los datos y del derecho a retirarse en cualquier momento sin dar motivo.
-- **Anonimización**: los resultados se reportan de forma agregada y los participantes se identifican como P1…P8. No se publica ningún dato que permita identificarlos a ellos ni a sus empresas.
+- **Anonimización**: los resultados se reportan de forma agregada y los participantes se identifican como P1…P8. No se publica ningún dato que permita identificarlos a ellos ni a sus organizaciones.
 - **Se evalúa el sistema, no a la persona.** Se declara explícitamente al participante al inicio de la sesión, porque condiciona su disposición a intentar sin miedo a equivocarse.
 
 ### 7.6 Evidencia a conservar
@@ -341,4 +343,4 @@ Se consignan para que el alcance de la evidencia no se sobreentienda mayor de lo
 | RNF-402 y RNF-403 se verifican por inspección | Tienen criterio observable, no automatizado |
 | La evaluación de usabilidad usa de 5 a 8 participantes | Dimensionada para **detectar problemas** (Nielsen y Landauer, 1993), no para estimar parámetros poblacionales: no procede afirmar significancia estadística sobre sus tiempos ni sobre la media SUS |
 | La usabilidad evaluada es la del **cambio de contexto** | No se concluye nada sobre la usabilidad de las demás pantallas, que no se sometieron a prueba con usuarios |
-| El escenario base usa tres cuentas y tres empresas | Suficiente para las tres preguntas del aislamiento (§2.1), pero no explora el comportamiento con un número elevado de inquilinos |
+| El escenario base usa tres cuentas y tres organizaciones | Suficiente para las tres preguntas del aislamiento (§2.1), pero no explora el comportamiento con un número elevado de inquilinos |

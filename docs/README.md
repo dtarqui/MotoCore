@@ -1,6 +1,6 @@
 # Documentación del proyecto de grado
 
-**Diseño, implementación y validación de una arquitectura multi-tenant jerárquica con aislamiento verificable en la base de datos para empresas de servicio de motocicletas en Bolivia.**
+**Diseño, implementación y validación de una arquitectura multi-tenant jerárquica con aislamiento verificable en la base de datos para organizaciones de servicio de motocicletas en Bolivia.**
 
 Maestría en Full Stack Development · Universidad Católica Boliviana "San Pablo" · Septiembre – diciembre de 2026
 
@@ -107,7 +107,7 @@ Lo que falta resolver antes de la entrega final, las decisiones que corresponden
 ## Premisas que rigen toda la documentación
 
 - **Mercado objetivo**: Bolivia.
-- **Modelo jerárquico**: una cuenta administra varias **empresas**; cada empresa opera varias **sucursales**. La empresa es la unidad de aislamiento; la sucursal, una subdivisión operativa.
+- **Modelo jerárquico**: una cuenta administra varias **organizaciones**; cada organización opera varios **talleres**. La organización es la unidad de aislamiento; el taller, una subdivisión operativa.
 - **Aislamiento en dos capas**: políticas en el motor de base de datos, más verificación en la capa de aplicación.
 - **Alcance acotado**: se especifica el sistema completo, pero se construye y valida el corte vertical que demuestra el modelo jerárquico. Lo excluido está declarado de forma explícita.
 - **La documentación precede a la construcción**: define el sistema a construir; no describe un estado de avance. Cuando la implementación difiera de lo aquí especificado, **se corrige la implementación** — salvo que la diferencia revele un error de la especificación, en cuyo caso se enmienda el documento responsable y, si la decisión era estructural, se registra un ADR.

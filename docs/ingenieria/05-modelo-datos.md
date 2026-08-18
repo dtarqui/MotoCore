@@ -11,16 +11,16 @@ erDiagram
     AUTH_USERS ||--|| PROFILES : "tiene perfil"
     AUTH_USERS ||--o{ MEMBERSHIPS : "pertenece a"
     ORGANIZATIONS ||--o{ MEMBERSHIPS : "tiene miembros"
-    ORGANIZATIONS ||--o{ WORKSHOPS : "tiene sucursales"
+    ORGANIZATIONS ||--o{ WORKSHOPS : "tiene talleres"
     MEMBERSHIPS ||--o{ WORKSHOP_ASSIGNMENTS : "se asigna a"
     WORKSHOPS ||--o{ WORKSHOP_ASSIGNMENTS : "recibe asignados"
-    ORGANIZATIONS ||--o{ CLIENTS : "nivel empresa"
+    ORGANIZATIONS ||--o{ CLIENTS : "nivel organización"
     ORGANIZATIONS ||--o{ PARTS : "aislamiento"
-    WORKSHOPS ||--o{ PARTS : "nivel sucursal"
+    WORKSHOPS ||--o{ PARTS : "nivel taller"
     PARTS ||--o{ PART_MOVEMENTS : "registra"
     ORGANIZATIONS ||--o{ PART_MOVEMENTS : "aislamiento"
-    WORKSHOPS ||--o{ PART_MOVEMENTS : "nivel sucursal"
-    ORGANIZATIONS ||--o{ AUDIT_LOG : "nivel empresa"
+    WORKSHOPS ||--o{ PART_MOVEMENTS : "nivel taller"
+    ORGANIZATIONS ||--o{ AUDIT_LOG : "nivel organización"
     WORKSHOPS |o--o{ AUDIT_LOG : "referencia opcional"
 
     AUTH_USERS { uuid id PK }
@@ -93,7 +93,7 @@ erDiagram
 
 ## Principio rector
 
-**Toda tabla de negocio lleva `organization_id`**, incluidas las de nivel sucursal. Esto permite que las políticas de aislamiento se evalúen siempre sobre el mismo criterio, sin importar el nivel jerárquico del dato. Las tablas de nivel sucursal llevan **además** `workshop_id`.
+**Toda tabla de negocio lleva `organization_id`**, incluidas las de nivel taller. Esto permite que las políticas de aislamiento se evalúen siempre sobre el mismo criterio, sin importar el nivel jerárquico del dato. Las tablas de nivel taller llevan **además** `workshop_id`.
 
 ## Tablas
 
@@ -109,18 +109,18 @@ erDiagram
 | Tabla | Nivel | Claves y restricciones |
 |---|---|---|
 | `organizations` | — (es el tenant) | PK `id`; `owner_id` → `auth.users(id)`; índice por `owner_id` |
-| `workshops` | Empresa | PK `id`; `organization_id` → `organizations(id)` en cascada; único `(organization_id, name)`; índice por `organization_id` |
-| `memberships` | Empresa | PK `id`; **único `(organization_id, user_id)`**; `role ∈ {owner, mechanic, receptionist}`; índices por `user_id` y por `organization_id` |
-| `workshop_assignments` | Empresa | PK `id`; único `(membership_id, workshop_id)`; ambas FK en cascada |
+| `workshops` | Organización | PK `id`; `organization_id` → `organizations(id)` en cascada; único `(organization_id, name)`; índice por `organization_id` |
+| `memberships` | Organización | PK `id`; **único `(organization_id, user_id)`**; `role ∈ {owner, mechanic, receptionist}`; índices por `user_id` y por `organization_id` |
+| `workshop_assignments` | Organización | PK `id`; único `(membership_id, workshop_id)`; ambas FK en cascada |
 
 ### Negocio — corte vertical
 
 | Tabla | Nivel | Claves y restricciones |
 |---|---|---|
-| `clients` | **Empresa** | PK `id`; `organization_id` FK; **único `(organization_id, email)`**; índice por `organization_id` |
-| `parts` | **Sucursal** | PK `id`; `organization_id` + `workshop_id` FK; **único `(workshop_id, part_number)`**; índice por `(organization_id, workshop_id)` |
-| `part_movements` | **Sucursal** | PK `id`; `organization_id` + `workshop_id` + `part_id` FK; **inmutable** (solo inserción); índices por `part_id` y por fecha |
-| `audit_log` | **Empresa** | PK `id`; `organization_id`; `workshop_id` nullable; `performed_by` **sin FK real**, para que el registro sobreviva al borrado del usuario |
+| `clients` | **Organización** | PK `id`; `organization_id` FK; **único `(organization_id, email)`**; índice por `organization_id` |
+| `parts` | **Taller** | PK `id`; `organization_id` + `workshop_id` FK; **único `(workshop_id, part_number)`**; índice por `(organization_id, workshop_id)` |
+| `part_movements` | **Taller** | PK `id`; `organization_id` + `workshop_id` + `part_id` FK; **inmutable** (solo inserción); índices por `part_id` y por fecha |
+| `audit_log` | **Organización** | PK `id`; `organization_id`; `workshop_id` nullable; `performed_by` **sin FK real**, para que el registro sobreviva al borrado del usuario |
 
 ### Convenciones comunes
 
@@ -135,10 +135,10 @@ El nivel de cada entidad determina el ámbito de sus claves únicas — es la co
 
 | Restricción | Ámbito | Consecuencia práctica |
 |---|---|---|
-| Email de cliente | `(organization_id, email)` | Dos empresas distintas pueden tener el mismo cliente. Dos sucursales de la **misma** empresa, no: es el mismo cliente. |
-| Número de parte | `(workshop_id, part_number)` | La misma pieza puede existir en varias sucursales, cada una con su propia existencia. |
-| Miembro | `(organization_id, user_id)` | Una cuenta tiene un solo rol por empresa, aunque trabaje en varias sucursales. |
-| Nombre de sucursal | `(organization_id, name)` | No puede haber dos sucursales con el mismo nombre en una empresa. |
+| Email de cliente | `(organization_id, email)` | Dos organizaciones distintas pueden tener el mismo cliente. Dos talleres de la **misma** organización, no: es el mismo cliente. |
+| Número de parte | `(workshop_id, part_number)` | La misma pieza puede existir en varios talleres, cada una con su propia existencia. |
+| Miembro | `(organization_id, user_id)` | Una cuenta tiene un solo rol por organización, aunque trabaje en varios talleres. |
+| Nombre de taller | `(organization_id, name)` | No puede haber dos talleres con el mismo nombre en una organización. |
 
 ## Políticas de aislamiento (RLS)
 
@@ -146,29 +146,29 @@ Todas las tablas de negocio activan Row-Level Security. Las políticas se apoyan
 
 | Función | Devuelve |
 |---|---|
-| `is_org_member(org)` | Verdadero si la cuenta autenticada tiene membresía **activa** en esa empresa |
+| `is_org_member(org)` | Verdadero si la cuenta autenticada tiene membresía **activa** en esa organización |
 | `is_org_owner(org)` | Verdadero si además su rol es `owner` |
 
 **Patrón aplicado**
 
 | Operación | Regla |
 |---|---|
-| Lectura | `is_org_member(organization_id)` — incluye el listado de miembros y de sucursales (RF-302, RF-407) |
+| Lectura | `is_org_member(organization_id)` — incluye el listado de miembros y de talleres (RF-302, RF-407) |
 | Escritura de datos de negocio | `is_org_member(organization_id)` + verificación de rol en la capa de aplicación |
-| Escritura administrativa (crear, modificar o desactivar sucursales; alta, cambio de rol y baja de miembros) | `is_org_owner(organization_id)` |
+| Escritura administrativa (crear, modificar o desactivar talleres; alta, cambio de rol y baja de miembros) | `is_org_owner(organization_id)` |
 | **Lectura del registro de auditoría** | `is_org_owner(organization_id)` — es la única tabla cuya lectura no basta con ser miembro (RF-704) |
 
-Las tablas de nivel sucursal usan **la misma condición sobre `organization_id`**: la pertenencia del `workshop_id` a la empresa activa se valida en la API, no en la política. Esta separación mantiene las políticas simples y auditables (ver [ADR-006](07-decisiones-diseno.md)).
+Las tablas de nivel taller usan **la misma condición sobre `organization_id`**: la pertenencia del `workshop_id` a la organización activa se valida en la API, no en la política. Esta separación mantiene las políticas simples y auditables (ver [ADR-006](07-decisiones-diseno.md)).
 
 ## Reglas de negocio con impacto en los datos
 
 | Regla | Descripción |
 |---|---|
-| Cálculo de existencias | `compra`, `devolución` y `transferencia de entrada` suman; `venta` y `merma` restan; `ajuste` **fija** un valor absoluto. Una operación que dejaría la existencia negativa se rechaza. |
+| Cálculo de existencias | `compra` y `devolucion` suman; `venta` y `merma` restan; `ajuste` **fija** un valor absoluto. La `transferencia` no se registra directamente: genera un movimiento de salida en el origen y uno de entrada en el destino (RF-608). Una operación que dejaría la existencia negativa se rechaza. |
 | Atomicidad del movimiento | La inserción del movimiento y la actualización de la existencia del repuesto deben ocurrir en una sola transacción, resuelta dentro del motor de base de datos ([ADR-007](07-decisiones-diseno.md)). |
 | Registro inicial de stock | Al crear un repuesto con existencia inicial mayor a cero, se genera automáticamente un movimiento de entrada que lo justifica. |
-| Protección del propietario | No se puede cambiar el rol ni remover al `owner_id` de la empresa. |
-| Transferencia entre sucursales | Genera dos movimientos vinculados (salida en origen, entrada en destino), ambos en la misma transacción y dentro de la misma empresa ([ADR-007](07-decisiones-diseno.md)). |
+| Protección del propietario | No se puede cambiar el rol ni remover al `owner_id` de la organización. |
+| Transferencia entre talleres | Genera dos movimientos vinculados (salida en origen, entrada en destino), ambos en la misma transacción y dentro de la misma organización ([ADR-007](07-decisiones-diseno.md)). |
 
 ## Evolución del esquema
 

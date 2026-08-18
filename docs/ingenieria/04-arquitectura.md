@@ -6,12 +6,12 @@ Diseño arquitectónico del sistema. Responde a los requisitos especificados en 
 
 ## Visión general
 
-El sistema se diseña como una aplicación web multiempresa desplegada sobre infraestructura **serverless**, con el aislamiento de datos aplicado en el propio motor de base de datos.
+El sistema se diseña como una aplicación web multiorganización desplegada sobre infraestructura **serverless**, con el aislamiento de datos aplicado en el propio motor de base de datos.
 
 ```text
 Interfaz de usuario (aplicación web)
         |
-        |  REST + credencial de sesión + contexto activo (empresa / sucursal)
+        |  REST + credencial de sesión + contexto activo (organización / taller)
         v
 Servicios de aplicación (funciones serverless)
         |
@@ -21,28 +21,28 @@ Base de datos relacional + proveedor de identidad + seguridad a nivel de fila
 
 La interfaz de usuario se autentica directamente contra el proveedor de identidad; los servicios de aplicación únicamente **verifican** la credencial recibida y no emiten ni almacenan credenciales propias (ADR-004).
 
-## Modelo multiempresa jerárquico
+## Modelo multiorganización jerárquico
 
 La jerarquía tiene dos niveles y **un solo límite de seguridad**:
 
 ```
-Cuenta ──membresía(rol)──> Empresa   ← unidad de aislamiento
-                              └── Sucursal   ← subdivisión operativa
+Cuenta ──membresía(rol)──> Organización   ← unidad de aislamiento
+                              └── Taller   ← subdivisión operativa
 ```
 
-- La **empresa** es la unidad de aislamiento. Toda entidad de negocio la referencia.
-- Una cuenta puede pertenecer a **varias empresas**, con un rol distinto en cada una.
-- Una empresa puede tener **varias sucursales**. La sucursal determina *dónde* ocurre una operación, no *quién* puede verla: no constituye una segunda frontera de seguridad (ADR-006).
-- El contexto activo —empresa y, cuando corresponde, sucursal— se indica explícitamente en cada petición y se valida contra la membresía (ADR-005).
-- El registro de una cuenta crea su primera empresa, su primera sucursal y la membresía con rol propietario.
+- La **organización** es la unidad de aislamiento. Toda entidad de negocio la referencia.
+- Una cuenta puede pertenecer a **varias organizaciones**, con un rol distinto en cada una.
+- Una organización puede tener **varios talleres**. El taller determina *dónde* ocurre una operación, no *quién* puede verla: no constituye una segunda frontera de seguridad (ADR-006).
+- El contexto activo —organización y, cuando corresponde, taller— se indica explícitamente en cada petición y se valida contra la membresía (ADR-005).
+- El registro de una cuenta crea su primera organización, su primer taller y la membresía con rol propietario.
 
-Qué dato pertenece a qué nivel está fijado en el [Glosario](01-glosario.md). Las entidades de nivel sucursal referencian **tanto** a la sucursal como a la empresa, de modo que las políticas de aislamiento se evalúan siempre sobre un único criterio. El modelo completo está en [05-modelo-datos.md](05-modelo-datos.md).
+Qué dato pertenece a qué nivel está fijado en el [Glosario](01-glosario.md). Las entidades de nivel taller referencian **tanto** al taller como a la organización, de modo que las políticas de aislamiento se evalúan siempre sobre un único criterio. El modelo completo está en [05-modelo-datos.md](05-modelo-datos.md).
 
 ## Aislamiento de datos: defensa en profundidad
 
 Dos capas independientes, ambas obligatorias (detalle en [06-seguridad.md](06-seguridad.md)):
 
-1. **Seguridad a nivel de fila en el motor de base de datos** — las políticas exigen que quien consulta tenga una membresía activa en la empresa propietaria del registro. Actúa aunque la capa de aplicación falle u omita un filtro.
+1. **Seguridad a nivel de fila en el motor de base de datos** — las políticas exigen que quien consulta tenga una membresía activa en la organización propietaria del registro. Actúa aunque la capa de aplicación falle u omita un filtro.
 2. **Verificación de membresía en la capa de aplicación** — cada operación valida la membresía y, cuando corresponde, el rol, antes de actuar, y devuelve un error de negocio específico.
 
 Esta redundancia responde a que la seguridad a nivel de fila, aun siendo un control efectivo, no está exenta de vías de fuga indirectas ni de errores en la aplicación de políticas — evidencia documentada en el estado del arte ([anteproyecto/02-antecedentes-y-estado-del-arte.md](../anteproyecto/02-antecedentes-y-estado-del-arte.md)).
@@ -51,8 +51,8 @@ Esta redundancia responde a que la seguridad a nivel de fila, aun siendo un cont
 
 | Capa | Responsabilidad |
 |---|---|
-| **Interfaz de usuario** | Presentación, autenticación contra el proveedor de identidad, y conservación del contexto activo (empresa y sucursal) |
-| **Servicios de aplicación** | Validación de la entrada, verificación de membresía y rol, reglas de negocio, y las operaciones privilegiadas que no pueden ejecutarse desde el cliente: alta de cuenta con su primera empresa y sucursal, cálculo de existencias y registro de auditoría (ADR-007) |
+| **Interfaz de usuario** | Presentación, autenticación contra el proveedor de identidad, y conservación del contexto activo (organización y taller) |
+| **Servicios de aplicación** | Validación de la entrada, verificación de membresía y rol, reglas de negocio, y las operaciones privilegiadas que no pueden ejecutarse desde el cliente: alta de cuenta con su primera organización y taller, cálculo de existencias y registro de auditoría (ADR-007) |
 | **Base de datos** | Persistencia, integridad referencial y aplicación de las políticas de aislamiento |
 | **Proveedor de identidad** | Registro, inicio de sesión, renovación de sesión, confirmación de correo y recuperación de contraseña |
 

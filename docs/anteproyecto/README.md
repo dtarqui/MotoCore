@@ -4,7 +4,7 @@ Documento académico del proyecto de grado, elaborado **sesión por sesión** ju
 
 ## Documentos de entrega
 
-[**Anteproyecto integrado**](04-anteproyecto-integrado.md) — **el documento que se entrega**. Responde punto por punto a los 16 exigidos por las instrucciones de la entrega: título, planteamiento, preguntas, justificación, antecedentes, estado del arte, marco teórico y conceptual (solo estructura, se amplía en la fase siguiente), objetivos, hipótesis, variables, operacionalización, matriz de consistencia, enfoque y tipo, diseño, y población y muestra.
+[**Anteproyecto integrado**](04-anteproyecto-integrado.md) — **el documento que se entrega**. Responde punto por punto a los 16 exigidos por las instrucciones de la entrega: título, planteamiento, preguntas, justificación, antecedentes, estado del arte, marco teórico y conceptual (desarrollado en forma condensada, según exige la instrucción del punto 7), objetivos, hipótesis, variables, operacionalización, matriz de consistencia, enfoque y tipo, diseño, y población y muestra.
 
 [**Perfil de proyecto**](00-perfil-proyecto.md) — el documento que se presenta para aprobación. Condensa los tres capítulos en la estructura del perfil de proyecto de grado: antecedentes, planteamiento, objetivos, hipótesis, justificación, alcance, marco teórico resumido, diseño metodológico, matriz de consistencia, cronograma, presupuesto, riesgos, resultados esperados y bibliografía. No sustituye a los capítulos: los resume, y cada afirmación se remite a ellos.
 
