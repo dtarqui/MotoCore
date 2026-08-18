@@ -33,7 +33,7 @@ Cada fase materializa uno de los cuatro objetivos específicos.
 | **F1 · Análisis** | Septiembre (sem. 1–2) | 1 | Estado del arte con matriz de extracción, análisis del mercado y vacío de investigación |
 | **F2 · Diseño** | Septiembre (sem. 3–4) | 2 | Marco teórico y conceptual, modelo de datos jerárquico, políticas de aislamiento, decisiones registradas, contrato de la interfaz y plan de pruebas |
 | **F3 · Construcción** | 29 de septiembre – 7 de diciembre | 3 | Sistema funcional con el corte vertical e integración continua operativa |
-| **F4 · Validación y cierre** | Diciembre | 4 | Evidencia de aislamiento, documento final y defensa |
+| **F4 · Validación y cierre** | Diciembre | 4 | Evidencia de aislamiento, evaluación de usabilidad con operadores, documento final y defensa |
 
 ### Detalle por iteración
 
@@ -46,7 +46,7 @@ Cada fase materializa uno de los cuatro objetivos específicos.
 | **I5** | 27 oct – 9 nov | Módulo de clientes — entidad de nivel empresa | HU-13, HU-14, HU-15 |
 | **I6** | 10–23 nov | Módulo de inventario y movimientos de existencias — entidad de nivel sucursal | HU-16 a HU-19 (HU-20 si hay margen) |
 | **I7** | 24 nov – 7 dic | Interfaz de usuario: autenticación, selección de empresa y sucursal, diseño responsivo y manifiesto de instalación (RNF-402, RNF-403) | Aplicación utilizable de extremo a extremo |
-| **I8** | 8–21 dic | Pruebas de aislamiento, redacción final y preparación de la defensa | HU-21, HU-22 · Documento final |
+| **I8** | 8–21 dic | Pruebas de aislamiento; evaluación de usabilidad con operadores (RNF-404); redacción final y preparación de la defensa | HU-21, HU-22 · Informe de usabilidad · Documento final |
 
 *Reserva: del 22 al 31 de diciembre queda como margen para correcciones posteriores a la revisión del asesor.*
 
@@ -67,7 +67,7 @@ Cada fase materializa uno de los cuatro objetivos específicos.
 | **H2 · Jerarquía operativa** | 12 de octubre | Una empresa gestiona varias sucursales; el aislamiento sigue vigente |
 | **H3 · Corte vertical completo** | 23 de noviembre | Clientes (nivel empresa) e Inventario (nivel sucursal) funcionando y probados |
 | **H4 · Sistema integrado** | 7 de diciembre | Frontend conectado; flujo completo desde el registro hasta la operación |
-| **H5 · Validación concluida** | 21 de diciembre | Evidencia de aislamiento reproducible; documento final entregado |
+| **H5 · Validación concluida** | 21 de diciembre | Evidencia de aislamiento reproducible; evaluación de usabilidad ejecutada con al menos cinco operadores; documento final entregado |
 
 ## 4. Riesgos
 
@@ -80,6 +80,7 @@ Probabilidad e impacto en escala baja / media / alta. Ordenados por exposición.
 | **R3** | Dependencia de un proveedor externo (Supabase/Vercel): cambios de API, límites de plan gratuito o indisponibilidad | Media | Medio | Aislar el acceso al proveedor tras una capa propia; no usar funciones exclusivas innecesarias | Ejecutar PostgreSQL local para desarrollo y pruebas; el aislamiento por RLS no depende del proveedor |
 | **R4** | Las políticas de aislamiento resultan más complejas de lo previsto al añadir el segundo nivel | Media | Medio | Decisión de ADR-006: un solo criterio de aislamiento (`organization_id`) en todas las tablas | Mantener el nivel sucursal solo en la capa de aplicación si RLS se vuelve inmanejable |
 | **R5** | Tiempo insuficiente por carga laboral o académica paralela | Media | Medio | Iteraciones cortas con entregable demostrable; reserva de 10 días en diciembre | Reducir a `Could` las historias no esenciales (HU-20, HU-22) |
+| **R8** | No conseguir operadores disponibles para la evaluación de usabilidad en la ventana de I8, o que se retiren tras aceptar | **Alta** | Medio | Contactar y confirmar a los participantes durante I6, no en I8; sobre-reclutar a 8 para asegurar 5 efectivos; permitir sesiones remotas | Reportar la evaluación con los participantes efectivamente conseguidos, declarando el tamaño alcanzado. La hipótesis del proyecto es sobre el aislamiento, de modo que una muestra menor limita este hallazgo pero no invalida la tesis |
 | **R6** | No conseguir fuentes académicas suficientes de los últimos 5 años sobre RLS multi-tenant | Media | Bajo | Ampliar a arquitecturas comparables de otros rubros; usar tesis de maestría además de artículos | Documentar la escasez de literatura como hallazgo del estado del arte |
 | **R7** | Pérdida de trabajo por fallo de equipo | Baja | Alto | Control de versiones con repositorio remoto; integración frecuente | Recuperar desde el repositorio remoto |
 

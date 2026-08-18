@@ -42,7 +42,7 @@ El software de gestión de talleres relevado con presencia en Bolivia (AutoSoft 
 1. ¿Qué estrategias de aislamiento multi-tenant documenta la literatura, con qué ventajas y limitaciones, y qué carencias presentan frente al modelo multiempresa las soluciones de gestión de talleres disponibles en Bolivia? *(Análisis)*
 2. ¿Qué modelo de datos y qué políticas de seguridad a nivel de fila permiten representar la jerarquía empresa → sucursales sin fragmentar la información del cliente y sosteniendo un único límite de aislamiento? *(Diseño)*
 3. ¿Cómo se implementan la identidad, la jerarquía organizacional, el control de acceso por rol y el alcance diferenciado de datos sobre una plataforma serverless con verificación automatizada en cada integración? *(Implementación)*
-4. ¿Cómo se comprueba, con evidencia reproducible, que el aislamiento entre empresas se cumple incluso ante fallos de la capa de aplicación? *(Validación)*
+4. ¿Cómo se comprueba, con evidencia reproducible, que el aislamiento entre empresas se cumple incluso ante fallos de la capa de aplicación, y que el cambio de contexto entre empresas y sucursales resulta usable para el operador? *(Validación)*
 
 ## 1.6 Objetivo general
 
@@ -60,7 +60,9 @@ El software de gestión de talleres relevado con presencia en Bolivia (AutoSoft 
 
 3. **Implementar** sobre infraestructura serverless la capa de identidad, la jerarquía organizacional y el control de acceso por rol, junto con el corte vertical que demuestra el alcance diferenciado de datos —clientes como entidad de nivel empresa e inventario como entidad de nivel sucursal—, y **automatizar** un pipeline de integración continua que ejecute verificación estática de tipos y la suite de pruebas en cada integración al ramal principal.
 
-4. **Validar** el aislamiento de datos mediante pruebas automatizadas de seguridad que comprueben, tanto a través de la interfaz de programación como accediendo directamente a la base de datos, que una empresa no puede acceder a datos de otra aun cuando la capa de aplicación omita sus controles.
+4. **Validar** el aislamiento de datos mediante pruebas automatizadas de seguridad que comprueben, tanto a través de la interfaz de programación como accediendo directamente a la base de datos, que una empresa no puede acceder a datos de otra aun cuando la capa de aplicación omita sus controles, y **evaluar** con operadores del rubro la usabilidad del cambio de contexto entre empresas y sucursales.
+
+> La evaluación de usabilidad se acota deliberadamente al **cambio de contexto**, que es la consecuencia visible de la jerarquía de dos niveles: no se estudia la interfaz en general, sino si el modelo que propone la tesis resulta comprensible para quien debe operarlo. Una arquitectura jerárquica correcta que el operador no sabe manejar no resuelve el problema planteado en §1.2.
 
 ### Trazabilidad objetivo → evidencia
 
@@ -69,7 +71,7 @@ El software de gestión de talleres relevado con presencia en Bolivia (AutoSoft 
 | 1 | Analizar la literatura y la oferta boliviana | Matriz de extracción del estado del arte (§2.2) · análisis competitivo con el vacío identificado (§2.3) |
 | 2 | Diseñar el modelo jerárquico y especificar las políticas | Modelo entidad-relación con alcance por nivel y restricciones de unicidad · contrato de la interfaz de programación con el contexto activo y las reglas de no divulgación · migración con políticas RLS y funciones de verificación de membresía |
 | 3 | Implementar la arquitectura y automatizar su verificación | Backend serverless con registro, empresas, sucursales, miembros y roles operativos · módulos de clientes e inventario funcionando · pipeline en verde en cada integración |
-| 4 | Validar el aislamiento | Suite de pruebas de seguridad que demuestra la separación por interfaz de programación y por acceso directo a la base de datos, con la matriz de trazabilidad requisito → caso → evidencia |
+| 4 | Validar el aislamiento y evaluar la usabilidad del cambio de contexto | Suite de pruebas de seguridad que demuestra la separación por interfaz de programación y por acceso directo a la base de datos, con la matriz de trazabilidad requisito → caso → evidencia · informe de evaluación de usabilidad con tasa de éxito por tarea y puntuación SUS |
 
 ## 1.8 Delimitación y alcance
 
@@ -80,6 +82,7 @@ El software de gestión de talleres relevado con presencia en Bolivia (AutoSoft 
 - Gestión de miembros por empresa: invitar, cambiar rol, remover (reservado al rol Owner), y asignación operativa de miembros a sucursales.
 - **Corte vertical de demostración**: dos módulos de negocio implementados como prueba del modelo jerárquico — **Clientes** (entidad de nivel empresa, visible desde cualquier sucursal) e **Inventario de repuestos** (entidad de nivel sucursal, acotada a su local). Son el mínimo necesario para demostrar y validar que el alcance por nivel funciona; se eligen estos dos porque no dependen de otros módulos de negocio.
 - Verificación de aislamiento: una cuenta sin membresía activa en una empresa no puede leer ni escribir sus datos por ninguna vía.
+- **Evaluación de usabilidad del cambio de contexto** con operadores del rubro: tareas guiadas sobre la selección de empresa y sucursal activas y sobre el acceso a un cliente registrado en otra sucursal, con medición de éxito, tiempo, errores y satisfacción percibida.
 
 ### 1.8.2 Alcance técnico
 - **Backend**: Node.js, TypeScript, Hono (framework de API), Zod (validación).
@@ -101,4 +104,5 @@ El objeto de estudio es la **arquitectura**, no la suite funcional completa. En 
 - **La emisión de factura electrónica del SIN** de Bolivia. Se documenta como requisito del mercado (ver análisis competitivo), pero su implementación excede el alcance temporal.
 - **Aplicaciones móviles o de escritorio nativas**: solo web responsiva/PWA.
 - **Migración de datos productivos** desde sistemas anteriores (no existen datos productivos previos).
-- **Pruebas de carga o rendimiento a escala productiva**: la validación se centra en el aislamiento y la corrección funcional, no en el desempeño bajo alta concurrencia.
+- **Pruebas de carga o rendimiento a escala productiva**: la validación se centra en el aislamiento, la corrección funcional y la usabilidad del cambio de contexto, no en el desempeño bajo alta concurrencia.
+- **La evaluación de usabilidad de la totalidad de la interfaz.** Se evalúa el cambio de contexto entre empresas y sucursales, por ser la manifestación visible del aporte de la tesis (§1.7, objetivo 4); las demás pantallas quedan fuera de esa evaluación.

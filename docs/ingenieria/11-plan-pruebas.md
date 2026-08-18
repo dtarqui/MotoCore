@@ -29,15 +29,17 @@ De ahí tres reglas de selección:
 | **N2 · Contrato HTTP** | La interfaz **antes** de tocar la base: credencial ausente o inválida, contexto activo obligatorio, forma del error, validación de entrada | La aplicación en memoria | Segundos |
 | **N3 · Integración** | Flujo completo contra base de datos y proveedor de identidad reales: creación, unicidad por nivel, transiciones de estado, auditoría | Entorno con credenciales y migraciones aplicadas | Decenas de segundos |
 | **N4 · Aislamiento** | Que una empresa no accede a datos de otra, por interfaz **y** por acceso directo al motor | Igual que N3, más una identidad adicional | Decenas de segundos |
+| **N5 · Usabilidad** | Que el cambio de contexto entre empresas y sucursales resulta operable por un usuario del rubro (RNF-401, RNF-404) | Aplicación desplegada y operadores participantes | Sesión presencial o remota, por participante |
 
-N1 y N2 corren siempre, en cada integración al ramal principal. N3 y N4 exigen credenciales; su tratamiento cuando faltan está en §6.2.
+N1 y N2 corren siempre, en cada integración al ramal principal. N3 y N4 exigen credenciales; su tratamiento cuando faltan está en §6.2. N5 es **manual y no repetible en cada integración**: se ejecuta una vez, sobre la aplicación terminada, y su diseño está en §7.
 
 ### 1.3 Qué queda deliberadamente fuera
 
 | Fuera del plan | Motivo |
 |---|---|
 | Pruebas de carga y de rendimiento | Excluidas del alcance (§1.8.3); RNF-501 es criterio cualitativo, no objetivo medido |
-| Pruebas automatizadas de la interfaz de usuario | El objeto de validación es la arquitectura de aislamiento, que reside en el servidor y en la base de datos. RNF-401 a RNF-403 se verifican por inspección sobre la aplicación (N0) |
+| Pruebas automatizadas de la interfaz de usuario | El objeto de validación es la arquitectura de aislamiento, que reside en el servidor y en la base de datos. RNF-402 y RNF-403 se verifican por inspección (N0); RNF-401 y RNF-404 se evalúan con operadores reales (N5, §7) |
+| Evaluación de usabilidad de la interfaz completa | La evaluación se acota al **cambio de contexto** entre empresas y sucursales, por ser la manifestación visible del aporte de la tesis. Las demás pantallas no se someten a prueba con usuarios |
 | Pruebas de penetración | El alcance cubre el aislamiento entre inquilinos, no una evaluación de seguridad ofensiva del despliegue |
 | Mitigación del canal lateral temporal de RLS | Amenaza reconocida y documentada (§3.3 del marco teórico); su mitigación excede el objeto del proyecto |
 
@@ -199,9 +201,11 @@ Identificación de casos: **CP-nnn**, donde `nnn` es el número del requisito qu
 | RNF-302 | CP-N302 | N0 | El modelo de despliegue escala a cero sin tráfico |
 | RNF-303 | CP-N303 | N0 | Cambiar de entorno solo requiere variables distintas, sin tocar código |
 | RNF-304 | CP-N304 | N3 | La base se reconstruye desde cero aplicando las migraciones en orden |
-| RNF-401 | CP-N401 | N0 | El cambio de empresa y de sucursal ocurre sin cerrar sesión y los datos mostrados corresponden al nuevo contexto |
+| RNF-401 | CP-N401 | N0 · N5 | El cambio de empresa y de sucursal ocurre sin cerrar sesión y los datos mostrados corresponden al nuevo contexto |
 | RNF-402 | CP-N402 | N0 | Interfaz utilizable en anchos de escritorio y móvil |
 | RNF-403 | CP-N403 | N0 | El manifiesto permite instalar la aplicación desde el navegador |
+| RNF-404 | CP-N404.1 | **N5** | Tasa de éxito por tarea ≥ 80 % en las tres tareas de cambio de contexto (§7.2) |
+| RNF-404 | CP-N404.2 | **N5** | Puntuación SUS media ≥ 68 (Bangor et al., 2008) |
 
 RNF-501 no aparece: está fuera de alcance como objetivo medible.
 
@@ -262,11 +266,70 @@ Un informe de ejecución que muestre casos omitidos en N3 o N4 **no** constituye
 
 ### 6.3 Cierre del proyecto
 
-El criterio de cierre del proyecto (§6 del plan de trabajo) exige, sobre las pruebas: que todo requisito `Must` de alcance `Sí` tenga su caso en verde, y que la suite de aislamiento —§5, ejecutada contra un entorno real— sea reproducible desde una base vacía con el guion conservado.
+El criterio de cierre del proyecto (§6 del plan de trabajo) exige, sobre las pruebas: que todo requisito `Must` de alcance `Sí` tenga su caso en verde; que la suite de aislamiento —§5, ejecutada contra un entorno real— sea reproducible desde una base vacía con el guion conservado; y que la evaluación de usabilidad (§7) se haya ejecutado con al menos cinco participantes, con su informe de resultados y la lista de problemas detectados.
+
+La usabilidad se reporta **aunque no alcance sus umbrales**. Un resultado por debajo de 80 % de éxito o de 68 puntos SUS no invalida la tesis —cuya hipótesis es sobre el aislamiento, no sobre la interfaz—, pero constituye un hallazgo que debe declararse y discutirse, no ocultarse.
 
 ---
 
-## 7. Limitaciones declaradas
+## 7. Evaluación de usabilidad del cambio de contexto (objetivo específico 4)
+
+Complementa la verificación del aislamiento. Responde a una pregunta que las pruebas automatizadas no pueden responder: si el modelo jerárquico que la tesis propone resulta **comprensible para quien debe operarlo**. Una arquitectura correcta que el operador no sabe manejar no resuelve el problema planteado.
+
+### 7.1 Participantes
+
+| Elemento | Definición |
+|---|---|
+| **Población** | Operadores de empresas de servicio de motocicletas en Bolivia que administran —o planean administrar— más de una empresa y/o más de una sucursal |
+| **Muestra** | **De 5 a 8 participantes** |
+| **Tipo de muestreo** | No probabilístico **intencional**, por criterio: se busca el perfil que padece el problema, no una muestra representativa del sector |
+| **Justificación del tamaño** | Nielsen y Landauer (1993) modelan matemáticamente el hallazgo de problemas de usabilidad y muestran que la curva de detección se satura pronto: cinco participantes descubren la mayoría de los problemas de una interfaz, y cada participante adicional aporta cada vez menos. El objetivo es **detectar problemas**, no estimar un parámetro poblacional, de modo que aumentar la muestra no mejoraría la conclusión en proporción al esfuerzo |
+| **Criterio de exclusión** | Haber participado en el desarrollo o haber visto la aplicación antes de la sesión |
+
+### 7.2 Tareas
+
+Las tres tareas se eligen porque cada una ejercita una consecuencia distinta de la jerarquía de dos niveles. No se evalúa la interfaz en general.
+
+| # | Tarea | Qué pone a prueba |
+|---|---|---|
+| **T1** | Cambiar a otra empresa y confirmar que los datos mostrados son los de esa empresa | Que el usuario distinga el nivel **empresa** y perciba el cambio de contexto (RNF-401) |
+| **T2** | Seleccionar una sucursal y registrar en ella un repuesto | Que distinga el nivel **sucursal** y comprenda que el inventario es local |
+| **T3** | Localizar un cliente registrado en **otra** sucursal de la misma empresa | Que perciba el beneficio central del modelo: el cliente pertenece a la empresa, no al local (RF-502) |
+
+### 7.3 Instrumentos y métricas
+
+| Instrumento | Métrica | Unidad | Umbral |
+|---|---|---|---|
+| Observación de tarea guiada | Tasa de éxito por tarea | Porcentaje | **≥ 80 %** |
+| Cronometraje de la sesión | Tiempo por tarea | Segundos | Sin umbral: se reporta para comparar entre tareas |
+| Registro de incidencias | Errores por tarea | Cantidad | Sin umbral: alimenta la lista de problemas detectados |
+| Cuestionario SUS | Puntuación de satisfacción | 0 a 100 | **≥ 68**, promedio de la industria (Bangor et al., 2008) |
+
+El tiempo y los errores **no llevan umbral a propósito**: con una muestra de cinco a ocho participantes no procede afirmar significancia estadística sobre ellos. Se reportan como evidencia descriptiva y como insumo de la lista de problemas.
+
+### 7.4 Procedimiento
+
+1. Explicación del propósito y firma del **consentimiento informado**.
+2. Sesión individual sobre la aplicación desplegada, con datos de prueba ya cargados —el participante no crea el escenario.
+3. Ejecución de T1, T2 y T3 sin asistencia; se interviene solo si el participante se detiene por completo, y esa intervención se registra como fallo de la tarea.
+4. Cuestionario SUS al terminar.
+5. Comentario abierto sobre qué resultó confuso.
+
+### 7.5 Consideraciones éticas
+
+A diferencia del resto de la validación, aquí **sí participan personas**, lo que impone tres condiciones:
+
+- **Consentimiento informado** previo, con explicación del propósito, del uso de los datos y del derecho a retirarse en cualquier momento sin dar motivo.
+- **Anonimización**: los resultados se reportan de forma agregada y los participantes se identifican como P1…P8. No se publica ningún dato que permita identificarlos a ellos ni a sus empresas.
+- **Se evalúa el sistema, no a la persona.** Se declara explícitamente al participante al inicio de la sesión, porque condiciona su disposición a intentar sin miedo a equivocarse.
+
+### 7.6 Evidencia a conservar
+
+Guion de tareas, formularios de consentimiento firmados, planilla de resultados por participante (éxito, tiempo, errores), respuestas SUS individuales con su puntuación calculada, y la lista de problemas detectados ordenada por frecuencia.
+
+---
+
+## 8. Limitaciones declaradas
 
 Se consignan para que el alcance de la evidencia no se sobreentienda mayor de lo que es:
 
@@ -275,5 +338,7 @@ Se consignan para que el alcance de la evidencia no se sobreentienda mayor de lo
 | Los casos N3 y N4 se ejecutan sobre un entorno de desarrollo, no productivo | Demuestran la corrección de las políticas y del contrato, no el comportamiento bajo carga ni ante fallos de infraestructura |
 | El canal lateral temporal de RLS no se prueba | El aislamiento verificado es el de **contenido** —qué filas se devuelven—, no el de metadatos inferibles por tiempo de ejecución (§3.3 del marco teórico) |
 | Las reglas alojadas en funciones del motor solo se prueban contra un motor real | Su cobertura depende del entorno; §6.2 fija cómo se reporta |
-| La interfaz de usuario se verifica por inspección | RNF-401 a RNF-403 tienen criterio observable, no automatizado |
+| RNF-402 y RNF-403 se verifican por inspección | Tienen criterio observable, no automatizado |
+| La evaluación de usabilidad usa de 5 a 8 participantes | Dimensionada para **detectar problemas** (Nielsen y Landauer, 1993), no para estimar parámetros poblacionales: no procede afirmar significancia estadística sobre sus tiempos ni sobre la media SUS |
+| La usabilidad evaluada es la del **cambio de contexto** | No se concluye nada sobre la usabilidad de las demás pantallas, que no se sometieron a prueba con usuarios |
 | El escenario base usa tres cuentas y tres empresas | Suficiente para las tres preguntas del aislamiento (§2.1), pero no explora el comportamiento con un número elevado de inquilinos |

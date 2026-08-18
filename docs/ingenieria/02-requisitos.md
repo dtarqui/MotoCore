@@ -109,7 +109,9 @@ Documentados para dar contexto al diseño; su implementación es trabajo posteri
 
 Cada RNF define un **criterio verificable**: si no se puede comprobar, no es un requisito, es un deseo.
 
-Las tablas de esta sección no llevan columna de prioridad porque el reparto es uniforme: **todos los RNF de alcance `Sí` son `Must`, salvo RNF-403, que es `Should`**. RNF-501 queda fuera de alcance y por eso no recibe prioridad.
+Las tablas de esta sección no llevan columna de prioridad porque el reparto es uniforme: **todos los RNF de alcance `Sí` son `Must`, salvo RNF-403 y RNF-404, que son `Should`**. RNF-501 queda fuera de alcance y por eso no recibe prioridad.
+
+RNF-404 es `Should` de forma deliberada: la hipótesis del proyecto es sobre el **aislamiento**, no sobre la interfaz. Un resultado de usabilidad por debajo de sus umbrales es un hallazgo que debe reportarse y discutirse, no un incumplimiento que invalide la tesis.
 
 ### RNF-100 · Seguridad
 
@@ -147,6 +149,7 @@ Las tablas de esta sección no llevan columna de prioridad porque el reparto es 
 | ID | Requisito | Criterio de aceptación | Alcance |
 |---|---|---|---|
 | RNF-401 | El cambio de empresa y de sucursal está disponible de forma explícita, sin cerrar sesión. | El usuario cambia de contexto y los datos mostrados corresponden al nuevo contexto. | Sí |
+| RNF-404 | El cambio de contexto entre empresas y sucursales resulta operable por un usuario del rubro sin formación previa. | Evaluación con operadores mediante tareas guiadas: **tasa de éxito ≥ 80 %** por tarea y **puntuación SUS ≥ 68**, el promedio de la industria según Bangor et al. (2008). | Sí |
 | RNF-402 | La interfaz es utilizable en navegador de escritorio y móvil. | Diseño responsivo verificado en ambos anchos. | Sí |
 | RNF-403 | La aplicación es instalable como PWA. | El manifiesto permite la instalación desde el navegador. | Sí |
 
@@ -165,6 +168,6 @@ Las tablas de esta sección no llevan columna de prioridad porque el reparto es 
 | 1 | **Analizar** las estrategias de aislamiento y la oferta boliviana | — (fundamenta RNF-101 y RNF-102, el alcance funcional y los RF-800) |
 | 2 | **Diseñar** el modelo jerárquico y **especificar** las políticas de aislamiento | RF-301, RF-302, RF-303, RF-502, RF-602, RF-603, RF-701, RF-702, RNF-101, RNF-105, RNF-106, RNF-206, RNF-304 |
 | 3 | **Implementar** la arquitectura y **automatizar** su verificación | RF-101 a RF-104, RF-201 a RF-204, RF-304, RF-305, RF-401 a RF-407, RF-501 a RF-505, RF-601 a RF-608, RF-703, RF-704, RNF-103, RNF-104, RNF-201 a RNF-205, RNF-301 a RNF-303, RNF-401 a RNF-403 |
-| 4 | **Validar** el aislamiento con evidencia reproducible | RF-701, RF-702, RNF-102 |
+| 4 | **Validar** el aislamiento con evidencia reproducible y **evaluar** la usabilidad del cambio de contexto | RF-701, RF-702, RNF-102, RNF-404 |
 
 Todo requisito con alcance `Sí` aparece al menos en una fila de esta tabla. Cinco aparecen en dos, porque un objetivo los **especifica** y otro los **materializa**: RF-502, RF-602 y RF-603 se diseñan en el objetivo 2 —son las reglas de alcance por nivel— y se implementan en el 3; RF-701 y RF-702 se especifican en el objetivo 2 y se validan en el 4. RNF-501 no aparece por estar fuera de alcance.

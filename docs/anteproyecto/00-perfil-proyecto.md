@@ -16,13 +16,13 @@
 
 **Postulante:** Daniel Mauricio Tarqui Apaza
 
-**Tutor / Asesor:** «Nombre del tutor asignado»
+**Tutor / Asesor:** _________________________
 
-**Unidad Académica:** «Regional»
+**Unidad Académica:** La Paz
 
 **Modalidad de graduación:** Proyecto de Grado
 
-«Ciudad» – Bolivia
+La Paz – Bolivia
 2026
 
 </div>
@@ -164,6 +164,7 @@ El modelo de despliegue serverless, con escalado a cero y sin costo fijo por emp
 - Gestión de miembros por empresa —invitar, cambiar rol, remover— reservada al propietario, y asignación operativa de miembros a sucursales.
 - **Corte vertical de demostración**: **Clientes** (entidad de nivel empresa, visible desde cualquier sucursal) e **Inventario de repuestos** (entidad de nivel sucursal, acotada a su local). Son el mínimo necesario para demostrar que el alcance por nivel funciona, y se eligen por no depender de otros módulos.
 - Verificación de aislamiento por dos vías independientes.
+- **Evaluación de usabilidad del cambio de contexto** con operadores del rubro, mediante tareas guiadas.
 
 ### 7.3 Alcance técnico
 
@@ -187,6 +188,7 @@ El objeto de estudio es la **arquitectura**, no la suite funcional completa. No 
 - Aplicaciones móviles o de escritorio nativas.
 - Migración de datos productivos desde sistemas anteriores.
 - Pruebas de carga o rendimiento a escala productiva.
+- La evaluación de usabilidad de la **totalidad** de la interfaz: se evalúa el cambio de contexto entre empresas y sucursales, no las demás pantallas.
 
 ---
 
@@ -219,7 +221,10 @@ El marco se organiza en cuatro bloques, y de cada teoría se consigna además su
 
 ### 9.2 Unidades de análisis
 
-Las **tablas de negocio** del esquema y las **operaciones del contrato de la interfaz**. Los sujetos son cuentas sintéticas construidas por la propia prueba, no usuarios reales: no se recolectan datos personales, lo que evita todo tratamiento de información sensible.
+**Dos unidades de análisis, de naturaleza distinta:**
+
+1. **Técnica** — las tablas de negocio del esquema y las operaciones del contrato de la interfaz. Sus sujetos son cuentas sintéticas construidas por la propia prueba: no intervienen personas.
+2. **De uso** — el cambio de contexto entre empresas y sucursales, evaluado con **de 5 a 8 operadores** del rubro (muestreo no probabilístico intencional; tamaño justificado por Nielsen y Landauer, 1993, que muestran que la detección de problemas de usabilidad se satura pronto). Aquí **sí participan personas**, lo que exige consentimiento informado, anonimización de los resultados y derecho a retirarse en cualquier momento.
 
 ### 9.3 Técnicas e instrumentos
 
@@ -230,6 +235,7 @@ Las **tablas de negocio** del esquema y las **operaciones del contrato de la int
 | 2 | Modelado conceptual y lógico de datos | Diagrama entidad-relación · especificación de políticas | Modelo jerárquico y contrato de interfaz |
 | 3 | Desarrollo iterativo e incremental | Control de versiones · integración continua | Sistema funcional con corte vertical |
 | 4 | **Experimentación controlada** por dos vías independientes | Suite automatizada de pruebas · matriz requisito → caso → evidencia | Evidencia reproducible de aislamiento |
+| 4 | **Observación estructurada** de tareas guiadas con operadores | Guion de tareas T1–T3 · cuestionario SUS (Bangor et al., 2008) | Informe de usabilidad del cambio de contexto |
 
 ### 9.4 Procesamiento y análisis de los resultados
 
@@ -264,7 +270,7 @@ Cuatro fases, ocho iteraciones de dos semanas. Cada fase materializa un objetivo
 | **F1 · Análisis** | Septiembre, semanas 1–2 | 1 | Estado del arte con matriz de extracción, análisis del mercado y vacío de investigación |
 | **F2 · Diseño** | Septiembre, semanas 3–4 | 2 | Marco teórico, modelo de datos jerárquico, políticas, contrato de interfaz y plan de pruebas |
 | **F3 · Construcción** | 29 de septiembre – 7 de diciembre | 3 | Sistema funcional con el corte vertical e integración continua operativa |
-| **F4 · Validación y cierre** | Diciembre | 4 | Evidencia de aislamiento, documento final y defensa |
+| **F4 · Validación y cierre** | Diciembre | 4 | Evidencia de aislamiento, evaluación de usabilidad con operadores, documento final y defensa |
 
 ### Detalle por iteración
 
@@ -302,7 +308,7 @@ Cuatro fases, ocho iteraciones de dos semanas. Cada fase materializa un objetivo
 | **H2 · Jerarquía operativa** | 12 de octubre | Una empresa gestiona varias sucursales; el aislamiento sigue vigente |
 | **H3 · Corte vertical completo** | 23 de noviembre | Clientes e inventario funcionando y probados |
 | **H4 · Sistema integrado** | 7 de diciembre | Flujo completo desde el registro hasta la operación |
-| **H5 · Validación concluida** | 21 de diciembre | Evidencia de aislamiento reproducible; documento final entregado |
+| **H5 · Validación concluida** | 21 de diciembre | Evidencia de aislamiento reproducible; evaluación de usabilidad ejecutada con al menos cinco operadores; documento final entregado |
 
 ---
 
@@ -355,6 +361,8 @@ Alobaywi, B., Almutairi, M. G., & Sheldon, F. T. (2026). Performance trade-offs 
 
 Andriianenko, O. (2026). *Design and evaluation of multi-tenant architectures in microservice based project management systems* [Tesis de maestría, Universitatea Tehnică a Moldovei]. https://repository.utm.md/handle/5014/35481
 
+Bangor, A., Kortum, P. T., & Miller, J. T. (2008). An empirical evaluation of the System Usability Scale. *International Journal of Human–Computer Interaction, 24*(6), 574–594. https://doi.org/10.1080/10447310802205776
+
 Bass, L., Clements, P., & Kazman, R. (2021). *Software architecture in practice* (4.ª ed.). Addison-Wesley Professional.
 
 Beck, K. (2002). *Test-driven development: By example*. Addison-Wesley Professional.
@@ -385,6 +393,8 @@ Krebs, R., Momm, C., & Kounev, S. (2012). Architectural concerns in multi-tenant
 
 Larman, C., & Basili, V. R. (2003). Iterative and incremental developments: A brief history. *Computer, 36*(6), 47–56. https://doi.org/10.1109/MC.2003.1204375
 
+Nielsen, J., & Landauer, T. K. (1993). A mathematical model of the finding of usability problems. En *Proceedings of the INTERACT '93 and CHI '93 Conference on Human Factors in Computing Systems* (pp. 206–213). ACM. https://doi.org/10.1145/169059.169166
+
 Olabanji, D., Fitch, T., & Matthew, O. (2023). Multi-tenancy in cloud-native architecture: A systematic mapping study. *WSEAS Transactions on Computers, 22*, 25–43. https://doi.org/10.37394/23205.2023.22.4
 
 Rose, S., Borchert, O., Mitchell, S., & Connelly, S. (2020). *Zero trust architecture* (NIST Special Publication 800-207). National Institute of Standards and Technology. https://doi.org/10.6028/NIST.SP.800-207
@@ -399,13 +409,13 @@ Simić, M., Dedeić, J., Stojkov, M., & Prokić, I. (2024). A hierarchical names
 
 <div align="center">
 
-«Ciudad», «día» de «mes» de 2026
+La Paz, ____ de ______________ de 2026
 
 <br><br>
 
 _______________________________&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_______________________________
 
-Daniel Mauricio Tarqui Apaza &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; «Nombre del tutor»
+Daniel Mauricio Tarqui Apaza &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; _______________________
 
 Postulante &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Tutor
 

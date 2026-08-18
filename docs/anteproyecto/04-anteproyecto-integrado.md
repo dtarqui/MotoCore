@@ -16,13 +16,13 @@
 
 **Postulante:** Daniel Mauricio Tarqui Apaza
 
-**Tutor / Asesor:** «Nombre del tutor asignado»
+**Tutor / Asesor:** _________________________
 
-**Unidad Académica:** «Regional»
+**Unidad Académica:** La Paz
 
 **Modalidad de graduación:** Proyecto de Grado
 
-«Ciudad» – Bolivia
+La Paz – Bolivia
 2026
 
 </div>
@@ -81,7 +81,7 @@
 1. ¿Qué estrategias de aislamiento multi-tenant documenta la literatura, con qué ventajas y limitaciones, y qué carencias presentan frente al modelo multiempresa las soluciones de gestión de talleres disponibles en Bolivia? *(Análisis)*
 2. ¿Qué modelo de datos y qué políticas de seguridad a nivel de fila permiten representar la jerarquía empresa → sucursales sin fragmentar la información del cliente y sosteniendo un único límite de aislamiento? *(Diseño)*
 3. ¿Cómo se implementan la identidad, la jerarquía organizacional, el control de acceso por rol y el alcance diferenciado de datos sobre una plataforma serverless con verificación automatizada en cada integración? *(Implementación)*
-4. ¿Cómo se comprueba, con evidencia reproducible, que el aislamiento entre empresas se cumple incluso ante fallos de la capa de aplicación? *(Validación)*
+4. ¿Cómo se comprueba, con evidencia reproducible, que el aislamiento entre empresas se cumple incluso ante fallos de la capa de aplicación, y que el cambio de contexto entre empresas y sucursales resulta usable para el operador? *(Validación)*
 
 ---
 
@@ -242,7 +242,7 @@ Cuatro objetivos secuenciales, uno por fase —**Analizar → Diseñar → Imple
 | 1 | **Analizar** las estrategias de aislamiento multi-tenant documentadas en la literatura —base por inquilino, esquema por inquilino y esquema compartido con seguridad a nivel de fila— y las soluciones de gestión de talleres con presencia en Bolivia, para fundamentar la selección arquitectónica e identificar el vacío que justifica el proyecto | Matriz de extracción del estado del arte · análisis del mercado con el vacío identificado |
 | 2 | **Diseñar** el modelo de datos de la jerarquía empresa → sucursales —con el alcance de cada entidad según su nivel y las restricciones de integridad que de él se derivan— y **especificar** las políticas de seguridad a nivel de fila, junto con las funciones auxiliares de verificación de membresía, que sostienen un único límite de aislamiento | Modelo entidad-relación con alcance por nivel · contrato de la interfaz de programación · migración con políticas y funciones de verificación |
 | 3 | **Implementar** sobre infraestructura serverless la capa de identidad, la jerarquía organizacional y el control de acceso por rol, junto con el corte vertical que demuestra el alcance diferenciado de datos —clientes (nivel empresa) e inventario (nivel sucursal)—, y **automatizar** un pipeline de integración continua | Sistema con registro, empresas, sucursales, miembros, clientes e inventario operativos · pipeline en verde en cada integración |
-| 4 | **Validar** el aislamiento mediante pruebas automatizadas que comprueben, tanto por la interfaz de programación como por acceso directo a la base de datos, que una empresa no puede acceder a datos de otra aun cuando la capa de aplicación omita sus controles | Suite de pruebas de aislamiento con su matriz requisito → caso → evidencia, reproducible desde una base vacía |
+| 4 | **Validar** el aislamiento mediante pruebas automatizadas que comprueben, tanto por la interfaz de programación como por acceso directo a la base de datos, que una empresa no puede acceder a datos de otra aun cuando la capa de aplicación omita sus controles, y **evaluar** con operadores del rubro la usabilidad del cambio de contexto entre empresas y sucursales | Suite de pruebas de aislamiento con su matriz requisito → caso → evidencia, reproducible desde una base vacía · informe de evaluación de usabilidad con tasa de éxito por tarea y puntuación SUS |
 
 ---
 
@@ -271,6 +271,7 @@ La H0 se rechaza únicamente si **todas** las condiciones siguientes se cumplen 
 | **Independiente** (causa) | **Arquitectura multi-tenant jerárquica con aislamiento en dos capas** | Modelo de organización de datos que sitúa el límite de aislamiento en la empresa y la sucursal como subdivisión operativa, con políticas de seguridad a nivel de fila en el motor de base de datos reforzadas por verificación de membresía en la capa de aplicación |
 | **Dependiente** (efecto) | **Separación verificable de datos entre empresas** | Grado en que los datos de una empresa resultan inaccesibles para cuentas sin membresía activa en ella, comprobable por vías independientes y con independencia de que la capa de aplicación aplique o no sus controles |
 | **Dependiente** (efecto) | **Gestión centralizada** | Capacidad de administrar varias empresas y sucursales desde una sola cuenta conservando la visión consolidada del cliente y su historial |
+| **Dependiente** (efecto) | **Usabilidad del cambio de contexto** | Grado en que un operador del rubro, sin formación previa, logra situarse en la empresa y la sucursal correctas y percibir el alcance de los datos que está viendo |
 | **Interviniente** | Modelo de despliegue serverless | Condición de ejecución que impone ausencia de estado entre peticiones y costo proporcional al uso; no se manipula, se mantiene constante |
 
 ---
@@ -292,7 +293,17 @@ La H0 se rechaza únicamente si **todas** las condiciones siguientes se cumplen 
 | **Alcance de datos por nivel** | • Entidades de nivel empresa accesibles desde cualquier sucursal (porcentaje %)<br>• Entidades de nivel sucursal visibles fuera de su sucursal (cantidad; esperado 0) | • Casos de prueba de alcance por nivel (Vitest) |
 | **Cambio de contexto** | • Empresas administrables por cuenta (cantidad, entero)<br>• Operaciones que exigen reautenticación al cambiar de contexto (cantidad; esperado 0) | • Pruebas de integración sobre el cambio de empresa y sucursal activas |
 
-### 12.3 Variable independiente: Arquitectura multi-tenant jerárquica
+### 12.3 Variable dependiente: Usabilidad del cambio de contexto
+
+| Dimensión | Indicadores (unidad de medida) | Instrumento / herramienta |
+|---|---|---|
+| **Eficacia** | • Tasa de éxito por tarea (porcentaje %; umbral ≥ 80 %)<br>• Tareas completadas sin asistencia (cantidad sobre 3) | • Observación estructurada de tarea guiada<br>• Guion de tareas T1–T3 |
+| **Eficiencia** | • Tiempo por tarea (segundos)<br>• Errores por tarea (cantidad) | • Cronometraje de la sesión<br>• Registro de incidencias |
+| **Satisfacción** | • Puntuación SUS (escala 0 a 100; umbral ≥ 68, promedio de la industria) | • Cuestionario System Usability Scale (Bangor et al., 2008) |
+
+Los indicadores de eficiencia se reportan **sin umbral**: con una muestra dimensionada para detectar problemas no procede afirmar significancia estadística sobre tiempos ni sobre recuentos de error.
+
+### 12.4 Variable independiente: Arquitectura multi-tenant jerárquica
 
 | Dimensión | Indicadores (unidad de medida) | Instrumento / herramienta |
 |---|---|---|
@@ -315,7 +326,7 @@ La H0 se rechaza únicamente si **todas** las condiciones siguientes se cumplen 
 | Dimensión | Definición adoptada | Fundamento |
 |---|---|---|
 | **Tipo de investigación** | **Aplicada** | No busca conocimiento general, sino resolver un problema concreto mediante un artefacto de software verificable |
-| **Enfoque** | **Mixto, con predominio cualitativo** | El componente cualitativo abarca la revisión de literatura, el relevamiento del mercado y el diseño arquitectónico; el cuantitativo se limita a la medición objetiva del aislamiento (filas devueltas, porcentajes de cobertura y de casos en verde) |
+| **Enfoque** | **Mixto** | El componente cualitativo abarca la revisión de literatura, el relevamiento del mercado, el diseño arquitectónico y la observación de las sesiones con operadores; el cuantitativo, la medición objetiva del aislamiento (filas devueltas, porcentajes de cobertura y de casos en verde) y las métricas de usabilidad (tasa de éxito, tiempos y puntuación SUS) |
 | **Alcance** | **Descriptivo → propositivo → explicativo** | Descriptivo en la fase de análisis, propositivo en la de diseño y explicativo-experimental en la de validación, donde se establece la relación causa-efecto entre la arquitectura aplicada y la separación obtenida |
 | **Método** | **Hipotético-deductivo** | La hipótesis se formula antes de la validación y se somete a pruebas capaces de refutarla |
 
@@ -337,7 +348,21 @@ La H0 se rechaza únicamente si **todas** las condiciones siguientes se cumplen 
 
 La comparación entre C1, C2 y C3 es lo que permite afirmar —o refutar— que las dos capas son **independientes**, y no que una encubre el fallo de la otra.
 
-### 15.3 Escenario de laboratorio
+### 15.3 Evaluación de usabilidad
+
+La validación del objetivo 4 incorpora un segundo componente, de naturaleza distinta: un **estudio observacional de tareas guiadas** con operadores del rubro, sobre la aplicación desplegada.
+
+| Elemento | Definición |
+|---|---|
+| **Diseño** | Observacional, de un solo grupo y una sola medición. No hay grupo de control: no se compara contra otra interfaz, sino contra umbrales establecidos en la literatura |
+| **Tareas** | T1 cambiar de empresa y confirmar los datos mostrados · T2 seleccionar sucursal y registrar en ella un repuesto · T3 localizar un cliente registrado en otra sucursal de la misma empresa |
+| **Métricas** | Tasa de éxito por tarea (≥ 80 %), tiempo y errores por tarea (descriptivos), y puntuación SUS (≥ 68) |
+| **Por qué estas tres tareas** | Cada una ejercita una consecuencia distinta de la jerarquía: el nivel empresa, el nivel sucursal y el beneficio de que el cliente pertenezca a la empresa y no al local. No se evalúa la interfaz en general |
+
+El componente de usabilidad **no forma parte de la hipótesis**: la afirmación sujeta a refutación es la del aislamiento (§10). La usabilidad se reporta como evidencia complementaria del objetivo 4, con sus umbrales declarados de antemano, y un resultado por debajo de ellos constituye un hallazgo que se discute, no un fallo de la tesis.
+
+
+### 15.4 Escenario de laboratorio
 
 ```
 Cuenta A ──owner──> Empresa 1 ──> Sucursal 1.1 (repuestos propios)
@@ -353,7 +378,7 @@ Cuenta C  ── sin membresía en ninguna de las anteriores
 
 Un solo montaje cubre las tres preguntas del aislamiento: **entre cuentas** (A frente a B), **entre empresas de la misma cuenta** (Empresa 1 frente a Empresa 2) y **frente a quien no es miembro de ninguna** (Cuenta C).
 
-### 15.4 Procedimiento
+### 15.5 Procedimiento
 
 1. Construcción del escenario base por la propia prueba, desde una base vacía reconstruida con migraciones versionadas.
 2. Ejecución de los casos bajo la condición C1 y registro de resultados.
@@ -361,7 +386,7 @@ Un solo montaje cubre las tres preguntas del aislamiento: **entre cuentas** (A f
 4. Contraste de los resultados contra el criterio de decisión de la hipótesis (§10.3).
 5. Conservación de la evidencia: guion de construcción, salida de la ejecución e identificador de la migración aplicada.
 
-### 15.5 Validez y limitaciones del diseño
+### 15.6 Validez y limitaciones del diseño
 
 | Aspecto | Tratamiento |
 |---|---|
@@ -403,13 +428,26 @@ Es la población sobre la que se mide la variable dependiente.
 | **Población** | Las **tablas de negocio** del esquema de datos y las **operaciones** expuestas por la interfaz de programación del sistema construido |
 | **Muestra** | **Censo — el 100 % de la población.** Se evalúan las 7 tablas de negocio (clientes, sucursales, membresías, asignaciones, repuestos, movimientos de existencias y registro de auditoría) y la totalidad de las operaciones del contrato |
 | **Justificación de no muestrear** | En validación de aislamiento **no cabe el muestreo probabilístico**: una sola tabla sin política activa constituye una fuga, y una muestra parcial podría declarar seguro un sistema que no lo es. La cobertura total es condición del objetivo 4, no una decisión de conveniencia |
-| **Sujetos de prueba** | **3 cuentas sintéticas**, 3 empresas y 3 sucursales, generadas por la propia prueba con identificadores irrepetibles. **No se recolectan datos personales de personas reales**, por lo que el estudio no requiere tratamiento de información sensible ni consentimiento informado |
+| **Sujetos de prueba** | **3 cuentas sintéticas**, 3 empresas y 3 sucursales, generadas por la propia prueba con identificadores irrepetibles. En esta población **no intervienen personas**: los datos son generados, no reales |
 
-### 16.4 Sobre la ausencia de muestra de usuarios
+### 16.4 Población de operadores *(objetivo 4 — evaluación de usabilidad)*
 
-La población de referencia del problema —empresas de servicio de motocicletas en Bolivia— **no se muestrea**, y conviene declararlo de forma explícita para evitar una expectativa equivocada sobre el diseño: el proyecto **no aplica encuestas, entrevistas ni pruebas de usabilidad con usuarios finales**. Su objeto de estudio es la **arquitectura** y su validación es **técnica y objetiva**, no perceptual. La caracterización del sector se sustenta en fuentes estadísticas oficiales del INE (§5), no en trabajo de campo propio.
+Es la única población compuesta por **personas**, y la única que impone consideraciones éticas.
 
-Las pruebas de usabilidad y la validación con operadores reales quedan identificadas como **línea de continuación** posterior al alcance de este proyecto.
+| Elemento | Definición |
+|---|---|
+| **Población** | Operadores de empresas de servicio de motocicletas en Bolivia que administran —o planean administrar— más de una empresa y/o más de una sucursal: exactamente el perfil que padece el problema descrito en §2 |
+| **Muestra** | **De 5 a 8 participantes** |
+| **Tipo de muestreo** | No probabilístico **intencional**, por criterio de perfil |
+| **Justificación del tamaño** | Nielsen y Landauer (1993) modelan matemáticamente el hallazgo de problemas de usabilidad y muestran que la curva de detección se satura pronto: cinco participantes descubren la mayoría de los problemas de una interfaz, y cada participante adicional aporta cada vez menos. El objetivo es **detectar problemas de uso**, no estimar un parámetro poblacional; por eso ampliar la muestra no mejoraría la conclusión en proporción al esfuerzo |
+| **Criterio de exclusión** | Haber participado en el desarrollo o conocer la aplicación antes de la sesión |
+| **Consideraciones éticas** | Consentimiento informado previo, con derecho a retirarse en cualquier momento; resultados reportados de forma agregada, con los participantes identificados como P1…P8; no se publica ningún dato que permita identificarlos a ellos ni a sus empresas. Se declara al participante que **se evalúa el sistema, no a la persona** |
+
+### 16.5 Sobre el alcance de esta muestra
+
+Conviene declarar qué **no** permite concluir. La muestra de operadores está dimensionada para detectar problemas de uso, no para sostener inferencia estadística: no se afirma representatividad del sector boliviano ni significancia sobre tiempos o puntuaciones. La caracterización del sector sigue apoyándose en fuentes estadísticas oficiales del INE (§5), no en esta muestra.
+
+Tampoco se evalúa la interfaz completa: la evaluación se acota al **cambio de contexto entre empresas y sucursales**, por ser la manifestación visible del aporte de la tesis. Las demás pantallas no se someten a prueba con usuarios.
 
 ---
 
@@ -457,6 +495,8 @@ Alobaywi, B., Almutairi, M. G., & Sheldon, F. T. (2026). Performance trade-offs 
 
 Andriianenko, O. (2026). *Design and evaluation of multi-tenant architectures in microservice based project management systems* [Tesis de maestría, Universitatea Tehnică a Moldovei]. https://repository.utm.md/handle/5014/35481
 
+Bangor, A., Kortum, P. T., & Miller, J. T. (2008). An empirical evaluation of the System Usability Scale. *International Journal of Human–Computer Interaction, 24*(6), 574–594. https://doi.org/10.1080/10447310802205776
+
 Bass, L., Clements, P., & Kazman, R. (2021). *Software architecture in practice* (4.ª ed.). Addison-Wesley Professional.
 
 Beck, K. (2002). *Test-driven development: By example*. Addison-Wesley Professional.
@@ -490,6 +530,8 @@ Krebs, R., Momm, C., & Kounev, S. (2012). Architectural concerns in multi-tenant
 Larman, C., & Basili, V. R. (2003). Iterative and incremental developments: A brief history. *Computer, 36*(6), 47–56. https://doi.org/10.1109/MC.2003.1204375
 
 Nielsen, J. (1993). *Usability engineering*. Morgan Kaufmann.
+
+Nielsen, J., & Landauer, T. K. (1993). A mathematical model of the finding of usability problems. En *Proceedings of the INTERACT '93 and CHI '93 Conference on Human Factors in Computing Systems* (pp. 206–213). ACM. https://doi.org/10.1145/169059.169166
 
 Olabanji, D., Fitch, T., & Matthew, O. (2023). Multi-tenancy in cloud-native architecture: A systematic mapping study. *WSEAS Transactions on Computers, 22*, 25–43. https://doi.org/10.37394/23205.2023.22.4
 
