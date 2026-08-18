@@ -6,6 +6,7 @@ import { organizationRoutes } from './modules/organizations.js';
 import { workshopRoutes } from './modules/workshops.js';
 import { clientRoutes } from './modules/clients.js';
 import { inventoryRoutes } from './modules/inventory.js';
+import { auditRoutes } from './modules/audit.js';
 import type { AppBindings } from './types.js';
 
 /** Construye la app Hono. Sirve tanto para el dev-server local como para Vercel. */
@@ -35,6 +36,8 @@ export function createApp() {
   app.route('/api/clients', clientRoutes);
   // Inventario exige ademas la sucursal activa (X-Workshop-Id).
   app.route('/api/inventory', inventoryRoutes);
+  // Auditoria: nivel empresa, reservada al Owner (RF-704).
+  app.route('/api/audit', auditRoutes);
 
   return app;
 }

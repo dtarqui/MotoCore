@@ -5,9 +5,10 @@ import { createApp } from '../src/app.js';
 /**
  * PRUEBA DE AISLAMIENTO POR ACCESO DIRECTO A LA BASE DE DATOS — RF-702.
  *
- * Es el entregable del objetivo especifico 8, y la unica prueba que demuestra
- * la premisa central del proyecto: que el aislamiento entre empresas se
- * sostiene AUNQUE la capa de aplicacion omita sus controles.
+ * Es el entregable del objetivo especifico 4 —validar el aislamiento con
+ * evidencia reproducible—, y la unica prueba que demuestra la premisa central
+ * del proyecto: que el aislamiento entre empresas se sostiene AUNQUE la capa
+ * de aplicacion omita sus controles.
  *
  * La diferencia con integration.test.ts es deliberada y esencial: alli las
  * peticiones pasan por la API, que verifica la membresia antes de consultar.
@@ -23,7 +24,7 @@ import { createApp } from '../src/app.js';
  * servicio salta RLS por diseño, asi que la prueba pasaria siempre y no
  * demostraria nada.
  *
- * Requiere un Supabase real con las migraciones 0001..0006 aplicadas.
+ * Requiere un Supabase real con las migraciones 0001..0007 aplicadas.
  */
 const hasEnv = Boolean(
   process.env.SUPABASE_URL && process.env.SUPABASE_ANON_KEY && process.env.SUPABASE_SERVICE_ROLE_KEY,
@@ -148,6 +149,12 @@ describe.skipIf(!hasEnv)('aislamiento a nivel de base de datos (RLS sin pasar po
     expect(data).toEqual([]);
   });
 
+  it('B no puede leer la auditoria de A', async () => {
+    const { data, error } = await dbAsB.from('audit_log').select('id, action').eq('organization_id', orgAId);
+    expect(error).toBeNull();
+    expect(data).toEqual([]);
+  });
+
   it('B no puede ESCRIBIR en la empresa de A', async () => {
     // El aislamiento no es solo de lectura: la politica de insert exige
     // membresia activa, asi que la escritura debe ser rechazada.
@@ -187,5 +194,119 @@ describe.skipIf(!hasEnv)('aislamiento a nivel de base de datos (RLS sin pasar po
     // RNF-106: evita usar la invitacion como mecanismo de enumeracion de cuentas.
     const { error } = await dbAsB.rpc('get_user_id_by_email', { p_email: userA.email });
     expect(error).not.toBeNull();
+  });
+});
+
+/**
+ * CP-704 — LA AUDITORIA ES LA UNICA LECTURA RESERVADA A UN ROL.
+ *
+ * Las pruebas anteriores contrastan empresas distintas. Esta es diferente y
+ * mas exigente: el usuario SI es miembro activo de la empresa, con membresia
+ * legitima, pero su rol no es propietario. Para todas las demas tablas eso le
+ * basta para leer; para audit_log no (RF-704).
+ *
+ * Se comprueba por las dos vias, porque el requisito exige ambas:
+ *   - via API      -> 403 audit.insufficient_permissions   (CP-704.1)
+ *   - via base de datos, sin pasar por la API -> cero filas (CP-704.2)
+ *
+ * Sin la migracion 0007 el segundo caso falla: la politica original usaba
+ * is_org_member y devolvia el registro completo a cualquier miembro.
+ */
+describe.skipIf(!hasEnv)('auditoria reservada al Owner (RF-704)', () => {
+  const app = createApp();
+
+  const owner = { email: `audit_owner_${rnd()}@motocore.test`, password: 'supersecret1' };
+  const mecanico = { email: `audit_mech_${rnd()}@motocore.test`, password: 'supersecret1' };
+
+  let orgId = '';
+  let tokenMecanico = '';
+  let dbComoMecanico: SupabaseClient;
+
+  beforeAll(async () => {
+    const url = process.env.SUPABASE_URL!;
+    const anonKey = process.env.SUPABASE_ANON_KEY!;
+    const anon = () =>
+      createClient(url, anonKey, { auth: { persistSession: false, autoRefreshToken: false } });
+
+    async function registrar(cuenta: { email: string; password: string }, empresa: string) {
+      const res = await app.request('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...cuenta, firstName: 'Audit', lastName: 'Test', organizationName: empresa }),
+      });
+      expect(res.status).toBe(201);
+      return (await res.json()) as { organization: { id: string } };
+    }
+
+    orgId = (await registrar(owner, `Empresa auditada ${rnd()}`)).organization.id;
+    await registrar(mecanico, `Empresa del mecanico ${rnd()}`);
+
+    const sesionOwner = await anon().auth.signInWithPassword(owner);
+    if (sesionOwner.error) throw sesionOwner.error;
+    const tokenOwner = sesionOwner.data.session!.access_token;
+
+    // El Owner invita al mecanico: esta invitacion genera, ademas, la primera
+    // entrada de auditoria con la que se prueba la lectura.
+    const invitacion = await app.request(`/api/organizations/${orgId}/members/invite`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${tokenOwner}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: mecanico.email, role: 'mechanic' }),
+    });
+    expect(invitacion.status).toBe(201);
+
+    const sesionMecanico = await anon().auth.signInWithPassword(mecanico);
+    if (sesionMecanico.error) throw sesionMecanico.error;
+    tokenMecanico = sesionMecanico.data.session!.access_token;
+
+    dbComoMecanico = createClient(url, anonKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
+      global: { headers: { Authorization: `Bearer ${tokenMecanico}` } },
+    });
+  });
+
+  it('el Owner consulta la auditoria de su empresa', async () => {
+    const url = process.env.SUPABASE_URL!;
+    const anonKey = process.env.SUPABASE_ANON_KEY!;
+    const sesion = await createClient(url, anonKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    }).auth.signInWithPassword(owner);
+    if (sesion.error) throw sesion.error;
+
+    const res = await app.request('/api/audit', {
+      headers: { Authorization: `Bearer ${sesion.data.session!.access_token}`, 'X-Org-Id': orgId },
+    });
+    expect(res.status).toBe(200);
+
+    const { audit } = (await res.json()) as { audit: Array<{ action: string }> };
+    // La invitacion del beforeAll debe estar registrada (RF-703).
+    expect(audit.some((e) => e.action === 'member.invited')).toBe(true);
+  });
+
+  it('CP-704.1 — un miembro no propietario recibe 403 al consultar por la API', async () => {
+    const res = await app.request('/api/audit', {
+      headers: { Authorization: `Bearer ${tokenMecanico}`, 'X-Org-Id': orgId },
+    });
+    expect(res.status).toBe(403);
+    expect(((await res.json()) as { title: string }).title).toBe('audit.insufficient_permissions');
+  });
+
+  it('CP-704.2 — un miembro no propietario no lee la auditoria por acceso directo', async () => {
+    // Es el caso que la migracion 0007 corrige. El mecanico es miembro activo,
+    // asi que la consulta no falla por permisos: simplemente no devuelve filas.
+    const { data, error } = await dbComoMecanico
+      .from('audit_log')
+      .select('id, action')
+      .eq('organization_id', orgId);
+
+    expect(error).toBeNull();
+    expect(data).toEqual([]);
+  });
+
+  it('el mecanico si lee las demas tablas de su empresa', async () => {
+    // Control negativo: confirma que su membresia es valida y que lo anterior
+    // se debe a la politica de audit_log, no a que RLS le bloquee todo.
+    const { data, error } = await dbComoMecanico.from('workshops').select('id').eq('organization_id', orgId);
+    expect(error).toBeNull();
+    expect((data ?? []).length).toBeGreaterThan(0);
   });
 });

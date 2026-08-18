@@ -83,6 +83,14 @@ El aislamiento lo garantizan **políticas RLS** (un usuario solo ve filas de emp
 | GET / POST | `/api/inventory/parts/:partId/movements` | Historial de movimientos · registrar movimiento |
 | POST | `/api/inventory/parts/:partId/transfer` | Transferir existencias a otra sucursal de la misma empresa |
 
+**Auditoría** (nivel empresa — requiere `X-Org-Id`, **solo Owner**):
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| GET | `/api/audit` | Acciones críticas de la empresa activa (RF-703). Filtros: `action`, `workshopId`, `limit` |
+
+Es la única lectura reservada a un rol. La restricción se aplica **también en la base de datos**: la política de `audit_log` exige `is_org_owner` (migración `0007`), de modo que el acceso directo tampoco la elude (RF-704). No se expone ninguna operación de escritura: el registro es historial inmutable.
+
 El **login** se hace desde el cliente con Supabase Auth (`signInWithPassword`), no por este API. El cliente envía el access token de Supabase en `Authorization: Bearer <token>`.
 
 Los errores se devuelven como **Problem Details** (RFC 9457, que sustituye al RFC 7807) con códigos `modulo.razon` — mismo catálogo que el backend .NET, para que el `api-client` del frontend los maneje sin cambios.
@@ -128,6 +136,6 @@ Corren **solo con credenciales** (`describe.skipIf`). Requieren las migraciones 
 ## Pendiente (próximas iteraciones)
 
 - Integración del frontend: adoptar Supabase Auth en el login/registro y agregar los **selectores de empresa y sucursal** (envían `X-Org-Id` y `X-Workshop-Id`).
-- Endpoint de consulta del registro de auditoría, reservado al `Owner` (RF-704). Hoy la auditoría solo se **escribe**.
+- Conformar las rutas de **sucursales y miembros** a la regla de ADR-005: `/api/workshops` y `/api/members` resueltas por cabecera, sin anidar bajo `/organizations/:orgId`.
 - Portar los módulos que siguen en el backend .NET (Motorcycles → WorkOrders → MaintenanceHistory → Dashboard) con sus tablas + RLS por `organization_id`. Están fuera del alcance del proyecto de grado (RF-800).
 - Funcionalidades del [análisis del mercado](../docs/ingenieria/09-analisis-mercado.md): facturación electrónica del SIN, WhatsApp, presupuestos con aprobación, agendamiento, portal del cliente.

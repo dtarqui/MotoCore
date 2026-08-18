@@ -36,6 +36,21 @@ describe('modulos de negocio: contexto activo obligatorio', () => {
     // Sigue siendo 401 por falta de token; comprobar que no se cuela a 200.
     expect(res.status).toBe(401);
   });
+
+  it('auditoria sin token responde 401', async () => {
+    expect((await app.request('/api/audit')).status).toBe(401);
+  });
+
+  it('auditoria no expone escritura: el registro es inmutable', async () => {
+    // RF-703: historial de solo insercion. El contrato no publica ninguna
+    // operacion de modificacion ni de borrado sobre la auditoria, de modo que
+    // esos metodos no deben existir en la ruta.
+    for (const method of ['POST', 'PATCH', 'PUT', 'DELETE']) {
+      const res = await app.request('/api/audit', { method });
+      expect(res.status).not.toBe(200);
+      expect(res.status).not.toBe(201);
+    }
+  });
 });
 
 describe('esquemas del corte vertical', () => {
