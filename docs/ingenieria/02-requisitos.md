@@ -3,12 +3,14 @@
 Requisitos funcionales (RF) y no funcionales (RNF) del proyecto. Cada requisito tiene identificador estable, prioridad, criterio de verificación y trazabilidad al objetivo específico que lo sustenta ([anteproyecto/01-definicion-y-alcance.md](../anteproyecto/01-definicion-y-alcance.md) §1.7).
 
 > Terminología: [Glosario](01-glosario.md) · Modelo de datos: [Modelo de datos](05-modelo-datos.md) · Historias de usuario: [Historias de usuario](03-historias-usuario.md)
+>
+> La columna **Verificación** enuncia el criterio; los casos de prueba que lo ejecutan, con su nivel y su evidencia, están en el [Plan de pruebas](11-plan-pruebas.md). La interfaz por la que se ejercen estos requisitos está fijada en el [Contrato de la interfaz de programación](10-contrato-api.md).
 
 ## Convenciones
 
 - **Prioridad** — `Must`: sin esto el proyecto no cumple su objetivo · `Should`: importante, no bloqueante · `Could`: deseable si sobra tiempo.
 - **Alcance** — dentro (`Sí`) o fuera (`No`) del alcance del proyecto de grado (§1.8). Los requisitos fuera de alcance se documentan porque definen el producto completo y dan contexto al diseño, pero no se implementan en este período.
-- **Nivel** — si el dato que gobierna el requisito es de **empresa** o de **sucursal**.
+- **Nivel** — si el dato que gobierna el requisito es de **empresa** o de **sucursal**. La columna aparece solo en los bloques donde el nivel puede variar (RF-300, RF-500, RF-600); los de identidad, empresas, miembros y aislamiento (RF-100, RF-200, RF-400, RF-700) son siempre de nivel **empresa**.
 
 ---
 
@@ -107,6 +109,8 @@ Documentados para dar contexto al diseño; su implementación es trabajo posteri
 
 Cada RNF define un **criterio verificable**: si no se puede comprobar, no es un requisito, es un deseo.
 
+Las tablas de esta sección no llevan columna de prioridad porque el reparto es uniforme: **todos los RNF de alcance `Sí` son `Must`, salvo RNF-403, que es `Should`**. RNF-501 queda fuera de alcance y por eso no recibe prioridad.
+
 ### RNF-100 · Seguridad
 
 | ID | Requisito | Criterio de aceptación | Alcance |
@@ -144,7 +148,7 @@ Cada RNF define un **criterio verificable**: si no se puede comprobar, no es un 
 |---|---|---|---|
 | RNF-401 | El cambio de empresa y de sucursal está disponible de forma explícita, sin cerrar sesión. | El usuario cambia de contexto y los datos mostrados corresponden al nuevo contexto. | Sí |
 | RNF-402 | La interfaz es utilizable en navegador de escritorio y móvil. | Diseño responsivo verificado en ambos anchos. | Sí |
-| RNF-403 | La aplicación es instalable como PWA. Es el único RNF de prioridad `Should`; los demás son `Must`. | El manifiesto permite la instalación desde el navegador. | Sí |
+| RNF-403 | La aplicación es instalable como PWA. | El manifiesto permite la instalación desde el navegador. | Sí |
 
 ### RNF-500 · Rendimiento *(fuera de alcance como objetivo medible)*
 
@@ -163,4 +167,4 @@ Cada RNF define un **criterio verificable**: si no se puede comprobar, no es un 
 | 3 | **Implementar** la arquitectura y **automatizar** su verificación | RF-101 a RF-104, RF-201 a RF-204, RF-304, RF-305, RF-401 a RF-407, RF-501 a RF-505, RF-601 a RF-608, RF-703, RF-704, RNF-103, RNF-104, RNF-201 a RNF-205, RNF-301 a RNF-303, RNF-401 a RNF-403 |
 | 4 | **Validar** el aislamiento con evidencia reproducible | RF-701, RF-702, RNF-102 |
 
-Todo requisito con alcance `Sí` aparece exactamente en una fila de esta tabla, salvo RF-701 y RF-702, que se especifican en el objetivo 2 y se validan en el 4. RNF-501 no aparece por estar fuera de alcance.
+Todo requisito con alcance `Sí` aparece al menos en una fila de esta tabla. Cinco aparecen en dos, porque un objetivo los **especifica** y otro los **materializa**: RF-502, RF-602 y RF-603 se diseñan en el objetivo 2 —son las reglas de alcance por nivel— y se implementan en el 3; RF-701 y RF-702 se especifican en el objetivo 2 y se validan en el 4. RNF-501 no aparece por estar fuera de alcance.

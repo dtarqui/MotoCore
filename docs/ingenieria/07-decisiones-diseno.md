@@ -101,7 +101,7 @@ Registro de las decisiones estructurales del proyecto, con las alternativas eval
 
 **Justificación.** Permite cambiar de contexto sin reemitir el token de sesión, mantiene estables las rutas de los recursos y concentra la validación en un único punto reutilizable por todos los módulos.
 
-**Consecuencias.** El cliente debe conservar y enviar el contexto activo en cada llamada de negocio. El servidor **nunca asume un contexto por defecto**: si la cabecera falta, la petición se rechaza de forma explícita (RF-303).
+**Consecuencias.** El cliente debe conservar y enviar el contexto activo en cada llamada de negocio. El servidor **nunca asume un contexto por defecto**: si la cabecera falta, la petición se rechaza de forma explícita (RF-303). La regla de rutas que se deriva de esta decisión —qué identificadores pueden aparecer en la ruta y cuáles viajan solo por cabecera— está fijada en el [Contrato de la interfaz de programación](10-contrato-api.md) §2.3.
 
 ---
 
@@ -127,7 +127,7 @@ El reparto concreto de cada entidad entre los dos niveles, que se deriva de esta
 - Las entidades de nivel sucursal referencian **tanto** a la sucursal como a la empresa; conservar la referencia a la empresa en todas las tablas permite que las políticas de aislamiento se evalúen siempre sobre un único criterio.
 - Cada petición de nivel sucursal requiere indicar la sucursal activa, validada como perteneciente a la empresa activa (ADR-005).
 - Las restricciones de unicidad se definen según el nivel de cada entidad: el número de parte de inventario es único por sucursal; el correo del cliente, único por empresa.
-- La numeración de órdenes de trabajo es correlativa por sucursal y año.
+- La numeración de órdenes de trabajo queda fijada como correlativa **por sucursal** (RF-802): se sigue del nivel asignado a esa entidad, aunque el módulo esté fuera del alcance actual.
 
 **Alcance del aporte.** El modelo pasa de una multi-tenancy plana a una **jerárquica**: el reto de diseño consiste en sostener un aislamiento verificable entre empresas mientras se soporta una subdivisión interna con reglas de alcance distintas según el tipo de entidad (ver [anteproyecto/01-definicion-y-alcance.md](../anteproyecto/01-definicion-y-alcance.md)).
 

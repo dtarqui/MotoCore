@@ -18,7 +18,10 @@ erDiagram
     ORGANIZATIONS ||--o{ PARTS : "aislamiento"
     WORKSHOPS ||--o{ PARTS : "nivel sucursal"
     PARTS ||--o{ PART_MOVEMENTS : "registra"
+    ORGANIZATIONS ||--o{ PART_MOVEMENTS : "aislamiento"
+    WORKSHOPS ||--o{ PART_MOVEMENTS : "nivel sucursal"
     ORGANIZATIONS ||--o{ AUDIT_LOG : "nivel empresa"
+    WORKSHOPS |o--o{ AUDIT_LOG : "referencia opcional"
 
     AUTH_USERS { uuid id PK }
     PROFILES {
@@ -67,6 +70,7 @@ erDiagram
         text part_number
         int current_stock
         int minimum_stock
+        boolean is_active
     }
     PART_MOVEMENTS {
         uuid id PK
@@ -82,7 +86,7 @@ erDiagram
         uuid id PK
         uuid organization_id FK
         uuid workshop_id FK
-        uuid performed_by FK
+        uuid performed_by
         text action
     }
 ```
@@ -149,9 +153,9 @@ Todas las tablas de negocio activan Row-Level Security. Las políticas se apoyan
 
 | Operación | Regla |
 |---|---|
-| Lectura | `is_org_member(organization_id)` |
+| Lectura | `is_org_member(organization_id)` — incluye el listado de miembros y de sucursales (RF-302, RF-407) |
 | Escritura de datos de negocio | `is_org_member(organization_id)` + verificación de rol en la capa de aplicación |
-| Administración (sucursales, miembros) | `is_org_owner(organization_id)` |
+| Escritura administrativa (crear, modificar o desactivar sucursales; alta, cambio de rol y baja de miembros) | `is_org_owner(organization_id)` |
 | **Lectura del registro de auditoría** | `is_org_owner(organization_id)` — es la única tabla cuya lectura no basta con ser miembro (RF-704) |
 
 Las tablas de nivel sucursal usan **la misma condición sobre `organization_id`**: la pertenencia del `workshop_id` a la empresa activa se valida en la API, no en la política. Esta separación mantiene las políticas simples y auditables (ver [ADR-006](07-decisiones-diseno.md)).

@@ -9,13 +9,15 @@ Terminología unificada del proyecto. **Fuente de verdad de los términos**: si 
 | Término | Definición | Notas |
 |---|---|---|
 | **Cuenta** | La identidad de una persona en la plataforma (email + contraseña). Vive en `auth.users` de Supabase, con datos de perfil en `profiles`. | Una persona = una cuenta, sin importar en cuántas organizaciones participe. |
-| **Organización** | La **empresa** que opera el negocio. Es la **unidad de aislamiento de datos** (el *tenant*). Tabla `organizations`. | **Una cuenta puede crear y pertenecer a varias organizaciones** — este es el cambio central del modelo ERP. |
-| **Taller** | Una **sucursal o local físico** donde se presta el servicio. Pertenece a una organización. Tabla `workshops`. | **Una organización puede tener varios talleres** (relación 1:N). El taller **no** es una unidad de aislamiento: es una subdivisión operativa dentro de la organización. |
+| **Organización** *(en el texto: **empresa**)* | La **empresa** que opera el negocio. Es la **unidad de aislamiento de datos** (el *tenant*). Tabla `organizations`. | **Una cuenta puede crear y pertenecer a varias organizaciones** — este es el cambio central del modelo ERP. |
+| **Taller** *(en el texto: **sucursal**)* | Una **sucursal o local físico** donde se presta el servicio. Pertenece a una organización. Tabla `workshops`. | **Una organización puede tener varios talleres** (relación 1:N). El taller **no** es una unidad de aislamiento: es una subdivisión operativa dentro de la organización. |
 | **Membresía** | La relación entre una cuenta y una organización, con un rol. Tabla `memberships`, única por `(organization_id, user_id)`. | Es lo que autoriza el acceso. Sin membresía activa no hay acceso a los datos de esa organización. El rol es **de organización**, no de taller. |
 | **Asignación a taller** | Vínculo operativo entre un miembro y uno o varios talleres de su organización (p. ej. en qué sucursal trabaja un mecánico). | No otorga ni restringe permisos por sí sola: los permisos vienen del rol de la membresía. Sirve para operación y reportes. |
 | **Organización activa** | La organización sobre la que opera el usuario en un momento dado. Se envía por request en el header `X-Org-Id` y se valida contra la membresía. | Permite cambiar de empresa sin cerrar sesión (RNF-401). El servidor nunca la asume por defecto. |
 | **Taller activo** | La sucursal sobre la que se está operando dentro de la organización activa. Se indica por request (header `X-Workshop-Id`) y debe pertenecer a la organización activa. | Necesario para las operaciones que ocurren en un local concreto (órdenes, inventario). |
 | **Tenant** | Sinónimo técnico de *organización*. Se usa al hablar de arquitectura (multi-tenant, aislamiento entre tenants). | Preferir "organización" en documentación de producto; "tenant" en documentación técnica. |
+
+> **Nombre en el modelo y nombre en el texto.** Las tablas, las cabeceras y la interfaz de programación conservan `organizations` y `workshops`; la documentación y el texto visible al usuario dicen **empresa** y **sucursal**. Son el mismo concepto en cada par, y el resto de los documentos usa la forma en español de forma consistente.
 
 ## Jerarquía y alcance de los datos
 
@@ -50,6 +52,8 @@ Los identificadores de rol se mantienen **en inglés** en el modelo de datos y e
 | **Receptionist** | Atención: alta de clientes y motocicletas, apertura de órdenes, entrega. |
 
 El rol es **por organización**, no global: la misma cuenta puede ser Owner en una organización y Mechanic en otra.
+
+> Las responsabilidades sobre **motocicletas y órdenes de trabajo** describen el producto completo; esos módulos quedan fuera del alcance del proyecto de grado (RF-801 y RF-802, ver [Requisitos](02-requisitos.md)). Dentro del corte vertical, los tres roles se ejercen sobre **clientes e inventario**.
 
 ## Términos de arquitectura
 

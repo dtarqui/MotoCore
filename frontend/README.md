@@ -2,7 +2,9 @@
 
 SPA de React para la gestión de talleres de motocicletas.
 
-> **Nota de estado:** hoy consume la API REST del backend **.NET legacy** ([backend/](../backend/README.md)). Pendiente, como parte del pivote: migrar la auth a **Supabase** y apuntar al backend nuevo en [`server/`](../server/README.md), más el **selector de organización** (multiempresa). Ver [CLAUDE.md](../CLAUDE.md).
+> **Nota de estado:** hoy consume la API REST del backend **.NET legacy** ([backend/](../backend/README.md)). Pendiente, como parte del pivote: migrar la auth a **Supabase** y apuntar al backend nuevo en [`server/`](../server/README.md), más los **selectores de empresa y sucursal** (multiempresa). Detalle del backend nuevo en [server/README.md](../server/README.md).
+>
+> **Terminología:** los módulos de este SPA conservan los nombres del modelo .NET, donde `taller` era la unidad de negocio única. En el modelo nuevo, la unidad de aislamiento es la **empresa** (`organizations`) y el taller pasa a ser una **sucursal** (`workshops`) — ver el [Glosario](../docs/ingenieria/01-glosario.md).
 
 ## Stack
 
@@ -95,8 +97,8 @@ Componentes propios sobre Radix + `class-variance-authority` + `tailwind-merge`,
 
 ## Testing
 
-No hay suite de tests en el frontend todavía (ni Vitest ni React Testing Library) — ver [docs/roadmap-competitivo.md](../docs/roadmap-competitivo.md). El backend sí tiene cobertura real; esta es la asimetría más notoria del proyecto hoy.
+No hay suite de tests en el frontend todavía (ni Vitest ni React Testing Library). El backend sí tiene cobertura real; esta es la asimetría más notoria del proyecto hoy.
 
 ## Estado real de las features
 
-Todos los módulos listados arriba están conectados a la API real del backend (hoy el .NET; **pendiente** migrar auth a Supabase y apuntar al backend nuevo en `server/`, más el selector de organización — ver [CLAUDE.md](../CLAUDE.md)). Ver [docs/roadmap-competitivo.md](../docs/roadmap-competitivo.md) para el roadmap priorizado.
+Todos los módulos listados arriba están conectados a la API real del backend (hoy el .NET; **pendiente** migrar auth a Supabase y apuntar al backend nuevo en [`server/`](../server/README.md), más los selectores de empresa y sucursal). Ver el [análisis del mercado](../docs/ingenieria/09-analisis-mercado.md) para el roadmap priorizado de funcionalidades.

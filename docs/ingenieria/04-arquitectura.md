@@ -2,7 +2,7 @@
 
 Diseño arquitectónico del sistema. Responde a los requisitos especificados en [02-requisitos.md](02-requisitos.md); las decisiones que lo sustentan están registradas en [07-decisiones-diseno.md](07-decisiones-diseno.md).
 
-> Terminología: [01-glosario.md](01-glosario.md)
+> Terminología: [01-glosario.md](01-glosario.md) · Interfaz que expone esta arquitectura: [10-contrato-api.md](10-contrato-api.md)
 
 ## Visión general
 
@@ -52,7 +52,7 @@ Esta redundancia responde a que la seguridad a nivel de fila, aun siendo un cont
 | Capa | Responsabilidad |
 |---|---|
 | **Interfaz de usuario** | Presentación, autenticación contra el proveedor de identidad, y conservación del contexto activo (empresa y sucursal) |
-| **Servicios de aplicación** | Validación de la entrada, verificación de membresía y rol, reglas de negocio, y las operaciones privilegiadas que no pueden ejecutarse desde el cliente: numeración de órdenes, cálculo de existencias y registro de auditoría |
+| **Servicios de aplicación** | Validación de la entrada, verificación de membresía y rol, reglas de negocio, y las operaciones privilegiadas que no pueden ejecutarse desde el cliente: alta de cuenta con su primera empresa y sucursal, cálculo de existencias y registro de auditoría (ADR-007) |
 | **Base de datos** | Persistencia, integridad referencial y aplicación de las políticas de aislamiento |
 | **Proveedor de identidad** | Registro, inicio de sesión, renovación de sesión, confirmación de correo y recuperación de contraseña |
 
@@ -75,7 +75,7 @@ La definición formal de cada tecnología y la teoría que respalda su elección
 
 ## Integración continua
 
-Cada integración al ramal principal ejecuta de forma automatizada la verificación estática de tipos y la suite de pruebas; un fallo impide la integración (RNF-203). El diseño del pipeline forma parte del objetivo específico 3.
+Cada integración al ramal principal ejecuta de forma automatizada la verificación estática de tipos y la suite de pruebas; un fallo impide la integración (RNF-203). El diseño del pipeline forma parte del objetivo específico 3. Qué se ejecuta en cada integración y qué exige un entorno real está en el [Plan de pruebas](11-plan-pruebas.md) §1.2.
 
 ## Alcance de plataformas
 

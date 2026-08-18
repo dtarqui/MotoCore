@@ -31,6 +31,8 @@ Fuentes revisadas por pares, dentro de la ventana 2021–2026, seleccionadas por
 | **Dar, Hershcovitch & Morrison (2023)** · *Proc. ACM on Management of Data* (SIGMOD), art. 89 · DOI 10.1145/3588943 | Seguridad a nivel de fila (RLS) sobre PostgreSQL y SQL Server; proponen un esquema de consulta *data-oblivious* como defensa | Demuestran que RLS impide devolver datos no autorizados, **pero el tiempo de ejecución de la consulta filtra información**: mediante consultas que usan índices, un atacante determina si existe un valor que no está autorizado a ver y, en ciertos casos, cuántas veces existe. El ataque tuvo éxito contra instancias gestionadas en AWS. Su defensa alcanza seguridad con impacto mínimo en rendimiento para claves únicas | Su análisis se sitúa en un modelo de inquilinos **plano y de un solo nivel**: aborda el ataque y la defensa en la capa de consulta, no la **decisión arquitectónica** de dónde ubicar el límite de aislamiento cuando el inquilino tiene una subdivisión interna. Señalan además que los *benchmarks* establecidos (YCSB) no soportan multi-tenancy ni RLS |
 | **Alobaywi et al. (2026)** · *IoT* (MDPI), 7(1), art. 21 · DOI 10.3390/iot7010021 | Revisión sistemática guiada por PRISMA de marcos de seguridad para entornos multi-inquilino IoT–nube | Categorizan las amenazas de intersección entre inquilinos: **fuga de datos entre inquilinos, ataques de canal lateral y escalamiento de privilegios**. Evalúan marcos de nueva generación que buscan imponer aislamiento sin violar los límites estrictos de latencia y energía de sensores ligeros | Al ser una revisión, **identifica amenazas pero no propone ni valida una arquitectura concreta**. Su contexto son dispositivos IoT con restricciones de latencia y energía, no aplicaciones SaaS de gestión empresarial con estructura organizacional jerárquica |
 | **Andriianenko (2026)** · Tesis de maestría, Universitatea Tehnică a Moldovei | Sistema SaaS de gestión de proyectos basado en microservicios; diseña, implementa y evalúa **esquema compartido** frente a **base de datos por inquilino** | El esquema compartido reduce el consumo de recursos pero incrementa la complejidad y los riesgos de aislamiento; la base por inquilino ofrece separación superior a costa de mayor sobrecarga operativa. Entrega recomendaciones prácticas para arquitectos | Evalúa ambos modelos como **alternativas planas y excluyentes**, sin considerar la seguridad a nivel de fila como refuerzo *dentro* del esquema compartido, ni una jerarquía de dos niveles con reglas de alcance distintas por tipo de entidad |
+| **Simić, Dedeić, Stojkov & Prokić (2024)** · *IEEE Access*, 12, pp. 32597–32617 · DOI 10.1109/ACCESS.2024.3369031 | Jerarquía de **espacios de nombres** sobre infraestructura de nube distribuida en el borde de la red, para crear nubes virtuales con redistribución de CPU, memoria y almacenamiento entre niveles | La jerarquía de espacios de nombres sostiene el **aislamiento lógico entre inquilinos de distinto nivel**, permitiendo que un inquilino superior reorganice los recursos de los inferiores sin comprometer su separación | Es el trabajo más cercano en cuanto a **jerarquía**, pero su aislamiento opera sobre **recursos de infraestructura** —cómputo, memoria, almacenamiento—, no sobre las filas de una base de datos relacional compartida por una aplicación. No hay políticas de seguridad a nivel de fila ni reparto de entidades de negocio según su nivel |
+| **Olabanji, Fitch & Matthew (2023)** · *WSEAS Transactions on Computers*, 22, pp. 25–43 · DOI 10.37394/23205.2023.22.4 | Revisión de **mapeo sistemático** sobre multi-tenancy en arquitecturas *cloud-native*: de 921 publicaciones relevadas seleccionan y clasifican 64 revisadas por pares (2015–2022) | Documentan los retos emergentes y las tendencias de la multi-tenancy en entornos de contenedores y orquestación, y confirman que el aislamiento entre inquilinos **sigue siendo un problema abierto** en la literatura reciente | Al ser una revisión de mapeo, **cataloga el estado del conocimiento sin proponer ni validar una arquitectura propia**. Su dominio es *cloud-native* y contenedores, no la jerarquía organizacional de dos niveles con aislamiento aplicado en el motor de base de datos |
 
 ### Fichas analíticas de las fuentes primarias
 
@@ -77,17 +79,43 @@ Desarrollo de cada entrada de la matriz, con el detalle que la tabla no permite 
 | **Vacío frente a este proyecto** | No considera la seguridad a nivel de fila como mecanismo de refuerzo *dentro* del esquema compartido —es decir, como vía para obtener parte de la separación del modelo por inquilino sin asumir su costo operativo— ni contempla una jerarquía de dos niveles con reglas de alcance diferenciadas por tipo de entidad. |
 | **Aporte a este proyecto** | Es el comparable metodológico más cercano: valida que "diseñar, implementar y evaluar arquitecturas multi-tenant" constituye un trabajo de nivel de maestría, y aporta el marco de compromisos (recursos frente a aislamiento) sobre el que se apoya la selección arquitectónica de este proyecto. |
 
+#### Ficha 4 — Simić, Dedeić, Stojkov & Prokić (2024)
+
+| Campo | Contenido |
+|---|---|
+| **Referencia** | Simić, M., Dedeić, J., Stojkov, M., & Prokić, I. (2024). A hierarchical namespace approach for multi-tenancy in distributed clouds. *IEEE Access, 12*, 32597–32617. |
+| **Filiación / venue** | Universidad de Novi Sad (Serbia). *IEEE Access* — revista de acceso abierto revisada por pares, indexada en Scopus y en IEEE Xplore. |
+| **Problema abordado** | Cómo sostener multi-tenancy en el modelo de micro-nube en el borde de la red, organizando y redistribuyendo recursos entre niveles sin perder el aislamiento lógico entre inquilinos. |
+| **Metodología** | Diseño de un modelo de nubes virtuales sobre infraestructura física mediante una jerarquía de espacios de nombres, con implementación y evaluación del comportamiento del aislamiento y de la redistribución de recursos. |
+| **Resultados clave** | La jerarquía de espacios de nombres permite que un nivel superior reorganice CPU, memoria y almacenamiento de los niveles inferiores conservando la separación lógica entre nubes virtuales. |
+| **Vacío frente a este proyecto** | Es el antecedente **más cercano en cuanto a jerarquía**, y por eso resulta el más exigente de contrastar. Su aislamiento, sin embargo, opera sobre **recursos de infraestructura**, no sobre filas de una base de datos relacional compartida: no emplea políticas de seguridad a nivel de fila ni distribuye entidades de negocio entre los niveles de la jerarquía según su alcance. |
+| **Aporte a este proyecto** | Demuestra que la multi-tenancy **jerárquica** es una línea de investigación vigente y publicable en un venue de impacto, y delimita con precisión el aporte propio: trasladar la jerarquía desde la capa de infraestructura hasta la capa de datos. |
+
+#### Ficha 5 — Olabanji, Fitch & Matthew (2023)
+
+| Campo | Contenido |
+|---|---|
+| **Referencia** | Olabanji, D., Fitch, T., & Matthew, O. (2023). Multi-tenancy in cloud-native architecture: A systematic mapping study. *WSEAS Transactions on Computers, 22*, 25–43. |
+| **Filiación / venue** | Universidad de Portsmouth y Southampton Solent University (Reino Unido). *WSEAS Transactions on Computers* — revista revisada por pares, de acceso abierto. |
+| **Problema abordado** | Sistematizar qué se ha investigado sobre multi-tenancy en arquitecturas *cloud-native* y qué retos permanecen abiertos. |
+| **Metodología** | Mapeo sistemático: de **921 publicaciones** potencialmente relevantes se seleccionan **64 revisadas por pares** (2015–2022), clasificadas mediante un marco de caracterización. |
+| **Resultados clave** | Identifican los retos emergentes y las tendencias de la multi-tenancy en contenedores y orquestación, y constatan que el aislamiento entre inquilinos permanece como problema abierto pese a los avances del período. |
+| **Limitaciones** | Al ser una revisión de mapeo, **no propone ni valida arquitectura alguna**: sintetiza y clasifica el conocimiento existente. |
+| **Vacío frente a este proyecto** | Su dominio son las arquitecturas *cloud-native* y los contenedores, no la jerarquía organizacional de dos niveles con aislamiento aplicado en el motor de base de datos. |
+| **Aporte a este proyecto** | Aporta **respaldo cuantitativo a la vigencia del problema**: sobre una base de 921 publicaciones relevadas, el aislamiento entre inquilinos sigue catalogado como reto abierto, lo que sitúa este proyecto en una línea activa y no marginal. |
+
 ### Síntesis comparativa
 
-| Criterio | Dar et al. (2023) | Alobaywi et al. (2026) | Andriianenko (2026) | **Este proyecto** |
-|---|---|---|---|---|
-| Tipo de trabajo | Investigación experimental | Revisión sistemática | Tesis con implementación | Tesis con implementación |
-| Niveles de inquilino | Uno (plano) | Uno (plano) | Uno (plano) | **Dos (jerárquico)** |
-| Mecanismo de aislamiento estudiado | RLS | Varios marcos | Esquema compartido / base por inquilino | **RLS + verificación en aplicación** |
-| ¿Propone arquitectura? | No (ataque y defensa) | No | Sí | Sí |
-| ¿Valida empíricamente? | Sí | No | Sí | Sí |
-| Dominio de aplicación | Genérico | IoT–nube | SaaS de gestión de proyectos | **SaaS de gestión de talleres (Bolivia)** |
-| Despliegue | Instancias gestionadas | No aplica | Microservicios | **Serverless** |
+| Criterio | Dar et al. (2023) | Alobaywi et al. (2026) | Andriianenko (2026) | Simić et al. (2024) | Olabanji et al. (2023) | **Este proyecto** |
+|---|---|---|---|---|---|---|
+| Tipo de trabajo | Investigación experimental | Revisión sistemática | Tesis con implementación | Investigación experimental | Revisión de mapeo | Tesis con implementación |
+| Niveles de inquilino | Uno (plano) | Uno (plano) | Uno (plano) | Jerárquico (infraestructura) | Uno (plano) | **Dos (jerárquico, en los datos)** |
+| Mecanismo de aislamiento estudiado | RLS | Varios marcos | Esquema compartido / base por inquilino | Espacios de nombres | Varios | **RLS + verificación en aplicación** |
+| Capa donde se aplica el aislamiento | Consulta | Varias | Base de datos | **Infraestructura** | Varias | **Motor de base de datos + aplicación** |
+| ¿Propone arquitectura? | No (ataque y defensa) | No | Sí | Sí | No | Sí |
+| ¿Valida empíricamente? | Sí | No | Sí | Sí | No | Sí |
+| Dominio de aplicación | Genérico | IoT–nube | SaaS de gestión de proyectos | Nube distribuida en el borde | *Cloud-native* | **SaaS de gestión de talleres (Bolivia)** |
+| Despliegue | Instancias gestionadas | No aplica | Microservicios | Micro-nubes en el borde | Contenedores | **Serverless** |
 
 ### Evidencia técnica primaria complementaria
 
@@ -105,7 +133,9 @@ Referencia: https://www.wiz.io/vulnerability-database/cve/cve-2024-10976 · http
 
 ## 2.3 Vacío de Investigación
 
-La solución propuesta por **Dar et al. (2023)** es rigurosa y demuestra empíricamente que la seguridad a nivel de fila cumple su función como control de acceso en bases de datos compartidas; **SIN EMBARGO**, su análisis se limita a un modelo de inquilinos plano y de un solo nivel, y se concentra en el ataque y la defensa en la capa de consulta, sin abordar la decisión arquitectónica previa: **dónde ubicar el límite de aislamiento cuando el inquilino posee una subdivisión interna** cuyas entidades no comparten el mismo alcance. **Alobaywi et al. (2026)** sistematizan las amenazas de fuga entre inquilinos y de canal lateral, **PERO**, al tratarse de una revisión centrada en entornos IoT–nube con restricciones de latencia y energía, identifican riesgos sin proponer ni validar una arquitectura aplicable a un SaaS de gestión empresarial. **Andriianenko (2026)**, por su parte, compara esquema compartido frente a base por inquilino, **NO OBSTANTE** los evalúa como alternativas planas y mutuamente excluyentes, sin considerar la seguridad a nivel de fila como refuerzo dentro del esquema compartido. A ello se suma que la serie de vulnerabilidades registradas en la aplicación de políticas RLS (CVE-2016-2193, CVE-2023-2455 y CVE-2024-10976) evidencia que confiar en una sola capa de aislamiento resulta insuficiente en la práctica.
+La solución propuesta por **Dar et al. (2023)** es rigurosa y demuestra empíricamente que la seguridad a nivel de fila cumple su función como control de acceso en bases de datos compartidas; **SIN EMBARGO**, su análisis se limita a un modelo de inquilinos plano y de un solo nivel, y se concentra en el ataque y la defensa en la capa de consulta, sin abordar la decisión arquitectónica previa: **dónde ubicar el límite de aislamiento cuando el inquilino posee una subdivisión interna** cuyas entidades no comparten el mismo alcance. **Alobaywi et al. (2026)** sistematizan las amenazas de fuga entre inquilinos y de canal lateral, **PERO**, al tratarse de una revisión centrada en entornos IoT–nube con restricciones de latencia y energía, identifican riesgos sin proponer ni validar una arquitectura aplicable a un SaaS de gestión empresarial. **Andriianenko (2026)**, por su parte, compara esquema compartido frente a base por inquilino, **NO OBSTANTE** los evalúa como alternativas planas y mutuamente excluyentes, sin considerar la seguridad a nivel de fila como refuerzo dentro del esquema compartido.
+
+El antecedente que más se aproxima es **Simić et al. (2024)**, que sí modelan una **jerarquía** de inquilinos y demuestran que el aislamiento se sostiene entre sus niveles; **AHORA BIEN**, esa jerarquía organiza **recursos de infraestructura** —cómputo, memoria y almacenamiento— y no las filas de una base de datos relacional compartida, de modo que no responde cómo repartir las entidades de negocio entre los niveles ni cómo hacer cumplir esa separación en el motor de datos. Por último, **Olabanji et al. (2023)**, sobre una base de 921 publicaciones relevadas, confirman que el aislamiento entre inquilinos permanece como reto abierto, **AUNQUE**, al ser una revisión de mapeo, catalogan el conocimiento sin proponer ni validar arquitectura alguna. A todo ello se suma que la serie de vulnerabilidades registradas en la aplicación de políticas RLS (CVE-2016-2193, CVE-2023-2455 y CVE-2024-10976) evidencia que confiar en una sola capa de aislamiento resulta insuficiente en la práctica.
 
 El presente proyecto aborda esta deficiencia mediante el **diseño, implementación y validación de una arquitectura multi-tenant jerárquica (empresa → sucursales)** que mantiene un **único límite de aislamiento verificable** a nivel de empresa, tratando la sucursal como criterio de alcance operativo y no como segunda frontera de seguridad; refuerza la seguridad a nivel de fila con **verificación de membresía en la capa de aplicación** (defensa en profundidad), en respuesta directa al patrón de fallos evidenciado por los CVE; y **valida empíricamente la separación de datos** por dos vías independientes —a través de la interfaz de programación y mediante acceso directo a la base de datos—, demostrando que el aislamiento se sostiene aun cuando la capa de aplicación omita sus controles.
 
@@ -134,6 +164,8 @@ Se separan en tres bloques según **cómo se verifica cada uno**: los libros por
 | L11 | Hernández-Sampieri, R., & Mendoza Torres, C. P. (2018). *Metodología de la investigación: Las rutas cuantitativa, cualitativa y mixta*. McGraw-Hill Education. | 978-1-4562-6096-5 |
 | L12 | Hernández Sampieri, R., Fernández Collado, C., & Baptista Lucio, M. P. (2014). *Metodología de la investigación* (6.ª ed.). McGraw-Hill Interamericana. | 978-1-4562-2396-0 |
 
+> **Alcance de este bloque.** Ninguno de estos libros se cita en el cuerpo del capítulo 2: el estado del arte se sostiene con los artículos del bloque B y las fuentes oficiales del bloque C. La lista reúne la **bibliografía de base del anteproyecto completo**, y seis de sus entradas ya están citadas en el capítulo 3 — L1 (§3.2.1), L2 (§3.2.1 y §3.2.5), L4 (§3.3), L5 (§3.2.2 y §3.3), L8 y L9 (§3.2.5). Las seis restantes —**L3, L6, L7, L10, L11 y L12**— aún no se citan en ningún capítulo. Antes de la entrega final deben incorporarse al cuerpo (metodología de la investigación, persistencia relacional, serverless y formato de las historias de usuario son sus puntos naturales de cita) o retirarse de la lista: APA 7 admite en la sección de referencias únicamente las obras efectivamente citadas. Queda registrado como pendiente en el [Anexo de referencias](anexo-referencias.md).
+
 ### B. Artículos y tesis con identificador permanente
 
 *Se verifican por DOI o por el identificador del repositorio institucional.*
@@ -143,6 +175,8 @@ Se separan en tres bloques según **cómo se verifica cada uno**: los libros por
 | A1 | Dar, C., Hershcovitch, M., & Morrison, A. (2023). RLS side channels: Investigating leakage of row-level security protected data through query execution time. *Proceedings of the ACM on Management of Data, 1*(1), Artículo 89, 1–25. | https://doi.org/10.1145/3588943 |
 | A2 | Alobaywi, B., Almutairi, M. G., & Sheldon, F. T. (2026). Performance trade-offs in multi-tenant IoT–cloud security: A systematic review of emerging technologies. *IoT, 7*(1), 21. | https://doi.org/10.3390/iot7010021 |
 | A3 | Andriianenko, O. (2026). *Design and evaluation of multi-tenant architectures in microservice based project management systems* [Tesis de maestría, Universitatea Tehnică a Moldovei]. Repositorio institucional UTM. | https://repository.utm.md/handle/5014/35481 |
+| A4 | Simić, M., Dedeić, J., Stojkov, M., & Prokić, I. (2024). A hierarchical namespace approach for multi-tenancy in distributed clouds. *IEEE Access, 12*, 32597–32617. | https://doi.org/10.1109/ACCESS.2024.3369031 |
+| A5 | Olabanji, D., Fitch, T., & Matthew, O. (2023). Multi-tenancy in cloud-native architecture: A systematic mapping study. *WSEAS Transactions on Computers, 22*, 25–43. | https://doi.org/10.37394/23205.2023.22.4 |
 
 ### C. Enlaces — fuentes estadísticas y registros oficiales
 

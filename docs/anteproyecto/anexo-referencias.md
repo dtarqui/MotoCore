@@ -2,7 +2,7 @@
 
 Estado de comprobación de cada fuente citada en el anteproyecto. Una referencia con datos incorrectos compromete la trazabilidad de la información tanto como una inventada, de modo que cada identificador se contrastó contra el registro del editor.
 
-**Última comprobación**: 14 de agosto de 2026.
+**Última comprobación**: 17 de agosto de 2026 (las entradas A4 y A5 del capítulo 2 se incorporaron y verificaron en esa fecha; el resto, el 14 de agosto de 2026).
 
 ## Cómo se verificó cada tipo de fuente
 
@@ -26,6 +26,8 @@ Estado de comprobación de cada fuente citada en el anteproyecto. Una referencia
 | 2 | A1 | Dar, Hershcovitch & Morrison (2023) | OK — *Proc. ACM Manag. Data*, 1(1), art. 89, pp. 1–25 · ACM | OK — Texto completo extraído y leído |
 | 2 | A2 | **Alobaywi**, Almutairi & Sheldon (2026) | OK — *IoT*, 7(1), 21 · MDPI · publicado 22-02-2026 | Parcial — Solo resumen |
 | 2 | A3 | Andriianenko (2026) | OK — Repositorio UTM accesible (HTTP 200) | Parcial — Solo resumen del repositorio |
+| 2 | A4 | **Simić**, Dedeić, Stojkov & Prokić (2024) | OK — *IEEE Access*, 12, pp. 32597–32617 · DOI resuelve a IEEE Xplore · cuatro autores confirmados por Crossref | Parcial — Solo resumen |
+| 2 | A5 | **Olabanji**, Fitch & Matthew (2023) | OK — *WSEAS Trans. on Computers*, 22, pp. 25–43 · DOI resuelve al PDF de acceso abierto · tres autores confirmados por Crossref | Parcial — Solo resumen |
 | 3 | A1 | Bezemer & Zaidman (2010) | OK — IWPSE-EVOL '10, pp. 88–92 · ACM | Parcial — Solo resumen |
 | 3 | A2 | Codd (1970) | OK — *CACM*, 13(6), pp. 377–387 | OK — Obra canónica |
 | 3 | A4 | Gao, Bird & Barr (2017) | OK — ICSE 2017, pp. 758–769 · IEEE/ACM | Parcial — Verificar en el texto la cifra del 15 % antes de la defensa |
@@ -39,7 +41,7 @@ Estado de comprobación de cada fuente citada en el anteproyecto. Una referencia
 
 ### Libros
 
-Los quince ISBN citados en el anteproyecto resuelven correctamente contra el catálogo. Tres presentan discrepancias de metadatos que conviene resolver contra la **página de créditos** del ejemplar:
+Los quince ISBN listados en el anteproyecto resuelven correctamente contra el catálogo. Tres presentan discrepancias de metadatos que conviene resolver contra la **página de créditos** del ejemplar:
 
 | Ref. | Obra | Discrepancia detectada | Qué hacer |
 |---|---|---|---|
@@ -70,9 +72,4 @@ Todos accesibles el 14 de agosto de 2026 (HTTP 200): react.dev · typescriptlang
 
 ## Pendientes antes de la entrega final
 
-1. **Conseguir el texto completo** de las referencias marcadas como *Parcial* en la columna «Contenido». Citar a partir de un resumen es admisible en un anteproyecto, no en el documento final.
-2. **Resolver Krasner & Pope (1988)**: obtener el artículo en biblioteca o sustituir la cita por una obra ya comprobada.
-3. **Confirmar los tres libros con discrepancia** contra la página de créditos del ejemplar.
-4. **Fijar la fecha de recuperación definitiva** de las fuentes sin fecha de publicación, el día en que se entregue el documento.
-5. **Sustituir las notas de prensa por el boletín del INE** en los antecedentes, para que la cifra se cite del documento oficial y no de su difusión periodística.
-6. **Fijar la tasa de crecimiento del parque automotor total** con el cuadro del INE. El texto afirmaba un 4,6 % interanual, incompatible con las otras dos cifras que él mismo cita: 2.493.753 vehículos en 2022 (nota de ABI) y 2.583.319 en 2024 son +3,6 % en **dos** años. Mientras no se tome el dato del cuadro oficial, §2.1 compara el crecimiento de forma cualitativa y no numérica.
+Se consolidaron en el registro único de pendientes del proyecto: [PENDIENTES.md](../PENDIENTES.md) §2 (verificación de fuentes) y §3 (datos estadísticos por confirmar). Este anexo mantiene el **estado por referencia**; aquel documento, la **lista de acciones** con su prioridad.

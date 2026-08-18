@@ -29,16 +29,16 @@ La jerarquía es **empresa → sucursales** ([Glosario](01-glosario.md)), pero e
 
 Como todas las entidades —incluidas las de nivel sucursal— referencian a la empresa, las políticas se evalúan siempre sobre el mismo criterio, sin importar el nivel jerárquico del dato. La pertenencia de la sucursal a la empresa activa se valida por separado, en la capa de aplicación.
 
-Ambas capas están cubiertas por pruebas automatizadas que verifican que una cuenta no pueda acceder a datos de una organización donde no es miembro.
+Ambas capas están cubiertas por pruebas automatizadas que verifican que una cuenta no pueda acceder a datos de una empresa donde no es miembro.
 
 ## Roles del sistema
 
 El rol es **por empresa**: la misma cuenta puede tener roles distintos en empresas distintas (ver [Glosario](01-glosario.md)).
 
 ### Owner
-- Administra la organización y sus datos.
+- Administra la empresa y sus datos.
 - Gestiona miembros: invitar, cambiar rol, remover.
-- Único rol que puede realizar acciones administrativas sobre la organización.
+- Único rol que puede realizar acciones administrativas sobre la empresa.
 - Único rol que puede **consultar el registro de auditoría** (RF-704).
 
 ### Mechanic
@@ -48,10 +48,12 @@ El rol es **por empresa**: la misma cuenta puede tener roles distintos en empres
 - Registro de clientes y motocicletas.
 - Apertura y seguimiento inicial de órdenes; coordinación de ingreso y entrega.
 
+> Las tareas de `Mechanic` y `Receptionist` sobre **órdenes de trabajo y motocicletas** describen el producto completo; esos módulos están fuera del alcance del proyecto de grado (RF-801 y RF-802). En el corte vertical, ambos roles operan sobre **clientes e inventario** con las reglas de RF-505.
+
 ### Reglas de protección del Owner
-- No se puede remover al Owner de su propia organización.
+- No se puede remover al Owner de su propia empresa.
 - No se puede cambiar el rol del Owner.
-- No se puede invitar a alguien directamente como Owner: el Owner es quien crea la organización.
+- No se puede invitar a alguien directamente como Owner: el Owner es quien crea la empresa.
 
 ## Autenticación
 
@@ -61,7 +63,7 @@ Delegar la identidad reduce la superficie de código sensible del sistema y perm
 
 ## Manejo de errores
 
-Los errores se devuelven en un formato uniforme y normalizado, con códigos estables. Los errores de autorización no revelan si el recurso existe cuando ello permitiría inferir datos de otra empresa (RNF-105).
+Los errores se devuelven en un formato uniforme y normalizado, con códigos estables. Los errores de autorización no revelan si el recurso existe cuando ello permitiría inferir datos de otra empresa (RNF-105). La regla que decide entre denegar y declarar inexistente, con el catálogo completo de códigos, está en el [Contrato de la interfaz de programación](10-contrato-api.md) §5.
 
 ## Protección de datos sensibles
 
@@ -75,7 +77,7 @@ El cumplimiento del aislamiento se comprueba mediante pruebas automatizadas que 
 1. **A través de la interfaz de programación**: una cuenta sin membresía en una empresa recibe error de autorización en cualquier operación sobre sus datos.
 2. **Mediante acceso directo a la base de datos**, prescindiendo de la capa de aplicación: las consultas ejecutadas con la identidad de otra cuenta no devuelven registros ajenos.
 
-La segunda vía es la que demuestra que el aislamiento se sostiene aun cuando la capa de aplicación omita sus controles.
+La segunda vía es la que demuestra que el aislamiento se sostiene aun cuando la capa de aplicación omita sus controles. El diseño de ambas —escenario, tablas cubiertas y evidencia a conservar— está en el [Plan de pruebas](11-plan-pruebas.md) §5.
 
 ## Fuera del alcance
 

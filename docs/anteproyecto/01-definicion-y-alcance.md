@@ -2,7 +2,13 @@
 
 ## 1.1 Tema
 
-**Diseño, implementación y validación de una arquitectura multi-tenant jerárquica (empresa → sucursales) sobre infraestructura serverless, con aislamiento de datos aplicado en el motor de base de datos mediante Row-Level Security, para la gestión centralizada de empresas de servicio de motocicletas en Bolivia.**
+**Título del proyecto**
+
+> **Diseño, implementación y validación de una arquitectura multi-tenant jerárquica con aislamiento verificable en la base de datos para empresas de servicio de motocicletas en Bolivia**
+
+**Formulación extendida del tema.** Diseño, implementación y validación de una arquitectura multi-tenant jerárquica (empresa → sucursales) sobre infraestructura serverless, con aislamiento de datos aplicado en el motor de base de datos mediante seguridad a nivel de fila, para la gestión centralizada de empresas de servicio de motocicletas en Bolivia.
+
+> El **título** es la forma canónica y se emplea en portada, índices y referencias a este proyecto; la formulación extendida solo desarrolla su contenido técnico. Si el título cambia, se actualiza en los cuatro lugares donde aparece: este apartado, el [Perfil de proyecto](00-perfil-proyecto.md), el [Anteproyecto integrado](04-anteproyecto-integrado.md) y el [índice de la documentación](../README.md).
 
 ## 1.2 El problema
 
@@ -40,7 +46,9 @@ El software de gestión de talleres relevado con presencia en Bolivia (AutoSoft 
 
 ## 1.6 Objetivo general
 
-> **Diseñar, implementar y validar una arquitectura multi-tenant jerárquica (empresa → sucursales) sobre infraestructura serverless —Node.js/TypeScript con Supabase (PostgreSQL) y despliegue continuo en Vercel—, que aplique el aislamiento de datos en el motor de base de datos mediante Row-Level Security, para permitir la gestión centralizada de varias empresas de servicio de motocicletas en Bolivia garantizando la separación verificable de sus datos.**
+> **Diseñar, implementar y validar una arquitectura multi-tenant jerárquica (empresa → sucursales) sobre infraestructura serverless, que aplique el aislamiento de datos en el motor de base de datos mediante seguridad a nivel de fila, para permitir la gestión centralizada de varias empresas de servicio de motocicletas en Bolivia garantizando la separación verificable de sus datos.**
+
+> Las tecnologías concretas que materializan este objetivo —Node.js/TypeScript, Supabase (PostgreSQL) y despliegue en Vercel— se declaran en el **alcance técnico** (§1.8.2), no en el enunciado del objetivo: son medios sustituibles y atarlos aquí envejecería la formulación. Esta redacción es la única válida y se replica sin variación en el [Perfil](00-perfil-proyecto.md) §4.1 y en el [Anteproyecto integrado](04-anteproyecto-integrado.md) §8.
 
 ## 1.7 Objetivos específicos
 
@@ -59,9 +67,9 @@ El software de gestión de talleres relevado con presencia en Bolivia (AutoSoft 
 | # | Objetivo | Entregable verificable |
 |---|---|---|
 | 1 | Analizar la literatura y la oferta boliviana | Matriz de extracción del estado del arte (§2.2) · análisis competitivo con el vacío identificado (§2.3) |
-| 2 | Diseñar el modelo jerárquico y especificar las políticas | Modelo entidad-relación con alcance por nivel y restricciones de unicidad · migración con políticas RLS y funciones de verificación de membresía |
+| 2 | Diseñar el modelo jerárquico y especificar las políticas | Modelo entidad-relación con alcance por nivel y restricciones de unicidad · contrato de la interfaz de programación con el contexto activo y las reglas de no divulgación · migración con políticas RLS y funciones de verificación de membresía |
 | 3 | Implementar la arquitectura y automatizar su verificación | Backend serverless con registro, empresas, sucursales, miembros y roles operativos · módulos de clientes e inventario funcionando · pipeline en verde en cada integración |
-| 4 | Validar el aislamiento | Suite de pruebas de seguridad que demuestra la separación por interfaz de programación y por acceso directo a la base de datos |
+| 4 | Validar el aislamiento | Suite de pruebas de seguridad que demuestra la separación por interfaz de programación y por acceso directo a la base de datos, con la matriz de trazabilidad requisito → caso → evidencia |
 
 ## 1.8 Delimitación y alcance
 
@@ -79,7 +87,7 @@ El software de gestión de talleres relevado con presencia en Bolivia (AutoSoft 
 - **Despliegue**: Vercel (funciones serverless).
 - **Frontend**: React con TypeScript, incluida su integración con el proveedor de identidad y los selectores de empresa y sucursal activas.
 - **Pruebas**: Vitest (pruebas unitarias, HTTP y de aislamiento multi-tenant).
-- **CI/CD**: pipeline automatizado en GitHub Actions que ejecuta la verificación de tipos y la suite de pruebas en cada integración al ramal principal.
+- **Integración continua**: pipeline automatizado en GitHub Actions que ejecuta la verificación de tipos y la suite de pruebas en cada integración al ramal principal. El despliegue automático a Vercel no forma parte del alcance: el objetivo 3 se cumple con la verificación en cada integración.
 
 > Las teorías, modelos y estándares que justifican cada una de estas elecciones se desarrollan en el [Marco teórico y conceptual](03-marco-teorico-y-conceptual.md); las alternativas evaluadas y descartadas, en [Decisiones de diseño](../ingenieria/07-decisiones-diseno.md).
 

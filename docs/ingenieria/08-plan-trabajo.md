@@ -2,7 +2,7 @@
 
 Metodología, cronograma, hitos y gestión de riesgos del proyecto de grado. Período: **septiembre a diciembre de 2026**.
 
-> Objetivos y alcance: [anteproyecto/01-definicion-y-alcance.md](../anteproyecto/01-definicion-y-alcance.md) · Requisitos: [Requisitos](02-requisitos.md) · Historias: [Historias de usuario](03-historias-usuario.md)
+> Objetivos y alcance: [anteproyecto/01-definicion-y-alcance.md](../anteproyecto/01-definicion-y-alcance.md) · Requisitos: [Requisitos](02-requisitos.md) · Historias: [Historias de usuario](03-historias-usuario.md) · Verificación: [Plan de pruebas](11-plan-pruebas.md)
 
 ## 1. Metodología
 
@@ -15,7 +15,7 @@ Prácticas adoptadas:
 | Práctica | Aplicación |
 |---|---|
 | Iteraciones de 2 semanas | Ocho iteraciones en total, cada una con un incremento demostrable. |
-| Definición de terminado | Código tipado sin errores, pruebas automatizadas en verde, requisito trazado y documentación actualizada. |
+| Definición de terminado | Código tipado sin errores, pruebas automatizadas en verde, requisito trazado y documentación actualizada. Las cuatro condiciones se detallan en [Plan de pruebas](11-plan-pruebas.md) §6.1. |
 | Decisiones registradas | Toda decisión estructural se documenta como ADR antes de implementarse. |
 | Integración continua | Verificación de tipos y pruebas en cada integración al ramal principal. |
 | Verificación sobre afirmación | Cada requisito `Must` tiene una prueba que lo respalda; no se declara cumplido lo que no se puede ejecutar. |
@@ -31,7 +31,7 @@ Cada fase materializa uno de los cuatro objetivos específicos.
 | Fase | Período | Objetivo | Resultado |
 |---|---|---|---|
 | **F1 · Análisis** | Septiembre (sem. 1–2) | 1 | Estado del arte con matriz de extracción, análisis del mercado y vacío de investigación |
-| **F2 · Diseño** | Septiembre (sem. 3–4) | 2 | Marco teórico y conceptual, modelo de datos jerárquico, políticas de aislamiento y decisiones registradas |
+| **F2 · Diseño** | Septiembre (sem. 3–4) | 2 | Marco teórico y conceptual, modelo de datos jerárquico, políticas de aislamiento, decisiones registradas, contrato de la interfaz y plan de pruebas |
 | **F3 · Construcción** | 29 de septiembre – 7 de diciembre | 3 | Sistema funcional con el corte vertical e integración continua operativa |
 | **F4 · Validación y cierre** | Diciembre | 4 | Evidencia de aislamiento, documento final y defensa |
 
@@ -39,8 +39,8 @@ Cada fase materializa uno de los cuatro objetivos específicos.
 
 | Iteración | Fechas | Contenido | Entregable |
 |---|---|---|---|
-| **I1** | 1–14 sep | Búsqueda en bases académicas; aplicación de criterios de inclusión y exclusión; lectura de fuentes | Matriz de extracción con fuentes revisadas por pares |
-| **I2** | 15–28 sep | Análisis del mercado; comparación de estrategias de aislamiento; redacción del marco teórico y conceptual con revisión crítica; diseño del modelo jerárquico y de las políticas | Vacío de investigación redactado · Marco teórico y conceptual · Modelo de datos y decisiones de diseño cerrados |
+| **I1** | 1–14 sep | Búsqueda en bases académicas; aplicación de criterios de inclusión y exclusión; lectura de fuentes; relevamiento de las soluciones con presencia en Bolivia | Matriz de extracción con fuentes revisadas por pares · Análisis del mercado · Vacío de investigación redactado |
+| **I2** | 15–28 sep | Comparación de estrategias de aislamiento; redacción del marco teórico y conceptual con revisión crítica; diseño del modelo jerárquico, de las políticas, del contrato de la interfaz y de la estrategia de verificación | Marco teórico y conceptual · Modelo de datos y decisiones de diseño cerrados · Contrato de la interfaz de programación · Plan de pruebas con su matriz de trazabilidad |
 | **I3** | 29 sep – 12 oct | Construcción del esquema: identidad, empresas, sucursales, membresías y políticas de aislamiento; selección de contexto activo | HU-06, HU-07, HU-08 · Esquema jerárquico operativo |
 | **I4** | 13–26 oct | Cuentas, registro, gestión de empresas y de miembros con control de acceso por rol | HU-01 a HU-05, HU-09 a HU-12 |
 | **I5** | 27 oct – 9 nov | Módulo de clientes — entidad de nivel empresa | HU-13, HU-14, HU-15 |
@@ -97,4 +97,4 @@ El costo de infraestructura es cero dentro del alcance del proyecto: los planes 
 
 ## 6. Criterio de cierre
 
-El proyecto se considera concluido cuando los cuatro objetivos específicos cuentan con su entregable verificable —según la tabla de trazabilidad de [anteproyecto/01-definicion-y-alcance.md](../anteproyecto/01-definicion-y-alcance.md) §1.7— y la suite de pruebas de aislamiento se ejecuta en verde de forma reproducible. Las funcionalidades excluidas del alcance (§1.8.3) no condicionan ese cierre.
+El proyecto se considera concluido cuando los cuatro objetivos específicos cuentan con su entregable verificable —según la tabla de trazabilidad de [anteproyecto/01-definicion-y-alcance.md](../anteproyecto/01-definicion-y-alcance.md) §1.7— y la suite de pruebas de aislamiento se ejecuta en verde de forma reproducible, con el detalle de condiciones que fija [Plan de pruebas](11-plan-pruebas.md) §6.3. Las funcionalidades excluidas del alcance (§1.8.3) no condicionan ese cierre.

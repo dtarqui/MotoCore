@@ -2,7 +2,7 @@
 
 Historias organizadas por épica, con criterios de aceptación verificables y trazabilidad a los requisitos ([Requisitos](02-requisitos.md)).
 
-> Solo se detallan las historias **dentro del alcance** del proyecto de grado. Las funcionalidades excluidas (§1.8.3) están en `requisitos.md` como RF-800.
+> Solo se detallan las historias **dentro del alcance** del proyecto de grado. Las funcionalidades excluidas ([§1.8.3](../anteproyecto/01-definicion-y-alcance.md)) están en [Requisitos](02-requisitos.md) como RF-800.
 
 ## Actores
 
@@ -260,8 +260,8 @@ Escala de puntos de historia (Fibonacci): `1` trivial · `2` sencilla · `3` mod
 *Requisitos*: RF-604, RF-605, RF-606 · *Puntos*: 5
 
 **Criterios de aceptación**
-- Puedo registrar compra, venta, ajuste, devolución y merma.
-- Compra, devolución y transferencia de entrada suman; venta y merma restan; el ajuste fija la existencia en un valor absoluto.
+- Puedo registrar compra, venta, ajuste, devolución y merma. La *transferencia* no se registra desde aquí: la genera HU-20 (RF-604).
+- Compra y devolución suman; venta y merma restan; el ajuste fija la existencia en un valor absoluto.
 - Cada movimiento guarda la existencia anterior y la resultante.
 - Un movimiento que dejaría la existencia negativa se rechaza y no altera el stock.
 - Los movimientos no se pueden editar ni borrar: son historial.
