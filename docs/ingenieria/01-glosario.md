@@ -53,7 +53,7 @@ Los identificadores de rol se mantienen **en inglés** en el modelo de datos y e
 
 El rol es **por organización**, no global: la misma cuenta puede ser Owner en una organización y Mechanic en otra.
 
-> Las responsabilidades sobre **motocicletas y órdenes de trabajo** describen el producto completo; esos módulos quedan fuera del alcance del proyecto de grado (RF-801 y RF-802, ver [Requisitos](02-requisitos.md)). Dentro del corte vertical, los tres roles se ejercen sobre **clientes e inventario**.
+> Las responsabilidades sobre **motocicletas y órdenes de trabajo** describen el producto completo; esos módulos quedan fuera del alcance del proyecto de grado (RF-801 y RF-802, ver [Requisitos](02-requisitos.md)). Dentro del corte vertical, los tres roles se ejercen sobre **clientes e inventario**, con el reparto de permisos que fijan RF-505 y RF-609.
 
 ## Términos de arquitectura
 

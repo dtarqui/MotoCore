@@ -45,9 +45,9 @@ La Paz – Bolivia
 
 ## 2. Antecedentes
 
-**El parque de motocicletas y la demanda de servicio.** La motocicleta es el vehículo más numeroso de Bolivia. Según el Instituto Nacional de Estadística (INE), a partir de los registros del Registro Único para la Administración Tributaria Municipal (RUAT), en 2024 se contabilizaron **872.550 motocicletas** sobre un parque automotor total de **2.583.283 vehículos**, encabezando el parque nacional por delante de vagonetas, automóviles y camionetas. Su crecimiento supera al del parque en conjunto: de **657.718 unidades en 2021** pasó a **800.890 en 2023** y a **872.550 en 2024**, **+32,7 % en tres años**, frente al +16,0 % del parque automotor total en el mismo período. Cada unidad requiere mantenimiento periódico, lo que sostiene una red amplia de talleres de servicio distribuida por todo el territorio.
+**El parque de motocicletas y la demanda de servicio.** La motocicleta es el vehículo más numeroso de Bolivia. Según el Instituto Nacional de Estadística (INE), a partir de los registros del Registro Único para la Administración Tributaria Municipal (RUAT), en **2025** se contabilizaron **931.205 motocicletas**, el **34,8 %** del parque automotor nacional, encabezándolo por delante de vagonetas, automóviles y camionetas. Su crecimiento supera al del parque en conjunto: de **657.718 unidades en 2021** pasó a **872.550 en 2024** y a **931.205 en 2025**, **+41,6 % en cuatro años**, frente al +20,0 % del parque automotor total en el mismo período. Cada unidad requiere mantenimiento periódico, lo que sostiene una red amplia de talleres de servicio distribuida por todo el territorio.
 
-**Condiciones del sector.** Ese crecimiento ocurre en una economía marcadamente informal: el INE reporta una **informalidad laboral del 84,2 % en 2024**. Para el rubro de talleres esto se traduce en unidades de negocio pequeñas, con presupuesto de tecnología muy limitado y baja adopción de software especializado, donde la gestión se apoya todavía en registros en papel u hojas de cálculo.
+**Condiciones del sector.** Ese crecimiento ocurre en una economía marcadamente informal: el indicador de **informalidad laboral del 84,2 % en 2024**, procedente de la Encuesta Continua de Empleo del INE, se emplea aquí como caracterización cualitativa del sector y no interviene en ningún cálculo del documento (capítulo 2, §2.1). Para el rubro de talleres esto se traduce en unidades de negocio pequeñas, con presupuesto de tecnología muy limitado y baja adopción de software especializado, donde la gestión se apoya todavía en registros en papel u hojas de cálculo.
 
 **El operador que crece.** En ese contexto, quien abre un segundo o tercer taller —o constituye más de una organización— no encuentra herramientas que le permitan administrarlas de forma centralizada. Debe optar entre llevar cada local como una instalación independiente, perdiendo la visión unificada del cliente y su historial, o renunciar a la especialización y volver a soluciones genéricas.
 
@@ -122,6 +122,8 @@ Por tratarse de una investigación explicativa que propone aplicar una arquitect
 | **Independiente** | Arquitectura multi-tenant jerárquica con aislamiento en dos capas | Número de niveles jerárquicos modelados · número de límites de aislamiento · cobertura de tablas de negocio con políticas activas | Modelo de datos y migraciones versionadas |
 | **Dependiente** | Separación verificable de datos entre organizaciones | **Filas ajenas devueltas por acceso directo a la base de datos = 0** · respuestas de autorización correctas en el 100 % de las operaciones del contrato · casos de aislamiento en verde con la verificación de la aplicación deshabilitada | Suite automatizada de pruebas de aislamiento |
 | **Dependiente** | Gestión centralizada | El cliente registrado en un taller es accesible desde cualquier otro de la misma organización · cambio de organización y de taller activos sin cerrar sesión | Casos de prueba de alcance por nivel |
+| **Dependiente** | Usabilidad del cambio de contexto | Tasa de éxito por tarea · tiempo y errores por tarea (descriptivos) · puntuación SUS | Observación estructurada de tareas guiadas · cuestionario SUS |
+| **Interviniente** | Modelo de despliegue serverless | Condición de ejecución que impone ausencia de estado entre peticiones y costo proporcional al uso; no se manipula, se mantiene constante | — |
 
 
 ---
@@ -161,7 +163,7 @@ El modelo de despliegue serverless, con escalado a cero y sin costo fijo por org
 - Registro que crea una cuenta, su primera organización y su primer taller, con el usuario como propietario.
 - Creación de organizaciones adicionales bajo la misma cuenta y de talleres dentro de cada organización.
 - Listado de organizaciones según membresía, cambio de organización activa y selección de taller activo.
-- Gestión de miembros por organización —invitar, cambiar rol, remover— reservada al propietario, y asignación operativa de miembros a talleres.
+- Gestión de miembros por organización —invitar, cambiar rol, remover—, reservada al propietario, y asignación operativa de miembros a talleres.
 - **Corte vertical de demostración**: **Clientes** (entidad de nivel organización, visible desde cualquier taller) e **Inventario de repuestos** (entidad de nivel taller, acotada a su local). Son el mínimo necesario para demostrar que el alcance por nivel funciona, y se eligen por no depender de otros módulos.
 - Verificación de aislamiento por dos vías independientes.
 - **Evaluación de usabilidad del cambio de contexto** con operadores del rubro, mediante tareas guiadas.
@@ -185,7 +187,7 @@ El objeto de estudio es la **arquitectura**, no la suite funcional completa. No 
 - La auditoría extendida a la totalidad de las entidades de negocio; sí se audita el conjunto acotado de acciones críticas.
 - La integración con mensajería por WhatsApp.
 - La emisión de factura electrónica del Servicio de Impuestos Nacionales.
-- Aplicaciones móviles o de escritorio nativas.
+- Aplicaciones móviles o de escritorio nativas: solo web responsiva e instalable.
 - Migración de datos productivos desde sistemas anteriores.
 - Pruebas de carga o rendimiento a escala productiva.
 - La evaluación de usabilidad de la **totalidad** de la interfaz: se evalúa el cambio de contexto entre organizaciones y talleres, no las demás pantallas.
@@ -200,7 +202,7 @@ El marco se organiza en cuatro bloques, y de cada teoría se consigna además su
 |---|---|---|
 | **Arquitectura** | Estilo REST y restricción de ausencia de estado (Fielding, 2000) · atributos de calidad y tácticas (Bass et al., 2021) · modelos de multi-tenancy (Krebs et al., 2012; Bezemer & Zaidman, 2010) · computación serverless (Jonas et al., 2019) | Contexto activo declarado por petición · el aislamiento como atributo de calidad rector · esquema compartido reforzado en el motor · despliegue sin costo fijo |
 | **Persistencia** | Modelo relacional (Codd, 1970) · propiedades ACID (Haerder & Reuter, 1983) · teorema CAP (Gilbert & Lynch, 2002) · sistemas de tipos (Pierce, 2002; Gao et al., 2017) | Reglas de acceso como condiciones lógicas sobre relaciones · atomicidad de las operaciones compuestas · motor relacional único con consistencia fuerte · verificación estática como primera barrera |
-| **Frontend** | Separación de responsabilidades y composición por componentes (Krasner & Pope, 1988) · umbrales de percepción (Nielsen, 1993) · manifiesto de aplicación web (World Wide Web Consortium [W3C], 2026) · evaluación con muestras pequeñas (Nielsen & Landauer, 1993) y medición de satisfacción (Bangor et al., 2008) | Contexto activo elevado a un componente contenedor · tiempos de respuesta como criterio de diseño y no como objetivo medido · alcance multiplataforma con una sola base de código · muestra de 5 a 8 operadores y umbral SUS ≥ 68 |
+| **Frontend** | Separación de responsabilidades y composición por componentes (Krasner & Pope, 1988) · umbrales de percepción (Nielsen, 1993) · manifiesto de aplicación web (World Wide Web Consortium [W3C], 2026) · evaluación con muestras pequeñas (Nielsen & Landauer, 1993) y medición de satisfacción (Brooke, 1996; Bangor et al., 2008) | Contexto activo elevado a un componente contenedor · tiempos de respuesta como criterio de diseño y no como objetivo medido · alcance multiplataforma con una sola base de código · muestra de 5 a 8 operadores y umbral SUS ≥ 68 |
 | **Seguridad** | Principios de diseño de sistemas protegidos (Saltzer & Schroeder, 1975) · control de acceso basado en roles (Sandhu et al., 1996) · confianza cero (Rose et al., 2020) · defensa en profundidad | Mediación completa en el motor · valores por defecto seguros · rol por organización y no global · verificación en cada petición · aislamiento en dos capas independientes |
 | **Metodología de construcción** | Desarrollo iterativo (Larman & Basili, 2003) · integración continua (Humble & Farley, 2010; Forsgren et al., 2018) · pruebas como especificación previa (Beck, 2002) | Iteraciones de dos semanas con incremento verificado · pipeline en cada integración · pruebas de aislamiento escritas antes que la funcionalidad |
 
@@ -238,7 +240,7 @@ Las categorías empleadas —tipo, enfoque, alcance, método y diseño— siguen
 | 2 | Modelado conceptual y lógico de datos | Diagrama entidad-relación · especificación de políticas | Modelo jerárquico y contrato de interfaz |
 | 3 | Desarrollo iterativo e incremental | Control de versiones · integración continua | Sistema funcional con corte vertical |
 | 4 | **Experimentación controlada** por dos vías independientes | Suite automatizada de pruebas · matriz requisito → caso → evidencia | Evidencia reproducible de aislamiento |
-| 4 | **Observación estructurada** de tareas guiadas con operadores | Guion de tareas T1–T3 · cuestionario SUS (Bangor et al., 2008) | Informe de usabilidad del cambio de contexto |
+| 4 | **Observación estructurada** de tareas guiadas con operadores | Guion de tareas T1–T3 · cuestionario SUS (Brooke, 1996), interpretado según el baremo de Bangor et al. (2008) | Informe de usabilidad del cambio de contexto |
 
 ### 9.4 Procesamiento y análisis de los resultados
 
@@ -374,6 +376,8 @@ Beck, K. (2002). *Test-driven development: By example*. Addison-Wesley Professio
 
 Bezemer, C.-P., & Zaidman, A. (2010). Multi-tenant SaaS applications: Maintenance dream or nightmare? En *Proceedings of the Joint ERCIM Workshop on Software Evolution and International Workshop on Principles of Software Evolution* (pp. 88–92). ACM. https://doi.org/10.1145/1862372.1862393
 
+Brooke, J. (1996). SUS: A quick and dirty usability scale. En P. W. Jordan, B. Thomas, B. A. Weerdmeester, & I. L. McClelland (Eds.), *Usability evaluation in industry* (pp. 189–194). Taylor & Francis.
+
 Codd, E. F. (1970). A relational model of data for large shared data banks. *Communications of the ACM, 13*(6), 377–387. https://doi.org/10.1145/362384.362685
 
 Dar, C., Hershcovitch, M., & Morrison, A. (2023). RLS side channels: Investigating leakage of row-level security protected data through query execution time. *Proceedings of the ACM on Management of Data, 1*(1), Artículo 89, 1–25. https://doi.org/10.1145/3588943
@@ -418,7 +422,7 @@ Sandhu, R. S., Coyne, E. J., Feinstein, H. L., & Youman, C. E. (1996). Role-base
 
 Simić, M., Dedeić, J., Stojkov, M., & Prokić, I. (2024). A hierarchical namespace approach for multi-tenancy in distributed clouds. *IEEE Access, 12*, 32597–32617. https://doi.org/10.1109/ACCESS.2024.3369031
 
-World Wide Web Consortium. (2026). *Web application manifest* (W3C Working Draft). Recuperado el 14 de agosto de 2026, de https://www.w3.org/TR/appmanifest/
+World Wide Web Consortium. (2026). *Web application manifest* (W3C Working Draft del 13 de agosto de 2026). https://www.w3.org/TR/appmanifest/
 ---
 
 <div align="center">

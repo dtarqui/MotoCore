@@ -147,7 +147,7 @@ Identificación de casos: **CP-nnn**, donde `nnn` es el número del requisito qu
 | Req. | Caso | Nivel | Criterio ejecutable |
 |---|---|---|---|
 | RF-501 | CP-501 | N3 | El cliente creado se recupera por identificador |
-| RF-502 | CP-502 | N3 | Un cliente creado con el taller A activa **se lista** con el taller B activa |
+| RF-502 | CP-502 | N3 | Un cliente creado con el taller A activo **se lista** con el taller B activo |
 | RF-503 | CP-503.1 | N3 | Correo duplicado en la misma organización: `409 client.duplicate_email` |
 | RF-503 | CP-503.2 | N3 | El mismo correo en otra organización se acepta |
 | RF-504 | CP-504.1 | N3 | La baja conserva el registro y lo excluye de los listados activos |
@@ -160,7 +160,7 @@ Identificación de casos: **CP-nnn**, donde `nnn` es el número del requisito qu
 |---|---|---|---|
 | RF-601 | CP-601 | N3 | El repuesto queda asociado al taller activo |
 | RF-602 | CP-602 | N3 | Un repuesto del taller A **no** aparece al operar con el taller B |
-| RF-603 | CP-603.1 | N3 | Número de parte duplicado en la mismo taller: `409` |
+| RF-603 | CP-603.1 | N3 | Número de parte duplicado en el mismo taller: `409` |
 | RF-603 | CP-603.2 | N3 | El mismo número de parte se acepta en otro taller |
 | RF-604 | CP-604.1 | N3 | Cada movimiento deja registro con existencia anterior y posterior — un caso por cada uno de los cinco tipos directos |
 | RF-604 | CP-604.2 | N2 | El tipo `transferencia` enviado directamente se rechaza |
@@ -171,6 +171,7 @@ Identificación de casos: **CP-nnn**, donde `nnn` es el número del requisito qu
 | RF-608 | CP-608.1 | N3 | La transferencia descuenta en origen y suma en destino de forma consistente |
 | RF-608 | CP-608.2 | N3 | Origen sin existencia suficiente: la operación se rechaza **completa** |
 | RF-608 | CP-608.3 | N3 | Destino fuera de la organización: `403 inventory.cross_organization_transfer` |
+| RF-609 | CP-609 | N3 | Un `Mechanic` que intenta crear o editar un repuesto: `403 inventory.insufficient_permissions`; consultar y registrar movimientos sí puede. Un `Receptionist` que intenta transferir: `403` |
 
 ### 4.6 Aislamiento y auditoría
 
@@ -178,8 +179,8 @@ Identificación de casos: **CP-nnn**, donde `nnn` es el número del requisito qu
 |---|---|---|---|
 | RF-701 | CP-701 | **N4 · vía interfaz** | Una cuenta sin membresía no obtiene dato alguno en ninguna operación — lectura y escritura —, respondiendo según §5 del [contrato](10-contrato-api.md): `403` con contexto ajeno declarado, `404` con recurso ajeno desde contexto propio |
 | RF-702 | CP-702 | **N4 · vía base de datos** | Consultas ejecutadas con la identidad de otra cuenta, sin pasar por la interfaz, no devuelven filas ajenas |
-| RF-703 | CP-703.1–.5 | N3 | Un caso por cada acción crítica: invitación, cambio de rol, remoción, desactivación de taller y baja de cliente |
-| RF-703 | CP-703.6 | N3 | El registro persiste tras eliminar la entidad o la cuenta referenciada |
+| RF-703 | CP-703.1–.6 | N3 | Un caso por cada acción crítica: invitación, cambio de rol, remoción, modificación de los datos de la organización, desactivación de taller y baja de cliente |
+| RF-703 | CP-703.7 | N3 | El registro persiste tras eliminar la entidad o la cuenta referenciada |
 | RF-704 | CP-704.1 | N3 | `Mechanic` o `Receptionist` que consulta la auditoría: `403` |
 | RF-704 | CP-704.2 | **N4 · vía base de datos** | La restricción se sostiene también por acceso directo: un miembro no propietario no lee el registro |
 
@@ -187,7 +188,7 @@ Identificación de casos: **CP-nnn**, donde `nnn` es el número del requisito qu
 
 | Req. | Caso | Nivel | Criterio |
 |---|---|---|---|
-| RNF-101 | CP-N101 | N4 · BD | Todas las tablas de negocio tienen políticas activas; la consulta directa con otra identidad no devuelve filas ajenas |
+| RNF-101 | CP-N101 | N4 · BD | Las siete tablas de negocio censadas en el [modelo de datos](05-modelo-datos.md) tienen políticas activas; la consulta directa con otra identidad no devuelve filas ajenas en ninguna |
 | RNF-102 | CP-N102 | N4 | Con la verificación de la capa de aplicación deshabilitada, el acceso cruzado **sigue** sin producirse (§5.3) |
 | RNF-103 | CP-N103 | N0 | Búsqueda de credenciales en el repositorio sin resultados; la clave privilegiada solo se lee del entorno |
 | RNF-104 | CP-N104 | N0 | Ninguna ruta de código recibe ni persiste contraseñas: la gestión está delegada (ADR-004) |
@@ -295,8 +296,8 @@ Las tres tareas se eligen porque cada una ejercita una consecuencia distinta de 
 | # | Tarea | Qué pone a prueba |
 |---|---|---|
 | **T1** | Cambiar a otra organización y confirmar que los datos mostrados son los de esa organización | Que el usuario distinga el nivel **organización** y perciba el cambio de contexto (RNF-401) |
-| **T2** | Seleccionar un taller y registrar en ella un repuesto | Que distinga el nivel **taller** y comprenda que el inventario es local |
-| **T3** | Localizar un cliente registrado en **otra** taller de la misma organización | Que perciba el beneficio central del modelo: el cliente pertenece a la organización, no al local (RF-502) |
+| **T2** | Seleccionar un taller y registrar en él un repuesto | Que distinga el nivel **taller** y comprenda que el inventario es local |
+| **T3** | Localizar un cliente registrado en **otro** taller de la misma organización | Que perciba el beneficio central del modelo: el cliente pertenece a la organización, no al local (RF-502) |
 
 ### 7.3 Instrumentos y métricas
 
@@ -305,7 +306,7 @@ Las tres tareas se eligen porque cada una ejercita una consecuencia distinta de 
 | Observación de tarea guiada | Tasa de éxito por tarea | Porcentaje | **≥ 80 %** |
 | Cronometraje de la sesión | Tiempo por tarea | Segundos | Sin umbral: se reporta para comparar entre tareas |
 | Registro de incidencias | Errores por tarea | Cantidad | Sin umbral: alimenta la lista de problemas detectados |
-| Cuestionario SUS | Puntuación de satisfacción | 0 a 100 | **≥ 68**, promedio de la industria (Bangor et al., 2008) |
+| Cuestionario SUS (Brooke, 1996) | Puntuación de satisfacción | 0 a 100 | **≥ 68**, promedio de la industria según el baremo de Bangor et al. (2008) |
 
 El tiempo y los errores **no llevan umbral a propósito**: con una muestra de cinco a ocho participantes no procede afirmar significancia estadística sobre ellos. Se reportan como evidencia descriptiva y como insumo de la lista de problemas.
 

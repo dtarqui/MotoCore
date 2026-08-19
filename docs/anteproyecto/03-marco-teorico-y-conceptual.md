@@ -23,13 +23,13 @@ Definiciones formales de las tecnologías que sostienen la solución. Se limita 
 | 9 | **Progressive Web App (PWA)** | Aplicación web que, mediante un manifiesto y un *service worker*, resulta instalable en el dispositivo y capaz de operar con conectividad intermitente, sin distribuirse por una tienda de aplicaciones. | World Wide Web Consortium [W3C] (2026) |
 | 10 | **Problem Details** | Formato normalizado de respuesta de error para interfaces HTTP, que transporta tipo, título, estado y detalle en un cuerpo estructurado, evitando que cada servicio invente el suyo. Estándar RFC 9457, que sustituye al RFC 7807. | Nottingham et al. (2023) |
 
-> **Nota técnica derivada de la entrada 10.** La especificación vigente es la **RFC 9457** (julio de 2023), que dejó obsoleta a la RFC 7807. El requisito RNF-204 se actualiza en consecuencia ([Requisitos](../ingenieria/02-requisitos.md)); el formato del cuerpo es compatible, de modo que la corrección es de referencia normativa, no de diseño.
+> **Nota técnica derivada de la entrada 10.** La especificación vigente es la **RFC 9457** (julio de 2023), que dejó obsoleta a la RFC 7807. El formato del cuerpo es compatible entre ambas, de modo que la diferencia es de referencia normativa y no de diseño.
 
 ---
 
 ## 3.2 Marco teórico — el «por qué» y el «cómo»
 
-Principios, teoremas, modelos y metodologías que gobiernan el sistema. Se organiza según la estructura sugerida por el módulo: arquitectura, *backend* y persistencia, *frontend*, y modelos de seguridad; se añade un bloque de metodología, exigido para justificar el proceso de construcción.
+Principios, teoremas, modelos y metodologías que gobiernan el sistema. Se organiza en cuatro bloques —arquitectura, *backend* y persistencia, *frontend*, y modelos de seguridad— y se añade un quinto de metodología, necesario para justificar el proceso de construcción.
 
 ### 3.2.1 Teorías de arquitectura — el diseño global
 
@@ -69,9 +69,9 @@ De ahí se sigue el problema teórico que el proyecto debe resolver por su cuent
 
 La consecuencia metodológica es la que gobierna el diseño de §16.4 del anteproyecto, y conviene enunciarla con precisión para no exagerar lo que se afirma: una muestra pequeña es adecuada **para detectar problemas**, que es el objetivo aquí, y sería insuficiente **para estimar un parámetro poblacional**, que no se pretende. Confundir ambos propósitos es el error habitual en la evaluación de interfaces, y por eso el proyecto declara que sus métricas de tiempo y de error se reportan como evidencia descriptiva, sin afirmación de significancia estadística.
 
-**Medición de la satisfacción percibida.** La eficacia y la eficiencia se observan; la satisfacción, no. Para incorporarla sin recurrir a una apreciación subjetiva del investigador, el proyecto emplea la escala de usabilidad del sistema (*System Usability Scale*), un cuestionario breve y agnóstico de la tecnología cuya validación psicométrica y baremo de interpretación establecieron Bangor et al. (2008) sobre casi tres mil aplicaciones del instrumento. De ese trabajo procede el umbral que el proyecto adopta: **68 puntos** como valor medio de referencia, lo que convierte una impresión —«resultó cómodo de usar»— en un criterio comparable y declarado de antemano.
+**Medición de la satisfacción percibida.** La eficacia y la eficiencia se observan; la satisfacción, no. Para incorporarla sin recurrir a una apreciación subjetiva del investigador, el proyecto emplea la escala de usabilidad del sistema (*System Usability Scale*), formulada por Brooke (1996) como un cuestionario breve —diez ítems en escala Likert— y deliberadamente agnóstico de la tecnología evaluada. Su validación psicométrica y su baremo de interpretación son posteriores: Bangor et al. (2008) los establecieron sobre casi tres mil aplicaciones del instrumento, y de ese trabajo procede el umbral que el proyecto adopta: **68 puntos** como valor medio de referencia. La distinción importa, porque separa el **instrumento** de su **norma de interpretación**, y es esta última la que convierte una impresión —«resultó cómodo de usar»— en un criterio comparable y declarado de antemano.
 
-Esta es, además, la respuesta teórica a una objeción previsible ante el tribunal: que la arquitectura sea correcta no implica que sea utilizable, y una jerarquía de dos niveles que el operador no logra manejar no resuelve el problema que motivó la tesis (§1.2).
+El fundamento de esa medición es, además, lo que sostiene una afirmación central del proyecto: que la arquitectura sea correcta no implica que sea utilizable, y una jerarquía de dos niveles que el operador no logra manejar no resuelve el problema que la motivó (§1.2).
 
 ### 3.2.4 Modelos de seguridad — cómo se protege la información
 
@@ -171,34 +171,35 @@ Las referencias del capítulo 2 no se repiten; cuando una obra de aquel capítul
 |---|---|---|
 | L1 | Bass, L., Clements, P., & Kazman, R. (2021). *Software architecture in practice* (4.ª ed.). Addison-Wesley Professional. **(cap. 2)** | 978-0-13-688609-9 |
 | L2 | Beck, K. (2002). *Test-driven development: By example*. Addison-Wesley Professional. | 978-0-321-14653-3 |
-| L3 | Forsgren, N., Humble, J., & Kim, G. (2018). *Accelerate: The science of lean software and DevOps*. IT Revolution Press. **(cap. 2)** | 978-1-942788-33-1 |
-| L4 | Humble, J., & Farley, D. (2010). *Continuous delivery: Reliable software releases through build, test, and deployment automation*. Addison-Wesley Professional. **(cap. 2)** | 978-0-321-60191-9 |
-| L5 | Kleppmann, M. (2017). *Designing data-intensive applications*. O'Reilly Media. **(cap. 2)** | 978-1-4493-7332-0 |
-| L6 | Newman, S. (2021). *Building microservices: Designing fine-grained systems* (2.ª ed.). O'Reilly Media. **(cap. 2)** | 978-1-4920-3402-5 |
-| L7 | Nielsen, J. (1993). *Usability engineering*. Morgan Kaufmann. | 978-0-12-518406-9 |
-| L8 | Pierce, B. C. (2002). *Types and programming languages*. MIT Press. | 978-0-262-16209-8 |
-| L9 | Richards, M., & Ford, N. (2020). *Fundamentals of software architecture: An engineering approach*. O'Reilly Media. **(cap. 2)** | 978-1-4920-4345-4 |
+| L3 | Brooke, J. (1996). SUS: A quick and dirty usability scale. En P. W. Jordan, B. Thomas, B. A. Weerdmeester, & I. L. McClelland (Eds.), *Usability evaluation in industry* (pp. 189–194). Taylor & Francis. | 978-0-7484-0460-5 |
+| L4 | Forsgren, N., Humble, J., & Kim, G. (2018). *Accelerate: The science of lean software and DevOps*. IT Revolution Press. **(cap. 2)** | 978-1-942788-33-1 |
+| L5 | Humble, J., & Farley, D. (2010). *Continuous delivery: Reliable software releases through build, test, and deployment automation*. Addison-Wesley Professional. **(cap. 2)** | 978-0-321-60191-9 |
+| L6 | Kleppmann, M. (2017). *Designing data-intensive applications*. O'Reilly Media. **(cap. 2)** | 978-1-4493-7332-0 |
+| L7 | Newman, S. (2021). *Building microservices: Designing fine-grained systems* (2.ª ed.). O'Reilly Media. **(cap. 2)** | 978-1-4920-3402-5 |
+| L8 | Nielsen, J. (1993). *Usability engineering*. Morgan Kaufmann. | 978-0-12-518406-9 |
+| L9 | Pierce, B. C. (2002). *Types and programming languages*. MIT Press. | 978-0-262-16209-8 |
+| L10 | Richards, M., & Ford, N. (2020). *Fundamentals of software architecture: An engineering approach*. O'Reilly Media. **(cap. 2)** | 978-1-4920-4345-4 |
 
 ### B. Artículos y ponencias revisadas por pares
 
-*Se verifican por DOI. Todos provienen de ACM, IEEE o editoriales indexadas — las fuentes que el módulo admite como sustento teórico.*
+*Se verifican por DOI. Todos provienen de ACM, IEEE o editoriales indexadas.*
 
 | # | Referencia | DOI |
 |---|---|---|
-| A1 | Bezemer, C.-P., & Zaidman, A. (2010). Multi-tenant SaaS applications: Maintenance dream or nightmare? En *Proceedings of the Joint ERCIM Workshop on Software Evolution (EVOL) and International Workshop on Principles of Software Evolution (IWPSE)* (pp. 88–92). ACM. | https://doi.org/10.1145/1862372.1862393 |
-| A2 | Codd, E. F. (1970). A relational model of data for large shared data banks. *Communications of the ACM, 13*(6), 377–387. | https://doi.org/10.1145/362384.362685 |
-| A3 | Dar, C., Hershcovitch, M., & Morrison, A. (2023). RLS side channels: Investigating leakage of row-level security protected data through query execution time. *Proceedings of the ACM on Management of Data, 1*(1), Artículo 89, 1–25. **(cap. 2)** | https://doi.org/10.1145/3588943 |
-| A3b | Bangor, A., Kortum, P. T., & Miller, J. T. (2008). An empirical evaluation of the System Usability Scale. *International Journal of Human–Computer Interaction, 24*(6), 574–594. | https://doi.org/10.1080/10447310802205776 |
-| A4 | Gao, Z., Bird, C., & Barr, E. T. (2017). To type or not to type: Quantifying detectable bugs in JavaScript. En *2017 IEEE/ACM 39th International Conference on Software Engineering (ICSE)* (pp. 758–769). IEEE. | https://doi.org/10.1109/ICSE.2017.75 |
-| A5 | Gilbert, S., & Lynch, N. (2002). Brewer's conjecture and the feasibility of consistent, available, partition-tolerant web services. *ACM SIGACT News, 33*(2), 51–59. | https://doi.org/10.1145/564585.564601 |
-| A6 | Haerder, T., & Reuter, A. (1983). Principles of transaction-oriented database recovery. *ACM Computing Surveys, 15*(4), 287–317. | https://doi.org/10.1145/289.291 |
-| A7 | Krebs, R., Momm, C., & Kounev, S. (2012). Architectural concerns in multi-tenant SaaS applications. En *Proceedings of the 2nd International Conference on Cloud Computing and Services Science (CLOSER 2012)* (pp. 426–431). SciTePress. | https://doi.org/10.5220/0003957604260431 |
-| A8 | Larman, C., & Basili, V. R. (2003). Iterative and incremental developments: A brief history. *Computer, 36*(6), 47–56. | https://doi.org/10.1109/MC.2003.1204375 |
-| A9 | Saltzer, J. H., & Schroeder, M. D. (1975). The protection of information in computer systems. *Proceedings of the IEEE, 63*(9), 1278–1308. | https://doi.org/10.1109/PROC.1975.9939 |
-| A10 | Sandhu, R. S., Coyne, E. J., Feinstein, H. L., & Youman, C. E. (1996). Role-based access control models. *Computer, 29*(2), 38–47. | https://doi.org/10.1109/2.485845 |
-| A10c | Simić, M., Dedeić, J., Stojkov, M., & Prokić, I. (2024). A hierarchical namespace approach for multi-tenancy in distributed clouds. *IEEE Access, 12*, 32597–32617. **(cap. 2)** | https://doi.org/10.1109/ACCESS.2024.3369031 |
-| A10b | Nielsen, J., & Landauer, T. K. (1993). A mathematical model of the finding of usability problems. En *Proceedings of the INTERACT '93 and CHI '93 Conference on Human Factors in Computing Systems* (pp. 206–213). ACM. | https://doi.org/10.1145/169059.169166 |
-| A11 | Krasner, G. E., & Pope, S. T. (1988). A cookbook for using the model-view-controller user interface paradigm in Smalltalk-80. *Journal of Object-Oriented Programming, 1*(3), 26–49. | *Sin DOI* — revista descontinuada; ver nota al final |
+| A1 | Bangor, A., Kortum, P. T., & Miller, J. T. (2008). An empirical evaluation of the System Usability Scale. *International Journal of Human–Computer Interaction, 24*(6), 574–594. | https://doi.org/10.1080/10447310802205776 |
+| A2 | Bezemer, C.-P., & Zaidman, A. (2010). Multi-tenant SaaS applications: Maintenance dream or nightmare? En *Proceedings of the Joint ERCIM Workshop on Software Evolution (EVOL) and International Workshop on Principles of Software Evolution (IWPSE)* (pp. 88–92). ACM. | https://doi.org/10.1145/1862372.1862393 |
+| A3 | Codd, E. F. (1970). A relational model of data for large shared data banks. *Communications of the ACM, 13*(6), 377–387. | https://doi.org/10.1145/362384.362685 |
+| A4 | Dar, C., Hershcovitch, M., & Morrison, A. (2023). RLS side channels: Investigating leakage of row-level security protected data through query execution time. *Proceedings of the ACM on Management of Data, 1*(1), Artículo 89, 1–25. **(cap. 2)** | https://doi.org/10.1145/3588943 |
+| A5 | Gao, Z., Bird, C., & Barr, E. T. (2017). To type or not to type: Quantifying detectable bugs in JavaScript. En *2017 IEEE/ACM 39th International Conference on Software Engineering (ICSE)* (pp. 758–769). IEEE. | https://doi.org/10.1109/ICSE.2017.75 |
+| A6 | Gilbert, S., & Lynch, N. (2002). Brewer's conjecture and the feasibility of consistent, available, partition-tolerant web services. *ACM SIGACT News, 33*(2), 51–59. | https://doi.org/10.1145/564585.564601 |
+| A7 | Haerder, T., & Reuter, A. (1983). Principles of transaction-oriented database recovery. *ACM Computing Surveys, 15*(4), 287–317. | https://doi.org/10.1145/289.291 |
+| A8 | Krasner, G. E., & Pope, S. T. (1988). A cookbook for using the model-view-controller user interface paradigm in Smalltalk-80. *Journal of Object-Oriented Programming, 1*(3), 26–49. | [ACM DL 10.5555/50757.50759](https://dl.acm.org/doi/10.5555/50757.50759) — sin DOI: revista descontinuada (ver nota al final) |
+| A9 | Krebs, R., Momm, C., & Kounev, S. (2012). Architectural concerns in multi-tenant SaaS applications. En *Proceedings of the 2nd International Conference on Cloud Computing and Services Science (CLOSER 2012)* (pp. 426–431). SciTePress. | https://doi.org/10.5220/0003957604260431 |
+| A10 | Larman, C., & Basili, V. R. (2003). Iterative and incremental developments: A brief history. *Computer, 36*(6), 47–56. | https://doi.org/10.1109/MC.2003.1204375 |
+| A11 | Nielsen, J., & Landauer, T. K. (1993). A mathematical model of the finding of usability problems. En *Proceedings of the INTERACT '93 and CHI '93 Conference on Human Factors in Computing Systems* (pp. 206–213). ACM. | https://doi.org/10.1145/169059.169166 |
+| A12 | Saltzer, J. H., & Schroeder, M. D. (1975). The protection of information in computer systems. *Proceedings of the IEEE, 63*(9), 1278–1308. | https://doi.org/10.1109/PROC.1975.9939 |
+| A13 | Sandhu, R. S., Coyne, E. J., Feinstein, H. L., & Youman, C. E. (1996). Role-based access control models. *Computer, 29*(2), 38–47. | https://doi.org/10.1109/2.485845 |
+| A14 | Simić, M., Dedeić, J., Stojkov, M., & Prokić, I. (2024). A hierarchical namespace approach for multi-tenancy in distributed clouds. *IEEE Access, 12*, 32597–32617. **(cap. 2)** | https://doi.org/10.1109/ACCESS.2024.3369031 |
 
 ### C. Documentos normativos y publicaciones oficiales
 
@@ -215,7 +216,7 @@ Las referencias del capítulo 2 no se repiten; cuando una obra de aquel capítul
 
 ### D. Enlaces — documentación oficial de las tecnologías
 
-*Autor corporativo, sin fecha de publicación fija. Admitidos por el módulo **solo para el marco conceptual** (§3.1), nunca como sustento teórico. Fecha de recuperación consignada: 14 de agosto de 2026.*
+*Autor corporativo, sin fecha de publicación fija. Se emplean **solo como sustento del marco conceptual** (§3.1), nunca como sustento teórico. Fecha de recuperación consignada: 14 de agosto de 2026.*
 
 | # | Referencia | Enlace |
 |---|---|---|
@@ -228,7 +229,7 @@ Las referencias del capítulo 2 no se repiten; cuando una obra de aquel capítul
 | E7 | Zod. (s. f.). *Zod documentation*. | https://zod.dev/ |
 | E8 | Chong, F., Carraro, G., & Wolter, R. (2006). *Multi-tenant data architecture*. Microsoft Corporation. [Original retirado; se cita la copia archivada] | https://web.archive.org/web/20170530080303/https://msdn.microsoft.com/en-us/library/aa479086.aspx |
 
-> **Nota sobre A11 (Krasner & Pope, 1988).** El *Journal of Object-Oriented Programming* dejó de publicarse y sus artículos nunca recibieron DOI, por lo que esta referencia **no puede comprobarse por identificador**. Es una obra fundacional ampliamente citada; su verificación exige consultar el artículo en una biblioteca universitaria. Si no se consigue el original, la alternativa es sustentar el mismo argumento con una obra ya verificada (L1 o L9) y retirar esta entrada.
+> **Nota sobre A8 (Krasner & Pope, 1988).** El *Journal of Object-Oriented Programming* dejó de publicarse y sus artículos nunca recibieron DOI. La obra está, no obstante, indexada en la ACM Digital Library con el identificador estable `10.5555/50757.50759`, que es la vía por la que se verifica esta entrada.
 
 > **Nota sobre E8 (Chong et al., 2006).** El artículo original de MSDN fue retirado por Microsoft. Se cita la copia archivada, comprobada y accesible. Por tratarse de documentación corporativa **no se emplea como sustento teórico**: la taxonomía de modelos de multi-tenancy se atribuye en §3.2.1 a Krebs et al. (2012), que es literatura revisada por pares.
 

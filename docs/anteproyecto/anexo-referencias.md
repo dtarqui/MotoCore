@@ -2,7 +2,7 @@
 
 Estado de comprobación de cada fuente citada en el anteproyecto. Una referencia con datos incorrectos compromete la trazabilidad de la información tanto como una inventada, de modo que cada identificador se contrastó contra el registro del editor.
 
-**Última comprobación**: 18 de agosto de 2026. En esa fecha se verificaron contra el **texto completo del editor** las entradas antes marcadas `Parcial` por metadatos, y se añadió a cada fuente un **enlace de acceso** localizado en los repositorios que fija el seminario: [Google Scholar](https://scholar.google.com/), [OATD](https://oatd.org/), [BASE](https://api.base-search.net/), Scopus / Web of Science, IEEE Xplore y ACM DL.
+**Última comprobación**: 18 de agosto de 2026. En esa fecha se verificaron contra el **texto completo del editor** las entradas antes marcadas `Parcial` por metadatos, y se añadió a cada fuente un **enlace de acceso** localizado en las bases consultadas: [Google Scholar](https://scholar.google.com/), [OATD](https://oatd.org/), [BASE](https://api.base-search.net/), Scopus / Web of Science, IEEE Xplore y ACM DL.
 
 ## Cómo se verificó cada tipo de fuente
 
@@ -31,31 +31,43 @@ Estado de comprobación de cada fuente citada en el anteproyecto. Una referencia
 | 2 | A3 | Andriianenko (2026) | OK — repositorio UTM accesible; ficha confirmada: Universidad Técnica de Moldavia, Facultad de Computadores, Informática y Microelectrónica; licencia CC BY-NC-ND 3.0 | `Parcial` — solo resumen | **PDF descargable (353 KB)**: [repository.utm.md/handle/5014/35481](https://repository.utm.md/handle/5014/35481) |
 | 2 | A4 | Simić, Dedeić, Stojkov & Prokić (2024) | OK — *IEEE Access*, 12, pp. 32597–32617 · cuatro autores confirmados por Crossref | `Parcial` — solo resumen | **Acceso abierto (CC BY 4.0)**: [ieeexplore.ieee.org/document/10443611](https://ieeexplore.ieee.org/document/10443611/) |
 | 2 | A5 | Olabanji, Fitch & Matthew (2023) | OK — *WSEAS Trans. on Computers*, 22, pp. 25–43 · tres autores confirmados por Crossref | `Parcial` — solo resumen | **PDF abierto del editor**: [wseas.com/journals/computers/2023/a105105-1421.pdf](https://wseas.com/journals/computers/2023/a105105-1421.pdf) |
-| 3 | A1 | Bezemer & Zaidman (2010) | OK — IWPSE-EVOL '10, pp. 88–92 · ACM | `Parcial` — solo resumen | **PDF del propio autor**: [azaidman.github.io/publications/bezemerIWPSE2010.pdf](https://azaidman.github.io/publications/bezemerIWPSE2010.pdf) |
-| 3 | A2 | Codd (1970) | OK — *CACM*, 13(6), pp. 377–387 | OK — obra canónica | [doi.org/10.1145/362384.362685](https://doi.org/10.1145/362384.362685) |
-| 3 | A3b | **Bangor, Kortum & Miller (2008)** | OK — *Int. J. Human–Computer Interaction*, 24(6), pp. 574–594 · Taylor & Francis | `Parcial` — se toma de él el umbral SUS = 68 | [doi.org/10.1080/10447310802205776](https://doi.org/10.1080/10447310802205776) |
-| 3 | A4 | Gao, Bird & Barr (2017) | OK — ICSE 2017, pp. 758–769 · IEEE/ACM | **OK — cifra del 15 % verificada en el texto completo** (ver §2) | **PDF abierto (Microsoft Research)**: [microsoft.com/…/gao2017javascript.pdf](https://www.microsoft.com/en-us/research/wp-content/uploads/2017/09/gao2017javascript.pdf) |
-| 3 | A5 | Gilbert & Lynch (2002) | OK — *ACM SIGACT News*, 33(2), pp. 51–59 | OK — obra canónica | [doi.org/10.1145/564585.564601](https://doi.org/10.1145/564585.564601) |
-| 3 | A6 | Haerder & Reuter (1983) | OK — *ACM Computing Surveys*, 15(4), pp. 287–317 | OK — obra canónica | [doi.org/10.1145/289.291](https://doi.org/10.1145/289.291) |
-| 3 | A7 | Krebs, Momm & Kounev (2012) | **OK — autoría confirmada en la portada del PDF del editor**: «Krebs R., Momm C. and Kounev S.»; CLOSER-2012, pp. 426–431; ISBN de actas 978-989-8565-05-1 | OK — portada y resumen leídos | **PDF abierto del editor**: [scitepress.org/papers/2012/39576/39576.pdf](https://www.scitepress.org/papers/2012/39576/39576.pdf) |
-| 3 | A8 | Larman & Basili (2003) | OK — *Computer*, 36(6), pp. 47–56 · IEEE | OK — obra canónica | [doi.org/10.1109/MC.2003.1204375](https://doi.org/10.1109/MC.2003.1204375) |
-| 3 | A9 | Saltzer & Schroeder (1975) | OK — *Proceedings of the IEEE*, 63(9), pp. 1278–1308 | OK — obra canónica | [doi.org/10.1109/PROC.1975.9939](https://doi.org/10.1109/PROC.1975.9939) |
-| 3 | A10 | Sandhu, Coyne, Feinstein & Youman (1996) | OK — *Computer*, 29(2), pp. 38–47 · IEEE | OK — obra canónica | [doi.org/10.1109/2.485845](https://doi.org/10.1109/2.485845) |
-| 3 | A10b | **Nielsen & Landauer (1993)** | OK — INTERACT '93 / CHI '93, pp. 206–213 · ACM | `Parcial` — se toma de él la curva de rendimientos decrecientes | [doi.org/10.1145/169059.169166](https://doi.org/10.1145/169059.169166) |
-| 3 | A10c | Simić et al. (2024) | Ver cap. 2, A4 | — | Ver cap. 2, A4 |
-| 3 | A11 | Krasner & Pope (1988) | **OK — resuelto**: sin DOI por ser revista descontinuada, pero **indexado en ACM DL** con identificador estable `10.5555/50757.50759`; *JOOP*, 1(3), pp. 26–49; autores de ParcPlace Systems | `Parcial` — copia escaneada localizada | **ACM DL**: [dl.acm.org/doi/10.5555/50757.50759](https://dl.acm.org/doi/10.5555/50757.50759) · **PDF escaneado (UC Irvine, 18 pp.)**: [ics.uci.edu/~redmiles/…/KrasnerPope88.pdf](https://www.ics.uci.edu/~redmiles/ics227-SQ04/papers/KrasnerPope88.pdf) |
+| 3 | A1 | **Bangor, Kortum & Miller (2008)** | OK — *Int. J. Human–Computer Interaction*, 24(6), pp. 574–594 · Taylor & Francis | `Parcial` — se toma de él el umbral SUS = 68 | [doi.org/10.1080/10447310802205776](https://doi.org/10.1080/10447310802205776) |
+| 3 | A2 | Bezemer & Zaidman (2010) | OK — IWPSE-EVOL '10, pp. 88–92 · ACM | `Parcial` — solo resumen | **PDF del propio autor**: [azaidman.github.io/publications/bezemerIWPSE2010.pdf](https://azaidman.github.io/publications/bezemerIWPSE2010.pdf) |
+| 3 | A3 | Codd (1970) | OK — *CACM*, 13(6), pp. 377–387 | OK — obra canónica | [doi.org/10.1145/362384.362685](https://doi.org/10.1145/362384.362685) |
+| 3 | A4 | Dar, Hershcovitch & Morrison (2023) | Ver capítulo 2, ref. A1 | Ver capítulo 2, ref. A1 | Ver capítulo 2, ref. A1 |
+| 3 | A5 | Gao, Bird & Barr (2017) | OK — ICSE 2017, pp. 758–769 · IEEE/ACM | **OK — cifra del 15 % verificada en el texto completo** (ver §2) | **PDF abierto (Microsoft Research)**: [microsoft.com/…/gao2017javascript.pdf](https://www.microsoft.com/en-us/research/wp-content/uploads/2017/09/gao2017javascript.pdf) |
+| 3 | A6 | Gilbert & Lynch (2002) | OK — *ACM SIGACT News*, 33(2), pp. 51–59 | OK — obra canónica | [doi.org/10.1145/564585.564601](https://doi.org/10.1145/564585.564601) |
+| 3 | A7 | Haerder & Reuter (1983) | OK — *ACM Computing Surveys*, 15(4), pp. 287–317 | OK — obra canónica | [doi.org/10.1145/289.291](https://doi.org/10.1145/289.291) |
+| 3 | A8 | Krasner & Pope (1988) | **OK — resuelto**: sin DOI por ser revista descontinuada, pero **indexado en ACM DL** con identificador estable `10.5555/50757.50759`; *JOOP*, 1(3), pp. 26–49; autores de ParcPlace Systems | `Parcial` — copia escaneada localizada | **ACM DL**: [dl.acm.org/doi/10.5555/50757.50759](https://dl.acm.org/doi/10.5555/50757.50759) · **PDF escaneado (UC Irvine, 18 pp.)**: [ics.uci.edu/~redmiles/…/KrasnerPope88.pdf](https://www.ics.uci.edu/~redmiles/ics227-SQ04/papers/KrasnerPope88.pdf) |
+| 3 | A9 | Krebs, Momm & Kounev (2012) | **OK — autoría confirmada en la portada del PDF del editor**: «Krebs R., Momm C. and Kounev S.»; CLOSER-2012, pp. 426–431; ISBN de actas 978-989-8565-05-1 | OK — portada y resumen leídos | **PDF abierto del editor**: [scitepress.org/papers/2012/39576/39576.pdf](https://www.scitepress.org/papers/2012/39576/39576.pdf) |
+| 3 | A10 | Larman & Basili (2003) | OK — *Computer*, 36(6), pp. 47–56 · IEEE | OK — obra canónica | [doi.org/10.1109/MC.2003.1204375](https://doi.org/10.1109/MC.2003.1204375) |
+| 3 | A11 | **Nielsen & Landauer (1993)** | OK — INTERACT '93 / CHI '93, pp. 206–213 · ACM | `Parcial` — se toma de él la curva de rendimientos decrecientes | [doi.org/10.1145/169059.169166](https://doi.org/10.1145/169059.169166) |
+| 3 | A12 | Saltzer & Schroeder (1975) | OK — *Proceedings of the IEEE*, 63(9), pp. 1278–1308 | OK — obra canónica | [doi.org/10.1109/PROC.1975.9939](https://doi.org/10.1109/PROC.1975.9939) |
+| 3 | A13 | Sandhu, Coyne, Feinstein & Youman (1996) | OK — *Computer*, 29(2), pp. 38–47 · IEEE | OK — obra canónica | [doi.org/10.1109/2.485845](https://doi.org/10.1109/2.485845) |
+| 3 | A14 | Simić et al. (2024) | Ver capítulo 2, ref. A4 | Ver capítulo 2, ref. A4 | Ver capítulo 2, ref. A4 |
 
 ### 1.2 Libros
 
-**Las tres discrepancias de metadatos quedaron resueltas el 18 de agosto de 2026 contrastando con la página del editor. En los tres casos el error estaba en el catálogo consultado, no en la cita del anteproyecto: las citas se mantienen sin cambio.**
+**Las dos discrepancias de metadatos detectadas quedaron resueltas contrastando con la página del editor. En ambos casos el error estaba en el catálogo consultado, no en la cita: las referencias se mantienen sin cambio.**
 
 | Ref. | Obra | Discrepancia que reportaba el catálogo | Resolución contra el editor |
 |---|---|---|---|
-| Cap. 2 L4 / Cap. 3 L6 | Newman (2021), *Building microservices*, 2.ª ed. | El catálogo fechaba ese ISBN en 2020 | **Confirmado 2021** — O'Reilly Media, 2.ª ed., publicada el 5 de octubre de 2021, ISBN 978-1-4920-3402-5. [Ficha del editor](https://www.oreilly.com/library/view/building-microservices-2nd/9781492034018/) |
-| Cap. 2 L7 | Sbarski, Cui & Nair (2022), *Serverless architectures on AWS*, 2.ª ed. | El catálogo fechaba 2019 y **omitía a Yan Cui** | **Confirmado 2022 y los tres autores** — Manning, 2.ª ed., marzo de 2022, ISBN 978-1-61729-542-3. [Ficha del editor](https://www.manning.com/books/serverless-architectures-on-aws-second-edition) |
+| Cap. 2 L3 / Cap. 3 L7 | Newman (2021), *Building microservices*, 2.ª ed. | El catálogo fechaba ese ISBN en 2020 | **Confirmado 2021** — O'Reilly Media, 2.ª ed., publicada el 5 de octubre de 2021, ISBN 978-1-4920-3402-5. [Ficha del editor](https://www.oreilly.com/library/view/building-microservices-2nd/9781492034018/) |
 | Cap. 3 L2 | Beck (2002), *Test-driven development: By example* | El catálogo devolvía una reimpresión de 2006 | **Confirmado 2002** — Addison-Wesley Professional, 1.ª ed., 8 de noviembre de 2002, ISBN 978-0-321-14653-3 |
 
-Sin discrepancias: Bass et al. (2021), Richards & Ford (2020), Evans (2003), Kleppmann (2017), Obe & Hsu (2017), Humble & Farley (2010), Forsgren et al. (2018), Cohn (2004), Nielsen (1993), Pierce (2002), Hernández-Sampieri & Mendoza (2018) y Hernández Sampieri et al. (2014).
+Los **once ISBN** que quedan en el anteproyecto —siete en el bloque A del capítulo 2 y cuatro propios del capítulo 3 (Beck, Brooke, Nielsen y Pierce)— resuelven correctamente contra el catálogo. Sin discrepancias: Bass et al. (2021), Richards & Ford (2020), Kleppmann (2017), Humble & Farley (2010), Forsgren et al. (2018), Nielsen (1993), Pierce (2002) y Hernández-Sampieri & Mendoza (2018).
+
+#### Obras evaluadas y no incorporadas
+
+APA 7 no admite referencias sin cita. Estas cinco obras se evaluaron para el bloque A del capítulo 2 y no se incorporaron. **Todas son obras publicadas y verificables**, de modo que la exclusión no obedece a falta de fiabilidad sino a **falta de pertinencia**: ninguna sostiene una afirmación del anteproyecto, y conservarlas habría sido engrosar la bibliografía sin uso —lo que la auditoría de pertinencia del §7.4 descarta expresamente—.
+
+| Obra | Por qué no se cita | Qué la sustituye |
+|---|---|---|
+| Evans, E. (2003). *Domain-driven design*. Addison-Wesley. | El marco teórico no desarrolla diseño guiado por el dominio, y ninguna decisión del proyecto se deriva de él. La expresión «lenguaje del dominio» del glosario es descriptiva, no una adopción de DDD | — (no había afirmación que sostener) |
+| Obe, R. O., & Hsu, L. S. (2017). *PostgreSQL: Up and running* (3.ª ed.). O'Reilly. | Manual de práctica; PostgreSQL y la seguridad a nivel de fila ya se sustentan en la documentación oficial del motor, que es la fuente normativa | PostgreSQL Global Development Group (s. f.-a y s. f.-b) |
+| Sbarski, P., Cui, Y., & Nair, A. (2022). *Serverless architectures on AWS* (2.ª ed.). Manning. | Libro de práctica y específico de AWS, mientras el proyecto despliega en otra plataforma; el fundamento de serverless lo aporta una fuente revisada por pares | Jonas et al. (2019) |
+| Cohn, M. (2004). *User stories applied*. Addison-Wesley. | **No sale del proyecto, cambia de lugar**: no sostiene nada en el anteproyecto, pero sí es la fuente del formato «Como… quiero… para…» y de los puntos de historia en Fibonacci que el proyecto emplea | Citado ahora en [ingenieria/03-historias-usuario.md](../ingenieria/03-historias-usuario.md), con su ISBN y su entrada en ACM DL (`10.5555/984017`) |
+| Hernández Sampieri, R., Fernández Collado, C., & Baptista Lucio, M. P. (2014). *Metodología de la investigación* (6.ª ed.). McGraw-Hill. | Edición **superada**: la clasificación metodológica que emplea el proyecto se toma de la edición posterior, ya citada. Mantener ambas ediciones de la misma obra duplicaría la referencia | Hernández-Sampieri & Mendoza (2018) |
 
 ### 1.3 Documentos normativos
 
@@ -70,7 +82,7 @@ Sin discrepancias: Bass et al. (2021), Richards & Ford (2020), Evans (2003), Kle
 
 ### 1.4 Documentación técnica con autor corporativo
 
-Incorporada al §7.1 del anteproyecto. Se admite **solo como sustento del marco conceptual**, nunca como sustento teórico. Todas requieren **fecha de recuperación** el día de la entrega.
+Incorporada al §7.1 del anteproyecto. Se emplea **solo como sustento del marco conceptual**, nunca como sustento teórico. Al carecer de fecha de publicación fija, todas llevan **fecha de recuperación**.
 
 | Fuente | Enlace | Estado |
 |---|---|---|
@@ -93,7 +105,7 @@ Lo que se verificó **dentro del texto**, no solo en sus metadatos.
 |---|---|---|
 | «Aproximadamente el **15 %** de los errores públicos de proyectos JavaScript habría sido detectado por un verificador de tipos estático como TypeScript» | Gao et al. (2017) | **Confirmada**. El resumen del artículo dice literalmente: *«our central finding is that both static type systems find an important percentage of public bugs: both Flow 0.30 and TypeScript 2.0 successfully detect 15%»*. La cifra mide el porcentaje de **errores públicos corregidos** que el verificador detecta, y aplica por igual a Flow y a TypeScript |
 | Autoría de Krebs et al. (2012), que Crossref no listaba | Krebs, Momm & Kounev (2012) | **Confirmada** en la portada del PDF del editor: «Krebs R., Momm C. and Kounev S.» |
-| Que Brooke (1996) es la fuente primaria de la escala SUS | Brooke (1996) | **Confirmada**. El documento original —John Brooke, Redhatch Consulting Ltd.— se abre con «*This chapter describes the System Usability Scale (SUS)*», lo que confirma que es el capítulo del libro y no una reimpresión posterior |
+| Que Brooke (1996) es la fuente primaria de la escala SUS | Brooke (1996) | **Confirmada**. El documento original —John Brooke, Redhatch Consulting Ltd.— se abre con «*This chapter describes the System Usability Scale (SUS)*», lo que confirma que es el capítulo del libro y no una reimpresión posterior. Se cita en el cuerpo como origen del instrumento (marco teórico §3.2.3, anteproyecto §7.2.3 y perfil §8), manteniendo a Bangor et al. (2008) como fuente del baremo y del umbral de 68 puntos |
 
 ---
 
@@ -171,11 +183,11 @@ Nottingham, M., Wilde, E., & Dalal, S. (2023). *Problem details for HTTP APIs* (
 
 Rose, S., Borchert, O., Mitchell, S., & Connelly, S. (2020). *Zero trust architecture* (NIST Special Publication 800-207). National Institute of Standards and Technology. https://doi.org/10.6028/NIST.SP.800-207
 
-World Wide Web Consortium. (2026). *Web application manifest* (W3C Working Draft, 13 de agosto de 2026). https://www.w3.org/TR/appmanifest/
+World Wide Web Consortium. (2026). *Web application manifest* (W3C Working Draft del 13 de agosto de 2026). https://www.w3.org/TR/appmanifest/
 
 ### Documentación técnica con autor corporativo
 
-*Requieren fecha de recuperación el día de la entrega (ver PENDIENTES §2.4).*
+*Al carecer de fecha de publicación fija, cada entrada lleva su fecha de recuperación.*
 
 Meta Open Source. (s. f.). *React documentation*. Recuperado el 14 de agosto de 2026, de https://react.dev/
 
@@ -201,6 +213,6 @@ Instituto Nacional de Estadística de Bolivia. (2026). *Estadísticas del parque
 
 ---
 
-## 4. Pendientes antes de la entrega final
+## 4. Alcance de esta verificación
 
-Se mantienen en el registro único: [PENDIENTES.md](../PENDIENTES.md) §2 (verificación de fuentes) y §3 (datos estadísticos por confirmar). Este anexo conserva el **estado por referencia**; aquel documento, la **lista de acciones** con su prioridad.
+Este anexo consigna el **estado por referencia**: qué se comprobó de cada fuente, con qué método y con qué resultado. Las entradas marcadas `Parcial` en la columna «Contenido» tienen sus datos bibliográficos confirmados contra el registro del editor y su afirmación tomada del resumen; las marcadas `OK` fueron contrastadas contra el texto completo. Esa distinción se declara aquí de forma explícita, en lugar de darse por supuesta.

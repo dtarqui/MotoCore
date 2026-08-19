@@ -142,7 +142,18 @@ El nivel de cada entidad determina el ámbito de sus claves únicas — es la co
 
 ## Políticas de aislamiento (RLS)
 
-Todas las tablas de negocio activan Row-Level Security. Las políticas se apoyan en dos funciones auxiliares que se ejecutan con privilegios definidos por el creador, para evitar recursión al consultar `memberships` desde una política:
+**Censo de tablas de negocio.** Son **siete**, y todas activan Row-Level Security: `workshops`, `memberships`, `workshop_assignments`, `clients`, `parts`, `part_movements` y `audit_log`. Es el conjunto sobre el que se mide la cobertura de políticas (RNF-101) y el que recorre la verificación por acceso directo ([Plan de pruebas](11-plan-pruebas.md) §5.2).
+
+Quedan **fuera del censo** las dos tablas que no son de negocio, cada una por un motivo distinto:
+
+| Tabla | Por qué no entra en el censo | Cómo se protege |
+|---|---|---|
+| `organizations` | **Es el tenant, no un dato del tenant.** No porta `organization_id`: lo define. Aplicarle el mismo patrón sería tautológico | Su lectura se limita a las organizaciones donde el solicitante tiene membresía activa (RF-202); la escritura, al `owner` (RF-204) |
+| `profiles` | **Es identidad, no negocio.** Un perfil pertenece a una cuenta, no a una organización, y la misma cuenta puede ser miembro de varias | Cada cuenta accede a su propio perfil; los datos de perfil de otros miembros se exponen solo a través del listado de miembros de la organización activa (RF-407) |
+
+Ninguna de las dos contiene datos de negocio de una organización, de modo que su exclusión no abre una vía de acceso cruzado: lo que un miembro puede saber de otra organización a través de ellas es, como mucho, lo que ya afirmó al declarar su contexto.
+
+Las políticas se apoyan en dos funciones auxiliares que se ejecutan con privilegios definidos por el creador, para evitar recursión al consultar `memberships` desde una política:
 
 | Función | Devuelve |
 |---|---|

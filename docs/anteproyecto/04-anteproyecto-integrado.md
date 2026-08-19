@@ -107,9 +107,9 @@ El modelo de despliegue serverless, con escalado a cero y sin costo fijo por org
 
 ## 5. Antecedentes
 
-**El parque de motocicletas y la demanda de servicio.** La motocicleta es el vehículo más numeroso de Bolivia. Según el Instituto Nacional de Estadística (INE), a partir de los registros del Registro Único para la Administración Tributaria Municipal (RUAT), en 2024 se contabilizaron **872.550 motocicletas** sobre un parque automotor total de **2.583.283 vehículos**, encabezando el parque nacional por delante de vagonetas, automóviles y camionetas. Su crecimiento es sostenido y superior al del parque en conjunto: pasó de **657.718 unidades en 2021** a **800.890 en 2023** y a **872.550 en 2024**, un incremento del **32,7 % en tres años**, frente al +16,0 % del parque automotor total en el mismo período. Cada una de esas unidades requiere mantenimiento periódico y reparaciones, lo que sostiene una red amplia de talleres de servicio distribuida por todo el territorio — una base de negocio que crece año a año y que, al hacerlo, empuja a los operadores más exitosos a abrir locales adicionales.
+**El parque de motocicletas y la demanda de servicio.** La motocicleta es el vehículo más numeroso de Bolivia. Según el Instituto Nacional de Estadística (INE), a partir de los registros del Registro Único para la Administración Tributaria Municipal (RUAT), en **2025** se contabilizaron **931.205 motocicletas**, el **34,8 %** del parque automotor nacional, encabezándolo por delante de vagonetas, automóviles y camionetas. Su crecimiento es sostenido y superior al del parque en conjunto: pasó de **657.718 unidades en 2021** a **872.550 en 2024** y a **931.205 en 2025**, un incremento del **41,6 % en cuatro años**, frente al +20,0 % del parque automotor total en el mismo período. Cada una de esas unidades requiere mantenimiento periódico y reparaciones, lo que sostiene una red amplia de talleres de servicio distribuida por todo el territorio — una base de negocio que crece año a año y que, al hacerlo, empuja a los operadores más exitosos a abrir locales adicionales.
 
-**Condiciones del sector que explican el problema.** Ese crecimiento ocurre, sin embargo, en una economía marcadamente informal: el INE reporta una **informalidad laboral del 84,2 % en 2024**, tendencia que se ha agravado de forma sostenida durante las últimas dos décadas. Para el rubro de talleres esto se traduce en unidades de negocio pequeñas, con presupuesto de tecnología muy limitado y baja adopción de software especializado, donde la gestión se apoya todavía en registros en papel u hojas de cálculo. En ese contexto, el operador que crece —el que abre un segundo o tercer taller, o constituye más de una organización— se encuentra sin herramientas que le permitan administrarlas de forma centralizada. Este es precisamente el escenario que el presente proyecto aborda.
+**Condiciones del sector que explican el problema.** Ese crecimiento ocurre, sin embargo, en una economía marcadamente informal: el indicador de **informalidad laboral del 84,2 % en 2024**, procedente de la Encuesta Continua de Empleo del INE, describe una tendencia agravada de forma sostenida durante las últimas dos décadas. Se emplea como caracterización cualitativa del sector y no interviene en ningún cálculo de este documento. Para el rubro de talleres esto se traduce en unidades de negocio pequeñas, con presupuesto de tecnología muy limitado y baja adopción de software especializado, donde la gestión se apoya todavía en registros en papel u hojas de cálculo. En ese contexto, el operador que crece —el que abre un segundo o tercer taller, o constituye más de una organización— se encuentra sin herramientas que le permitan administrarlas de forma centralizada. Este es precisamente el escenario que el presente proyecto aborda.
 
 **Fuentes de los antecedentes**
 
@@ -118,6 +118,7 @@ El modelo de despliegue serverless, con escalado a cero y sin costo fijo por org
 | INE — **Cuadro N.º 1.2**, *Bolivia: parque automotor por tipo de servicio y clase de vehículo, 2003–2025* (datos originados en el RUAT). Cuadro del que proceden todas las cifras | Primaria (oficial, descargable) |
 | INE — *Boletín estadístico parque automotor 2024* (28 de mayo de 2025) | Primaria (oficial) |
 | INE — *Estadísticas del parque automotor 2003–2025* (1 de julio de 2026) | Primaria (oficial) |
+| INE — *Encuesta Continua de Empleo* (indicador de informalidad laboral) | Secundaria — dato por remitir a su cuadro oficial |
 
 ---
 
@@ -166,7 +167,7 @@ El presente proyecto aborda esta deficiencia mediante el **diseño, implementaci
 
 ## 7. Marco teórico y conceptual
 
-El **marco conceptual** responde *«¿qué herramientas se usan?»*; el **marco teórico**, *«¿por qué se usan y cómo funcionan internamente?»*. Conforme a la instrucción de que este punto no sea extenso, se presenta condensado: diez definiciones en el conceptual y, en el teórico, el enunciado de cada teoría y la decisión de ingeniería que gobierna — su crítica se remite a §7.3 y su encadenamiento con el problema a §7.4, para no repetirlos. Las fichas analíticas por teoría se incorporan en la fase siguiente. Toda afirmación no propia lleva crédito a su autor en normas APA 7.ª edición, con autor corporativo cuando la fuente es documentación técnica sin autor humano.
+El **marco conceptual** responde *«¿qué herramientas se usan?»*; el **marco teórico**, *«¿por qué se usan y cómo funcionan internamente?»*. Se presenta en forma condensada: diez definiciones en el conceptual y, en el teórico, el enunciado de cada teoría y la decisión de ingeniería que gobierna — su crítica se remite a §7.3 y su encadenamiento con el problema a §7.4, para no repetirlos. El desarrollo extenso de cada bloque, con la discusión completa de sus limitaciones, está en el [capítulo 3](03-marco-teorico-y-conceptual.md). Toda afirmación no propia lleva crédito a su autor en normas APA 7.ª edición, con autor corporativo cuando la fuente es documentación técnica sin autor humano.
 
 ### 7.1 Marco conceptual — el «qué»
 
@@ -207,7 +208,7 @@ Definición formal de las tecnologías propias de esta solución; se excluyen lo
 
 **De las responsabilidades a los componentes.** Krasner y Pope (1988) formularon el paradigma Modelo-Vista-Controlador, cuyo aporte permanente es separar el estado del dominio, su presentación y la gestión de la interacción. Las interfaces web actuales conservan el principio pero cambian la unidad de descomposición: **componentes** que encapsulan estado y presentación con flujo de datos unidireccional (Meta Open Source, s. f.). Nielsen (1993) aporta el criterio de percepción —**0,1 s** para sentir una acción instantánea, **1 s** para no romper el flujo de pensamiento, **10 s** como límite de la atención—, que el proyecto declara como criterio de diseño y **no** como objetivo medido (§17.3); y la opción de aplicación web instalable frente a aplicaciones nativas se apoya en el manifiesto de aplicación web (W3C, 2026).
 
-**Evaluación de usabilidad con muestras pequeñas.** Nielsen y Landauer (1993) modelaron el hallazgo de problemas de usabilidad y mostraron que la detección sigue una **curva de rendimientos decrecientes**. La consecuencia debe enunciarse con precisión: una muestra pequeña es adecuada **para detectar problemas**, que es el objetivo aquí, e insuficiente **para estimar un parámetro poblacional**, que no se pretende (§16.5). La satisfacción se mide con la escala de usabilidad del sistema, cuyo baremo estableció Bangor et al. (2008) sobre casi tres mil aplicaciones del instrumento; de ahí el umbral de **68 puntos**.
+**Evaluación de usabilidad con muestras pequeñas.** Nielsen y Landauer (1993) modelaron el hallazgo de problemas de usabilidad y mostraron que la detección sigue una **curva de rendimientos decrecientes**. La consecuencia debe enunciarse con precisión: una muestra pequeña es adecuada **para detectar problemas**, que es el objetivo aquí, e insuficiente **para estimar un parámetro poblacional**, que no se pretende (§16.5). La satisfacción se mide con la escala de usabilidad del sistema, formulada por Brooke (1996) y cuyo baremo de interpretación estableció Bangor et al. (2008) sobre casi tres mil aplicaciones del instrumento; de ahí el umbral de **68 puntos**.
 
 #### 7.2.4 Modelos de seguridad — cómo se protege la información
 
@@ -262,8 +263,6 @@ Ninguna teoría se acepta como verdad absoluta. De cada una se consigna su limit
 | — | Verificar que la separación se cumple | Pruebas como especificación previa (Beck, 2002); integración continua (Humble & Farley, 2010; Forsgren et al., 2018) | Suite de aislamiento por dos vías y pipeline automatizado |
 
 **Auditoría de pertinencia.** La prueba aplicada a cada tema fue la misma —si explicarlo no ayuda a resolver el problema de §2, se excluye—, y por ella quedaron fuera la arquitectura de microservicios en profundidad (solo figura como alternativa descartada en §7.3), el aprendizaje automático, la cadena de bloques —la trazabilidad se resuelve con historial inmutable en una tabla de solo inserción—, la teoría de colas y el modelado de rendimiento —las pruebas de carga están excluidas del alcance (§17.3)—, la criptografía aplicada —la gestión de credenciales está delegada en el proveedor de identidad— y la interoperabilidad con la facturación electrónica del SIN.
-
-> **Ampliación prevista.** En la fase siguiente este punto incorporará las fichas analíticas por teoría, la discusión extendida de los compromisos entre alternativas de multi-tenancy y la formalización del criterio de reparto de entidades por nivel jerárquico.
 
 ---
 
@@ -339,7 +338,7 @@ La H0 se rechaza únicamente si **todas** las condiciones siguientes se cumplen 
 |---|---|---|
 | **Eficacia** | • Tasa de éxito por tarea (porcentaje %; umbral ≥ 80 %)<br>• Tareas completadas sin asistencia (cantidad sobre 3) | • Observación estructurada de tarea guiada<br>• Guion de tareas T1–T3 |
 | **Eficiencia** | • Tiempo por tarea (segundos)<br>• Errores por tarea (cantidad) | • Cronometraje de la sesión<br>• Registro de incidencias |
-| **Satisfacción** | • Puntuación SUS (escala 0 a 100; umbral ≥ 68, promedio de la industria) | • Cuestionario System Usability Scale (Bangor et al., 2008) |
+| **Satisfacción** | • Puntuación SUS (escala 0 a 100; umbral ≥ 68, promedio de la industria) | • Cuestionario System Usability Scale (Brooke, 1996), interpretado con el baremo de Bangor et al. (2008) |
 
 Los indicadores de eficiencia se reportan **sin umbral**: con una muestra dimensionada para detectar problemas no procede afirmar significancia estadística sobre tiempos ni sobre recuentos de error.
 
@@ -397,7 +396,7 @@ La validación del objetivo 4 incorpora un segundo componente, de naturaleza dis
 | Elemento | Definición |
 |---|---|
 | **Diseño** | Observacional, de un solo grupo y una sola medición. No hay grupo de control: no se compara contra otra interfaz, sino contra umbrales establecidos en la literatura |
-| **Tareas** | T1 cambiar de organización y confirmar los datos mostrados · T2 seleccionar taller y registrar en ella un repuesto · T3 localizar un cliente registrado en otro taller de la misma organización |
+| **Tareas** | T1 cambiar de organización y confirmar los datos mostrados · T2 seleccionar taller y registrar en él un repuesto · T3 localizar un cliente registrado en otro taller de la misma organización |
 | **Métricas** | Tasa de éxito por tarea (≥ 80 %), tiempo y errores por tarea (descriptivos), y puntuación SUS (≥ 68) |
 | **Por qué estas tres tareas** | Cada una ejercita una consecuencia distinta de la jerarquía: el nivel organización, el nivel taller y el beneficio de que el cliente pertenezca a la organización y no al local. No se evalúa la interfaz en general |
 
@@ -457,9 +456,9 @@ El proyecto trabaja con **tres poblaciones diferenciadas**, porque combina revis
 | Elemento | Definición |
 |---|---|
 | **Población** | Plataformas de software para la gestión de talleres de servicio vehicular con presencia, uso o comercialización en Bolivia |
-| **Muestra** | **11 plataformas** relevadas: 5 con presencia directa en Bolivia, 2 regionales de uso extendido en el país y 4 referentes internacionales tomados como estándar de funcionalidades |
+| **Muestra** | **10 plataformas** relevadas: 4 con presencia o uso directo en Bolivia, 2 regionales de uso extendido en el país y 4 referentes internacionales tomados como estándar de funcionalidades |
 | **Tipo de muestreo** | No probabilístico **intencional**, por accesibilidad de la información pública del producto |
-| **Criterio de inclusión** | Solo plataformas del **mismo objetivo** —gestión de la operación de talleres—; se excluye software administrativo o contable de propósito general |
+| **Criterio de inclusión** | Solo plataformas del **mismo objetivo** —gestión de la operación de talleres—; se excluye el software administrativo o contable de propósito general. Los comparadores y directorios de mercado se emplean como **fuente de relevamiento** y no se cuentan como plataformas ([Análisis del mercado](../ingenieria/09-analisis-mercado.md)) |
 
 ### 16.3 Población técnica: unidades de análisis *(objetivos 2, 3 y 4)*
 
@@ -547,6 +546,8 @@ Beck, K. (2002). *Test-driven development: By example*. Addison-Wesley Professio
 
 Bezemer, C.-P., & Zaidman, A. (2010). Multi-tenant SaaS applications: Maintenance dream or nightmare? En *Proceedings of the Joint ERCIM Workshop on Software Evolution and International Workshop on Principles of Software Evolution* (pp. 88–92). ACM. https://doi.org/10.1145/1862372.1862393
 
+Brooke, J. (1996). SUS: A quick and dirty usability scale. En P. W. Jordan, B. Thomas, B. A. Weerdmeester, & I. L. McClelland (Eds.), *Usability evaluation in industry* (pp. 189–194). Taylor & Francis.
+
 Codd, E. F. (1970). A relational model of data for large shared data banks. *Communications of the ACM, 13*(6), 377–387. https://doi.org/10.1145/362384.362685
 
 Dar, C., Hershcovitch, M., & Morrison, A. (2023). RLS side channels: Investigating leakage of row-level security protected data through query execution time. *Proceedings of the ACM on Management of Data, 1*(1), Artículo 89, 1–25. https://doi.org/10.1145/3588943
@@ -569,13 +570,13 @@ Instituto Nacional de Estadística de Bolivia. (2026). *Bolivia: parque automoto
 
 Jonas, E., Schleier-Smith, J., Sreekanti, V., Tsai, C.-C., Khandelwal, A., Pu, Q., Shankar, V., Carreira, J., Krauth, K., Yadwadkar, N., Gonzalez, J. E., Popa, R. A., Stoica, I., & Patterson, D. A. (2019). *Cloud programming simplified: A Berkeley view on serverless computing* (Informe técnico N.º UCB/EECS-2019-3). University of California, Berkeley. https://arxiv.org/abs/1902.03383
 
-Krebs, R., Momm, C., & Kounev, S. (2012). Architectural concerns in multi-tenant SaaS applications. En *Proceedings of the 2nd International Conference on Cloud Computing and Services Science* (pp. 426–431). SciTePress. https://doi.org/10.5220/0003957604260431
-
 Jones, M., Bradley, J., & Sakimura, N. (2015). *JSON Web Token (JWT)* (RFC 7519). Internet Engineering Task Force. https://doi.org/10.17487/RFC7519
 
 Kleppmann, M. (2017). *Designing data-intensive applications: The big ideas behind reliable, scalable, and maintainable systems*. O'Reilly Media.
 
 Krasner, G. E., & Pope, S. T. (1988). A cookbook for using the model-view-controller user interface paradigm in Smalltalk-80. *Journal of Object-Oriented Programming, 1*(3), 26–49.
+
+Krebs, R., Momm, C., & Kounev, S. (2012). Architectural concerns in multi-tenant SaaS applications. En *Proceedings of the 2nd International Conference on Cloud Computing and Services Science* (pp. 426–431). SciTePress. https://doi.org/10.5220/0003957604260431
 
 Larman, C., & Basili, V. R. (2003). Iterative and incremental developments: A brief history. *Computer, 36*(6), 47–56. https://doi.org/10.1109/MC.2003.1204375
 
@@ -613,6 +614,6 @@ Schwaber, K., & Sutherland, J. (2020). *The Scrum Guide: The definitive guide to
 
 Simić, M., Dedeić, J., Stojkov, M., & Prokić, I. (2024). A hierarchical namespace approach for multi-tenancy in distributed clouds. *IEEE Access, 12*, 32597–32617. https://doi.org/10.1109/ACCESS.2024.3369031
 
-World Wide Web Consortium. (2026). *Web application manifest* (W3C Working Draft). https://www.w3.org/TR/appmanifest/
+World Wide Web Consortium. (2026). *Web application manifest* (W3C Working Draft del 13 de agosto de 2026). https://www.w3.org/TR/appmanifest/
 
 Zod. (s. f.). *Zod documentation*. Recuperado el 14 de agosto de 2026, de https://zod.dev/

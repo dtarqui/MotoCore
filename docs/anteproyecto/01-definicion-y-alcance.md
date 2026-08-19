@@ -8,7 +8,7 @@
 
 **Formulación extendida del tema.** Diseño, implementación y validación de una arquitectura multi-tenant jerárquica (organización → talleres) sobre infraestructura serverless, con aislamiento de datos aplicado en el motor de base de datos mediante seguridad a nivel de fila, para la gestión centralizada de organizaciones de servicio de motocicletas en Bolivia.
 
-> El **título** es la forma canónica y se emplea en portada, índices y referencias a este proyecto; la formulación extendida solo desarrolla su contenido técnico. Si el título cambia, se actualiza en los cuatro lugares donde aparece: este apartado, el [Perfil de proyecto](00-perfil-proyecto.md), el [Anteproyecto integrado](04-anteproyecto-integrado.md) y el [índice de la documentación](../README.md).
+> El **título** es la forma canónica y se emplea en portada, índices y referencias a este proyecto; la formulación extendida solo desarrolla su contenido técnico.
 
 ## 1.2 El problema
 
@@ -48,7 +48,7 @@ El software de gestión de talleres relevado con presencia en Bolivia (AutoSoft 
 
 > **Diseñar, implementar y validar una arquitectura multi-tenant jerárquica (organización → talleres) sobre infraestructura serverless, que aplique el aislamiento de datos en el motor de base de datos mediante seguridad a nivel de fila, para permitir la gestión centralizada de varias organizaciones de servicio de motocicletas en Bolivia garantizando la separación verificable de sus datos.**
 
-> Las tecnologías concretas que materializan este objetivo —Node.js/TypeScript, Supabase (PostgreSQL) y despliegue en Vercel— se declaran en el **alcance técnico** (§1.8.2), no en el enunciado del objetivo: son medios sustituibles y atarlos aquí envejecería la formulación. Esta redacción es la única válida y se replica sin variación en el [Perfil](00-perfil-proyecto.md) §4.1 y en el [Anteproyecto integrado](04-anteproyecto-integrado.md) §8.
+> Las tecnologías concretas que materializan este objetivo —Node.js/TypeScript, Supabase (PostgreSQL) y despliegue en Vercel— se declaran en el **alcance técnico** (§1.8.2), no en el enunciado del objetivo: son medios sustituibles, y atarlos aquí envejecería la formulación.
 
 ## 1.7 Objetivos específicos
 

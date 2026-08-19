@@ -13,7 +13,6 @@ Del relevamiento se desprenden dos capacidades determinantes para el mercado bol
 | ServitechApp | https://servitechapp.com | Órdenes de trabajo, presupuestos, venta de productos, clientes |
 | TuneraTaller | https://programa-taller.com | Talleres de motos: órdenes, presupuestos, facturación, repuestos y stock |
 | AppTaller (Proyecto Nube) | https://proyectonube.com/software-taller-mecanico/ | Talleres mecánicos y servicios automotrices |
-| ComparaSoftware Bolivia | https://www.comparasoftware.com.bo/taller-mecanico | Comparador/directorio del mercado boliviano de software de taller |
 
 ### Regionales (LATAM) usados también en Bolivia
 | Plataforma | Dirección | Conocida por |
@@ -25,6 +24,15 @@ Del relevamiento se desprenden dos capacidades determinantes para el mercado bol
 No compiten en Bolivia, pero marcan el estándar de features (inspección digital, booking, portal del cliente): **Shopmonkey** (https://www.shopmonkey.io), **Tekmetric** (https://www.tekmetric.com), **AutoLeap** (https://www.autoleap.com) y **Blackpurl** (https://www.blackpurl.com, powersports).
 
 > **Criterio de la comparativa**: se relevan únicamente plataformas del **mismo objetivo** —gestión de talleres de servicio vehicular—. El software administrativo o contable de propósito general queda fuera, por no resolver la operación del taller.
+
+**Recuento**: **10 plataformas relevadas** — 4 con presencia o uso en Bolivia, 2 regionales de uso extendido en el país y 4 referentes internacionales tomados como estándar de funcionalidades.
+
+**Fuentes de relevamiento que no entran en el recuento.** Dos referencias sirvieron para localizar y contrastar la oferta, pero no son plataformas del mismo objetivo y por eso quedan fuera de la comparativa:
+
+| Fuente | Qué es | Para qué se usó |
+|---|---|---|
+| [ComparaSoftware Bolivia](https://www.comparasoftware.com.bo/taller-mecanico) | Comparador y directorio de software del mercado boliviano | Identificar qué productos se ofrecen activamente en Bolivia y con qué posicionamiento |
+| [Oficina Integrada](https://www.oficinaintegrada.com.br) (Brasil) | Plataforma de gestión de talleres sin comercialización en Bolivia | Evidenciar que el envío de la orden de servicio por WhatsApp es estándar en la región (§A) |
 
 ## Cobertura de la oferta existente
 

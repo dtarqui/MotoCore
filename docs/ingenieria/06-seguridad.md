@@ -48,7 +48,7 @@ El rol es **por organización**: la misma cuenta puede tener roles distintos en 
 - Registro de clientes y motocicletas.
 - Apertura y seguimiento inicial de órdenes; coordinación de ingreso y entrega.
 
-> Las tareas de `Mechanic` y `Receptionist` sobre **órdenes de trabajo y motocicletas** describen el producto completo; esos módulos están fuera del alcance del proyecto de grado (RF-801 y RF-802). En el corte vertical, ambos roles operan sobre **clientes e inventario** con las reglas de RF-505.
+> Las tareas de `Mechanic` y `Receptionist` sobre **órdenes de trabajo y motocicletas** describen el producto completo; esos módulos están fuera del alcance del proyecto de grado (RF-801 y RF-802). En el corte vertical, ambos roles operan sobre **clientes e inventario** con las reglas de RF-505 y RF-609.
 
 ### Reglas de protección del Owner
 - No se puede remover al Owner de su propia organización.
@@ -81,4 +81,4 @@ La segunda vía es la que demuestra que el aislamiento se sostiene aun cuando la
 
 ## Fuera del alcance
 
-Se identifican como líneas de refuerzo posterior: autenticación de doble factor, políticas formales de rotación de credenciales y auditoría extendida a la totalidad de las entidades de negocio. Esta última exclusión es la misma que registra el alcance del proyecto ([anteproyecto/01-definicion-y-alcance.md](../anteproyecto/01-definicion-y-alcance.md) §1.8.3): se audita el conjunto acotado de acciones críticas de RF-703, no toda operación del sistema.
+Se identifican como líneas de refuerzo posterior: autenticación de doble factor, políticas formales de rotación de credenciales y auditoría extendida a la totalidad de las entidades de negocio. Esta última exclusión es la misma que registra el alcance del proyecto ([anteproyecto/01-definicion-y-alcance.md](../anteproyecto/01-definicion-y-alcance.md) §1.8.3): se audita el conjunto acotado de seis acciones críticas que enumera RF-703, no toda operación del sistema.

@@ -14,9 +14,11 @@ Historias organizadas por épica, con criterios de aceptación verificables y tr
 
 Los roles se nombran en inglés en el sistema (ver [Glosario](01-glosario.md)); aquí se usa la traducción para legibilidad de la narrativa.
 
-## Estimación
+## Formato y estimación
 
-Escala de puntos de historia (Fibonacci): `1` trivial · `2` sencilla · `3` moderada · `5` compleja · `8` muy compleja, candidata a dividirse.
+Las historias siguen el formato **rol – objetivo – beneficio** («Como… quiero… para…») y se estiman en **puntos de historia** sobre una escala de Fibonacci, ambas prácticas tomadas de Cohn (2004): `1` trivial · `2` sencilla · `3` moderada · `5` compleja · `8` muy compleja, candidata a dividirse.
+
+> Cohn, M. (2004). *User stories applied: For agile software development*. Addison-Wesley Professional. ISBN 978-0-321-20568-1 · [ACM DL 10.5555/984017](https://dl.acm.org/doi/10.5555/984017)
 
 ---
 
@@ -99,12 +101,12 @@ Escala de puntos de historia (Fibonacci): `1` trivial · `2` sencilla · `3` mod
 **Criterios de aceptación**
 - Puedo crear un taller indicando nombre, dirección y teléfono.
 - El listado muestra solo los talleres de la organización activa.
-- Puedo desactivar un taller: deja de aparecer como activa, pero su información histórica se conserva.
+- Puedo desactivar un taller: deja de aparecer como activo, pero su información histórica se conserva.
 - Un usuario que no es `Owner` recibe error de permisos al intentar crear o desactivar.
 
 ### HU-07 · Cambiar de taller activo
 **Como** usuario que trabaja en una organización con varios locales
-**quiero** seleccionar el taller en la que estoy operando
+**quiero** seleccionar el taller en el que estoy operando
 **para** que las órdenes y el inventario correspondan al local correcto.
 
 *Requisitos*: RF-303 · *Puntos*: 3
@@ -112,7 +114,7 @@ Escala de puntos de historia (Fibonacci): `1` trivial · `2` sencilla · `3` mod
 **Criterios de aceptación**
 - Puedo seleccionar cualquier taller activo de la organización activa.
 - Si envío un taller que pertenece a otra organización, la operación se rechaza.
-- Las operaciones de nivel taller sin taller activo seleccionada se rechazan con un mensaje claro.
+- Las operaciones de nivel taller sin taller activo seleccionado se rechazan con un mensaje claro.
 
 ### HU-08 · Asignar miembros a talleres
 **Como** propietario
@@ -205,7 +207,7 @@ Escala de puntos de historia (Fibonacci): `1` trivial · `2` sencilla · `3` mod
 *Requisitos*: RF-502 · *Puntos*: 3
 
 **Criterios de aceptación**
-- Un cliente registrado con el taller A activa aparece al operar con el taller B de la misma organización.
+- Un cliente registrado con el taller A activo aparece al operar con el taller B de la misma organización.
 - Un cliente de otra organización **no** aparece en ningún caso.
 - Puedo buscar por nombre o email dentro de la organización activa.
 
@@ -230,17 +232,18 @@ Escala de puntos de historia (Fibonacci): `1` trivial · `2` sencilla · `3` mod
 **quiero** registrar un repuesto con su stock inicial
 **para** llevar el control de existencias de mi local.
 
-*Requisitos*: RF-601, RF-603 · *Puntos*: 3
+*Requisitos*: RF-601, RF-603, RF-609 · *Puntos*: 3
 
 **Criterios de aceptación**
 - El repuesto queda asociado al taller activo.
-- El número de parte no puede repetirse dentro de la mismo taller.
+- Un `Mechanic` que intenta registrar o editar un repuesto recibe error de permisos; consultarlo y registrar movimientos sí puede.
+- El número de parte no puede repetirse dentro del mismo taller.
 - El mismo número de parte sí puede existir en otro taller de la organización.
 - Si registro con stock inicial mayor a cero, se genera automáticamente un movimiento de entrada.
 
 ### HU-17 · Ver solo el inventario del taller activo
 **Como** mecánico
-**quiero** ver las existencias del taller que tengo seleccionada
+**quiero** ver las existencias del taller que tengo seleccionado
 **para** saber con qué cuento sin confundirme con otro taller.
 
 > El filtro lo determina el **taller activo** de la petición, no la asignación del miembro a talleres: esa asignación es operativa y no restringe lo que puede verse ([ADR-006](07-decisiones-diseno.md)).
@@ -279,13 +282,13 @@ Escala de puntos de historia (Fibonacci): `1` trivial · `2` sencilla · `3` mod
 
 ### HU-20 · Transferir stock entre talleres
 **Como** propietario
-**quiero** mover repuestos de un taller a otra
+**quiero** mover repuestos de un taller a otro
 **para** cubrir faltantes sin comprar de nuevo.
 
-*Requisitos*: RF-608 · *Puntos*: 5 · *Prioridad*: `Could`
+*Requisitos*: RF-608, RF-609 · *Puntos*: 5 · *Prioridad*: `Could`
 
 **Criterios de aceptación**
-- La transferencia descuenta en el taller de origen y suma en la de destino.
+- La transferencia descuenta en el taller de origen y suma en el de destino.
 - Ambos talleres deben pertenecer a la misma organización.
 - Si el origen no tiene existencia suficiente, la operación se rechaza completa (no queda a medias).
 
@@ -314,7 +317,7 @@ Escala de puntos de historia (Fibonacci): `1` trivial · `2` sencilla · `3` mod
 *Requisitos*: RF-703, RF-704 · *Puntos*: 3
 
 **Criterios de aceptación**
-- Quedan registradas con autor, acción y fecha las cinco acciones críticas que enumera RF-703: invitación de un miembro, cambio de rol, remoción de un miembro, desactivación de un taller y baja lógica de un cliente.
+- Quedan registradas con autor, acción y fecha las seis acciones críticas que enumera RF-703: invitación de un miembro, cambio de rol, remoción de un miembro, modificación de los datos de la organización, desactivación de un taller y baja lógica de un cliente.
 - El registro sobrevive a la eliminación de la entidad o del usuario referenciado.
 - Solo el `Owner` puede consultarlo: los demás roles reciben error de permisos, y la restricción se sostiene también por acceso directo a la base de datos (RF-704).
 

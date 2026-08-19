@@ -92,6 +92,8 @@ Ningún listado devuelve registros fuera del contexto activo, con independencia 
 
 Las transiciones de estado no se modelan como edición de un campo: la baja lógica de un taller o de un cliente es una acción con consecuencias de auditoría (RF-703), y el contrato la distingue de un `PATCH` ordinario.
 
+**Excepción declarada: la revocación de un vínculo.** La remoción de un miembro y el retiro de una asignación a taller son también acciones auditadas y reversibles —reincorporar a alguien reactiva su membresía en lugar de duplicarla (§3.4)—, pero se exponen como `DELETE` y no como `POST /…/deactivate`. El motivo es que lo que se revoca no es el estado de un recurso propio, sino **la relación** entre una cuenta y una organización: `DELETE` sobre la membresía expresa esa semántica con exactitud, y la baja lógica es un detalle de cómo se conserva el historial, no lo que la operación significa. La regla general rige para las entidades; la excepción, para los vínculos.
+
 | Estado | Significado en esta interfaz |
 |---|---|
 | `400` | Entrada inválida (RNF-205) o falta una cabecera de contexto obligatoria |
@@ -99,6 +101,7 @@ Las transiciones de estado no se modelan como edición de un campo: la baja lóg
 | `403` | Credencial válida, pero sin membresía o sin rol suficiente |
 | `404` | El recurso no existe **o no pertenece al contexto activo** (RNF-105) |
 | `409` | La operación contradice una regla de negocio sobre el estado actual (duplicados, existencia insuficiente) |
+| `500` | La operación falló por causa del servidor y **no dejó nada aplicado** — el caso previsto es el registro atómico interrumpido (§4) |
 
 ### 2.7 Formato de error
 
@@ -128,7 +131,7 @@ El registro es atómico: si cualquiera de los cuatro pasos falla, no queda ningu
 | `GET` | `/api/organizations` | — | *(cuenta autenticada)* | RF-202 | Organizaciones de la cuenta **según membresía activa**, no según quién las creó |
 | `POST` | `/api/organizations` | — | *(cuenta autenticada)* | RF-201 | Crea una organización; el solicitante queda como `owner` |
 | `GET` | `/api/organizations/{orgId}` | — | Miembro | RF-202 | Datos de la organización |
-| `PATCH` | `/api/organizations/{orgId}` | — | Owner | RF-204 | Modifica los datos de la organización |
+| `PATCH` | `/api/organizations/{orgId}` | — | Owner | RF-204 | Modifica los datos de la organización. **Acción auditada** (RF-703) |
 | `POST` | `/api/organizations/{orgId}/switch` | — | Miembro | RF-203 | Confirma la organización como activa y devuelve el rol del solicitante en ella |
 
 `switch` no cambia estado en el servidor —no hay sesión que actualizar (§1)—: **valida** que la cuenta pueda operar sobre esa organización y devuelve el rol, para que el cliente guarde el contexto y lo envíe en las llamadas siguientes.
@@ -141,7 +144,7 @@ El registro es atómico: si cualquiera de los cuatro pasos falla, no queda ningu
 | `POST` | `/api/workshops` | Org | Owner | RF-301 | Crea un taller |
 | `GET` | `/api/workshops/{workshopId}` | Org | Miembro | RF-302 | Datos del taller |
 | `PATCH` | `/api/workshops/{workshopId}` | Org | Owner | RF-301 | Modifica los datos del taller |
-| `POST` | `/api/workshops/{workshopId}/deactivate` | Org | Owner | RF-305 | Baja lógica: deja de listarse como activa, su historial se conserva. **Acción auditada** (RF-703) |
+| `POST` | `/api/workshops/{workshopId}/deactivate` | Org | Owner | RF-305 | Baja lógica: deja de listarse como activo, su historial se conserva. **Acción auditada** (RF-703) |
 | `GET` | `/api/workshops/{workshopId}/assignments` | Org | Miembro | RF-304 | Miembros asignados al taller |
 | `POST` | `/api/workshops/{workshopId}/assignments` | Org | Owner | RF-304 | Asigna un miembro al taller |
 | `DELETE` | `/api/workshops/{workshopId}/assignments/{userId}` | Org | Owner | RF-304 | Retira la asignación, sin afectar la membresía |
@@ -182,12 +185,12 @@ Que estas operaciones **no** exijan `X-Workshop-Id` es deliberado y es lo que de
 | Método | Ruta | Contexto | Rol | Requisito | Resultado |
 |---|---|---|---|---|---|
 | `GET` | `/api/inventory/parts` | Org+Tal | Miembro | RF-602, RF-607 | Repuestos **del taller activo**; con `lowStock`, solo los que están en o bajo el mínimo |
-| `POST` | `/api/inventory/parts` | Org+Tal | Owner, Receptionist | RF-601, RF-603 | Registra un repuesto en el taller activo |
+| `POST` | `/api/inventory/parts` | Org+Tal | Owner, Receptionist | RF-601, RF-603, RF-609 | Registra un repuesto en el taller activo |
 | `GET` | `/api/inventory/parts/{partId}` | Org+Tal | Miembro | RF-602 | Datos del repuesto |
-| `PATCH` | `/api/inventory/parts/{partId}` | Org+Tal | Owner, Receptionist | RF-601 | Modifica el catálogo del repuesto, **nunca su existencia** |
+| `PATCH` | `/api/inventory/parts/{partId}` | Org+Tal | Owner, Receptionist | RF-601, RF-609 | Modifica el catálogo del repuesto, **nunca su existencia** |
 | `GET` | `/api/inventory/parts/{partId}/movements` | Org+Tal | Miembro | RF-604 | Historial de movimientos del repuesto |
 | `POST` | `/api/inventory/parts/{partId}/movements` | Org+Tal | Miembro | RF-604, RF-605, RF-606 | Registra un movimiento y recalcula la existencia, **en una sola transacción** (ADR-007) |
-| `POST` | `/api/inventory/parts/{partId}/transfer` | Org+Tal | Owner | RF-608 | Transfiere existencias a otro taller de la misma organización |
+| `POST` | `/api/inventory/parts/{partId}/transfer` | Org+Tal | Owner | RF-608, RF-609 | Transfiere existencias a otro taller de la misma organización |
 
 Reglas que el contrato debe hacer cumplir:
 
@@ -220,7 +223,7 @@ Los códigos son parte estable del contrato. Un código nuevo se agrega; uno exi
 | `auth.missing_token` | `401` | Falta la credencial |
 | `auth.invalid_token` | `401` | Credencial inválida o expirada |
 | `auth.email_already_registered` | `409` | El correo ya tiene cuenta (RF-101) |
-| `auth.registration_failed` | `409` | El registro no pudo completarse entero; no queda nada aplicado |
+| `auth.registration_failed` | `500` | El registro no pudo completarse entero; no queda nada aplicado. No es `409`: no contradice ninguna regla de negocio sobre el estado actual, sino que la operación falló del lado del servidor |
 | `organization.missing_active_org` | `400` | Falta `X-Org-Id` |
 | `organization.access_denied` | `403` | Sin membresía activa en la organización indicada |
 | `organization.insufficient_permissions` | `403` | El rol no habilita la operación sobre la organización |
@@ -243,8 +246,8 @@ Los códigos son parte estable del contrato. Un código nuevo se agrega; uno exi
 | `inventory.invalid_quantity` | `400` | Cantidad ausente, nula o negativa |
 | `inventory.insufficient_stock` | `409` | El movimiento dejaría la existencia en negativo (RF-606) |
 | `inventory.cross_organization_transfer` | `403` | Destino de transferencia fuera de la organización (RF-608) |
-| `inventory.same_workshop_transfer` | `400` | Origen y destino son la mismo taller |
-| `inventory.insufficient_permissions` | `403` | El rol no permite administrar el catálogo ni transferir |
+| `inventory.same_workshop_transfer` | `400` | Origen y destino son el mismo taller |
+| `inventory.insufficient_permissions` | `403` | El rol no permite administrar el catálogo ni transferir (RF-609) |
 | `audit.insufficient_permissions` | `403` | Solo el `Owner` consulta la auditoría (RF-704) |
 | `validation.invalid_body` | `400` | La entrada no satisface el esquema; el detalle acompaña por campo (RNF-205) |
 

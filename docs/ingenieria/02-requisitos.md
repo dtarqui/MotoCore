@@ -61,7 +61,7 @@ Requisitos funcionales (RF) y no funcionales (RNF) del proyecto. Cada requisito 
 | ID | Requisito | Prioridad | Alcance | Nivel | Verificación |
 |---|---|---|---|---|---|
 | RF-501 | El sistema permite registrar clientes en la organización activa. | Must | Sí | Organización | El cliente creado se recupera por identificador. |
-| RF-502 | Los clientes son visibles desde **cualquier taller** de la organización. | Must | Sí | Organización | Un cliente creado con el taller A activa se lista con el taller B activa. |
+| RF-502 | Los clientes son visibles desde **cualquier taller** de la organización. | Must | Sí | Organización | Un cliente creado con el taller A activo se lista con el taller B activo. |
 | RF-503 | El email del cliente es único dentro de la organización, y no colisiona entre organizaciones distintas. | Must | Sí | Organización | Email duplicado en la misma organización falla; el mismo email en otra organización se acepta. |
 | RF-504 | El sistema permite editar, buscar y dar de baja lógica a un cliente. | Must | Sí | Organización | La baja conserva el registro y lo excluye de los listados activos. |
 | RF-505 | `Owner` y `Receptionist` pueden crear y editar clientes; `Mechanic` solo consultarlos. | Should | Sí | Organización | Un `Mechanic` que intenta crear recibe `403`. |
@@ -71,13 +71,14 @@ Requisitos funcionales (RF) y no funcionales (RNF) del proyecto. Cada requisito 
 | ID | Requisito | Prioridad | Alcance | Nivel | Verificación |
 |---|---|---|---|---|---|
 | RF-601 | El sistema permite registrar repuestos en el taller activo. | Must | Sí | Taller | El repuesto queda asociado al taller donde se creó. |
-| RF-602 | El inventario de un taller **no** se mezcla con el de otra de la misma organización. | Must | Sí | Taller | Un repuesto creado en el taller A no aparece al operar con el taller B. |
+| RF-602 | El inventario de un taller **no** se mezcla con el de otro de la misma organización. | Must | Sí | Taller | Un repuesto creado en el taller A no aparece al operar con el taller B. |
 | RF-603 | El número de parte es único **por taller**. | Must | Sí | Taller | El mismo número de parte se acepta en dos talleres distintos. |
 | RF-604 | El sistema registra movimientos de stock como historial inmutable. Los tipos registrables por el usuario son compra, venta, ajuste, devolución y merma; el tipo *transferencia* no se registra de forma directa, lo genera RF-608. | Must | Sí | Taller | Cada movimiento deja registro con existencia anterior y posterior. La parte `Must` de este requisito se verifica con los cinco tipos directos, de modo que no depende de RF-608 (`Could`). |
 | RF-605 | El sistema recalcula la existencia según el tipo de movimiento: el ajuste fija un valor absoluto, el resto suma o resta. | Must | Sí | Taller | Pruebas por cada tipo de movimiento. |
 | RF-606 | El sistema rechaza un movimiento que dejaría la existencia en negativo. | Must | Sí | Taller | La operación devuelve error de negocio y no altera el stock. |
 | RF-607 | El sistema señala los repuestos cuya existencia está en o por debajo del mínimo. | Should | Sí | Taller | El listado de bajo stock devuelve solo los que cumplen la condición. |
 | RF-608 | El sistema permite transferir existencias entre talleres de la misma organización. | Could | Sí | Taller | La transferencia descuenta en origen y suma en destino de forma consistente. |
+| RF-609 | `Owner` y `Receptionist` pueden crear y editar el catálogo de repuestos; la transferencia entre talleres queda reservada al `Owner`. Cualquier miembro puede consultar el inventario y registrar movimientos. | Should | Sí | Taller | Un `Mechanic` que intenta crear o editar un repuesto recibe `403`; consultar y registrar movimientos sí puede. |
 
 ### RF-700 · Aislamiento y auditoría
 
@@ -85,7 +86,7 @@ Requisitos funcionales (RF) y no funcionales (RNF) del proyecto. Cada requisito 
 |---|---|---|---|---|
 | RF-701 | Una cuenta sin membresía activa en una organización no puede leer ni escribir ninguno de sus datos. | Must | Sí | Prueba de aislamiento vía API: `403 organization.access_denied` cuando se declara el contexto ajeno y `404` del módulo cuando se referencia un recurso ajeno desde el contexto propio (§5 del [Contrato](10-contrato-api.md)). |
 | RF-702 | El aislamiento se cumple **también** cuando se accede a la base de datos sin pasar por la API. | Must | Sí | Prueba con cliente de base de datos autenticado como otro usuario: las consultas no devuelven filas ajenas. |
-| RF-703 | El sistema registra las acciones críticas con autor, acción y fecha. Son acciones críticas: la invitación de un miembro, el cambio de rol, la remoción de un miembro, la desactivación de un taller (RF-305) y la baja lógica de un cliente (RF-504). | Should | Sí | El registro persiste aunque se elimine la entidad referenciada. Existe una prueba por cada una de las cinco acciones. |
+| RF-703 | El sistema registra las acciones críticas con autor, acción y fecha. Son acciones críticas: la invitación de un miembro, el cambio de rol, la remoción de un miembro, la modificación de los datos de la organización (RF-204), la desactivación de un taller (RF-305) y la baja lógica de un cliente (RF-504). | Should | Sí | El registro persiste aunque se elimine la entidad referenciada. Existe una prueba por cada una de las seis acciones. |
 | RF-704 | La consulta del registro de auditoría está reservada al `Owner` de la organización. | Should | Sí | Un `Mechanic` o `Receptionist` que intenta consultarlo recibe `403`; la restricción se aplica también por acceso directo a la base de datos. |
 
 ### RF-800 · Fuera del alcance del proyecto de grado
@@ -117,7 +118,7 @@ RNF-404 es `Should` de forma deliberada: la hipótesis del proyecto es sobre el 
 
 | ID | Requisito | Criterio de aceptación | Alcance |
 |---|---|---|---|
-| RNF-101 | El aislamiento entre organizaciones se aplica en el motor de base de datos, no solo en la aplicación. | Existen políticas de Row-Level Security activas en todas las tablas de negocio; una consulta directa a la base de datos con la identidad de otro usuario no devuelve filas ajenas. | Sí |
+| RNF-101 | El aislamiento entre organizaciones se aplica en el motor de base de datos, no solo en la aplicación. | Existen políticas de Row-Level Security activas en las **siete tablas de negocio** censadas en el [Modelo de datos](05-modelo-datos.md); una consulta directa a la base de datos con la identidad de otro usuario no devuelve filas ajenas en ninguna de ellas. | Sí |
 | RNF-102 | El aislamiento se aplica en dos capas independientes (defensa en profundidad). | Deshabilitar la verificación de la capa de aplicación no produce fuga de datos: RLS lo impide. Se comprueba con una prueba dedicada. | Sí |
 | RNF-103 | Las credenciales privilegiadas no se exponen al cliente ni al repositorio. | Búsqueda en el repositorio sin resultados de claves; la clave de servicio solo se lee de variables de entorno del servidor. | Sí |
 | RNF-104 | La contraseña nunca se almacena ni se transmite en texto plano. | La gestión de credenciales está delegada en el proveedor de identidad; el sistema nunca recibe ni persiste contraseñas. | Sí |
@@ -151,7 +152,7 @@ RNF-404 es `Should` de forma deliberada: la hipótesis del proyecto es sobre el 
 | RNF-401 | El cambio de organización y de taller está disponible de forma explícita, sin cerrar sesión. | El usuario cambia de contexto y los datos mostrados corresponden al nuevo contexto. | Sí |
 | RNF-402 | La interfaz es utilizable en navegador de escritorio y móvil. | Diseño responsivo verificado en ambos anchos. | Sí |
 | RNF-403 | La aplicación es instalable como PWA. | El manifiesto permite la instalación desde el navegador. | Sí |
-| RNF-404 | El cambio de contexto entre organizaciones y talleres resulta operable por un usuario del rubro sin formación previa. | Evaluación con operadores mediante tareas guiadas: **tasa de éxito ≥ 80 %** por tarea y **puntuación SUS ≥ 68**, el promedio de la industria según Bangor et al. (2008). | Sí |
+| RNF-404 | El cambio de contexto entre organizaciones y talleres resulta operable por un usuario del rubro sin formación previa. | Evaluación con operadores mediante tareas guiadas: **tasa de éxito ≥ 80 %** por tarea y **puntuación SUS ≥ 68** en la escala de Brooke (1996), umbral que corresponde al promedio de la industria según el baremo de Bangor et al. (2008). | Sí |
 
 ### RNF-500 · Rendimiento *(fuera de alcance como objetivo medible)*
 
@@ -167,7 +168,7 @@ RNF-404 es `Should` de forma deliberada: la hipótesis del proyecto es sobre el 
 |---|---|---|
 | 1 | **Analizar** las estrategias de aislamiento y la oferta boliviana | — (fundamenta RNF-101 y RNF-102, el alcance funcional y los RF-800) |
 | 2 | **Diseñar** el modelo jerárquico y **especificar** las políticas de aislamiento | RF-301, RF-302, RF-303, RF-502, RF-602, RF-603, RF-701, RF-702, RNF-101, RNF-105, RNF-106, RNF-206, RNF-304 |
-| 3 | **Implementar** la arquitectura y **automatizar** su verificación | RF-101 a RF-104, RF-201 a RF-204, RF-304, RF-305, RF-401 a RF-407, RF-501 a RF-505, RF-601 a RF-608, RF-703, RF-704, RNF-103, RNF-104, RNF-201 a RNF-205, RNF-301 a RNF-303, RNF-401 a RNF-403 |
+| 3 | **Implementar** la arquitectura y **automatizar** su verificación | RF-101 a RF-104, RF-201 a RF-204, RF-304, RF-305, RF-401 a RF-407, RF-501 a RF-505, RF-601 a RF-609, RF-703, RF-704, RNF-103, RNF-104, RNF-201 a RNF-205, RNF-301 a RNF-303, RNF-401 a RNF-403 |
 | 4 | **Validar** el aislamiento con evidencia reproducible y **evaluar** la usabilidad del cambio de contexto | RF-701, RF-702, RNF-102, RNF-404 |
 
 Todo requisito con alcance `Sí` aparece al menos en una fila de esta tabla. Cinco aparecen en dos, porque un objetivo los **especifica** y otro los **materializa**: RF-502, RF-602 y RF-603 se diseñan en el objetivo 2 —son las reglas de alcance por nivel— y se implementan en el 3; RF-701 y RF-702 se especifican en el objetivo 2 y se validan en el 4. RNF-501 no aparece por estar fuera de alcance.
