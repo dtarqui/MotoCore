@@ -4,6 +4,7 @@ import { handleError } from './lib/errors.js';
 import { authRoutes } from './modules/auth.js';
 import { organizationRoutes } from './modules/organizations.js';
 import { workshopRoutes } from './modules/workshops.js';
+import { memberRoutes } from './modules/members.js';
 import { clientRoutes } from './modules/clients.js';
 import { inventoryRoutes } from './modules/inventory.js';
 import { auditRoutes } from './modules/audit.js';
@@ -28,15 +29,20 @@ export function createApp() {
   app.get('/health', (c) => c.json({ status: 'ok' }));
 
   app.route('/api/auth', authRoutes);
-  // Las sucursales se montan antes que la empresa para que su ruta anidada no
-  // quede capturada por los handlers de /:orgId de organizationRoutes.
-  app.route('/api/organizations/:orgId/workshops', workshopRoutes);
+
+  // Regla de rutas del §2.3 del contrato: el identificador de la organizacion
+  // aparece en la ruta SOLO cuando el recurso es la organizacion misma. Todo lo
+  // interior a ella —talleres, miembros, clientes, inventario, auditoria— se
+  // resuelve por la cabecera X-Org-Id, de modo que exista un unico mecanismo de
+  // contexto y un unico punto donde validarlo (ADR-005).
   app.route('/api/organizations', organizationRoutes);
-  // Modulos de negocio: la empresa activa viaja en X-Org-Id, no en la ruta.
+
+  app.route('/api/workshops', workshopRoutes);
+  app.route('/api/members', memberRoutes);
   app.route('/api/clients', clientRoutes);
-  // Inventario exige ademas la sucursal activa (X-Workshop-Id).
+  // Inventario exige ademas el taller activo (X-Workshop-Id).
   app.route('/api/inventory', inventoryRoutes);
-  // Auditoria: nivel empresa, reservada al Owner (RF-704).
+  // Auditoria: nivel organizacion, reservada al Owner (RF-704).
   app.route('/api/audit', auditRoutes);
 
   return app;

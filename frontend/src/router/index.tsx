@@ -3,7 +3,7 @@ import { AppShell } from '../app/layouts/AppShell'
 import { DashboardPage } from '../modules/dashboard/pages/DashboardPage'
 import { ClientesPage } from '../modules/clientes/pages/ClientesPage'
 import { InventarioPage } from '../modules/inventario/pages/InventarioPage'
-import { SucursalesPage } from '../modules/organizaciones/pages/SucursalesPage'
+import { TalleresPage } from '../modules/organizaciones/pages/TalleresPage'
 import { EquipoPage } from '../modules/organizaciones/pages/EquipoPage'
 import { AuditoriaPage } from '../modules/auditoria/pages/AuditoriaPage'
 import { LoginPage } from '../modules/auth/pages/LoginPage'
@@ -59,10 +59,10 @@ export const appRouter = createBrowserRouter([
             ),
           },
           {
-            path: 'sucursales',
+            path: 'talleres',
             element: (
               <RoleRoute allowedRoles={['owner', 'mechanic', 'receptionist']}>
-                <SucursalesPage />
+                <TalleresPage />
               </RoleRoute>
             ),
           },

@@ -4,7 +4,7 @@ import type { MeResponse, RegisterRequest } from './types'
 
 /**
  * El registro es la única operación de identidad que pasa por nuestra API: crea
- * la cuenta y, en el mismo acto, la primera empresa, su primera sucursal y la
+ * la cuenta y, en el mismo acto, la primera organización, su primera taller y la
  * membresía propietaria (RF-101). El resto —inicio de sesión, renovación,
  * recuperación de contraseña— lo hace el cliente contra Supabase Auth.
  */
@@ -31,7 +31,7 @@ export async function registerRequest(payload: RegisterRequest) {
   }
 }
 
-/** Perfil y empresas de la cuenta autenticada, con su rol en cada una (RF-104). */
+/** Perfil y organizaciones de la cuenta autenticada, con su rol en cada una (RF-104). */
 export function fetchMe() {
   return apiRequest<MeResponse>('/api/auth/me')
 }

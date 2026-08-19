@@ -12,8 +12,8 @@ import type { Client, ClientUpsertPayload } from '../types'
 const EMPTY: ClientUpsertPayload = { firstName: '', lastName: '', email: '', phone: '', documentId: '', address: '', notes: '' }
 
 /**
- * Clientes — nivel empresa. Se listan según la empresa activa, sin importar la
- * sucursal seleccionada: es la demostración visible de RF-502.
+ * Clientes — nivel organización. Se listan según la organización activa, sin importar la
+ * taller seleccionado: es la demostración visible de RF-502.
  */
 export function ClientesPage() {
   const { hasAnyRole } = useAuth()
@@ -70,7 +70,7 @@ export function ClientesPage() {
     <div className="space-y-6">
       <PageHeader
         title="Clientes"
-        description="Los clientes pertenecen a la empresa y se atienden desde cualquiera de sus sucursales."
+        description="Los clientes pertenecen a la organización y se atienden desde cualquiera de sus talleres."
       />
 
       {error ? <Alert variant="destructive">{error}</Alert> : null}
@@ -109,7 +109,7 @@ export function ClientesPage() {
           />
           <Input
             type="email"
-            placeholder="Email (único dentro de la empresa)"
+            placeholder="Email (único dentro de la organización)"
             value={form.email}
             onChange={(e) => setForm({ ...form, email: e.target.value })}
           />
@@ -154,7 +154,7 @@ export function ClientesPage() {
       {clientsQuery.isLoading ? (
         <p className="text-sm text-slate-500">Cargando clientes…</p>
       ) : clients.length === 0 ? (
-        <p className="text-sm text-slate-500">No hay clientes registrados en esta empresa.</p>
+        <p className="text-sm text-slate-500">No hay clientes registrados en esta organización.</p>
       ) : (
         <ul className="divide-y divide-slate-200 rounded-lg border border-slate-200">
           {clients.map((client) => (

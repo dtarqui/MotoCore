@@ -1,6 +1,13 @@
 import { describe, it, expect } from 'vitest';
 import { createApp } from '../src/app.js';
-import { createPartSchema, movementSchema, transferSchema, createClientSchema } from '../src/schemas.js';
+import {
+  createPartSchema,
+  movementSchema,
+  transferSchema,
+  createClientSchema,
+  DIRECT_MOVEMENT_TYPES,
+  MOVEMENT_TYPES,
+} from '../src/schemas.js';
 
 const UUID = '00000000-0000-0000-0000-000000000000';
 
@@ -28,12 +35,12 @@ describe('modulos de negocio: contexto activo obligatorio', () => {
       headers: { 'X-Org-Id': UUID, 'X-Workshop-Id': UUID },
     });
     expect(res.status).toBe(401);
-    expect(((await res.json()) as { title: string }).title).toBe('auth.unauthorized');
+    expect(((await res.json()) as { title: string }).title).toBe('auth.missing_token');
   });
 
-  it('la sucursal activa se exige aunque venga la empresa activa', async () => {
+  it('el taller activo se exige aunque venga la organizacion activa', async () => {
     const res = await app.request('/api/inventory/parts', { headers: { 'X-Org-Id': UUID } });
-    // Sigue siendo 401 por falta de token; comprobar que no se cuela a 200.
+    // Sigue siendo 401 por falta de credencial; comprobar que no se cuela a 200.
     expect(res.status).toBe(401);
   });
 
@@ -85,14 +92,24 @@ describe('esquemas del corte vertical', () => {
     expect(movementSchema.safeParse({ movementType: 'sale', quantity: -5 }).success).toBe(false);
   });
 
-  it('solo admite los seis tipos de movimiento documentados', () => {
-    for (const movementType of ['purchase', 'sale', 'adjustment', 'return', 'transfer', 'damaged']) {
-      expect(movementSchema.safeParse({ movementType, quantity: 1 }).success).toBe(true);
+  it('CP-604.2 — solo admite los cinco tipos registrables directamente', () => {
+    for (const movementType of DIRECT_MOVEMENT_TYPES) {
+      expect(movementSchema.safeParse({ movementType, quantity: 1 }).success, movementType).toBe(true);
     }
     expect(movementSchema.safeParse({ movementType: 'regalo', quantity: 1 }).success).toBe(false);
   });
 
-  it('la transferencia exige sucursal y repuesto de destino, y cantidad positiva', () => {
+  it('CP-604.2 — el tipo transferencia NO se acepta en el registro directo', () => {
+    // Lo genera la transferencia entre talleres (RF-608) como par de
+    // movimientos vinculados. Admitirlo aqui permitiria una entrada sin la
+    // salida que la explica.
+    expect(movementSchema.safeParse({ movementType: 'transfer', quantity: 1 }).success).toBe(false);
+    // Sigue siendo un tipo valido del historial: lo que cambia es quien lo crea.
+    expect(MOVEMENT_TYPES).toContain('transfer');
+    expect(DIRECT_MOVEMENT_TYPES).not.toContain('transfer');
+  });
+
+  it('la transferencia exige taller y repuesto de destino, y cantidad positiva', () => {
     expect(transferSchema.safeParse({ toWorkshopId: UUID, toPartId: UUID, quantity: 0 }).success).toBe(false);
     expect(transferSchema.safeParse({ toWorkshopId: UUID, toPartId: UUID, quantity: 3 }).success).toBe(true);
     expect(transferSchema.safeParse({ toWorkshopId: 'x', toPartId: UUID, quantity: 3 }).success).toBe(false);

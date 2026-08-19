@@ -7,13 +7,13 @@ import { createApp } from '../src/app.js';
  *
  * Es el entregable del objetivo especifico 4 —validar el aislamiento con
  * evidencia reproducible—, y la unica prueba que demuestra la premisa central
- * del proyecto: que el aislamiento entre empresas se sostiene AUNQUE la capa
+ * del proyecto: que el aislamiento entre organizaciones se sostiene AUNQUE la capa
  * de aplicacion omita sus controles.
  *
  * La diferencia con integration.test.ts es deliberada y esencial: alli las
  * peticiones pasan por la API, que verifica la membresia antes de consultar.
  * Aqui se PRESCINDE de la API. Se usa un cliente de Supabase autenticado con
- * el token del usuario B y se consultan directamente las tablas de la empresa
+ * la credencial de la cuenta B y se consultan directamente las tablas de la organizacion
  * de A. Si las politicas RLS fallaran, estas consultas devolverian datos — y
  * ninguna verificacion de la aplicacion estaria ahi para impedirlo.
  *
@@ -61,13 +61,13 @@ describe.skipIf(!hasEnv)('aislamiento a nivel de base de datos (RLS sin pasar po
     const anonKey = process.env.SUPABASE_ANON_KEY!;
     const anon = createClient(url, anonKey, { auth: { persistSession: false, autoRefreshToken: false } });
 
-    const provisioned = await register(userA.email, userA.password, `Empresa A ${rnd()}`);
+    const provisioned = await register(userA.email, userA.password, `Organizacion A ${rnd()}`);
     orgAId = provisioned.organization.id;
     workshopAId = provisioned.workshop.id;
 
-    await register(userB.email, userB.password, `Empresa B ${rnd()}`);
+    await register(userB.email, userB.password, `Organizacion B ${rnd()}`);
 
-    // La empresa A crea datos en los dos niveles de la jerarquia.
+    // La organizacion A crea datos en los dos niveles de la jerarquia.
     const sessionA = await anon.auth.signInWithPassword(userA);
     if (sessionA.error) throw sessionA.error;
     const tokenA = sessionA.data.session!.access_token;
@@ -107,13 +107,13 @@ describe.skipIf(!hasEnv)('aislamiento a nivel de base de datos (RLS sin pasar po
     });
   });
 
-  it('B no puede leer la empresa de A', async () => {
+  it('B no puede leer la organizacion de A', async () => {
     const { data, error } = await dbAsB.from('organizations').select('id, name').eq('id', orgAId);
     expect(error).toBeNull();
     expect(data).toEqual([]);
   });
 
-  it('B no puede leer las sucursales de A', async () => {
+  it('B no puede leer los talleres de A', async () => {
     const { data, error } = await dbAsB.from('workshops').select('id, name').eq('organization_id', orgAId);
     expect(error).toBeNull();
     expect(data).toEqual([]);
@@ -125,7 +125,7 @@ describe.skipIf(!hasEnv)('aislamiento a nivel de base de datos (RLS sin pasar po
     expect(data).toEqual([]);
   });
 
-  it('B no puede leer los clientes de A (nivel empresa)', async () => {
+  it('B no puede leer los clientes de A (nivel organizacion)', async () => {
     const { data, error } = await dbAsB.from('clients').select('id, first_name').eq('organization_id', orgAId);
     expect(error).toBeNull();
     expect(data).toEqual([]);
@@ -137,7 +137,7 @@ describe.skipIf(!hasEnv)('aislamiento a nivel de base de datos (RLS sin pasar po
     expect(direct.data).toEqual([]);
   });
 
-  it('B no puede leer el inventario de A (nivel sucursal)', async () => {
+  it('B no puede leer el inventario de A (nivel taller)', async () => {
     const { data, error } = await dbAsB.from('parts').select('id, part_number').eq('id', partAId);
     expect(error).toBeNull();
     expect(data).toEqual([]);
@@ -155,7 +155,7 @@ describe.skipIf(!hasEnv)('aislamiento a nivel de base de datos (RLS sin pasar po
     expect(data).toEqual([]);
   });
 
-  it('B no puede ESCRIBIR en la empresa de A', async () => {
+  it('B no puede ESCRIBIR en la organizacion de A', async () => {
     // El aislamiento no es solo de lectura: la politica de insert exige
     // membresia activa, asi que la escritura debe ser rechazada.
     const { error } = await dbAsB
@@ -200,8 +200,8 @@ describe.skipIf(!hasEnv)('aislamiento a nivel de base de datos (RLS sin pasar po
 /**
  * CP-704 — LA AUDITORIA ES LA UNICA LECTURA RESERVADA A UN ROL.
  *
- * Las pruebas anteriores contrastan empresas distintas. Esta es diferente y
- * mas exigente: el usuario SI es miembro activo de la empresa, con membresia
+ * Las pruebas anteriores contrastan organizaciones distintas. Esta es diferente y
+ * mas exigente: la cuenta SI es miembro activo de la organizacion, con membresia
  * legitima, pero su rol no es propietario. Para todas las demas tablas eso le
  * basta para leer; para audit_log no (RF-704).
  *
@@ -228,18 +228,18 @@ describe.skipIf(!hasEnv)('auditoria reservada al Owner (RF-704)', () => {
     const anon = () =>
       createClient(url, anonKey, { auth: { persistSession: false, autoRefreshToken: false } });
 
-    async function registrar(cuenta: { email: string; password: string }, empresa: string) {
+    async function registrar(cuenta: { email: string; password: string }, organizacion: string) {
       const res = await app.request('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...cuenta, firstName: 'Audit', lastName: 'Test', organizationName: empresa }),
+        body: JSON.stringify({ ...cuenta, firstName: 'Audit', lastName: 'Test', organizationName: organizacion }),
       });
       expect(res.status).toBe(201);
       return (await res.json()) as { organization: { id: string } };
     }
 
-    orgId = (await registrar(owner, `Empresa auditada ${rnd()}`)).organization.id;
-    await registrar(mecanico, `Empresa del mecanico ${rnd()}`);
+    orgId = (await registrar(owner, `Organizacion auditada ${rnd()}`)).organization.id;
+    await registrar(mecanico, `Organizacion del mecanico ${rnd()}`);
 
     const sesionOwner = await anon().auth.signInWithPassword(owner);
     if (sesionOwner.error) throw sesionOwner.error;
@@ -247,9 +247,13 @@ describe.skipIf(!hasEnv)('auditoria reservada al Owner (RF-704)', () => {
 
     // El Owner invita al mecanico: esta invitacion genera, ademas, la primera
     // entrada de auditoria con la que se prueba la lectura.
-    const invitacion = await app.request(`/api/organizations/${orgId}/members/invite`, {
+    const invitacion = await app.request('/api/members/invite', {
       method: 'POST',
-      headers: { Authorization: `Bearer ${tokenOwner}`, 'Content-Type': 'application/json' },
+      headers: {
+        Authorization: `Bearer ${tokenOwner}`,
+        'Content-Type': 'application/json',
+        'X-Org-Id': orgId,
+      },
       body: JSON.stringify({ email: mecanico.email, role: 'mechanic' }),
     });
     expect(invitacion.status).toBe(201);
@@ -264,7 +268,7 @@ describe.skipIf(!hasEnv)('auditoria reservada al Owner (RF-704)', () => {
     });
   });
 
-  it('el Owner consulta la auditoria de su empresa', async () => {
+  it('el Owner consulta la auditoria de su organizacion', async () => {
     const url = process.env.SUPABASE_URL!;
     const anonKey = process.env.SUPABASE_ANON_KEY!;
     const sesion = await createClient(url, anonKey, {
@@ -302,7 +306,7 @@ describe.skipIf(!hasEnv)('auditoria reservada al Owner (RF-704)', () => {
     expect(data).toEqual([]);
   });
 
-  it('el mecanico si lee las demas tablas de su empresa', async () => {
+  it('el mecanico si lee las demas tablas de su organizacion', async () => {
     // Control negativo: confirma que su membresia es valida y que lo anterior
     // se debe a la politica de audit_log, no a que RLS le bloquee todo.
     const { data, error } = await dbComoMecanico.from('workshops').select('id').eq('organization_id', orgId);

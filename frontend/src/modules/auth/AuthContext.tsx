@@ -21,7 +21,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
     const profile = await fetchMe()
     setMe(profile)
 
-    // Si no hay empresa activa, o la guardada ya no corresponde a una membresía
+    // Si no hay organización activa, o la guardada ya no corresponde a una membresía
     // vigente (por ejemplo, tras ser removido), se selecciona la primera.
     const current = getActiveOrgId()
     const stillValid = current && profile.organizations.some((m) => m.organization.id === current)

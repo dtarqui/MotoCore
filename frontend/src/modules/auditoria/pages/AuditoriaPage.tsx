@@ -37,7 +37,7 @@ function describirAutor(entry: AuditEntry) {
 }
 
 /**
- * Registro de auditoría de la empresa activa (HU-22).
+ * Registro de auditoría de la organización activa (HU-22).
  *
  * Es la única pantalla reservada al Owner. La restricción no se confía a la
  * interfaz: la API responde 403 y la política de la base de datos tampoco
@@ -61,13 +61,13 @@ export function AuditoriaPage() {
     <div className="space-y-6">
       <PageHeader
         title="Auditoría"
-        description="Acciones críticas registradas en la empresa activa, con su autor y su fecha."
+        description="Acciones críticas registradas en la organización activa, con su autor y su fecha."
       />
 
       {error ? (
         <Alert variant="destructive">
           {error.code === 'audit.insufficient_permissions'
-            ? 'Solo el propietario de la empresa puede consultar la auditoría.'
+            ? 'Solo el propietario de la organización puede consultar la auditoría.'
             : error.message}
         </Alert>
       ) : null}
@@ -95,7 +95,7 @@ export function AuditoriaPage() {
         <p className="text-sm text-slate-500">Cargando el registro…</p>
       ) : entradas.length === 0 && !error ? (
         <p className="text-sm text-slate-500">
-          Todavía no hay acciones registradas en esta empresa.
+          Todavía no hay acciones registradas en esta organización.
         </p>
       ) : (
         <ul className="divide-y divide-slate-200 rounded-lg border border-slate-200">

@@ -46,7 +46,7 @@ async function toApiError(response: Response) {
 }
 
 export type ApiRequestOptions = RequestInit & {
-  /** Adjunta la sucursal activa. Solo para endpoints de nivel sucursal. */
+  /** Adjunta el taller activo. Solo para endpoints de nivel taller. */
   withWorkshop?: boolean
 }
 
@@ -57,7 +57,7 @@ export type ApiRequestOptions = RequestInit & {
  * guardarse: el SDK lo renueva por su cuenta, y leerlo al vuelo evita enviar
  * uno caducado (RF-102).
  *
- * La empresa activa viaja en `X-Org-Id`; la sucursal, en `X-Workshop-Id` cuando
+ * La organización activa viaja en `X-Org-Id`; el taller, en `X-Workshop-Id` cuando
  * el endpoint lo requiere (ADR-005). El servidor revalida ambas contra la
  * membresía: enviarlas no concede acceso, solo indica sobre qué se opera.
  */

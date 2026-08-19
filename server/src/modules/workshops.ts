@@ -1,46 +1,51 @@
 import { Hono } from 'hono';
 import { serviceClient } from '../lib/supabase.js';
 import { requireAuth } from '../lib/auth.js';
-import { requireMembership, requireOwner, getMembership } from '../lib/memberships.js';
+import { requireActiveOrg, type OrgBindings } from '../lib/org-context.js';
+import { getMembership } from '../lib/memberships.js';
 import { assertWorkshopInOrg } from '../lib/workshop-context.js';
-import { badRequest, conflict, notFound } from '../lib/errors.js';
+import { conflict, forbidden, internal, notFound } from '../lib/errors.js';
 import { recordAudit } from '../lib/audit.js';
 import { createWorkshopSchema, updateWorkshopSchema, assignMemberSchema } from '../schemas.js';
-import type { AppBindings, Workshop } from '../types.js';
+import type { Workshop } from '../types.js';
 
 /**
- * Sucursales de una empresa (ADR-006). Montado bajo
- * /api/organizations/:orgId/workshops — la ruta refleja que la sucursal solo
- * existe dentro de una empresa.
+ * Talleres de la organizacion activa (ADR-006). Montado en `/api/workshops`:
+ * el taller es un recurso INTERIOR a la organizacion, de modo que el contexto
+ * llega por `X-Org-Id` y no anidado en la ruta (§2.3 del contrato, ADR-005).
  *
- * Reglas de acceso: cualquier miembro LEE las sucursales de su empresa (no son
- * frontera de seguridad); solo el Owner las administra.
+ * Reglas de acceso: cualquier miembro LEE los talleres de su organizacion —no
+ * son frontera de seguridad—; solo el Owner los administra.
  */
-export const workshopRoutes = new Hono<AppBindings>();
+export const workshopRoutes = new Hono<OrgBindings>();
 
 const WORKSHOP_COLUMNS = 'id, organization_id, name, address, phone, is_active, created_at, updated_at';
 
-workshopRoutes.use('*', requireAuth);
+workshopRoutes.use('*', requireAuth, requireActiveOrg);
 
-/** Lista las sucursales de la empresa — RF-302. */
+/** Solo el Owner administra talleres — RF-301, RF-305. */
+function assertOwner(c: { get: (k: 'orgRole') => string }): void {
+  if (c.get('orgRole') !== 'owner') {
+    throw forbidden('workshop.insufficient_permissions', 'Solo el Owner puede administrar talleres.');
+  }
+}
+
+/** Lista los talleres de la organizacion activa — RF-302. */
 workshopRoutes.get('/', async (c) => {
-  const orgId = c.req.param('orgId')!;
-  await requireMembership(orgId, c.get('userId'));
-
   const { data, error } = await serviceClient()
     .from('workshops')
     .select(WORKSHOP_COLUMNS)
-    .eq('organization_id', orgId)
+    .eq('organization_id', c.get('orgId'))
     .order('name');
 
-  if (error) throw badRequest('workshop.lookup_failed', error.message);
+  if (error) throw internal(`workshops.select: ${error.message}`);
   return c.json({ workshops: data ?? [] });
 });
 
-/** Crea una sucursal en la empresa (solo Owner) — RF-301. */
+/** Crea un taller en la organizacion activa (solo Owner) — RF-301. */
 workshopRoutes.post('/', async (c) => {
-  const orgId = c.req.param('orgId')!;
-  await requireOwner(orgId, c.get('userId'));
+  assertOwner(c);
+  const orgId = c.get('orgId');
   const input = createWorkshopSchema.parse(await c.req.json());
 
   const { data, error } = await serviceClient()
@@ -55,23 +60,21 @@ workshopRoutes.post('/', async (c) => {
     .single();
 
   if (error) {
-    // Unico (organization_id, name): no puede haber dos sucursales con el
-    // mismo nombre en una empresa, pero si en empresas distintas.
+    // Unico (organization_id, name): no puede haber dos talleres con el mismo
+    // nombre en una organizacion, pero si en organizaciones distintas.
     if (error.code === '23505') {
-      throw conflict('workshop.name_in_use', 'Ya existe una sucursal con ese nombre en la empresa.');
+      throw conflict('workshop.duplicate_name', 'Ya existe un taller con ese nombre en la organizacion.');
     }
-    throw badRequest('workshop.create_failed', error.message);
+    throw internal(`workshops.insert: ${error.message}`);
   }
 
   return c.json({ workshop: data }, 201);
 });
 
-/** Detalle de una sucursal (requiere membership en su empresa). */
+/** Detalle de un taller de la organizacion activa. */
 workshopRoutes.get('/:workshopId', async (c) => {
-  const orgId = c.req.param('orgId')!;
   const workshopId = c.req.param('workshopId');
-  await requireMembership(orgId, c.get('userId'));
-  await assertWorkshopInOrg(workshopId, orgId);
+  await assertWorkshopInOrg(workshopId, c.get('orgId'));
 
   const { data, error } = await serviceClient()
     .from('workshops')
@@ -79,18 +82,17 @@ workshopRoutes.get('/:workshopId', async (c) => {
     .eq('id', workshopId)
     .maybeSingle();
 
-  if (error) throw badRequest('workshop.lookup_failed', error.message);
-  if (!data) throw notFound('workshop.not_found', 'Sucursal no encontrada.');
+  if (error) throw internal(`workshops.select: ${error.message}`);
+  if (!data) throw notFound('workshop.not_found', 'Taller no encontrado.');
 
   return c.json({ workshop: data });
 });
 
-/** Edita una sucursal (solo Owner). */
+/** Edita un taller (solo Owner) — RF-301. */
 workshopRoutes.patch('/:workshopId', async (c) => {
-  const orgId = c.req.param('orgId')!;
+  assertOwner(c);
   const workshopId = c.req.param('workshopId');
-  await requireOwner(orgId, c.get('userId'));
-  await assertWorkshopInOrg(workshopId, orgId);
+  await assertWorkshopInOrg(workshopId, c.get('orgId'));
   const input = updateWorkshopSchema.parse(await c.req.json());
 
   const { data, error } = await serviceClient()
@@ -102,23 +104,27 @@ workshopRoutes.patch('/:workshopId', async (c) => {
 
   if (error) {
     if (error.code === '23505') {
-      throw conflict('workshop.name_in_use', 'Ya existe una sucursal con ese nombre en la empresa.');
+      throw conflict('workshop.duplicate_name', 'Ya existe un taller con ese nombre en la organizacion.');
     }
-    throw badRequest('workshop.update_failed', error.message);
+    throw internal(`workshops.update: ${error.message}`);
   }
-  if (!data) throw notFound('workshop.not_found', 'Sucursal no encontrada.');
+  if (!data) throw notFound('workshop.not_found', 'Taller no encontrado.');
 
   return c.json({ workshop: data });
 });
 
 /**
- * Baja logica de la sucursal (solo Owner) — RF-305. No se borra: su historial
- * (inventario, movimientos) debe seguir siendo consultable.
+ * Baja logica del taller (solo Owner) — RF-305. Accion auditada (RF-703).
+ *
+ * Se expone como `POST /deactivate` y no como `PATCH`: es una transicion de
+ * estado con consecuencias de auditoria, no la edicion de un campo (§2.6 del
+ * contrato). No se borra: su historial —inventario, movimientos— debe seguir
+ * siendo consultable.
  */
-workshopRoutes.patch('/:workshopId/deactivate', async (c) => {
-  const orgId = c.req.param('orgId')!;
+workshopRoutes.post('/:workshopId/deactivate', async (c) => {
+  assertOwner(c);
+  const orgId = c.get('orgId');
   const workshopId = c.req.param('workshopId');
-  await requireOwner(orgId, c.get('userId'));
   await assertWorkshopInOrg(workshopId, orgId);
 
   const { data, error } = await serviceClient()
@@ -128,8 +134,8 @@ workshopRoutes.patch('/:workshopId/deactivate', async (c) => {
     .select(WORKSHOP_COLUMNS)
     .maybeSingle();
 
-  if (error) throw badRequest('workshop.update_failed', error.message);
-  if (!data) throw notFound('workshop.not_found', 'Sucursal no encontrada.');
+  if (error) throw internal(`workshops.update: ${error.message}`);
+  if (!data) throw notFound('workshop.not_found', 'Taller no encontrado.');
 
   await recordAudit({
     organizationId: orgId,
@@ -143,19 +149,17 @@ workshopRoutes.patch('/:workshopId/deactivate', async (c) => {
   return c.json({ workshop: data });
 });
 
-/** Miembros asignados a la sucursal. La asignacion es informativa (RF-304). */
+/** Miembros asignados al taller. La asignacion es operativa (RF-304). */
 workshopRoutes.get('/:workshopId/assignments', async (c) => {
-  const orgId = c.req.param('orgId')!;
   const workshopId = c.req.param('workshopId');
-  await requireMembership(orgId, c.get('userId'));
-  await assertWorkshopInOrg(workshopId, orgId);
+  await assertWorkshopInOrg(workshopId, c.get('orgId'));
 
   const { data, error } = await serviceClient()
     .from('workshop_assignments')
     .select('id, workshop_id, memberships ( user_id, role, is_active )')
     .eq('workshop_id', workshopId);
 
-  if (error) throw badRequest('workshop.lookup_failed', error.message);
+  if (error) throw internal(`workshop_assignments.select: ${error.message}`);
 
   const assignments = (data ?? []).map((a: Record<string, unknown>) => {
     const m = a.memberships as { user_id: string; role: string; is_active: boolean } | null;
@@ -166,73 +170,71 @@ workshopRoutes.get('/:workshopId/assignments', async (c) => {
 });
 
 /**
- * Asigna un miembro a la sucursal (solo Owner) — RF-304.
+ * Asigna un miembro al taller (solo Owner) — RF-304.
  * La asignacion indica DONDE trabaja esa persona; no cambia lo que puede ver:
- * eso lo determina su rol en la empresa (ADR-006).
+ * eso lo determina su rol en la organizacion (ADR-006).
  */
 workshopRoutes.post('/:workshopId/assignments', async (c) => {
-  const orgId = c.req.param('orgId')!;
+  assertOwner(c);
+  const orgId = c.get('orgId');
   const workshopId = c.req.param('workshopId');
-  await requireOwner(orgId, c.get('userId'));
   await assertWorkshopInOrg(workshopId, orgId);
   const input = assignMemberSchema.parse(await c.req.json());
 
-  const membership = await getMembership(orgId, input.userId);
-  if (!membership) {
-    throw notFound('membership.not_found', 'El usuario no es miembro de esta organizacion.');
-  }
-
-  const { data: membershipRow, error: idErr } = await serviceClient()
-    .from('memberships')
-    .select('id')
-    .eq('organization_id', orgId)
-    .eq('user_id', input.userId)
-    .maybeSingle();
-
-  if (idErr) throw badRequest('membership.lookup_failed', idErr.message);
-  if (!membershipRow) throw notFound('membership.not_found', 'El usuario no es miembro de esta organizacion.');
+  const membershipId = await findMembershipId(orgId, input.userId);
 
   const { error } = await serviceClient()
     .from('workshop_assignments')
-    .insert({ membership_id: (membershipRow as { id: string }).id, workshop_id: workshopId });
+    .insert({ membership_id: membershipId, workshop_id: workshopId });
 
   if (error) {
     if (error.code === '23505') {
-      throw conflict('workshop.already_assigned', 'El miembro ya esta asignado a esta sucursal.');
+      throw conflict('member.already_active', 'El miembro ya esta asignado a este taller.');
     }
-    throw badRequest('workshop.assign_failed', error.message);
+    throw internal(`workshop_assignments.insert: ${error.message}`);
   }
 
   return c.json({ workshopId, userId: input.userId }, 201);
 });
 
-/** Quita la asignacion de un miembro a la sucursal (solo Owner). */
+/** Retira la asignacion de un miembro al taller (solo Owner) — RF-304. */
 workshopRoutes.delete('/:workshopId/assignments/:userId', async (c) => {
-  const orgId = c.req.param('orgId')!;
+  assertOwner(c);
+  const orgId = c.get('orgId');
   const workshopId = c.req.param('workshopId');
   const targetUserId = c.req.param('userId');
-  await requireOwner(orgId, c.get('userId'));
   await assertWorkshopInOrg(workshopId, orgId);
 
-  const { data: membershipRow, error: idErr } = await serviceClient()
-    .from('memberships')
-    .select('id')
-    .eq('organization_id', orgId)
-    .eq('user_id', targetUserId)
-    .maybeSingle();
-
-  if (idErr) throw badRequest('membership.lookup_failed', idErr.message);
-  if (!membershipRow) throw notFound('membership.not_found', 'El usuario no es miembro de esta organizacion.');
+  const membershipId = await findMembershipId(orgId, targetUserId);
 
   const { error } = await serviceClient()
     .from('workshop_assignments')
     .delete()
-    .eq('membership_id', (membershipRow as { id: string }).id)
+    .eq('membership_id', membershipId)
     .eq('workshop_id', workshopId);
 
-  if (error) throw badRequest('workshop.unassign_failed', error.message);
+  if (error) throw internal(`workshop_assignments.delete: ${error.message}`);
 
   return c.body(null, 204);
 });
+
+/** Resuelve el identificador de la membresia, exigiendo que la cuenta sea miembro. */
+async function findMembershipId(orgId: string, userId: string): Promise<string> {
+  const membership = await getMembership(orgId, userId);
+  if (!membership) {
+    throw notFound('member.not_found', 'La cuenta no es miembro de esta organizacion.');
+  }
+
+  const { data, error } = await serviceClient()
+    .from('memberships')
+    .select('id')
+    .eq('organization_id', orgId)
+    .eq('user_id', userId)
+    .maybeSingle();
+
+  if (error) throw internal(`memberships.select: ${error.message}`);
+  if (!data) throw notFound('member.not_found', 'La cuenta no es miembro de esta organizacion.');
+  return (data as { id: string }).id;
+}
 
 export type { Workshop };

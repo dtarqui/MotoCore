@@ -1,12 +1,12 @@
 /**
- * Contexto activo (empresa y sucursal) fuera de React.
+ * Contexto activo (organización y taller) fuera de React.
  *
  * Existe para que `apiRequest` pueda adjuntar las cabeceras sin recibirlas por
  * parámetro en cada llamada. El proveedor de React es quien lo mantiene al día;
  * este módulo es solo el lugar donde se lee.
  *
  * Se persiste en el almacenamiento local para que recargar la página no pierda
- * la empresa sobre la que se estaba trabajando. El valor guardado es solo una
+ * la organización sobre la que se estaba trabajando. El valor guardado es solo una
  * preferencia: el servidor revalida la membresía en cada petición, así que
  * manipularlo a mano no concede ningún acceso.
  */
@@ -42,8 +42,8 @@ export function getActiveWorkshopId() {
 }
 
 /**
- * Cambia la empresa activa por acción del usuario. Limpia la sucursal, porque
- * la que estaba elegida pertenecía a la empresa anterior.
+ * Cambia la organización activa por acción del usuario. Limpia el taller, porque
+ * la que estaba elegida pertenecía a la organización anterior.
  */
 export function setActiveOrgId(orgId: string | null) {
   syncActiveOrgId(orgId)
@@ -51,8 +51,8 @@ export function setActiveOrgId(orgId: string | null) {
 }
 
 /**
- * Fija la empresa sin tocar la sucursal. Se usa para reflejar un valor ya
- * resuelto (la primera empresa al iniciar sesión), no para cambiar de contexto.
+ * Fija la organización sin tocar el taller. Se usa para reflejar un valor ya
+ * resuelto (la primera organización al iniciar sesión), no para cambiar de contexto.
  */
 export function syncActiveOrgId(orgId: string | null) {
   activeOrgId = orgId

@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import { serviceClient } from '../lib/supabase.js';
 import { requireAuth } from '../lib/auth.js';
 import { requireActiveOrg, type OrgBindings } from '../lib/org-context.js';
-import { badRequest, forbidden } from '../lib/errors.js';
+import { forbidden, internal } from '../lib/errors.js';
 
 /**
  * Consulta del registro de auditoria — RF-703, RF-704.
@@ -27,10 +27,10 @@ const LIMITE_MAXIMO = 500;
 auditRoutes.use('*', requireAuth, requireActiveOrg);
 
 /**
- * Lista las acciones criticas de la empresa activa — RF-703, RF-704.
+ * Lista las acciones criticas de la organizacion activa — RF-703, RF-704.
  *
- * Filtros opcionales: `action` (accion exacta), `workshopId` (sucursal a la
- * que se refiere la accion) y `limit`.
+ * Filtros opcionales: `action` (accion exacta), `workshopId` (taller al que se
+ * refiere la accion) y `limit`.
  */
 auditRoutes.get('/', async (c) => {
   // El catalogo de errores del contrato reserva un codigo propio para este
@@ -60,7 +60,7 @@ auditRoutes.get('/', async (c) => {
   if (workshopId) query = query.eq('workshop_id', workshopId);
 
   const { data, error } = await query;
-  if (error) throw badRequest('audit.lookup_failed', error.message);
+  if (error) throw internal('audit_log.select: ' + error.message);
 
   const entradas = data ?? [];
 

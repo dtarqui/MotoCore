@@ -37,7 +37,7 @@ export function AppShell() {
                 {fullName || me?.email}
               </p>
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                {/* El rol es el de la empresa activa, no uno global. */}
+                {/* El rol es el de la organización activa, no uno global. */}
                 {activeMembership ? ROLE_LABELS[activeMembership.role] : ''}
               </p>
               <Button className="mt-2" variant="outline" size="sm" onClick={() => void logout()}>

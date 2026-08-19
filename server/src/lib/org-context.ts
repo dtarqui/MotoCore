@@ -5,7 +5,7 @@ import type { AppBindings, Role } from '../types.js';
 
 /**
  * Contexto de organizacion activa para los modulos de negocio. Lee el header
- * `X-Org-Id`, valida la membership activa y deja orgId + orgRole en el
+ * `X-Org-Id`, valida la membresia activa y deja orgId + orgRole en el
  * contexto (ADR-005).
  *
  * El servidor NUNCA asume una organizacion por defecto: si falta la cabecera,

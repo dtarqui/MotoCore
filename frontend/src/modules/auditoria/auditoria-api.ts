@@ -20,9 +20,9 @@ export const AUDIT_ACTION_LABELS: Record<AuditAction, string> = {
   'member.invited': 'Miembro invitado',
   'member.role_changed': 'Rol modificado',
   'member.removed': 'Miembro removido',
-  'workshop.deactivated': 'Sucursal desactivada',
+  'workshop.deactivated': 'Taller desactivado',
   'client.deactivated': 'Cliente dado de baja',
-  'organization.updated': 'Datos de la empresa editados',
+  'organization.updated': 'Datos de la organización editados',
 }
 
 export type AuditEntry = {
@@ -50,7 +50,7 @@ export type AuditFilters = {
 }
 
 /**
- * Registro de acciones críticas de la empresa activa — RF-703, RF-704.
+ * Registro de acciones críticas de la organización activa — RF-703, RF-704.
  *
  * Reservado al Owner. Un rol distinto recibe `403 audit.insufficient_permissions`,
  * y la restricción se sostiene también en la base de datos.

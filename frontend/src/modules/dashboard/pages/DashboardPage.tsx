@@ -10,7 +10,7 @@ import { getParts } from '@/modules/inventario/inventario-api'
 
 /**
  * Inicio: resumen del contexto activo. Muestra a la vez un dato de nivel
- * empresa (clientes) y uno de nivel sucursal (inventario), que es la forma más
+ * organización (clientes) y uno de nivel taller (inventario), que es la forma más
  * directa de ver la diferencia entre ambos niveles.
  */
 export function DashboardPage() {
@@ -22,7 +22,7 @@ export function DashboardPage() {
 
   const workshopsQuery = useQuery({
     queryKey: ['workshops', orgId],
-    queryFn: () => getWorkshops(orgId!),
+    queryFn: () => getWorkshops(),
     enabled: Boolean(orgId),
   })
 
@@ -48,35 +48,35 @@ export function DashboardPage() {
         title={membership?.organization.name ?? 'MotoCore'}
         description={
           membership
-            ? `Tu rol en esta empresa: ${ROLE_LABELS[membership.role]}`
-            : 'Selecciona una empresa para comenzar.'
+            ? `Tu rol en esta organización: ${ROLE_LABELS[membership.role]}`
+            : 'Selecciona una organización para comenzar.'
         }
       />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card className="p-4">
-          <p className="text-xs uppercase tracking-wide text-slate-500">Empresas</p>
+          <p className="text-xs uppercase tracking-wide text-slate-500">Organizaciones</p>
           <p className="mt-1 text-2xl font-semibold">{me?.organizations.length ?? 0}</p>
           <p className="text-xs text-slate-500">donde tienes membresía activa</p>
         </Card>
 
         <Card className="p-4">
-          <p className="text-xs uppercase tracking-wide text-slate-500">Sucursales</p>
+          <p className="text-xs uppercase tracking-wide text-slate-500">Talleres</p>
           <p className="mt-1 text-2xl font-semibold">{workshopsQuery.data?.length ?? 0}</p>
-          <p className="text-xs text-slate-500">en la empresa activa</p>
+          <p className="text-xs text-slate-500">en la organización activa</p>
         </Card>
 
         <Card className="p-4">
           <p className="text-xs uppercase tracking-wide text-slate-500">Clientes</p>
           <p className="mt-1 text-2xl font-semibold">{clientsQuery.data?.length ?? 0}</p>
-          <p className="text-xs text-slate-500">nivel empresa · visibles desde toda sucursal</p>
+          <p className="text-xs text-slate-500">nivel organización · visibles desde cualquier taller</p>
         </Card>
 
         <Card className="p-4">
           <p className="text-xs uppercase tracking-wide text-slate-500">Repuestos</p>
           <p className="mt-1 text-2xl font-semibold">{parts.length}</p>
           <p className="text-xs text-slate-500">
-            {activeWorkshop ? `en ${activeWorkshop.name}` : 'sin sucursal activa'}
+            {activeWorkshop ? `en ${activeWorkshop.name}` : 'sin taller activo'}
             {lowStock > 0 ? ` · ${lowStock} bajo mínimo` : ''}
           </p>
         </Card>

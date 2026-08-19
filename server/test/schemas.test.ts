@@ -34,7 +34,7 @@ describe('registerSchema', () => {
 
 describe('createOrganizationSchema', () => {
   it('acepta solo el nombre', () => {
-    expect(createOrganizationSchema.safeParse({ name: 'Sucursal Norte' }).success).toBe(true);
+    expect(createOrganizationSchema.safeParse({ name: 'Motos del Norte' }).success).toBe(true);
   });
 
   it('rechaza sin nombre', () => {

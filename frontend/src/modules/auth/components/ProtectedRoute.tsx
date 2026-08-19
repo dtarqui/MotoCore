@@ -24,7 +24,7 @@ type RoleRouteProps = PropsWithChildren<{
   allowedRoles: UserRole[]
 }>
 
-/** Autoriza por el rol en la **empresa activa**, no por un rol global. */
+/** Autoriza por el rol en la **organización activa**, no por un rol global. */
 export function RoleRoute({ allowedRoles, children }: RoleRouteProps) {
   const { hasAnyRole, me } = useAuth()
 

@@ -218,6 +218,8 @@ El registro es de **solo inserción**: el contrato no expone ninguna operación 
 
 Los códigos son parte estable del contrato. Un código nuevo se agrega; uno existente no cambia de significado.
 
+**El catálogo es cerrado**: la interfaz no emite ningún código fuera de esta tabla. Un fallo que no corresponda a ninguna de estas situaciones se propaga como `server.error`, en lugar de inventar un código para el caso — de otro modo el catálogo dejaría de ser el contrato y pasaría a ser una muestra de él.
+
 | Código | Estado | Cuándo |
 |---|---|---|
 | `auth.missing_token` | `401` | Falta la credencial |
@@ -250,6 +252,7 @@ Los códigos son parte estable del contrato. Un código nuevo se agrega; uno exi
 | `inventory.insufficient_permissions` | `403` | El rol no permite administrar el catálogo ni transferir (RF-609) |
 | `audit.insufficient_permissions` | `403` | Solo el `Owner` consulta la auditoría (RF-704) |
 | `validation.invalid_body` | `400` | La entrada no satisface el esquema; el detalle acompaña por campo (RNF-205) |
+| `server.error` | `500` | Fallo inesperado del servidor. **No transporta detalle interno**: la causa se registra en el servidor, no se devuelve. Es el código al que se propaga cualquier fallo del motor que no corresponda a una regla de negocio del catálogo |
 
 ---
 

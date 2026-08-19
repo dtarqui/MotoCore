@@ -18,14 +18,14 @@ export type UserProfile = {
   last_name: string
 }
 
-/** Empresa: unidad de aislamiento. Una cuenta puede pertenecer a varias. */
+/** Organización: unidad de aislamiento. Una cuenta puede pertenecer a varias. */
 export type Organization = {
   id: string
   name: string
   is_active: boolean
 }
 
-/** Sucursal: subdivisión operativa de una empresa, no frontera de seguridad. */
+/** Taller: subdivisión operativa de una organización, no frontera de seguridad. */
 export type Workshop = {
   id: string
   organization_id: string
@@ -35,7 +35,7 @@ export type Workshop = {
   is_active: boolean
 }
 
-/** Una empresa junto al rol que la cuenta tiene *en esa empresa*. */
+/** Una organización junto al rol que la cuenta tiene *en esa organización*. */
 export type OrganizationMembership = {
   role: UserRole
   organization: Organization
@@ -58,7 +58,7 @@ export type RegisterRequest = {
   password: string
   firstName: string
   lastName: string
-  /** RF-101: el registro crea la empresa y su primera sucursal. */
+  /** RF-101: el registro crea la organización y su primer taller. */
   organizationName: string
   workshopName?: string
 }

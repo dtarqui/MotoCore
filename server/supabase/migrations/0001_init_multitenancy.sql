@@ -4,7 +4,7 @@
 -- Modelo:
 --   auth.users            -> identidad global (gestionada por Supabase Auth)
 --   profiles              -> datos de perfil 1:1 con auth.users
---   organizations         -> empresa/compania (era "workshop")
+--   organizations         -> organización/compania (era "workshop")
 --   memberships           -> auth.users <-> organizations (rol por organizacion)
 --
 -- Aislamiento por tenant: Row Level Security. Un usuario solo ve/gestiona filas

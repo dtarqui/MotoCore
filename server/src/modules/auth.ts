@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import { serviceClient } from '../lib/supabase.js';
 import { requireAuth } from '../lib/auth.js';
-import { badRequest, conflict } from '../lib/errors.js';
+import { AppError, conflict, internal } from '../lib/errors.js';
 import { getEnv } from '../lib/env.js';
 import { registerSchema } from '../schemas.js';
 import type { AppBindings } from '../types.js';
@@ -9,8 +9,8 @@ import type { AppBindings } from '../types.js';
 export const authRoutes = new Hono<AppBindings>();
 
 /**
- * Registro (RF-101): crea la cuenta y, en un mismo acto, su primera empresa,
- * su primera sucursal y la membresia Owner.
+ * Registro (RF-101): crea la cuenta y, en un mismo acto, su primera
+ * organizacion, su primer taller y la membresia Owner.
  *
  * Los tres ultimos pasos ocurren dentro de la funcion `register_account`, que
  * es una sola transaccion en Postgres (ADR-007). La cuenta en auth.users es lo
@@ -34,9 +34,12 @@ authRoutes.post('/register', async (c) => {
   if (createErr || !created.user) {
     const msg = (createErr?.message ?? '').toLowerCase();
     if (msg.includes('already') || msg.includes('registered') || msg.includes('exists')) {
-      throw conflict('auth.email_in_use', 'Ya existe una cuenta con ese email.');
+      throw conflict('auth.email_already_registered', 'Ya existe una cuenta con ese correo.');
     }
-    throw badRequest('auth.register_failed', createErr?.message ?? 'No se pudo crear la cuenta.');
+    // El registro no pudo completarse y no quedo nada aplicado. No es 409: no
+    // contradice ninguna regla de negocio sobre el estado actual, sino que la
+    // operacion fallo del lado del servidor (§2.6 y §4 del contrato).
+    throw registrationFailed(createErr?.message ?? 'createUser sin usuario devuelto');
   }
 
   const userId = created.user.id;
@@ -49,7 +52,7 @@ authRoutes.post('/register', async (c) => {
     last_name: input.lastName,
   });
 
-  // Empresa + sucursal + membresia Owner, en una sola transaccion.
+  // Organizacion + taller + membresia Owner, en una sola transaccion.
   const { data: created2, error: rpcErr } = await db.rpc('register_account', {
     p_user_id: userId,
     p_org_name: input.organizationName,
@@ -59,9 +62,10 @@ authRoutes.post('/register', async (c) => {
   const provisioned = Array.isArray(created2) ? created2[0] : created2;
 
   if (rpcErr || !provisioned) {
-    // La transaccion no dejo nada a medias; solo queda revertir la cuenta.
+    // La transaccion no dejo nada a medias; solo queda revertir la cuenta,
+    // para que el registro entero sea atomico de cara al cliente (ADR-007).
     await db.auth.admin.deleteUser(userId).catch(() => undefined);
-    throw badRequest('organization.create_failed', rpcErr?.message ?? 'No se pudo crear la organizacion.');
+    throw registrationFailed(rpcErr?.message ?? 'register_account sin fila devuelta');
   }
 
   const { organization_id: orgId, workshop_id: workshopId } = provisioned as {
@@ -84,7 +88,20 @@ authRoutes.post('/register', async (c) => {
   return c.json({ userId, organization: org, workshop }, 201);
 });
 
-/** Perfil + organizaciones (con rol) del usuario autenticado. Alimenta el selector de organizacion. */
+/**
+ * `auth.registration_failed` con estado 500: el registro atomico se interrumpio
+ * y no dejo nada aplicado. La causa se registra en consola, no se devuelve.
+ */
+function registrationFailed(cause: string): AppError {
+  console.error('[auth.registration_failed]', cause);
+  return new AppError(
+    'auth.registration_failed',
+    'No se pudo completar el registro. No se creo ninguna cuenta.',
+    500,
+  );
+}
+
+/** Perfil + organizaciones (con rol) de la cuenta autenticada. Alimenta el selector de organizacion. */
 authRoutes.get('/me', requireAuth, async (c) => {
   const userId = c.get('userId');
   const db = serviceClient();
@@ -101,7 +118,7 @@ authRoutes.get('/me', requireAuth, async (c) => {
     .eq('user_id', userId)
     .eq('is_active', true);
 
-  if (error) throw badRequest('membership.lookup_failed', error.message);
+  if (error) throw internal(`memberships.select: ${error.message}`);
 
   const organizations = (memberships ?? []).map((m: Record<string, unknown>) => ({
     role: m.role,

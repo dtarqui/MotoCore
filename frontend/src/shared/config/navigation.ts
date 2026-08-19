@@ -8,7 +8,7 @@ type NavigationItem = {
 
 /**
  * Navegación del alcance construido: el corte vertical (clientes e inventario)
- * más la administración de la jerarquía (sucursales y equipo).
+ * más la administración de la jerarquía (talleres y equipo).
  *
  * Los módulos de motocicletas, órdenes e historial existen como interfaz pero
  * todavía no tienen respaldo en el backend nuevo; se incorporan cuando se
@@ -28,8 +28,8 @@ export const navigationItems: NavigationItem[] = [
     allowedRoles: ['owner', 'mechanic', 'receptionist'],
   },
   {
-    to: '/sucursales',
-    label: 'Sucursales',
+    to: '/talleres',
+    label: 'Talleres',
     allowedRoles: ['owner', 'mechanic', 'receptionist'],
   },
   {

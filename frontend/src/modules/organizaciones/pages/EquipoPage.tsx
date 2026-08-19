@@ -13,10 +13,10 @@ import { getMembers, inviteMember, removeMember, updateMemberRole } from '../org
 type InvitableRole = 'mechanic' | 'receptionist'
 
 /**
- * Equipo de la empresa activa (HU-09 a HU-12).
+ * Equipo de la organización activa (HU-09 a HU-12).
  *
  * No aparece «Propietario» entre los roles asignables: el Owner es quien creó
- * la empresa y no se otorga por invitación (RF-402).
+ * la organización y no se otorga por invitación (RF-402).
  */
 export function EquipoPage() {
   const { hasAnyRole, me } = useAuth()
@@ -32,14 +32,14 @@ export function EquipoPage() {
 
   const membersQuery = useQuery({
     queryKey: ['members', orgId],
-    queryFn: () => getMembers(orgId!),
+    queryFn: () => getMembers(),
     enabled: Boolean(orgId),
   })
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ['members'] })
 
   const inviteMutation = useMutation({
-    mutationFn: () => inviteMember(orgId!, invite),
+    mutationFn: () => inviteMember(invite),
     onSuccess: async () => {
       setInvite({ email: '', role: 'mechanic' })
       setError(null)
@@ -50,13 +50,13 @@ export function EquipoPage() {
 
   const roleMutation = useMutation({
     mutationFn: ({ userId, role }: { userId: string; role: InvitableRole }) =>
-      updateMemberRole(orgId!, userId, role),
+      updateMemberRole(userId, role),
     onSuccess: invalidate,
     onError: (err: Error) => setError(err.message),
   })
 
   const removeMutation = useMutation({
-    mutationFn: (userId: string) => removeMember(orgId!, userId),
+    mutationFn: (userId: string) => removeMember(userId),
     onSuccess: invalidate,
     onError: (err: Error) => setError(err.message),
   })
@@ -67,7 +67,7 @@ export function EquipoPage() {
     <div className="space-y-6">
       <PageHeader
         title="Equipo"
-        description="El rol se otorga sobre la empresa, no sobre una sucursal concreta."
+        description="El rol se otorga sobre la organización, no sobre un taller concreto."
       />
 
       {error ? <Alert variant="destructive">{error}</Alert> : null}

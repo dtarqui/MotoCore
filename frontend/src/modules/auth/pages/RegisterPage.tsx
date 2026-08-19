@@ -20,7 +20,7 @@ export function RegisterPage() {
   const [lastName, setLastName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  // RF-101: el registro crea la empresa y su primera sucursal en un solo acto.
+  // RF-101: el registro crea la organización y su primera taller en un solo acto.
   const [organizationName, setOrganizationName] = useState('')
   const [workshopName, setWorkshopName] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -40,7 +40,7 @@ export function RegisterPage() {
         email: email.trim(),
         password,
         organizationName: organizationName.trim(),
-        // Si se omite, el servidor nombra la sucursal como la empresa.
+        // Si se omite, el servidor nombra el taller como la organización.
         workshopName: workshopName.trim() || undefined,
       })
 
@@ -138,7 +138,7 @@ export function RegisterPage() {
                   htmlFor="organizationName"
                   className="text-sm font-medium text-gray-900 dark:text-gray-100"
                 >
-                  Nombre de la empresa
+                  Nombre de la organización
                 </label>
                 <Input
                   id="organizationName"
@@ -153,12 +153,12 @@ export function RegisterPage() {
                   htmlFor="workshopName"
                   className="text-sm font-medium text-gray-900 dark:text-gray-100"
                 >
-                  Nombre de la primera sucursal{' '}
+                  Nombre de la primera taller{' '}
                   <span className="font-normal text-gray-500">(opcional)</span>
                 </label>
                 <Input
                   id="workshopName"
-                  placeholder="Si lo dejas vacío, toma el nombre de la empresa"
+                  placeholder="Si lo dejas vacío, toma el nombre de la organización"
                   value={workshopName}
                   onChange={(event) => setWorkshopName(event.target.value)}
                 />

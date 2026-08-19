@@ -6,8 +6,8 @@ export const registerSchema = z.object({
   firstName: z.string().trim().min(1).max(100),
   lastName: z.string().trim().min(1).max(100),
   organizationName: z.string().trim().min(1).max(150),
-  // RF-101: el registro crea tambien la primera sucursal. Si no se indica
-  // nombre, toma el de la empresa — el caso del taller de un solo local.
+  // RF-101: el registro crea tambien el primer taller. Si no se indica
+  // nombre, toma el de la organizacion — el caso del negocio de un solo local.
   workshopName: z.string().trim().min(1).max(150).optional(),
 });
 export type RegisterInput = z.infer<typeof registerSchema>;
@@ -23,7 +23,7 @@ const orgFields = {
 export const createOrganizationSchema = z.object(orgFields);
 export type CreateOrganizationInput = z.infer<typeof createOrganizationSchema>;
 
-/** RF-204: el Owner edita su empresa. Al menos un campo debe venir. */
+/** RF-204: el Owner edita su organizacion. Al menos un campo debe venir. */
 export const updateOrganizationSchema = z
   .object({ ...orgFields, name: orgFields.name.optional() })
   .refine((v) => Object.keys(v).length > 0, 'Debe indicar al menos un campo a modificar.');
@@ -43,7 +43,7 @@ export const updateWorkshopSchema = z
   .refine((v) => Object.keys(v).length > 0, 'Debe indicar al menos un campo a modificar.');
 export type UpdateWorkshopInput = z.infer<typeof updateWorkshopSchema>;
 
-/** RF-304: asignacion operativa de un miembro a una sucursal. No altera permisos. */
+/** RF-304: asignacion operativa de un miembro a un taller. No altera permisos. */
 export const assignMemberSchema = z.object({
   userId: z.string().uuid(),
 });
@@ -62,7 +62,7 @@ export const updateRoleSchema = z.object({
 export type UpdateRoleInput = z.infer<typeof updateRoleSchema>;
 
 // ------------------------------------------------------------------
-// Clientes — nivel empresa (RF-501..505)
+// Clientes — nivel organizacion (RF-501..505)
 // ------------------------------------------------------------------
 const clientFields = {
   firstName: z.string().trim().min(1).max(100),
@@ -93,12 +93,25 @@ export const updateClientSchema = z
 export type UpdateClientInput = z.infer<typeof updateClientSchema>;
 
 // ------------------------------------------------------------------
-// Inventario — nivel sucursal (RF-601..608)
+// Inventario — nivel taller (RF-601..609)
 // ------------------------------------------------------------------
 
-/** RF-604: los seis tipos de movimiento. `adjustment` fija un valor absoluto. */
+/**
+ * Los seis tipos de movimiento que persiste el historial. `adjustment` fija un
+ * valor absoluto; el resto suma o resta (RF-605).
+ */
 export const MOVEMENT_TYPES = ['purchase', 'sale', 'adjustment', 'return', 'transfer', 'damaged'] as const;
 export type MovementType = (typeof MOVEMENT_TYPES)[number];
+
+/**
+ * Tipos que el usuario puede registrar DIRECTAMENTE (RF-604).
+ *
+ * `transfer` queda fuera a proposito: no se registra a mano, lo genera la
+ * transferencia entre talleres (RF-608) como par de movimientos vinculados.
+ * Admitirlo aqui permitiria inventar una entrada sin la salida que la explica,
+ * y la existencia dejaria de poder reconstruirse desde su historial.
+ */
+export const DIRECT_MOVEMENT_TYPES = MOVEMENT_TYPES.filter((t) => t !== 'transfer') as readonly MovementType[];
 
 const partFields = {
   partNumber: z.string().trim().min(1).max(100),
@@ -119,7 +132,7 @@ export const createPartSchema = z
   );
 export type CreatePartInput = z.infer<typeof createPartSchema>;
 
-/** El numero de parte no se edita: identifica la pieza dentro de la sucursal. */
+/** El numero de parte no se edita: identifica la pieza dentro del taller. */
 export const updatePartSchema = z
   .object({
     name: partFields.name.optional(),
@@ -135,7 +148,9 @@ export const updatePartSchema = z
 export type UpdatePartInput = z.infer<typeof updatePartSchema>;
 
 export const movementSchema = z.object({
-  movementType: z.enum(MOVEMENT_TYPES),
+  movementType: z.enum(['purchase', 'sale', 'adjustment', 'return', 'damaged'], {
+    message: 'inventory.invalid_movement_type',
+  }),
   quantity: z.number().int().min(0),
   unitCost: z.number().min(0).optional(),
   reference: z.string().trim().max(100).optional(),
@@ -143,7 +158,7 @@ export const movementSchema = z.object({
 });
 export type MovementInput = z.infer<typeof movementSchema>;
 
-/** RF-608: transferencia entre sucursales de la misma empresa. */
+/** RF-608: transferencia entre talleres de la misma organizacion. */
 export const transferSchema = z.object({
   toWorkshopId: z.string().uuid(),
   toPartId: z.string().uuid(),

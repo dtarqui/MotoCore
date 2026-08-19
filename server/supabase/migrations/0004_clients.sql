@@ -1,12 +1,12 @@
 -- MotoCore — clientes: entidad de NIVEL EMPRESA (RF-501..505)
 --
--- La mitad "empresa" del corte vertical. La tabla NO lleva workshop_id: el
--- cliente pertenece a la empresa y se atiende en cualquiera de sus sucursales.
+-- La mitad "organización" del corte vertical. La tabla NO lleva workshop_id: el
+-- cliente pertenece a la organización y se atiende en cualquiera de sus talleres.
 -- Centralizarlo es justamente el beneficio de administrar varios locales, y
--- fragmentarlo por sucursal anularia ese beneficio (ADR-006).
+-- fragmentarlo por taller anularia ese beneficio (ADR-006).
 --
--- Unicidad por (organization_id, email): dos empresas distintas pueden tener
--- al mismo cliente; dos sucursales de la MISMA empresa, no — es el mismo.
+-- Unicidad por (organization_id, email): dos organizaciones distintas pueden tener
+-- al mismo cliente; dos talleres de la MISMA organización, no — es el mismo.
 
 create table if not exists public.clients (
   id               uuid primary key default gen_random_uuid(),

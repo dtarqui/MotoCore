@@ -3,16 +3,16 @@ import { serviceClient } from '../lib/supabase.js';
 import { requireAuth } from '../lib/auth.js';
 import { requireActiveOrg } from '../lib/org-context.js';
 import { requireActiveWorkshop, assertWorkshopInOrg, type WorkshopBindings } from '../lib/workshop-context.js';
-import { badRequest, conflict, forbidden, notFound } from '../lib/errors.js';
+import { badRequest, conflict, forbidden, internal, notFound } from '../lib/errors.js';
 import { createPartSchema, updatePartSchema, movementSchema, transferSchema } from '../schemas.js';
 import type { Role } from '../types.js';
 
 /**
- * Inventario — entidad de NIVEL SUCURSAL (RF-601..608).
+ * Inventario — entidad de NIVEL TALLER (RF-601..609).
  *
- * A diferencia de clientes, aqui SI se exige la sucursal activa: las
- * existencias son fisicas y pertenecen a un local concreto. Es la otra mitad
- * del corte vertical, la que demuestra que el alcance por nivel funciona.
+ * A diferencia de clientes, aqui SI se exige el taller activo: las existencias
+ * son fisicas y pertenecen a un local concreto. Es la otra mitad del corte
+ * vertical, la que demuestra que el alcance por nivel funciona.
  */
 export const inventoryRoutes = new Hono<WorkshopBindings>();
 
@@ -21,12 +21,22 @@ export const inventoryRoutes = new Hono<WorkshopBindings>();
 const PART_COLUMNS =
   'id, organization_id, workshop_id, part_number, name, description, brand, category, current_stock, minimum_stock, maximum_stock, unit_cost, is_active, created_at, updated_at';
 
-/** El Mechanic consume repuestos, asi que puede registrar movimientos; no administra el catalogo. */
+/**
+ * RF-609: el Mechanic consume repuestos, asi que consulta el inventario y
+ * registra movimientos, pero no administra el catalogo. La transferencia entre
+ * talleres queda reservada al Owner, por mover existencias entre locales.
+ */
 const CATALOG_ROLES: readonly Role[] = ['owner', 'receptionist'];
 
 function assertCanManageCatalog(role: Role): void {
   if (!CATALOG_ROLES.includes(role)) {
     throw forbidden('inventory.insufficient_permissions', 'Tu rol no permite administrar el catalogo de repuestos.');
+  }
+}
+
+function assertCanTransfer(role: Role): void {
+  if (role !== 'owner') {
+    throw forbidden('inventory.insufficient_permissions', 'Solo el Owner puede transferir existencias.');
   }
 }
 
@@ -49,13 +59,18 @@ function mapDbError(message: string, fallbackCode: string): never {
   if (hit === 'inventory.insufficient_stock') {
     throw conflict(hit, 'La existencia es insuficiente para esta operacion.');
   }
+  // El catalogo del contrato fija 403 para el cruce de organizacion: es una
+  // frontera de autorizacion, no una entrada mal formada.
+  if (hit === 'inventory.cross_organization_transfer') {
+    throw forbidden(hit, 'El destino de la transferencia esta fuera de la organizacion.');
+  }
   if (hit) throw badRequest(hit, 'La operacion de inventario no es valida.');
-  throw badRequest(fallbackCode, message);
+  throw internal(fallbackCode + ': ' + message);
 }
 
 inventoryRoutes.use('*', requireAuth, requireActiveOrg, requireActiveWorkshop);
 
-/** Lista los repuestos de la sucursal activa — RF-602. */
+/** Lista los repuestos del taller activo — RF-602. */
 inventoryRoutes.get('/parts', async (c) => {
   const search = c.req.query('search')?.trim();
   const lowStockOnly = c.req.query('lowStock') === 'true';
@@ -73,7 +88,7 @@ inventoryRoutes.get('/parts', async (c) => {
   }
 
   const { data, error } = await query.order('name');
-  if (error) throw badRequest('inventory.lookup_failed', error.message);
+  if (error) throw internal('parts.select: ' + error.message);
 
   const parts = data ?? [];
   // RF-607: en o por debajo del minimo. Se filtra aqui porque PostgREST no
@@ -87,7 +102,7 @@ inventoryRoutes.get('/parts', async (c) => {
 });
 
 /**
- * Registra un repuesto en la sucursal activa — RF-601.
+ * Registra un repuesto en el taller activo — RF-601, RF-609.
  * Si nace con existencia > 0, se genera automaticamente su movimiento de
  * entrada: ninguna existencia debe aparecer sin un movimiento que la explique.
  */
@@ -116,9 +131,9 @@ inventoryRoutes.post('/parts', async (c) => {
 
   if (error) {
     if (error.code === '23505') {
-      throw conflict('inventory.part_number_in_use', 'Ya existe un repuesto con ese numero en esta sucursal.');
+      throw conflict('inventory.duplicate_part_number', 'Ya existe un repuesto con ese numero en este taller.');
     }
-    throw badRequest('inventory.create_failed', error.message);
+    throw internal('parts.insert: ' + error.message);
   }
 
   if ((input.initialStock ?? 0) > 0) {
@@ -145,13 +160,13 @@ inventoryRoutes.post('/parts', async (c) => {
   return c.json({ part }, 201);
 });
 
-/** Detalle de un repuesto de la sucursal activa. */
+/** Detalle de un repuesto del taller activo. */
 inventoryRoutes.get('/parts/:partId', async (c) => {
   const part = await findInWorkshop(c.req.param('partId'), c.get('orgId'), c.get('workshopId'));
   return c.json({ part });
 });
 
-/** Edita los datos de catalogo de un repuesto. La existencia no se toca aqui. */
+/** Edita los datos de catalogo de un repuesto — RF-601, RF-609. La existencia no se toca aqui. */
 inventoryRoutes.patch('/parts/:partId', async (c) => {
   assertCanManageCatalog(c.get('orgRole'));
   const partId = c.req.param('partId');
@@ -175,7 +190,7 @@ inventoryRoutes.patch('/parts/:partId', async (c) => {
     .select(PART_COLUMNS)
     .maybeSingle();
 
-  if (error) throw badRequest('inventory.update_failed', error.message);
+  if (error) throw internal('parts.update: ' + error.message);
   if (!data) throw notFound('inventory.part_not_found', 'Repuesto no encontrado.');
 
   return c.json({ part: data });
@@ -192,7 +207,7 @@ inventoryRoutes.get('/parts/:partId/movements', async (c) => {
     .eq('part_id', partId)
     .order('created_at', { ascending: false });
 
-  if (error) throw badRequest('inventory.lookup_failed', error.message);
+  if (error) throw internal('part_movements.select: ' + error.message);
   return c.json({ movements: data ?? [] });
 });
 
@@ -222,16 +237,18 @@ inventoryRoutes.post('/parts/:partId/movements', async (c) => {
 });
 
 /**
- * Transfiere existencias a otra sucursal de la misma empresa — RF-608.
- * El repuesto de destino debe existir ya en la sucursal receptora.
+ * Transfiere existencias a otro taller de la misma organizacion — RF-608.
+ * Reservada al Owner (RF-609). El repuesto de destino debe existir ya en el
+ * taller receptor.
  */
 inventoryRoutes.post('/parts/:partId/transfer', async (c) => {
+  assertCanTransfer(c.get('orgRole'));
   const partId = c.req.param('partId');
   const orgId = c.get('orgId');
   await findInWorkshop(partId, orgId, c.get('workshopId'));
   const input = transferSchema.parse(await c.req.json());
 
-  // La sucursal de destino debe pertenecer a la empresa activa: una
+  // El taller de destino debe pertenecer a la organizacion activa: una
   // transferencia no puede cruzar el limite de aislamiento.
   await assertWorkshopInOrg(input.toWorkshopId, orgId);
 
@@ -243,8 +260,8 @@ inventoryRoutes.post('/parts/:partId/transfer', async (c) => {
     .eq('workshop_id', input.toWorkshopId)
     .maybeSingle();
 
-  if (targetErr) throw badRequest('inventory.lookup_failed', targetErr.message);
-  if (!target) throw notFound('inventory.part_not_found', 'El repuesto de destino no existe en esa sucursal.');
+  if (targetErr) throw internal('parts.select: ' + targetErr.message);
+  if (!target) throw notFound('inventory.part_not_found', 'El repuesto de destino no existe en ese taller.');
 
   const { error } = await serviceClient().rpc('transfer_stock', {
     p_from_part_id: partId,
@@ -259,9 +276,8 @@ inventoryRoutes.post('/parts/:partId/transfer', async (c) => {
 });
 
 /**
- * Recupera el repuesto exigiendo que sea de la sucursal activa. Un repuesto de
- * otra sucursal responde "no encontrado" (RF-602): desde esta sucursal, no
- * existe.
+ * Recupera el repuesto exigiendo que sea del taller activo. Un repuesto de otro
+ * taller responde "no encontrado" (RF-602): desde este taller, no existe.
  */
 async function findInWorkshop(
   partId: string,
@@ -276,7 +292,7 @@ async function findInWorkshop(
     .eq('workshop_id', workshopId)
     .maybeSingle();
 
-  if (error) throw badRequest('inventory.lookup_failed', error.message);
+  if (error) throw internal('parts.select: ' + error.message);
   if (!data) throw notFound('inventory.part_not_found', 'Repuesto no encontrado.');
   return data as Record<string, unknown>;
 }

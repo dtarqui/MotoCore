@@ -1,24 +1,27 @@
 import { Hono } from 'hono';
 import { serviceClient } from '../lib/supabase.js';
 import { requireAuth } from '../lib/auth.js';
-import { requireMembership, requireOwner, getMembership } from '../lib/memberships.js';
-import { badRequest, conflict, notFound } from '../lib/errors.js';
+import { requireMembership, requireOwner } from '../lib/memberships.js';
+import { internal, notFound } from '../lib/errors.js';
 import { recordAudit } from '../lib/audit.js';
-import {
-  createOrganizationSchema,
-  updateOrganizationSchema,
-  inviteMemberSchema,
-  updateRoleSchema,
-} from '../schemas.js';
+import { createOrganizationSchema, updateOrganizationSchema } from '../schemas.js';
 import type { AppBindings, Organization } from '../types.js';
 
+/**
+ * Organizaciones de la cuenta — RF-201..204.
+ *
+ * Es el UNICO modulo cuyo identificador de organizacion viaja en la ruta, y la
+ * razon la fija el §2.3 del contrato: aqui la organizacion es el recurso, no el
+ * contexto. Todo lo interior a ella —talleres, miembros, clientes, inventario,
+ * auditoria— se resuelve por cabecera.
+ */
 export const organizationRoutes = new Hono<AppBindings>();
 
 const ORG_COLUMNS = 'id, name, description, address, phone, email, owner_id, is_active, created_at, updated_at';
 
 organizationRoutes.use('*', requireAuth);
 
-/** Lista las organizaciones donde el usuario tiene una membership activa (no por ownership). */
+/** Lista las organizaciones donde la cuenta tiene membresia activa (no por propiedad) — RF-202. */
 organizationRoutes.get('/', async (c) => {
   const userId = c.get('userId');
   const { data, error } = await serviceClient()
@@ -27,7 +30,7 @@ organizationRoutes.get('/', async (c) => {
     .eq('user_id', userId)
     .eq('is_active', true);
 
-  if (error) throw badRequest('membership.lookup_failed', error.message);
+  if (error) throw internal(`memberships.select: ${error.message}`);
 
   const organizations = (data ?? [])
     .filter((m: Record<string, unknown>) => m.organizations)
@@ -36,7 +39,7 @@ organizationRoutes.get('/', async (c) => {
   return c.json({ organizations });
 });
 
-/** Crea una organizacion nueva y agrega al creador como Owner. */
+/** Crea una organizacion nueva; el solicitante queda como Owner — RF-201. */
 organizationRoutes.post('/', async (c) => {
   const input = createOrganizationSchema.parse(await c.req.json());
   const userId = c.get('userId');
@@ -55,18 +58,18 @@ organizationRoutes.post('/', async (c) => {
     .select(ORG_COLUMNS)
     .single();
 
-  if (orgErr || !org) throw badRequest('organization.create_failed', orgErr?.message ?? 'No se pudo crear.');
+  if (orgErr || !org) throw internal(`organizations.insert: ${orgErr?.message ?? 'sin fila'}`);
 
   const { error: memErr } = await db
     .from('memberships')
     .insert({ organization_id: (org as Organization).id, user_id: userId, role: 'owner' });
 
-  if (memErr) throw badRequest('membership.create_failed', memErr.message);
+  if (memErr) throw internal(`memberships.insert: ${memErr.message}`);
 
   return c.json({ organization: org }, 201);
 });
 
-/** Detalle de una organizacion (requiere membership). */
+/** Detalle de una organizacion (requiere membresia). */
 organizationRoutes.get('/:orgId', async (c) => {
   const orgId = c.req.param('orgId');
   await requireMembership(orgId, c.get('userId'));
@@ -77,16 +80,19 @@ organizationRoutes.get('/:orgId', async (c) => {
     .eq('id', orgId)
     .maybeSingle();
 
-  if (error) throw badRequest('organization.lookup_failed', error.message);
+  if (error) throw internal(`organizations.select: ${error.message}`);
   if (!org) throw notFound('organization.not_found', 'Organizacion no encontrada.');
 
   return c.json({ organization: org });
 });
 
 /**
- * Cambiar de organizacion activa: valida la membership y devuelve org + rol.
- * El cliente guarda el orgId activo y lo envia como X-Org-Id en las llamadas
- * de negocio (RF-203, ADR-005).
+ * Cambiar de organizacion activa — RF-203, ADR-005.
+ *
+ * No cambia estado en el servidor: no hay sesion que actualizar. VALIDA que la
+ * cuenta pueda operar sobre esa organizacion y devuelve el rol, para que el
+ * cliente guarde el contexto y lo envie como `X-Org-Id` en las llamadas
+ * siguientes.
  */
 organizationRoutes.post('/:orgId/switch', async (c) => {
   const orgId = c.req.param('orgId');
@@ -98,16 +104,16 @@ organizationRoutes.post('/:orgId/switch', async (c) => {
     .eq('id', orgId)
     .maybeSingle();
 
-  if (error) throw badRequest('organization.lookup_failed', error.message);
+  if (error) throw internal(`organizations.select: ${error.message}`);
   if (!org) throw notFound('organization.not_found', 'Organizacion no encontrada.');
 
   return c.json({ organization: org, role });
 });
 
-/** Editar los datos de la organizacion (solo Owner) — RF-204. */
+/** Edita los datos de la organizacion (solo Owner) — RF-204. Accion auditada (RF-703). */
 organizationRoutes.patch('/:orgId', async (c) => {
   const orgId = c.req.param('orgId');
-  await requireOwner(orgId, c.get('userId'));
+  await requireOwner(orgId, c.get('userId'), 'organization');
   const input = updateOrganizationSchema.parse(await c.req.json());
 
   const { data: org, error } = await serviceClient()
@@ -117,167 +123,17 @@ organizationRoutes.patch('/:orgId', async (c) => {
     .select(ORG_COLUMNS)
     .maybeSingle();
 
-  if (error) throw badRequest('organization.update_failed', error.message);
+  if (error) throw internal(`organizations.update: ${error.message}`);
   if (!org) throw notFound('organization.not_found', 'Organizacion no encontrada.');
+
+  await recordAudit({
+    organizationId: orgId,
+    performedBy: c.get('userId'),
+    action: 'organization.updated',
+    entity: 'organization',
+    entityId: orgId,
+    details: { fields: Object.keys(input) },
+  });
 
   return c.json({ organization: org });
 });
-
-/** Lista los miembros de la organizacion (requiere membership). */
-organizationRoutes.get('/:orgId/members', async (c) => {
-  const orgId = c.req.param('orgId');
-  await requireMembership(orgId, c.get('userId'));
-  const db = serviceClient();
-
-  const { data: members, error } = await db
-    .from('memberships')
-    .select('user_id, role, is_active, joined_at')
-    .eq('organization_id', orgId);
-
-  if (error) throw badRequest('membership.lookup_failed', error.message);
-
-  const userIds = (members ?? []).map((m: Record<string, unknown>) => m.user_id as string);
-  const profilesById = new Map<string, Record<string, unknown>>();
-  if (userIds.length > 0) {
-    const { data: profiles } = await db
-      .from('profiles')
-      .select('id, email, first_name, last_name')
-      .in('id', userIds);
-    for (const p of profiles ?? []) profilesById.set((p as { id: string }).id, p as Record<string, unknown>);
-  }
-
-  const result = (members ?? []).map((m: Record<string, unknown>) => ({
-    userId: m.user_id,
-    role: m.role,
-    isActive: m.is_active,
-    joinedAt: m.joined_at,
-    profile: profilesById.get(m.user_id as string) ?? null,
-  }));
-
-  return c.json({ members: result });
-});
-
-/** Invitar un usuario existente a la organizacion (solo Owner). */
-organizationRoutes.post('/:orgId/members/invite', async (c) => {
-  const orgId = c.req.param('orgId');
-  await requireOwner(orgId, c.get('userId'));
-  const input = inviteMemberSchema.parse(await c.req.json());
-  const db = serviceClient();
-
-  const { data: targetUserId, error: rpcErr } = await db.rpc('get_user_id_by_email', {
-    p_email: input.email,
-  });
-  if (rpcErr) throw badRequest('membership.lookup_failed', rpcErr.message);
-  if (!targetUserId) {
-    throw notFound('membership.user_not_found', 'No existe una cuenta con ese email.');
-  }
-
-  const existing = await getMembership(orgId, targetUserId as string);
-  if (existing) {
-    if (existing.is_active) throw conflict('membership.already_member', 'El usuario ya es miembro.');
-    // Reactivar una membership desactivada.
-    const { error } = await db
-      .from('memberships')
-      .update({ role: input.role, is_active: true, updated_at: new Date().toISOString() })
-      .eq('organization_id', orgId)
-      .eq('user_id', targetUserId as string);
-    if (error) throw badRequest('membership.update_failed', error.message);
-    return c.json({ userId: targetUserId, role: input.role }, 201);
-  }
-
-  const { error } = await db
-    .from('memberships')
-    .insert({ organization_id: orgId, user_id: targetUserId as string, role: input.role });
-  if (error) throw badRequest('membership.create_failed', error.message);
-
-  await recordAudit({
-    organizationId: orgId,
-    performedBy: c.get('userId'),
-    action: 'member.invited',
-    entity: 'membership',
-    entityId: targetUserId as string,
-    details: { role: input.role },
-  });
-
-  return c.json({ userId: targetUserId, role: input.role }, 201);
-});
-
-/** Cambiar el rol de un miembro (solo Owner). No aplica al Owner de la organizacion. */
-organizationRoutes.patch('/:orgId/members/:userId/role', async (c) => {
-  const orgId = c.req.param('orgId');
-  const targetUserId = c.req.param('userId');
-  await requireOwner(orgId, c.get('userId'));
-  const input = updateRoleSchema.parse(await c.req.json());
-  const db = serviceClient();
-
-  const org = await getOrganizationOwner(orgId);
-  if (org.owner_id === targetUserId) {
-    throw badRequest('membership.cannot_change_owner_role', 'No se puede cambiar el rol del Owner.');
-  }
-
-  const target = await getMembership(orgId, targetUserId);
-  if (!target) throw notFound('membership.not_found', 'El usuario no es miembro de esta organizacion.');
-
-  const { error } = await db
-    .from('memberships')
-    .update({ role: input.role, updated_at: new Date().toISOString() })
-    .eq('organization_id', orgId)
-    .eq('user_id', targetUserId);
-  if (error) throw badRequest('membership.update_failed', error.message);
-
-  await recordAudit({
-    organizationId: orgId,
-    performedBy: c.get('userId'),
-    action: 'member.role_changed',
-    entity: 'membership',
-    entityId: targetUserId,
-    details: { from: target.role, to: input.role },
-  });
-
-  return c.json({ userId: targetUserId, role: input.role });
-});
-
-/** Quitar un miembro (solo Owner). No se puede quitar al Owner de la organizacion. */
-organizationRoutes.delete('/:orgId/members/:userId', async (c) => {
-  const orgId = c.req.param('orgId');
-  const targetUserId = c.req.param('userId');
-  await requireOwner(orgId, c.get('userId'));
-  const db = serviceClient();
-
-  const org = await getOrganizationOwner(orgId);
-  if (org.owner_id === targetUserId) {
-    throw badRequest('membership.cannot_remove_owner', 'No se puede quitar al Owner de la organizacion.');
-  }
-
-  const target = await getMembership(orgId, targetUserId);
-  if (!target) throw notFound('membership.not_found', 'El usuario no es miembro de esta organizacion.');
-
-  const { error } = await db
-    .from('memberships')
-    .delete()
-    .eq('organization_id', orgId)
-    .eq('user_id', targetUserId);
-  if (error) throw badRequest('membership.delete_failed', error.message);
-
-  await recordAudit({
-    organizationId: orgId,
-    performedBy: c.get('userId'),
-    action: 'member.removed',
-    entity: 'membership',
-    entityId: targetUserId,
-    details: { role: target.role },
-  });
-
-  return c.body(null, 204);
-});
-
-async function getOrganizationOwner(orgId: string): Promise<{ owner_id: string }> {
-  const { data, error } = await serviceClient()
-    .from('organizations')
-    .select('owner_id')
-    .eq('id', orgId)
-    .maybeSingle();
-  if (error) throw badRequest('organization.lookup_failed', error.message);
-  if (!data) throw notFound('organization.not_found', 'Organizacion no encontrada.');
-  return data as { owner_id: string };
-}

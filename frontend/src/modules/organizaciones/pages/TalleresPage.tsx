@@ -9,8 +9,8 @@ import { Badge } from '@/shared/ui/badge'
 import { getActiveOrgId } from '@/shared/lib/active-context'
 import { createWorkshop, deactivateWorkshop, getWorkshops } from '../organizaciones-api'
 
-/** Sucursales de la empresa activa (HU-06 · RF-301, RF-302, RF-305). */
-export function SucursalesPage() {
+/** Talleres de la organización activa (HU-06 · RF-301, RF-302, RF-305). */
+export function TalleresPage() {
   const { hasAnyRole } = useAuth()
   const queryClient = useQueryClient()
   const orgId = getActiveOrgId()
@@ -21,7 +21,7 @@ export function SucursalesPage() {
 
   const workshopsQuery = useQuery({
     queryKey: ['workshops', orgId],
-    queryFn: () => getWorkshops(orgId!),
+    queryFn: () => getWorkshops(),
     enabled: Boolean(orgId),
   })
 
@@ -29,7 +29,7 @@ export function SucursalesPage() {
 
   const createMutation = useMutation({
     mutationFn: () =>
-      createWorkshop(orgId!, {
+      createWorkshop({
         name: form.name,
         address: form.address || undefined,
         phone: form.phone || undefined,
@@ -43,7 +43,7 @@ export function SucursalesPage() {
   })
 
   const deactivateMutation = useMutation({
-    mutationFn: (workshopId: string) => deactivateWorkshop(orgId!, workshopId),
+    mutationFn: (workshopId: string) => deactivateWorkshop(workshopId),
     onSuccess: invalidate,
     onError: (err: Error) => setError(err.message),
   })
@@ -53,8 +53,8 @@ export function SucursalesPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Sucursales"
-        description="Locales de la empresa. La sucursal indica dónde ocurre una operación; no restringe quién puede verla."
+        title="Talleres"
+        description="Locales de la organización. El taller indica dónde ocurre una operación; no restringe quién puede verla."
       />
 
       {error ? <Alert variant="destructive">{error}</Alert> : null}
@@ -67,10 +67,10 @@ export function SucursalesPage() {
             createMutation.mutate()
           }}
         >
-          <h2 className="sm:col-span-3 text-sm font-semibold text-slate-700">Nueva sucursal</h2>
+          <h2 className="sm:col-span-3 text-sm font-semibold text-slate-700">Nuevo taller</h2>
           <Input
             required
-            placeholder="Nombre (único en la empresa)"
+            placeholder="Nombre (único en la organización)"
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
           />
@@ -86,16 +86,16 @@ export function SucursalesPage() {
           />
           <div className="sm:col-span-3">
             <Button type="submit" disabled={createMutation.isPending}>
-              Crear sucursal
+              Crear taller
             </Button>
           </div>
         </form>
       ) : (
-        <Alert>Solo el Propietario puede administrar las sucursales de la empresa.</Alert>
+        <Alert>Solo el Propietario puede administrar los talleres de la organización.</Alert>
       )}
 
       {workshopsQuery.isLoading ? (
-        <p className="text-sm text-slate-500">Cargando sucursales…</p>
+        <p className="text-sm text-slate-500">Cargando talleres…</p>
       ) : (
         <ul className="divide-y divide-slate-200 rounded-lg border border-slate-200">
           {workshops.map((workshop) => (

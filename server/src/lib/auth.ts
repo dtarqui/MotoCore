@@ -12,12 +12,12 @@ export const requireAuth: MiddlewareHandler<AppBindings> = async (c, next) => {
   const header = c.req.header('Authorization') ?? '';
   const token = header.startsWith('Bearer ') ? header.slice(7).trim() : '';
   if (!token) {
-    throw unauthorized('auth.unauthorized', 'Falta el token de acceso.');
+    throw unauthorized('auth.missing_token', 'Falta la credencial de sesion.');
   }
 
   const { data, error } = await serviceClient().auth.getUser(token);
   if (error || !data.user) {
-    throw unauthorized('auth.invalid_token', 'Token invalido o expirado.');
+    throw unauthorized('auth.invalid_token', 'Credencial invalida, expirada o revocada.');
   }
 
   c.set('userId', data.user.id);

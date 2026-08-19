@@ -5,6 +5,10 @@ import { ZodError } from 'zod';
  * Error de negocio con codigo `modulo.razon` y un status HTTP asociado.
  * Se serializa como Problem Details (RFC 9457) para cumplir RNF-204: formato
  * uniforme y codigos estables en todas las respuestas de error.
+ *
+ * Los codigos que puede emitir la API son EXACTAMENTE los del §4 del contrato
+ * de la interfaz. Un fallo que no corresponda a ninguno de ellos no inventa un
+ * codigo nuevo: se propaga como `server.error` (500) a traves de `internal()`.
  */
 export class AppError extends Error {
   constructor(
@@ -22,6 +26,19 @@ export const unauthorized = (code: string, message: string) => new AppError(code
 export const forbidden = (code: string, message: string) => new AppError(code, message, 403);
 export const notFound = (code: string, message: string) => new AppError(code, message, 404);
 export const conflict = (code: string, message: string) => new AppError(code, message, 409);
+
+/**
+ * Fallo del lado del servidor: la operacion no se completo y no dejo nada
+ * aplicado (§2.6 del contrato). Es lo que corresponde a un error inesperado de
+ * la base de datos, que no contradice ninguna regla de negocio.
+ *
+ * `cause` no viaja al cliente —revelaria detalle interno—, pero se registra en
+ * consola para poder diagnosticar el fallo.
+ */
+export function internal(cause: string, message = 'No se pudo completar la operacion.'): AppError {
+  console.error('[server.error]', cause);
+  return new AppError('server.error', message, 500);
+}
 
 /** Problem Details for HTTP APIs (RFC 9457). `title` transporta el codigo `modulo.razon`. */
 interface ProblemDetails {
@@ -55,7 +72,7 @@ export function handleError(err: unknown, c: Context): Response {
       (fieldErrors[key] ??= []).push(issue.message);
     }
     return c.json(
-      problem(400, 'validation.failed', 'Uno o mas campos son invalidos.', fieldErrors),
+      problem(400, 'validation.invalid_body', 'Uno o mas campos son invalidos.', fieldErrors),
       400,
     );
   }

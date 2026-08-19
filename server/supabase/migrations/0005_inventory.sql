@@ -1,11 +1,11 @@
 -- MotoCore — inventario: entidad de NIVEL SUCURSAL (RF-601..608)
 --
--- La mitad "sucursal" del corte vertical. Cada local tiene existencias fisicas
+-- La mitad "taller" del corte vertical. Cada local tiene existencias fisicas
 -- propias, asi que estas tablas llevan workshop_id ADEMAS de organization_id.
 --
 -- Punto clave del diseño (ADR-006): las politicas RLS se evaluan sobre
--- organization_id, NO sobre workshop_id. La pertenencia de la sucursal a la
--- empresa activa la valida la aplicacion. Asi todo el esquema conserva un solo
+-- organization_id, NO sobre workshop_id. La pertenencia de el taller a la
+-- organización activa la valida la aplicacion. Asi todo el esquema conserva un solo
 -- criterio de aislamiento y las politicas siguen siendo inspeccionables.
 
 -- ------------------------------------------------------------------
@@ -142,9 +142,9 @@ end;
 $$;
 
 -- ------------------------------------------------------------------
--- Transferencia entre sucursales (RF-608)
+-- Transferencia entre talleres (RF-608)
 -- Dos movimientos vinculados en la misma transaccion, ambos dentro de la
--- MISMA empresa: una transferencia nunca cruza el limite de aislamiento.
+-- MISMA organización: una transferencia nunca cruza el limite de aislamiento.
 -- ------------------------------------------------------------------
 create or replace function public.transfer_stock(
   p_from_part_id  uuid,

@@ -2,16 +2,17 @@ import { Hono } from 'hono';
 import { serviceClient } from '../lib/supabase.js';
 import { requireAuth } from '../lib/auth.js';
 import { requireActiveOrg, type OrgBindings } from '../lib/org-context.js';
-import { badRequest, conflict, forbidden, notFound } from '../lib/errors.js';
+import { conflict, forbidden, internal, notFound } from '../lib/errors.js';
+import { recordAudit } from '../lib/audit.js';
 import { createClientSchema, updateClientSchema } from '../schemas.js';
 import type { Role } from '../types.js';
 
 /**
- * Clientes — entidad de NIVEL EMPRESA (RF-501..505).
+ * Clientes — entidad de NIVEL ORGANIZACION (RF-501..505).
  *
- * Solo exige la organizacion activa, no la sucursal: esa ausencia es
- * deliberada y es lo que demuestra RF-502. Un cliente registrado operando con
- * una sucursal se ve igual operando con cualquier otra de la misma empresa.
+ * Solo exige la organizacion activa, no el taller: esa ausencia es deliberada
+ * y es lo que demuestra RF-502. Un cliente registrado operando con un taller
+ * se ve igual operando con cualquier otro de la misma organizacion.
  */
 export const clientRoutes = new Hono<OrgBindings>();
 
@@ -29,7 +30,7 @@ function assertCanWrite(role: Role): void {
 
 clientRoutes.use('*', requireAuth, requireActiveOrg);
 
-/** Lista los clientes de la empresa activa, con busqueda opcional — RF-502, RF-504. */
+/** Lista los clientes de la organizacion activa, con busqueda opcional — RF-502, RF-504. */
 clientRoutes.get('/', async (c) => {
   const orgId = c.get('orgId');
   const search = c.req.query('search')?.trim();
@@ -46,12 +47,12 @@ clientRoutes.get('/', async (c) => {
   }
 
   const { data, error } = await query.order('last_name').order('first_name');
-  if (error) throw badRequest('client.lookup_failed', error.message);
+  if (error) throw internal(`clients.select: ${error.message}`);
 
   return c.json({ clients: data ?? [] });
 });
 
-/** Registra un cliente en la empresa activa — RF-501. */
+/** Registra un cliente en la organizacion activa — RF-501. */
 clientRoutes.post('/', async (c) => {
   assertCanWrite(c.get('orgRole'));
   const orgId = c.get('orgId');
@@ -74,15 +75,15 @@ clientRoutes.post('/', async (c) => {
 
   if (error) {
     if (error.code === '23505') {
-      throw conflict('client.email_in_use', 'Ya existe un cliente con ese email en la empresa.');
+      throw conflict('client.duplicate_email', 'Ya existe un cliente con ese correo en la organizacion.');
     }
-    throw badRequest('client.create_failed', error.message);
+    throw internal(`clients.insert: ${error.message}`);
   }
 
   return c.json({ client: data }, 201);
 });
 
-/** Detalle de un cliente de la empresa activa. */
+/** Detalle de un cliente de la organizacion activa. */
 clientRoutes.get('/:clientId', async (c) => {
   const client = await findInOrg(c.req.param('clientId'), c.get('orgId'));
   return c.json({ client });
@@ -115,17 +116,23 @@ clientRoutes.patch('/:clientId', async (c) => {
 
   if (error) {
     if (error.code === '23505') {
-      throw conflict('client.email_in_use', 'Ya existe un cliente con ese email en la empresa.');
+      throw conflict('client.duplicate_email', 'Ya existe un cliente con ese correo en la organizacion.');
     }
-    throw badRequest('client.update_failed', error.message);
+    throw internal(`clients.update: ${error.message}`);
   }
   if (!data) throw notFound('client.not_found', 'Cliente no encontrado.');
 
   return c.json({ client: data });
 });
 
-/** Baja logica: conserva el registro y lo saca de los listados activos — RF-504. */
-clientRoutes.patch('/:clientId/deactivate', async (c) => {
+/**
+ * Baja logica del cliente — RF-504. Accion auditada (RF-703).
+ *
+ * Se expone como `POST /deactivate` y no como `PATCH`: es una transicion de
+ * estado con consecuencias de auditoria, no la edicion de un campo (§2.6 del
+ * contrato). El registro se conserva y solo sale de los listados activos.
+ */
+clientRoutes.post('/:clientId/deactivate', async (c) => {
   assertCanWrite(c.get('orgRole'));
   const clientId = c.req.param('clientId');
   const orgId = c.get('orgId');
@@ -139,16 +146,24 @@ clientRoutes.patch('/:clientId/deactivate', async (c) => {
     .select(CLIENT_COLUMNS)
     .maybeSingle();
 
-  if (error) throw badRequest('client.update_failed', error.message);
+  if (error) throw internal(`clients.update: ${error.message}`);
   if (!data) throw notFound('client.not_found', 'Cliente no encontrado.');
+
+  await recordAudit({
+    organizationId: orgId,
+    performedBy: c.get('userId'),
+    action: 'client.deactivated',
+    entity: 'client',
+    entityId: clientId,
+  });
 
   return c.json({ client: data });
 });
 
 /**
- * Recupera el cliente exigiendo que sea de la empresa activa. Un cliente de
- * otra empresa devuelve "no encontrado", no "prohibido" (RNF-105): distinguir
- * ambos casos revelaria que ese identificador existe en otra empresa.
+ * Recupera el cliente exigiendo que sea de la organizacion activa. Un cliente
+ * de otra organizacion devuelve "no encontrado", no "prohibido" (RNF-105):
+ * distinguir ambos casos revelaria que ese identificador existe en otra parte.
  */
 async function findInOrg(clientId: string, orgId: string): Promise<Record<string, unknown>> {
   const { data, error } = await serviceClient()
@@ -158,7 +173,7 @@ async function findInOrg(clientId: string, orgId: string): Promise<Record<string
     .eq('organization_id', orgId)
     .maybeSingle();
 
-  if (error) throw badRequest('client.lookup_failed', error.message);
+  if (error) throw internal(`clients.select: ${error.message}`);
   if (!data) throw notFound('client.not_found', 'Cliente no encontrado.');
   return data as Record<string, unknown>;
 }

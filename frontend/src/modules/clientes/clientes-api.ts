@@ -2,8 +2,9 @@ import { apiRequest } from '@/shared/lib/api-client'
 import type { Client, ClientUpsertPayload } from './types'
 
 /**
- * Clientes: nivel empresa. Ninguna llamada usa `withWorkshop`, y esa ausencia
- * es intencional — el cliente se ve igual desde cualquier sucursal (RF-502).
+ * Clientes: nivel organización. Ninguna llamada usa `withWorkshop`, y esa
+ * ausencia es intencional — el cliente se ve igual desde cualquier taller de la
+ * organización (RF-502).
  */
 
 /** Omite las cadenas vacías para no enviar un email vacío que falle la validación. */
@@ -49,9 +50,14 @@ export function updateClient(clientId: string, payload: ClientUpsertPayload) {
   }).then((r) => r.client)
 }
 
-/** Baja lógica: conserva el registro y su historial (RF-504). */
+/**
+ * Baja lógica: conserva el registro y su historial (RF-504).
+ *
+ * Es `POST /deactivate` y no `PATCH`: una transición de estado auditada no se
+ * modela como la edición de un campo (§2.6 del contrato).
+ */
 export function deactivateClient(clientId: string) {
   return apiRequest<{ client: Client }>(`/api/clients/${clientId}/deactivate`, {
-    method: 'PATCH',
+    method: 'POST',
   }).then((r) => r.client)
 }

@@ -1,5 +1,4 @@
 import { describe, it, expect } from 'vitest';
-import { Hono } from 'hono';
 import { createApp } from '../src/app.js';
 import {
   createWorkshopSchema,
@@ -8,63 +7,77 @@ import {
   updateOrganizationSchema,
 } from '../src/schemas.js';
 
-const ORG = '00000000-0000-0000-0000-000000000000';
+const UUID = '00000000-0000-0000-0000-000000000000';
 
-describe('rutas de sucursales', () => {
+describe('rutas de talleres y miembros', () => {
   const app = createApp();
 
-  it('listar sucursales sin token responde 401', async () => {
-    const res = await app.request(`/api/organizations/${ORG}/workshops`);
+  it('listar talleres sin credencial responde 401', async () => {
+    const res = await app.request('/api/workshops');
     expect(res.status).toBe(401);
-    const body = (await res.json()) as { title: string };
-    expect(body.title).toBe('auth.unauthorized');
+    expect(((await res.json()) as { title: string }).title).toBe('auth.missing_token');
   });
 
-  it('crear sucursal sin token responde 401', async () => {
-    const res = await app.request(`/api/organizations/${ORG}/workshops`, {
+  it('crear taller sin credencial responde 401', async () => {
+    const res = await app.request('/api/workshops', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: 'Sucursal Centro' }),
+      body: JSON.stringify({ name: 'Taller Centro' }),
     });
     expect(res.status).toBe(401);
   });
 
-  it('asignar miembro sin token responde 401 (ruta anidada de dos niveles)', async () => {
-    const res = await app.request(`/api/organizations/${ORG}/workshops/${ORG}/assignments`, {
+  it('asignar miembro a un taller sin credencial responde 401', async () => {
+    const res = await app.request(`/api/workshops/${UUID}/assignments`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId: ORG }),
+      body: JSON.stringify({ userId: UUID }),
     });
     expect(res.status).toBe(401);
   });
 
-  it('las sucursales no capturan las rutas de miembros de la empresa', async () => {
-    // Regresion: montar /api/organizations/:orgId/workshops no debe romper
-    // /api/organizations/:orgId/members, que vive en otro sub-app.
-    const res = await app.request(`/api/organizations/${ORG}/members`);
+  it('cambiar el rol de un miembro sin credencial responde 401', async () => {
+    const res = await app.request(`/api/members/${UUID}/role`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ role: 'mechanic' }),
+    });
     expect(res.status).toBe(401);
   });
 });
 
-describe('propagacion del parametro del prefijo montado', () => {
-  // El modulo de sucursales lee c.req.param('orgId'), que proviene del prefijo
-  // con el que se monta el sub-app. Si Hono dejara de propagarlo, todas las
-  // comprobaciones de pertenencia a la empresa se harian contra undefined.
-  it('un sub-app montado bajo :orgId recibe el parametro', async () => {
-    const sub = new Hono();
-    sub.get('/', (c) => c.json({ orgId: c.req.param('orgId') ?? null }));
+/**
+ * Regla de rutas del §2.3 del contrato. Se comprueba como REGRESION: la
+ * organizacion aparece en la ruta solo cuando es el recurso; todo lo interior a
+ * ella se resuelve por cabecera. Admitir las dos formas dejaria dos mecanismos
+ * de contexto conviviendo y la validacion dejaria de estar en un punto unico.
+ */
+describe('regla de rutas: el contexto viaja por cabecera', () => {
+  const app = createApp();
 
-    const parent = new Hono();
-    parent.route('/api/organizations/:orgId/workshops', sub);
+  it('los recursos interiores se montan en la raiz de /api, no bajo la organizacion', async () => {
+    // Estan montados y protegidos: responden 401, no 404.
+    for (const ruta of ['/api/workshops', '/api/members', '/api/clients', '/api/inventory/parts']) {
+      expect((await app.request(ruta)).status, ruta).toBe(401);
+    }
+  });
 
-    const res = await parent.request('/api/organizations/abc-123/workshops');
-    expect(res.status).toBe(200);
-    expect(await res.json()).toEqual({ orgId: 'abc-123' });
+  // Que las rutas anidadas hayan DESAPARECIDO no puede comprobarse en este
+  // nivel: `organizationRoutes` aplica requireAuth a todo `/api/organizations/*`,
+  // de modo que sin credencial la respuesta es 401 tanto si hay handler como si
+  // no. La regresion se verifica en N3 —con credencial valida— en
+  // integration.test.ts, donde el 404 si distingue ambos casos.
+
+  it('la organizacion sigue siendo un recurso con identificador en la ruta', async () => {
+    // Lo que SI conserva la ruta anidada es la organizacion misma y su cambio
+    // de contexto: ahi la organizacion es el recurso, no el contexto.
+    expect((await app.request(`/api/organizations/${UUID}`)).status).toBe(401);
+    expect((await app.request(`/api/organizations/${UUID}/switch`, { method: 'POST' })).status).toBe(401);
   });
 });
 
-describe('esquemas de sucursal', () => {
-  it('acepta una sucursal con solo el nombre', () => {
+describe('esquemas de taller y organizacion', () => {
+  it('acepta un taller con solo el nombre', () => {
     expect(createWorkshopSchema.parse({ name: 'Centro' })).toEqual({ name: 'Centro' });
   });
 
@@ -81,8 +94,8 @@ describe('esquemas de sucursal', () => {
     expect(updateWorkshopSchema.safeParse({ phone: '77712345' }).success).toBe(true);
   });
 
-  it('la asignacion exige un identificador de usuario valido', () => {
+  it('la asignacion exige un identificador de cuenta valido', () => {
     expect(assignMemberSchema.safeParse({ userId: 'no-es-uuid' }).success).toBe(false);
-    expect(assignMemberSchema.safeParse({ userId: ORG }).success).toBe(true);
+    expect(assignMemberSchema.safeParse({ userId: UUID }).success).toBe(true);
   });
 });

@@ -5,13 +5,13 @@
 
 # MotoCore
 
-Plataforma SaaS para la gestión integral de talleres de motocicletas, evolucionando hacia un modelo **ERP multiempresa**: una cuenta administra varias empresas, y cada empresa opera varias sucursales. **Mercado objetivo por ahora: Bolivia.**
+Plataforma SaaS para la gestión integral de talleres de motocicletas, evolucionando hacia un modelo **ERP multiorganización**: una cuenta administra varias organizaciones, y cada organización opera varios talleres. **Mercado objetivo por ahora: Bolivia.**
 
-> **Estado — pivote de backend en curso.** El backend se está reescribiendo de **.NET → Node/TypeScript + Supabase** para desplegar en **Vercel**. En el repo conviven dos backends: `server/` (el **nuevo**, objetivo) y `backend/` (**.NET legacy**, referencia hasta que `server/` lo reemplace). El frontend sigue, por ahora, contra el backend .NET. El detalle técnico del backend nuevo está en [server/README.md](server/README.md); la especificación que gobierna la construcción, en [docs/](docs/README.md).
+> **Estado — pivote de backend en curso.** El backend se está reescribiendo de **.NET → Node/TypeScript + Supabase** para desplegar en **Vercel**. En el repo conviven dos backends: `server/` (el **nuevo**, objetivo) y `backend/` (**.NET legacy**, referencia hasta que `server/` lo reemplace). El frontend ya consume el backend nuevo. El detalle técnico está en [server/README.md](server/README.md); la especificación que gobierna la construcción, en [docs/](docs/README.md).
 
 ## Resumen
 
-MotoCore centraliza la operación diaria de un taller: clientes, motocicletas, órdenes de trabajo, inventario, historial técnico y recordatorios de mantenimiento. El proyecto avanza hacia una plataforma multiempresa (varias empresas por cuenta, con cambio de empresa activa estilo QuickBooks/Zoho) enfocada en el mercado boliviano.
+MotoCore centraliza la operación diaria de un taller: clientes, motocicletas, órdenes de trabajo, inventario, historial técnico y recordatorios de mantenimiento. El proyecto avanza hacia una plataforma multiorganización (varias organizaciones por cuenta, con cambio de organización activa estilo QuickBooks/Zoho) enfocada en el mercado boliviano.
 
 ## Propuesta de valor
 
@@ -25,7 +25,7 @@ MotoCore centraliza la operación diaria de un taller: clientes, motocicletas, �
 
 MotoCore está orientado a talleres de motocicletas, mecánicos independientes y pequeños centros de servicio en Bolivia.
 
-Bajo el modelo **multiempresa**, una cuenta puede administrar **varias empresas** (`organizations`), y cada empresa puede tener **varias sucursales** (`workshops`). El equipo (`Owner`, `Mechanic`, `Receptionist`) y los datos (clientes, motos, órdenes, inventario, historial) quedan **aislados por empresa** — sin compartición entre empresas. La sucursal es una subdivisión operativa, no una frontera de seguridad: ver el [Glosario](docs/ingenieria/01-glosario.md).
+Bajo el modelo **multiorganización**, una cuenta puede administrar **varias organizaciones** (`organizations`), y cada organización puede tener **varios talleres** (`workshops`). El equipo (`Owner`, `Mechanic`, `Receptionist`) y los datos (clientes, motos, órdenes, inventario, historial) quedan **aislados por organización** — sin compartición entre organizaciones. El taller es una subdivisión operativa, no una frontera de seguridad: ver el [Glosario](docs/ingenieria/01-glosario.md).
 
 ## Arquitectura (alto nivel)
 
@@ -39,7 +39,7 @@ Backend Node/TS (Hono) — Serverless en Vercel
 Supabase (PostgreSQL + Auth + RLS + Storage)
 ```
 
-- Aislamiento multi-tenant **por empresa**: políticas **RLS** en Postgres + chequeo de membresía en la API (defensa en profundidad).
+- Aislamiento multi-tenant **por organización**: políticas **RLS** en Postgres + chequeo de membresía en la API (defensa en profundidad).
 - Autenticación por **Supabase Auth** (registro/login/refresh/OAuth); la API verifica el token.
 
 **Legacy (en `backend/`, se reemplaza):** Frontend → API ASP.NET Core (.NET 10) → PostgreSQL.
@@ -70,14 +70,16 @@ docker-compose.yml   Stack .NET legacy (Postgres + backend + frontend)
 ## Multitenancy ERP
 
 - `auth.users` (Supabase) = identidad global; `profiles` = perfil.
-- `organizations` = **empresa**, y es la unidad de aislamiento (*tenant*); **una cuenta puede tener varias**.
-- `workshops` = **sucursal** dentro de una empresa; subdivisión operativa, no unidad de aislamiento.
-- `memberships` = usuario ↔ empresa con rol (`owner`/`mechanic`/`receptionist`); el rol es por empresa, no global.
-- Todo dato de negocio se scopea por `organization_id`; las entidades de nivel sucursal llevan además `workshop_id`. El contexto activo se selecciona por request: header `X-Org-Id` para la empresa y `X-Workshop-Id` para la sucursal.
+- `organizations` = **organización**, y es la unidad de aislamiento (*tenant*); **una cuenta puede tener varias**.
+- `workshops` = **taller** dentro de una organización; subdivisión operativa, no unidad de aislamiento.
+- `memberships` = usuario ↔ organización con rol (`owner`/`mechanic`/`receptionist`); el rol es por organización, no global.
+- Todo dato de negocio se scopea por `organization_id`; las entidades de nivel taller llevan además `workshop_id`. El contexto activo se selecciona por petición: cabecera `X-Org-Id` para la organización y `X-Workshop-Id` para el taller.
+
+**La regla de rutas que se deriva de eso**: el identificador de la organización aparece en la URL **solo cuando el recurso es la organización misma** (`/api/organizations/...`). Todo lo interior a ella —talleres, miembros, clientes, inventario, auditoría— vive en rutas planas (`/api/workshops`, `/api/members`, `/api/clients`, `/api/inventory/...`) y se resuelve por cabecera. El servidor nunca asume un contexto por defecto: si falta la cabecera exigida, rechaza la petición (ADR-005, §2.3 del [contrato](docs/ingenieria/10-contrato-api.md)).
 
 ## Módulos y roadmap
 
-**Ya en `server/` (backend nuevo)**: registro atómico que crea cuenta + 1ª empresa + 1ª sucursal, gestión de empresas y miembros, sucursales y asignación de miembros a sucursales, clientes (nivel empresa), inventario y movimientos de stock con transferencia entre sucursales (nivel sucursal), registro de auditoría de acciones críticas y aislamiento por RLS.
+**Ya en `server/` (backend nuevo)**: registro atómico que crea cuenta + 1.ª organización + 1.er taller, gestión de organizaciones y miembros, talleres y asignación de miembros a talleres, clientes (nivel organización), inventario y movimientos de stock con transferencia entre talleres (nivel taller), registro de auditoría de acciones críticas y aislamiento por RLS.
 
 **Todavía solo en el backend .NET legacy**, pendiente de portar: motocicletas, órdenes de trabajo (estados, diagnóstico, cierre, entrega), historial de mantenimiento y dashboard. Quedan fuera del alcance del proyecto de grado (ver [Requisitos](docs/ingenieria/02-requisitos.md), RF-800).
 
@@ -86,7 +88,7 @@ docker-compose.yml   Stack .NET legacy (Postgres + backend + frontend)
 ## Seguridad
 
 - Autenticación por Supabase Auth (nuevo backend) / JWT con refresh (legacy).
-- Control de acceso por roles y aislamiento de datos por empresa (RLS + chequeo en la API).
+- Control de acceso por roles y aislamiento de datos por organización (RLS + chequeo en la API).
 - Los secretos de configuración del backend legacy están reemplazados por placeholders; los del backend nuevo van en variables de entorno (Supabase/Vercel), nunca en el repo.
 
 Roles: `Owner`, `Mechanic`, `Receptionist`.
@@ -98,7 +100,7 @@ Roles: `Owner`, `Mechanic`, `Receptionist`.
 ```bash
 cd server
 npm install
-# 1) Crear un proyecto en Supabase y aplicar supabase/migrations/0001_init_multitenancy.sql
+# 1) Crear un proyecto en Supabase y aplicar supabase/migrations/*.sql en orden
 # 2) Copiar .env.example a .env con las claves de Supabase
 npm run dev        # http://localhost:8787
 npm test           # unit + HTTP (la integración corre solo con credenciales de Supabase)
@@ -150,16 +152,16 @@ Configura `VITE_API_BASE_URL` en `frontend/.env` apuntando a la URL del backend.
 ## Testing
 
 ```bash
-# Backend nuevo
-cd server && npm test        # + npm run typecheck
-
-# Backend legacy (.NET)
-cd backend && dotnet test
+cd server   && npm test && npm run typecheck   # Node/TS: N1, N2 y —con credenciales— N3 y N4
+cd frontend && npm test && npm run build       # Vitest + React Testing Library
+cd backend  && dotnet test                     # .NET legacy
 ```
+
+Los niveles de prueba, la matriz requisito → caso → evidencia y el criterio de cierre están en el [Plan de pruebas](docs/ingenieria/11-plan-pruebas.md). Los casos de integración y de aislamiento (N3, N4) se saltan sin credenciales de Supabase: **un caso omitido no cubre su requisito**.
 
 ## CI/CD
 
-`.github/workflows/ci.yml` corre en cada push/PR a `main`: lint+build del frontend y typecheck+test del backend nuevo (`server/`). El job del backend .NET legacy está **comentado** en el workflow, en línea con el pivote. El despliegue continuo a Vercel se agrega cuando el proyecto tenga un entorno Supabase de destino.
+`.github/workflows/ci.yml` corre en cada push/PR a `main`: lint, test y build del frontend, y typecheck + test del backend nuevo (`server/`). El job del backend .NET legacy está **comentado** en el workflow, en línea con el pivote. El despliegue continuo a Vercel se agrega cuando el proyecto tenga un entorno Supabase de destino.
 
 ## Documentación
 

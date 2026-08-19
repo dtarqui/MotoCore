@@ -2,8 +2,8 @@ import { apiRequest } from '@/shared/lib/api-client'
 import type { CreateMovementPayload, CreatePartPayload, Part, PartMovement } from './types'
 
 /**
- * Inventario: nivel sucursal. TODAS las llamadas usan `withWorkshop`, porque el
- * servidor exige la sucursal activa y rechaza la petición sin ella (RF-303).
+ * Inventario: nivel taller. TODAS las llamadas usan `withWorkshop`, porque el
+ * servidor exige el taller activo y rechaza la petición sin ella (RF-303).
  */
 const withWorkshop = { withWorkshop: true } as const
 

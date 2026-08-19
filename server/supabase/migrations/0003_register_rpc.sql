@@ -1,7 +1,7 @@
 -- MotoCore — registro atomico de cuenta (RF-101, ADR-007)
 --
--- El registro debe crear, en un solo acto: la primera empresa, su primera
--- sucursal y la membresia Owner. Hacerlo en tres llamadas desde la aplicacion
+-- El registro debe crear, en un solo acto: la primera organización, su primera
+-- taller y la membresia Owner. Hacerlo en tres llamadas desde la aplicacion
 -- deja estados intermedios visibles y obliga a compensar a mano si una falla.
 --
 -- El cliente de Supabase no admite transacciones multi-sentencia, asi que la

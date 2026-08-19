@@ -11,8 +11,8 @@ import { createMovement, createPart, getMovements, getParts } from '../inventari
 import { MOVEMENT_LABELS, MOVEMENT_TYPES, type MovementType, type Part } from '../types'
 
 /**
- * Inventario — nivel sucursal. Solo muestra los repuestos de la sucursal
- * activa: cambiar de sucursal cambia por completo el listado (RF-602).
+ * Inventario — nivel taller. Solo muestra los repuestos de el taller
+ * activo: cambiar de taller cambia por completo el listado (RF-602).
  */
 export function InventarioPage() {
   const { hasAnyRole } = useAuth()
@@ -83,9 +83,9 @@ export function InventarioPage() {
   if (!activeWorkshopId) {
     return (
       <div className="space-y-6">
-        <PageHeader title="Inventario" description="Existencias de la sucursal activa." />
+        <PageHeader title="Inventario" description="Existencias de el taller activo." />
         <Alert>
-          Selecciona una sucursal para ver su inventario. Las existencias son propias de cada local.
+          Selecciona un taller para ver su inventario. Las existencias son propias de cada local.
         </Alert>
       </div>
     )
@@ -97,7 +97,7 @@ export function InventarioPage() {
     <div className="space-y-6">
       <PageHeader
         title="Inventario"
-        description="Cada sucursal tiene sus propias existencias. El mismo número de parte puede existir en varias."
+        description="Cada taller tiene sus propias existencias. El mismo número de parte puede existir en varias."
       />
 
       {error ? <Alert variant="destructive">{error}</Alert> : null}
@@ -157,7 +157,7 @@ export function InventarioPage() {
       {partsQuery.isLoading ? (
         <p className="text-sm text-slate-500">Cargando inventario…</p>
       ) : parts.length === 0 ? (
-        <p className="text-sm text-slate-500">Esta sucursal no tiene repuestos registrados.</p>
+        <p className="text-sm text-slate-500">Este taller no tiene repuestos registrados.</p>
       ) : (
         <ul className="divide-y divide-slate-200 rounded-lg border border-slate-200">
           {parts.map((part) => (

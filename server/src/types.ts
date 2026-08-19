@@ -18,7 +18,7 @@ export interface Membership {
   is_active: boolean;
 }
 
-/** Sucursal: subdivision operativa de la empresa, no unidad de aislamiento (ADR-006). */
+/** Taller: subdivision operativa de la organizacion, no unidad de aislamiento (ADR-006). */
 export interface Workshop {
   id: string;
   organization_id: string;

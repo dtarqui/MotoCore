@@ -1,6 +1,6 @@
 /**
- * Cliente — entidad de NIVEL EMPRESA. No lleva sucursal: se atiende en
- * cualquiera de los locales de la empresa (RF-502).
+ * Cliente — entidad de NIVEL ORGANIZACIÓN. No lleva taller: se atiende en
+ * cualquiera de los locales de la organización (RF-502).
  *
  * Los campos llegan tal como los devuelve la API, en snake_case, para no
  * introducir una capa de traducción que haya que mantener en dos sitios.

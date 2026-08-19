@@ -1,5 +1,5 @@
 /**
- * Repuesto — entidad de NIVEL SUCURSAL. Lleva `workshop_id` además de
+ * Repuesto — entidad de NIVEL TALLER. Lleva `workshop_id` además de
  * `organization_id`: cada local tiene existencias físicas propias (RF-602).
  */
 export type Part = {

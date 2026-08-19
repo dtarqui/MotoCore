@@ -11,13 +11,13 @@ import {
 import { getWorkshops } from './organizaciones-api'
 
 /**
- * Selectores de empresa y sucursal activas (RNF-401, HU-05, HU-07).
+ * Selectores de organización y taller activos (RNF-401, HU-05, HU-07).
  *
- * Cambiar de empresa no cierra la sesión: la identidad es global y solo cambia
- * el contexto sobre el que se opera.
+ * Cambiar de organización no cierra la sesión: la identidad es global y solo
+ * cambia el contexto sobre el que se opera.
  *
  * La selección efectiva se **deriva** en cada render en lugar de guardarse por
- * duplicado: si la empresa o la sucursal elegidas dejan de ser válidas —porque
+ * duplicado: si la organización o el taller elegidos dejan de ser válidos —porque
  * se removió la membresía o se desactivó el local—, se cae en la primera
  * disponible sin necesidad de sincronizar estados entre sí.
  */
@@ -37,7 +37,7 @@ export function ContextSelectors() {
 
   const workshopsQuery = useQuery({
     queryKey: ['workshops', orgId],
-    queryFn: () => getWorkshops(orgId!),
+    queryFn: () => getWorkshops(),
     enabled: Boolean(orgId),
   })
 
@@ -58,10 +58,10 @@ export function ContextSelectors() {
   }, [workshopId])
 
   async function handleOrgChange(nextOrgId: string) {
-    setActiveOrgId(nextOrgId) // limpia también la sucursal
+    setActiveOrgId(nextOrgId) // limpia también el taller
     setChosenOrgId(nextOrgId)
     setChosenWorkshopId(null)
-    // Los datos en caché son de la empresa anterior: no deben mostrarse.
+    // Los datos en caché son de la organización anterior: no deben mostrarse.
     await queryClient.invalidateQueries()
     await reloadMe()
   }
@@ -69,7 +69,7 @@ export function ContextSelectors() {
   async function handleWorkshopChange(nextWorkshopId: string) {
     setActiveWorkshopId(nextWorkshopId)
     setChosenWorkshopId(nextWorkshopId)
-    // Solo cambian los datos de nivel sucursal; los de empresa siguen válidos.
+    // Solo cambian los datos de nivel taller; los de organización siguen válidos.
     await queryClient.invalidateQueries({ queryKey: ['parts'] })
     await queryClient.invalidateQueries({ queryKey: ['movements'] })
   }
@@ -81,11 +81,11 @@ export function ContextSelectors() {
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <label className="sr-only" htmlFor="selector-empresa">
-        Empresa activa
+      <label className="sr-only" htmlFor="selector-organizacion">
+        Organización activa
       </label>
       <select
-        id="selector-empresa"
+        id="selector-organizacion"
         className={selectClass}
         value={orgId ?? ''}
         onChange={(event) => void handleOrgChange(event.target.value)}
@@ -97,23 +97,23 @@ export function ContextSelectors() {
         ))}
       </select>
 
-      <label className="sr-only" htmlFor="selector-sucursal">
-        Sucursal activa
+      <label className="sr-only" htmlFor="selector-taller">
+        Taller activo
       </label>
       <select
-        id="selector-sucursal"
+        id="selector-taller"
         className={selectClass}
         value={workshopId ?? ''}
         disabled={workshops.length === 0}
         onChange={(event) => void handleWorkshopChange(event.target.value)}
       >
         {workshops.length === 0 ? (
-          <option value="">Sin sucursales</option>
+          <option value="">Sin talleres</option>
         ) : (
           workshops.map((w) => (
             <option key={w.id} value={w.id}>
               {w.name}
-              {w.is_active ? '' : ' (inactiva)'}
+              {w.is_active ? '' : ' (inactivo)'}
             </option>
           ))
         )}

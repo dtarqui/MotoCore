@@ -3,12 +3,12 @@
 -- CORRECCION DE CONFORMIDAD con la especificacion.
 --
 -- La migracion 0006 creo la politica de lectura de audit_log con
--- `is_org_member`, de modo que cualquier miembro de la empresa podia leer el
+-- `is_org_member`, de modo que cualquier miembro de la organización podia leer el
 -- registro de auditoria consultando la base de datos directamente. La
 -- especificacion exige lo contrario:
 --
 --   RF-704  "La consulta del registro de auditoria esta reservada al Owner de
---            la empresa. [...] la restriccion se aplica tambien por acceso
+--            la organización. [...] la restriccion se aplica tambien por acceso
 --            directo a la base de datos."
 --
 --   05-modelo-datos.md  "Lectura del registro de auditoria: is_org_owner() —

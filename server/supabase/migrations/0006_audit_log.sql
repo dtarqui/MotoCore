@@ -1,6 +1,6 @@
 -- MotoCore — registro de auditoria (RF-703)
 --
--- Nivel EMPRESA, con referencia opcional a la sucursal: la auditoria debe
+-- Nivel EMPRESA, con referencia opcional a el taller: la auditoria debe
 -- poder revisarse de forma consolidada, sin importar en que local ocurrio.
 --
 -- Historial inmutable: solo insercion, como part_movements.
