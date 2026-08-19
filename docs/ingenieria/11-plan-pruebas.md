@@ -30,17 +30,31 @@ De ahí tres reglas de selección:
 | **N3 · Integración** | Flujo completo contra base de datos y proveedor de identidad reales: creación, unicidad por nivel, transiciones de estado, auditoría | Entorno con credenciales y migraciones aplicadas | Decenas de segundos |
 | **N4 · Aislamiento** | Que una organización no accede a datos de otra, por interfaz **y** por acceso directo al motor | Igual que N3, más una identidad adicional | Decenas de segundos |
 | **N5 · Usabilidad** | Que el cambio de contexto entre organizaciones y talleres resulta operable por un usuario del rubro (RNF-401, RNF-404) | Aplicación desplegada y operadores participantes | Sesión presencial o remota, por participante |
+| **N6 · Contrato desde el cliente** | Que el contexto que el operador elige sea el que viaja en las cabeceras, y que el cliente respete la regla de rutas y el método de las bajas lógicas | Nada externo: DOM simulado | Segundos |
 
-Además de estos seis niveles, la matriz de §4.7 emplea la marca **CI** para las propiedades que no verifica un caso de prueba sino el propio pipeline de integración continua (verificación de tipos, ejecución de la suite y bloqueo ante fallo).
+Además de estos siete niveles, la matriz de §4.7 emplea la marca **CI** para las propiedades que no verifica un caso de prueba sino el propio pipeline de integración continua (verificación de tipos, ejecución de la suite y bloqueo ante fallo).
 
-N1 y N2 corren siempre, en cada integración al ramal principal. N3 y N4 exigen credenciales; su tratamiento cuando faltan está en §6.2. N5 es **manual y no repetible en cada integración**: se ejecuta una vez, sobre la aplicación terminada, y su diseño está en §7.
+N1, N2 y N6 corren siempre, en cada integración al ramal principal. N3 y N4 exigen credenciales; su tratamiento cuando faltan está en §6.2. N5 es **manual y no repetible en cada integración**: se ejecuta una vez, sobre la aplicación terminada, y su diseño está en §7.
 
-### 1.3 Qué queda deliberadamente fuera
+### 1.3 Qué cubre N6, y qué deliberadamente no
+
+N6 no evalúa la interfaz: evalúa el **cumplimiento del contrato desde el lado del cliente**, que es lo que la evaluación con operadores no puede observar. Un participante puede completar las tres tareas con éxito mientras el cliente envía una cabecera equivocada, y a la inversa.
+
+| Cubre | No cubre |
+|---|---|
+| Que cambiar de organización limpie el taller activo | Si la pantalla resulta comprensible — eso es N5 |
+| Que `X-Org-Id` viaje siempre y `X-Workshop-Id` solo en endpoints de nivel taller | Diseño responsivo (RNF-402) e instalabilidad (RNF-403), que son N0 |
+| Que el código de negocio del error sobreviva al cliente | Recorridos completos de usuario extremo a extremo |
+| Regresión de la regla de rutas (§2.3) y del método de las bajas lógicas (§2.6) | Rendimiento y accesibilidad |
+
+**N6 no sustituye a N5 ni relaja sus umbrales.** RNF-401 y RNF-404 siguen verificándose con operadores reales.
+
+### 1.4 Qué queda deliberadamente fuera
 
 | Fuera del plan | Motivo |
 |---|---|
 | Pruebas de carga y de rendimiento | Excluidas del alcance (§1.8.3); RNF-501 es criterio cualitativo, no objetivo medido |
-| Pruebas automatizadas de la interfaz de usuario | El objeto de validación es la arquitectura de aislamiento, que reside en el servidor y en la base de datos. RNF-402 y RNF-403 se verifican por inspección (N0); RNF-401 y RNF-404 se evalúan con operadores reales (N5, §7) |
+| Pruebas automatizadas de **toda** la interfaz de usuario | El objeto de validación es la arquitectura de aislamiento, que reside en el servidor y en la base de datos. RNF-402 y RNF-403 se verifican por inspección (N0), y RNF-401 y RNF-404 con operadores reales (N5, §7). Lo que sí se automatiza es el subconjunto del nivel N6 (§1.3): el contrato visto desde el cliente |
 | Evaluación de usabilidad de la interfaz completa | La evaluación se acota al **cambio de contexto** entre organizaciones y talleres, por ser la manifestación visible del aporte de la tesis. Las demás pantallas no se someten a prueba con usuarios |
 | Pruebas de penetración | El alcance cubre el aislamiento entre inquilinos, no una evaluación de seguridad ofensiva del despliegue |
 | Mitigación del canal lateral temporal de RLS | Amenaza reconocida y documentada (§3.3 del marco teórico); su mitigación excede el objeto del proyecto |
@@ -203,8 +217,13 @@ Identificación de casos: **CP-nnn**, donde `nnn` es el número del requisito qu
 | RNF-301 | CP-N301 | N0 | El despliegue se completa sin infraestructura propia que aprovisionar |
 | RNF-302 | CP-N302 | N0 | El modelo de despliegue escala a cero sin tráfico |
 | RNF-303 | CP-N303 | N0 | Cambiar de entorno solo requiere variables distintas, sin tocar código |
-| RNF-304 | CP-N304 | N3 | La base se reconstruye desde cero aplicando las migraciones en orden |
+| RNF-304 | CP-N304 | N0 | La base se reconstruye desde cero aplicando las migraciones en orden. Es **operativo, no automatizable en esta suite**: exige un proyecto Supabase desechable. Se ejecuta antes de cada hito y su evidencia es el identificador de la última migración aplicada (§5.4) |
 | RNF-401 | CP-N401 | N0 · N5 | El cambio de organización y de taller ocurre sin cerrar sesión y los datos mostrados corresponden al nuevo contexto |
+| RNF-401 | CP-N401.1 | **N6** | Cambiar de organización limpia el taller activo: no se arrastra un local de la organización anterior |
+| ADR-005 | CP-N005 | **N6** | El cliente adjunta `X-Org-Id` siempre y `X-Workshop-Id` solo en endpoints de nivel taller; sin contexto elegido no inventa ninguno |
+| §2.3 | CP-N023 | **N6** | Ninguna llamada del cliente anida el identificador de organización en la ruta |
+| §2.6 | CP-N026 | **N6** | Las bajas lógicas se invocan con `POST /…/deactivate`; la revocación de un vínculo, con `DELETE` |
+| RNF-204 | CP-N204.1 | **N6** | El código de negocio del error sobrevive al cliente y llega como `ApiError.code` |
 | RNF-402 | CP-N402 | N0 | Interfaz utilizable en anchos de escritorio y móvil |
 | RNF-403 | CP-N403 | N0 | El manifiesto permite instalar la aplicación desde el navegador |
 | RNF-404 | CP-N404.1 | **N5** | Tasa de éxito por tarea ≥ 80 % en las tres tareas de cambio de contexto (§7.2) |
@@ -240,11 +259,15 @@ Debe cubrir **todas** las tablas de negocio: `clients`, `parts`, `part_movements
 
 RNF-102 exige demostrar que las dos capas son **independientes**, no que ambas existen. Se verifica omitiendo deliberadamente la verificación de membresía de la capa de aplicación y comprobando que el acceso cruzado sigue sin producirse.
 
+**Cómo se deshabilita.** No existe —ni debe existir— un interruptor en el código de producción que apague la comprobación: sería una vía de escalada esperando a que alguien la active por error. La capa se anula **en el banco de pruebas**, sustituyendo las funciones de verificación por versiones que conceden acceso sin comprobar nada; el resto del sistema queda intacto. La petición atraviesa entonces la capa de aplicación como si el solicitante fuera miembro, llega a la consulta, y no devuelve nada: el cliente de datos está atado a **su** credencial y las políticas se evalúan sobre su identidad real.
+
 Sin este caso, la defensa en profundidad de ADR-002 sería una afirmación de diseño; con él, es un hecho verificado. Es el argumento que responde directamente a la evidencia de Dar et al. (2023) y a la serie de CVE citada en el estado del arte.
 
 ### 5.4 Evidencia a conservar
 
 Para que la validación sea reproducible por un tercero (objetivo 4), se conserva: el guion de construcción del escenario base, la salida de la ejecución de los casos CP-701, CP-702, CP-704.2, CP-N101 y CP-N102, y la versión del esquema —identificador de la última migración aplicada— contra la que se ejecutaron.
+
+Los tres archivos que producen esa evidencia son `server/test/integration.test.ts` (CP-701 y el resto del flujo), `server/test/rls.test.ts` (CP-702, CP-N101, CP-704.2) y `server/test/defense-in-depth.test.ts` (CP-N102).
 
 ---
 

@@ -102,7 +102,9 @@ Antes de escribir sobre un tema, verificar quién es su responsable. Si ya lo ti
 
 ## Pendientes
 
-Lo que falta resolver antes de la entrega final, las decisiones que corresponden al autor y las correcciones que el código debe absorber están en un registro único: **[PENDIENTES.md](PENDIENTES.md)**. Los documentos de entrega se mantienen limpios de notas internas; todo lo que quede por decidir vive ahí.
+Lo que falta resolver antes de la entrega final —datos por completar, fuentes por verificar, decisiones que corresponden al autor y huecos de cobertura de pruebas— está en un registro único: **[PENDIENTES.md](PENDIENTES.md)**. Los documentos de entrega se mantienen limpios de notas internas; todo lo que quede por decidir vive ahí.
+
+Su **§1 es de lectura obligada antes de defender el aislamiento**: recoge una diferencia entre lo que la documentación afirma sobre las dos capas y lo que el código hace hoy, con las dos vías de resolución y lo que cada una implica para la hipótesis.
 
 ## Premisas que rigen toda la documentación
 

@@ -32,6 +32,19 @@ Las **siete tablas de negocio** —de `workshops` hacia abajo— llevan todas `o
 
 El aislamiento lo garantizan **políticas RLS** —una cuenta solo ve filas de organizaciones donde tiene membresía activa— **más** la verificación de membresía en la capa de aplicación (ADR-002, defensa en profundidad).
 
+### Los dos clientes de datos, y por qué importa cuál se usa
+
+Es la decisión más fácil de romper sin darse cuenta al añadir un endpoint.
+
+| Cliente | Respeta RLS | Cuándo |
+|---|---|---|
+| `c.get('db')` — atado a la credencial de la petición | **Sí** | Toda lectura y escritura de datos de negocio |
+| `serviceClient()` — clave de servicio | **No, la salta** | Siete excepciones, enumeradas en `src/lib/supabase.ts` |
+
+Si un handler consulta con `serviceClient()`, las políticas **no intervienen** y el aislamiento pasa a depender solo del control de la aplicación. Por eso el reparto está acotado y documentado excepción por excepción.
+
+La de más peso es la primera: **la propia verificación de membresía consulta con clave de servicio**. Es deliberado — si el control de la aplicación dependiera de RLS para funcionar, las dos capas dejarían de ser independientes, que es justo lo que RNF-102 exige demostrar. Esa independencia se verifica en `test/defense-in-depth.test.ts` (CP-N102): allí se anula la capa de aplicación y se comprueba que las políticas siguen filtrando.
+
 ## Contexto activo: la regla de rutas
 
 El §2.3 del contrato fija una regla que atraviesa toda la API: **el identificador de la organización aparece en la ruta solo cuando el recurso es la organización misma**. Todo lo interior a ella —talleres, miembros, clientes, inventario, auditoría— se dirige a una ruta plana y el contexto viaja por cabecera:
@@ -168,9 +181,10 @@ Los niveles siguen el [plan de pruebas](../docs/ingenieria/11-plan-pruebas.md). 
 | Archivo | Qué cubre |
 |---|---|
 | `test/integration.test.ts` | Flujo completo y reglas de negocio: CP-101 a CP-609, CP-703, CP-N105 |
-| `test/rls.test.ts` | **Aislamiento por acceso directo a la base de datos** (RF-702, CP-702, CP-704.2), sin pasar por la capa de aplicación |
+| `test/rls.test.ts` | **Aislamiento por acceso directo a la base de datos** (RF-702, CP-702, CP-N101, CP-N106, CP-704.2), sin pasar por la capa de aplicación |
+| `test/defense-in-depth.test.ts` | **CP-N102**: con la capa de aplicación anulada, las políticas del motor siguen impidiendo el acceso cruzado |
 
-`test/rls.test.ts` es la prueba que sostiene la premisa central del proyecto: demuestra que el aislamiento se mantiene aunque la capa de aplicación se omita por completo.
+Esos dos últimos archivos son los que sostienen la premisa central del proyecto: uno demuestra que el aislamiento se mantiene cuando se prescinde de la API, y el otro que se mantiene **dentro** de la API aunque su control de membresía falle.
 
 > **Un caso omitido no cubre su requisito.** Si N3 y N4 se saltan por falta de credenciales, la suite pasa en verde pero **no** constituye evidencia de cumplimiento (§6.2 del plan de pruebas). La validación del objetivo 4 se ejecuta contra un entorno real antes de cada hito.
 

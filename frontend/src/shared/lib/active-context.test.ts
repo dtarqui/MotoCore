@@ -21,7 +21,7 @@ describe('contexto activo', () => {
     setActiveWorkshopId(null)
   })
 
-  it('cambiar de organización LIMPIA el taller activo', () => {
+  it('CP-N401.1 — cambiar de organización LIMPIA el taller activo', () => {
     setActiveOrgId('org-1')
     setActiveWorkshopId('taller-1-a')
     expect(getActiveWorkshopId()).toBe('taller-1-a')

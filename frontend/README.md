@@ -149,7 +149,9 @@ Qué cubre, y por qué esas cosas y no otras:
 | `modules/organizaciones/ContextSelectors.test.tsx` | HU-05 y HU-07: que el contexto elegido sea el que viaja después en las cabeceras |
 | `modules/auditoria/auditoria-api.test.ts` | Que las seis acciones de RF-703 tengan etiqueta y no queden identificadores crudos en pantalla |
 
-El [plan de pruebas](../docs/ingenieria/11-plan-pruebas.md) no exige automatizar la interfaz: RNF-402 y RNF-403 se verifican por inspección (N0), y RNF-401 y RNF-404 con operadores reales (N5). Esta suite cubre lo que esa evaluación **no** puede comprobar —que el contexto elegido sea exactamente el que se envía— y actúa como red frente a regresiones del contrato. No la sustituye.
+Esta suite es el **nivel N6** del [plan de pruebas](../docs/ingenieria/11-plan-pruebas.md) §1.3: no evalúa la interfaz, sino el cumplimiento del contrato desde el lado del cliente. Corre en cada integración, junto a N1 y N2.
+
+No sustituye a la evaluación con operadores ni relaja sus umbrales: RNF-402 y RNF-403 siguen verificándose por inspección (N0), y RNF-401 y RNF-404 con operadores reales (N5). Un participante puede completar las tres tareas con éxito mientras el cliente envía una cabecera equivocada, y a la inversa — por eso hacen falta los dos niveles.
 
 ## Estado de las features
 

@@ -48,19 +48,22 @@ function assertRoleNotOwner(body: unknown): void {
 /** Lista los miembros de la organizacion activa con su rol y estado — RF-407. */
 memberRoutes.get('/', async (c) => {
   const orgId = c.get('orgId');
-  const db = serviceClient();
 
-  const { data: members, error } = await db
+  const { data: members, error } = await c.get('db')
     .from('memberships')
     .select('user_id, role, is_active, joined_at')
     .eq('organization_id', orgId);
 
   if (error) throw internal(`memberships.select: ${error.message}`);
 
+  // Los perfiles de los demas miembros exigen clave de servicio:
+  // `profiles_select_own` solo deja leer el propio, y exponer el de un
+  // co-miembro dentro de la organizacion es el privilegio acotado que sanciona
+  // RF-407 (ver `lib/supabase.ts`, excepcion 4).
   const userIds = (members ?? []).map((m: Record<string, unknown>) => m.user_id as string);
   const profilesById = new Map<string, Record<string, unknown>>();
   if (userIds.length > 0) {
-    const { data: profiles } = await db
+    const { data: profiles } = await serviceClient()
       .from('profiles')
       .select('id, email, first_name, last_name')
       .in('id', userIds);
@@ -91,11 +94,12 @@ memberRoutes.post('/invite', async (c) => {
   const body = await c.req.json();
   assertRoleNotOwner(body);
   const input = inviteMemberSchema.parse(body);
-  const db = serviceClient();
+  const db = c.get('db');
 
-  // La busqueda por correo vive solo en el servidor, con credenciales
-  // privilegiadas: no se expone como operacion consultable (RNF-106).
-  const { data: targetUserId, error: rpcErr } = await db.rpc('get_user_id_by_email', {
+  // La busqueda por correo se concede solo a `service_role`: no se expone como
+  // operacion consultable, para no ofrecer un mecanismo de enumeracion de
+  // cuentas (RNF-106, excepcion 5).
+  const { data: targetUserId, error: rpcErr } = await serviceClient().rpc('get_user_id_by_email', {
     p_email: input.email,
   });
   if (rpcErr) throw internal(`get_user_id_by_email: ${rpcErr.message}`);
@@ -142,7 +146,7 @@ memberRoutes.patch('/:userId/role', async (c) => {
   const body = await c.req.json();
   assertRoleNotOwner(body);
   const input = updateRoleSchema.parse(body);
-  const db = serviceClient();
+  const db = c.get('db');
 
   await assertNotOrganizationOwner(orgId, targetUserId, 'No se puede cambiar el rol del Owner.');
 
@@ -181,7 +185,7 @@ memberRoutes.delete('/:userId', async (c) => {
   assertOwner(c);
   const orgId = c.get('orgId');
   const targetUserId = c.req.param('userId');
-  const db = serviceClient();
+  const db = c.get('db');
 
   await assertNotOrganizationOwner(orgId, targetUserId, 'No se puede remover al Owner de la organizacion.');
 
@@ -212,6 +216,9 @@ memberRoutes.delete('/:userId', async (c) => {
  * remueve. Responde `403 member.owner_protected` — el recurso esta dentro de la
  * organizacion del solicitante, de modo que su existencia no es informacion
  * privilegiada; solo la operacion lo es (§5 del contrato).
+ *
+ * Consulta con clave de servicio: es una comprobacion de la capa de aplicacion,
+ * y hacerla depender de RLS colapsaria las dos capas (excepcion 1).
  */
 async function assertNotOrganizationOwner(orgId: string, userId: string, message: string): Promise<void> {
   const { data, error } = await serviceClient()

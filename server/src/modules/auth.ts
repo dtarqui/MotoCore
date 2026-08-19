@@ -101,10 +101,17 @@ function registrationFailed(cause: string): AppError {
   );
 }
 
-/** Perfil + organizaciones (con rol) de la cuenta autenticada. Alimenta el selector de organizacion. */
+/**
+ * Perfil + organizaciones (con rol) de la cuenta autenticada. Alimenta el
+ * selector de organizacion.
+ *
+ * Va por el cliente de la peticion: solo lee datos propios —`profiles_select_own`
+ * cubre el perfil, y `memberships_select_member` las membresias—, de modo que
+ * las politicas bastan y no hace falta privilegio.
+ */
 authRoutes.get('/me', requireAuth, async (c) => {
   const userId = c.get('userId');
-  const db = serviceClient();
+  const db = c.get('db');
 
   const { data: profile } = await db
     .from('profiles')

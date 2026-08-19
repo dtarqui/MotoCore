@@ -24,7 +24,7 @@ organizationRoutes.use('*', requireAuth);
 /** Lista las organizaciones donde la cuenta tiene membresia activa (no por propiedad) — RF-202. */
 organizationRoutes.get('/', async (c) => {
   const userId = c.get('userId');
-  const { data, error } = await serviceClient()
+  const { data, error } = await c.get('db')
     .from('memberships')
     .select(`role, organizations ( ${ORG_COLUMNS} )`)
     .eq('user_id', userId)
@@ -39,7 +39,15 @@ organizationRoutes.get('/', async (c) => {
   return c.json({ organizations });
 });
 
-/** Crea una organizacion nueva; el solicitante queda como Owner — RF-201. */
+/**
+ * Crea una organizacion nueva; el solicitante queda como Owner — RF-201.
+ *
+ * Es la unica escritura de negocio que conserva la clave de servicio: la
+ * politica `memberships_insert_owner` exige `is_org_owner`, y en el instante de
+ * crear la organizacion el solicitante todavia no es miembro de ella. Sin esa
+ * excepcion el ciclo no podria arrancar (ver `lib/supabase.ts`, excepcion 3).
+ * El propietario no se toma del cuerpo sino de la credencial verificada.
+ */
 organizationRoutes.post('/', async (c) => {
   const input = createOrganizationSchema.parse(await c.req.json());
   const userId = c.get('userId');
@@ -74,7 +82,7 @@ organizationRoutes.get('/:orgId', async (c) => {
   const orgId = c.req.param('orgId');
   await requireMembership(orgId, c.get('userId'));
 
-  const { data: org, error } = await serviceClient()
+  const { data: org, error } = await c.get('db')
     .from('organizations')
     .select(ORG_COLUMNS)
     .eq('id', orgId)
@@ -98,7 +106,7 @@ organizationRoutes.post('/:orgId/switch', async (c) => {
   const orgId = c.req.param('orgId');
   const role = await requireMembership(orgId, c.get('userId'));
 
-  const { data: org, error } = await serviceClient()
+  const { data: org, error } = await c.get('db')
     .from('organizations')
     .select(ORG_COLUMNS)
     .eq('id', orgId)
@@ -116,7 +124,7 @@ organizationRoutes.patch('/:orgId', async (c) => {
   await requireOwner(orgId, c.get('userId'), 'organization');
   const input = updateOrganizationSchema.parse(await c.req.json());
 
-  const { data: org, error } = await serviceClient()
+  const { data: org, error } = await c.get('db')
     .from('organizations')
     .update({ ...input, updated_at: new Date().toISOString() })
     .eq('id', orgId)

@@ -1,3 +1,5 @@
+import type { SupabaseClient } from '@supabase/supabase-js';
+
 export type Role = 'owner' | 'mechanic' | 'receptionist';
 
 export const ROLES: readonly Role[] = ['owner', 'mechanic', 'receptionist'];
@@ -7,6 +9,15 @@ export interface AuthedVars {
   userId: string;
   userEmail: string;
   userToken: string;
+  /**
+   * Cliente de datos de la peticion, atado a la credencial de quien llama, de
+   * modo que las politicas RLS se evaluen sobre su identidad (ADR-002).
+   *
+   * Es el que deben usar los handlers para leer y escribir datos de negocio.
+   * Las siete excepciones que exigen clave de servicio estan enumeradas en
+   * `lib/supabase.ts`.
+   */
+  db: SupabaseClient;
 }
 
 export type AppBindings = { Variables: AuthedVars };

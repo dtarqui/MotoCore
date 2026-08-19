@@ -103,6 +103,40 @@ describe.skipIf(!hasEnv)('integracion multiorganizacion (Supabase real)', () => 
     expect(await codeOf(res)).toBe('auth.email_already_registered');
   });
 
+  it('CP-101.3 — un registro fallido no deja cuenta ni organizacion huerfana', async () => {
+    // Se fuerza el fallo con un nombre de organizacion que el esquema rechaza,
+    // de modo que `register_account` no llegue a completar la transaccion.
+    const correo = `huerfano_${rnd()}@motocore.test`;
+    const res = await app.request('/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: correo,
+        password: 'supersecret1',
+        firstName: 'Sin',
+        lastName: 'Rastro',
+        organizationName: 'x'.repeat(400),
+      }),
+    });
+    expect(res.status).not.toBe(201);
+
+    // Lo que importa: la cuenta no queda creada a medias. Si existiera, el
+    // segundo intento con el mismo correo responderia 409.
+    const reintento = await register(correo, 'supersecret1', 'Organizacion valida');
+    expect(reintento.status).not.toBe(409);
+  });
+
+  it('CP-102 — la credencial emitida por el proveedor es aceptada por la interfaz', async () => {
+    // El login ocurre contra Supabase Auth, no contra esta API (ADR-004): lo
+    // que se verifica aqui es que la API acepta el token que aquel emite.
+    const token = await signIn(userA.email, userA.password);
+    expect(token).toBeTruthy();
+
+    const res = await app.request('/api/auth/me', authed(token));
+    expect(res.status).toBe(200);
+    expect(((await res.json()) as { email: string }).email).toBe(userA.email);
+  });
+
   it('CP-201 — una cuenta puede crear organizaciones adicionales y queda owner', async () => {
     const create = await app.request(
       '/api/organizations',
@@ -114,6 +148,18 @@ describe.skipIf(!hasEnv)('integracion multiorganizacion (Supabase real)', () => 
     const body = (await list.json()) as { organizations: Array<{ role: string }> };
     expect(body.organizations.length).toBeGreaterThanOrEqual(2);
     expect(body.organizations.every((o) => o.role === 'owner')).toBe(true);
+  });
+
+  it('CP-203.1 — el cambio de organizacion devuelve la organizacion y el rol', async () => {
+    const res = await app.request(`/api/organizations/${orgAId}/switch`, authed(tokenA, { method: 'POST' }));
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { organization: { id: string }; role: string };
+    expect(body.organization.id).toBe(orgAId);
+    expect(body.role).toBe('owner');
+
+    // Y las peticiones siguientes operan sobre ella.
+    const clientes = await app.request('/api/clients', { headers: ctx(tokenA, orgAId) });
+    expect(clientes.status).toBe(200);
   });
 
   it('CP-203.2 — activar una organizacion sin membresia responde 403 organization.access_denied', async () => {
@@ -181,6 +227,44 @@ describe.skipIf(!hasEnv)('integracion multiorganizacion (Supabase real)', () => 
       expect(res.status).toBe(200);
       const body = (await res.json()) as { members: Array<{ userId: string; role: string; isActive: boolean }> };
       expect(body.members.some((m) => m.userId === userBId && m.role === 'mechanic')).toBe(true);
+    });
+
+    it('CP-403 — el cambio de rol se refleja en el listado y surte efecto inmediato', async () => {
+      const antes = await app.request('/api/members', { headers: ctx(tokenA, orgAId) });
+      const previo = ((await antes.json()) as { members: Array<{ userId: string; role: string }> }).members
+        .find((m) => m.userId === userBId);
+      expect(previo?.role).toBe('mechanic');
+
+      const cambio = await app.request(`/api/members/${userBId}/role`, {
+        method: 'PATCH',
+        headers: ctx(tokenA, orgAId),
+        body: JSON.stringify({ role: 'receptionist' }),
+      });
+      expect(cambio.status).toBe(200);
+
+      const despues = await app.request('/api/members', { headers: ctx(tokenA, orgAId) });
+      const ahora = ((await despues.json()) as { members: Array<{ userId: string; role: string }> }).members
+        .find((m) => m.userId === userBId);
+      expect(ahora?.role).toBe('receptionist');
+
+      // Efecto inmediato: con el rol nuevo ya puede crear clientes (RF-505).
+      const escribir = await app.request('/api/clients', {
+        method: 'POST',
+        headers: ctx(tokenB, orgAId),
+        body: JSON.stringify({ firstName: 'Rol', lastName: `Nuevo${rnd()}` }),
+      });
+      expect(escribir.status).toBe(201);
+
+      // Se restituye el rol original: otros casos cuentan con B como mechanic.
+      expect(
+        (
+          await app.request(`/api/members/${userBId}/role`, {
+            method: 'PATCH',
+            headers: ctx(tokenA, orgAId),
+            body: JSON.stringify({ role: 'mechanic' }),
+          })
+        ).status,
+      ).toBe(200);
     });
 
     it('CP-405 — no se puede cambiar el rol del propietario ni removerlo', async () => {
@@ -300,6 +384,24 @@ describe.skipIf(!hasEnv)('integracion multiorganizacion (Supabase real)', () => 
       const res = await app.request('/api/workshops', { headers: ctx(tokenA, orgAId) });
       const body = (await res.json()) as { workshops: unknown[] };
       expect(body.workshops.length).toBeGreaterThanOrEqual(2);
+    });
+
+    it('CP-302 — el listado devuelve solo talleres de la organizacion activa', async () => {
+      // La cuenta A es owner de varias organizaciones. Los talleres de una no
+      // deben aparecer al operar con otra.
+      const orgs = (await (await app.request('/api/organizations', authed(tokenA))).json()) as {
+        organizations: Array<{ organization: { id: string } }>;
+      };
+      const otraOrg = orgs.organizations.map((o) => o.organization.id).find((id) => id !== orgAId);
+      expect(otraOrg, 'el caso necesita una segunda organizacion de la cuenta A').toBeTruthy();
+
+      const enOtra = await app.request('/api/workshops', { headers: ctx(tokenA, otraOrg!) });
+      expect(enOtra.status).toBe(200);
+      const ajenos = (await enOtra.json()) as { workshops: Array<{ id: string; organization_id: string }> };
+
+      // Ninguno de los talleres devueltos pertenece a la organizacion A.
+      expect(ajenos.workshops.every((w) => w.organization_id === otraOrg)).toBe(true);
+      expect(ajenos.workshops.some((w) => w.id === workshop1 || w.id === workshop2)).toBe(false);
     });
 
     it('CP-301.2 — un no-owner que intenta crear recibe 403 workshop.insufficient_permissions', async () => {
@@ -699,6 +801,38 @@ describe.skipIf(!hasEnv)('integracion multiorganizacion (Supabase real)', () => 
       expect(await leer(destino, workshop2)).toBe(4);
     });
 
+    it('CP-608.3 — un destino fuera de la organizacion se rechaza', async () => {
+      const partNumber = `XORG-${rnd()}`;
+      const origen = ((await (
+        await app.request('/api/inventory/parts', {
+          method: 'POST',
+          headers: ctx(tokenA, orgAId, workshop1),
+          body: JSON.stringify({ partNumber, name: 'Cable', initialStock: 5 }),
+        })
+      ).json()) as { part: { id: string } }).part.id;
+
+      // Taller inexistente para la organizacion activa: la comprobacion de
+      // pertenencia lo trata como inexistente antes de tocar la transferencia
+      // (RNF-105), de modo que no llega a cruzar el limite de aislamiento.
+      const res = await app.request(`/api/inventory/parts/${origen}/transfer`, {
+        method: 'POST',
+        headers: ctx(tokenA, orgAId, workshop1),
+        body: JSON.stringify({
+          toWorkshopId: '00000000-0000-0000-0000-000000000000',
+          toPartId: origen,
+          quantity: 1,
+        }),
+      });
+      expect(res.status).toBe(404);
+      expect(await codeOf(res)).toBe('workshop.not_found');
+
+      // La existencia del origen no se altero.
+      const after = await app.request(`/api/inventory/parts/${origen}`, {
+        headers: ctx(tokenA, orgAId, workshop1),
+      });
+      expect(((await after.json()) as { part: { current_stock: number } }).part.current_stock).toBe(5);
+    });
+
     it('CP-609 — el Mechanic no administra el catalogo ni transfiere, pero si registra movimientos', async () => {
       const headers = ctx(tokenA, orgAId, workshop1);
       const create = await app.request('/api/inventory/parts', {
@@ -776,96 +910,160 @@ describe.skipIf(!hasEnv)('integracion multiorganizacion (Supabase real)', () => 
       expect(await desdeA.json()).toEqual(await inexistente.json());
     });
 
+    it('CP-701 — una cuenta sin membresia no obtiene dato alguno por la interfaz', async () => {
+      // Cuenta C: sin membresia en ninguna de las organizaciones anteriores.
+      const userC = { email: `sin_${rnd()}@motocore.test`, password: 'supersecret1' };
+      expect((await register(userC.email, userC.password, 'Ajena Total')).status).toBe(201);
+      const tokenC = await signIn(userC.email, userC.password);
+
+      // Con el contexto ajeno DECLARADO: 403, porque el solicitante afirma
+      // operar sobre una organizacion que no es suya (§5 del contrato).
+      const lecturas = ['/api/clients', '/api/workshops', '/api/members', '/api/audit'];
+      for (const ruta of lecturas) {
+        const res = await app.request(ruta, { headers: ctx(tokenC, orgAId) });
+        expect(res.status, ruta).toBe(403);
+        expect(await codeOf(res), ruta).toBe('organization.access_denied');
+      }
+
+      // Escritura, con el mismo criterio.
+      const escritura = await app.request('/api/clients', {
+        method: 'POST',
+        headers: ctx(tokenC, orgAId),
+        body: JSON.stringify({ firstName: 'No', lastName: 'Debe' }),
+      });
+      expect(escritura.status).toBe(403);
+
+      // SIN declarar contexto: la peticion se rechaza por falta de cabecera,
+      // no se elige una organizacion por defecto (ADR-005).
+      const sinContexto = await app.request('/api/clients', { headers: ctx(tokenC) });
+      expect(sinContexto.status).toBe(400);
+      expect(await codeOf(sinContexto)).toBe('organization.missing_active_org');
+
+      // Recurso ajeno REFERENCIADO desde el contexto propio: 404, no 403.
+      const orgsC = (await (await app.request('/api/organizations', authed(tokenC))).json()) as {
+        organizations: Array<{ organization: { id: string } }>;
+      };
+      const orgCId = orgsC.organizations[0]!.organization.id;
+      const ajeno = await app.request('/api/clients/00000000-0000-0000-0000-000000000000', {
+        headers: ctx(tokenC, orgCId),
+      });
+      expect(ajeno.status).toBe(404);
+    });
+
     // ------------------------------------------------------------
     // Auditoria — CP-703
     // ------------------------------------------------------------
 
-    it('CP-703.1 a CP-703.6 — las seis acciones criticas quedan registradas', async () => {
-      const headers = ctx(tokenA, orgAId);
+    /**
+     * RF-703 exige una prueba POR CADA una de las seis acciones criticas. El
+     * montaje es comun —ejecutar las seis y leer el registro una vez—, pero
+     * cada accion tiene su propio caso: asi, si el codigo deja de auditar una,
+     * falla exactamente el caso que la nombra y no un bloque indistinto.
+     */
+    describe('CP-703 — las seis acciones criticas quedan registradas', () => {
+      let acciones = new Set<string>();
+      let entradas: Array<{ action: string; performedBy: string | null; createdAt: string }> = [];
 
-      // 1) Invitacion y 2) cambio de rol y 3) remocion, sobre una cuenta propia
-      // del caso para no interferir con el resto de la suite.
-      const userD = { email: `d_${rnd()}@motocore.test`, password: 'supersecret1' };
-      expect((await register(userD.email, userD.password, 'Motos del Oeste')).status).toBe(201);
+      beforeAll(async () => {
+        const headers = ctx(tokenA, orgAId);
 
-      const invitacion = await app.request('/api/members/invite', {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({ email: userD.email, role: 'mechanic' }),
+        // 1) invitacion · 2) cambio de rol · 3) remocion, sobre una cuenta
+        // propia del caso para no interferir con el resto de la suite.
+        const userD = { email: `d_${rnd()}@motocore.test`, password: 'supersecret1' };
+        expect((await register(userD.email, userD.password, 'Motos del Oeste')).status).toBe(201);
+
+        const invitacion = await app.request('/api/members/invite', {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({ email: userD.email, role: 'mechanic' }),
+        });
+        expect(invitacion.status).toBe(201);
+        const userDId = ((await invitacion.json()) as { userId: string }).userId;
+
+        expect(
+          (
+            await app.request(`/api/members/${userDId}/role`, {
+              method: 'PATCH',
+              headers,
+              body: JSON.stringify({ role: 'receptionist' }),
+            })
+          ).status,
+        ).toBe(200);
+
+        expect(
+          (await app.request(`/api/members/${userDId}`, { method: 'DELETE', headers })).status,
+        ).toBe(204);
+
+        // 4) modificacion de los datos de la organizacion (RF-204).
+        expect(
+          (
+            await app.request(`/api/organizations/${orgAId}`, {
+              method: 'PATCH',
+              headers,
+              body: JSON.stringify({ phone: `7${Math.floor(1000000 + Math.random() * 8999999)}` }),
+            })
+          ).status,
+        ).toBe(200);
+
+        // 5) desactivacion de un taller.
+        const taller = await app.request('/api/workshops', {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({ name: `Auditado ${rnd()}` }),
+        });
+        const tallerId = ((await taller.json()) as { workshop: { id: string } }).workshop.id;
+        expect(
+          (await app.request(`/api/workshops/${tallerId}/deactivate`, { method: 'POST', headers })).status,
+        ).toBe(200);
+
+        // 6) baja logica de un cliente.
+        const cliente = await app.request('/api/clients', {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({ firstName: 'Audit', lastName: `Cliente${rnd()}` }),
+        });
+        const clienteId = ((await cliente.json()) as { client: { id: string } }).client.id;
+        expect(
+          (await app.request(`/api/clients/${clienteId}/deactivate`, { method: 'POST', headers })).status,
+        ).toBe(200);
+
+        const res = await app.request('/api/audit?limit=500', { headers });
+        expect(res.status).toBe(200);
+        entradas = ((await res.json()) as { audit: typeof entradas }).audit;
+        acciones = new Set(entradas.map((e) => e.action));
       });
-      expect(invitacion.status).toBe(201);
-      const userDId = ((await invitacion.json()) as { userId: string }).userId;
 
-      expect(
-        (
-          await app.request(`/api/members/${userDId}/role`, {
-            method: 'PATCH',
-            headers,
-            body: JSON.stringify({ role: 'receptionist' }),
-          })
-        ).status,
-      ).toBe(200);
-
-      expect(
-        (await app.request(`/api/members/${userDId}`, { method: 'DELETE', headers })).status,
-      ).toBe(204);
-
-      // 4) Modificacion de los datos de la organizacion (RF-204).
-      expect(
-        (
-          await app.request(`/api/organizations/${orgAId}`, {
-            method: 'PATCH',
-            headers,
-            body: JSON.stringify({ phone: `7${Math.floor(1000000 + Math.random() * 8999999)}` }),
-          })
-        ).status,
-      ).toBe(200);
-
-      // 5) Desactivacion de un taller.
-      const taller = await app.request('/api/workshops', {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({ name: `Auditado ${rnd()}` }),
+      it('CP-703.1 — la invitacion de un miembro', () => {
+        expect(acciones).toContain('member.invited');
       });
-      const tallerId = ((await taller.json()) as { workshop: { id: string } }).workshop.id;
-      expect(
-        (await app.request(`/api/workshops/${tallerId}/deactivate`, { method: 'POST', headers })).status,
-      ).toBe(200);
 
-      // 6) Baja logica de un cliente.
-      const cliente = await app.request('/api/clients', {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({ firstName: 'Audit', lastName: `Cliente${rnd()}` }),
+      it('CP-703.2 — el cambio de rol', () => {
+        expect(acciones).toContain('member.role_changed');
       });
-      const clienteId = ((await cliente.json()) as { client: { id: string } }).client.id;
-      expect(
-        (await app.request(`/api/clients/${clienteId}/deactivate`, { method: 'POST', headers })).status,
-      ).toBe(200);
 
-      const res = await app.request('/api/audit?limit=500', { headers });
-      expect(res.status).toBe(200);
-      const body = (await res.json()) as {
-        audit: Array<{ action: string; performedBy: string | null; createdAt: string }>;
-      };
-      const acciones = new Set(body.audit.map((e) => e.action));
+      it('CP-703.3 — la remocion de un miembro', () => {
+        expect(acciones).toContain('member.removed');
+      });
 
-      for (const accion of [
-        'member.invited',
-        'member.role_changed',
-        'member.removed',
-        'organization.updated',
-        'workshop.deactivated',
-        'client.deactivated',
-      ]) {
-        expect(acciones, `falta la accion auditada ${accion}`).toContain(accion);
-      }
+      it('CP-703.4 — la modificacion de los datos de la organizacion', () => {
+        expect(acciones).toContain('organization.updated');
+      });
 
-      // Cada entrada lleva autor y fecha (RF-703).
-      for (const entrada of body.audit) {
-        expect(entrada.performedBy).toBeTruthy();
-        expect(entrada.createdAt).toBeTruthy();
-      }
+      it('CP-703.5 — la desactivacion de un taller', () => {
+        expect(acciones).toContain('workshop.deactivated');
+      });
+
+      it('CP-703.6 — la baja logica de un cliente', () => {
+        expect(acciones).toContain('client.deactivated');
+      });
+
+      it('cada entrada lleva autor y fecha', () => {
+        expect(entradas.length).toBeGreaterThan(0);
+        for (const entrada of entradas) {
+          expect(entrada.performedBy).toBeTruthy();
+          expect(entrada.createdAt).toBeTruthy();
+        }
+      });
     });
 
     it('CP-703.7 — el registro persiste tras la baja de la entidad referenciada', async () => {

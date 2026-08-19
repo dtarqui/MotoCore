@@ -26,7 +26,7 @@ describe('superficie HTTP', () => {
     expect(await codeOf(res)).toBe('auth.missing_token');
   });
 
-  it('CP-101.4 — body invalido responde 400 validation.invalid_body con detalle por campo', async () => {
+  it('CP-101.4 y CP-N205 — body invalido responde 400 con detalle por campo, sin efectos', async () => {
     const res = await app.request('/api/auth/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

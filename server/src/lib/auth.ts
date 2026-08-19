@@ -1,12 +1,17 @@
 import type { MiddlewareHandler } from 'hono';
-import { serviceClient } from './supabase.js';
+import { serviceClient, userClient } from './supabase.js';
 import { unauthorized } from './errors.js';
 import type { AppBindings } from '../types.js';
 
 /**
- * Verifica el access token de Supabase (Authorization: Bearer <jwt>) y deja
- * userId/userEmail/userToken en el contexto. La emision/refresh de tokens la
- * maneja Supabase Auth en el cliente; aqui solo validamos.
+ * Verifica el access token de Supabase (Authorization: Bearer <jwt>) y deja la
+ * identidad y el cliente de datos de la peticion en el contexto. La emision y
+ * la renovacion de tokens las maneja Supabase Auth en el cliente; aqui solo se
+ * verifica (ADR-004).
+ *
+ * El `db` que deja en el contexto esta atado a esa credencial, de modo que
+ * toda consulta de negocio se evalue contra las politicas RLS con la identidad
+ * real de quien llama.
  */
 export const requireAuth: MiddlewareHandler<AppBindings> = async (c, next) => {
   const header = c.req.header('Authorization') ?? '';
@@ -23,5 +28,8 @@ export const requireAuth: MiddlewareHandler<AppBindings> = async (c, next) => {
   c.set('userId', data.user.id);
   c.set('userEmail', data.user.email ?? '');
   c.set('userToken', token);
+  // Un solo cliente por peticion: crearlo por consulta multiplicaria el coste
+  // de arranque en una funcion efimera.
+  c.set('db', userClient(token));
   await next();
 };

@@ -32,7 +32,7 @@ function assertOwner(c: { get: (k: 'orgRole') => string }): void {
 
 /** Lista los talleres de la organizacion activa — RF-302. */
 workshopRoutes.get('/', async (c) => {
-  const { data, error } = await serviceClient()
+  const { data, error } = await c.get('db')
     .from('workshops')
     .select(WORKSHOP_COLUMNS)
     .eq('organization_id', c.get('orgId'))
@@ -48,7 +48,7 @@ workshopRoutes.post('/', async (c) => {
   const orgId = c.get('orgId');
   const input = createWorkshopSchema.parse(await c.req.json());
 
-  const { data, error } = await serviceClient()
+  const { data, error } = await c.get('db')
     .from('workshops')
     .insert({
       organization_id: orgId,
@@ -76,7 +76,7 @@ workshopRoutes.get('/:workshopId', async (c) => {
   const workshopId = c.req.param('workshopId');
   await assertWorkshopInOrg(workshopId, c.get('orgId'));
 
-  const { data, error } = await serviceClient()
+  const { data, error } = await c.get('db')
     .from('workshops')
     .select(WORKSHOP_COLUMNS)
     .eq('id', workshopId)
@@ -95,7 +95,7 @@ workshopRoutes.patch('/:workshopId', async (c) => {
   await assertWorkshopInOrg(workshopId, c.get('orgId'));
   const input = updateWorkshopSchema.parse(await c.req.json());
 
-  const { data, error } = await serviceClient()
+  const { data, error } = await c.get('db')
     .from('workshops')
     .update({ ...input, updated_at: new Date().toISOString() })
     .eq('id', workshopId)
@@ -127,7 +127,7 @@ workshopRoutes.post('/:workshopId/deactivate', async (c) => {
   const workshopId = c.req.param('workshopId');
   await assertWorkshopInOrg(workshopId, orgId);
 
-  const { data, error } = await serviceClient()
+  const { data, error } = await c.get('db')
     .from('workshops')
     .update({ is_active: false, updated_at: new Date().toISOString() })
     .eq('id', workshopId)
@@ -154,7 +154,7 @@ workshopRoutes.get('/:workshopId/assignments', async (c) => {
   const workshopId = c.req.param('workshopId');
   await assertWorkshopInOrg(workshopId, c.get('orgId'));
 
-  const { data, error } = await serviceClient()
+  const { data, error } = await c.get('db')
     .from('workshop_assignments')
     .select('id, workshop_id, memberships ( user_id, role, is_active )')
     .eq('workshop_id', workshopId);
@@ -183,7 +183,7 @@ workshopRoutes.post('/:workshopId/assignments', async (c) => {
 
   const membershipId = await findMembershipId(orgId, input.userId);
 
-  const { error } = await serviceClient()
+  const { error } = await c.get('db')
     .from('workshop_assignments')
     .insert({ membership_id: membershipId, workshop_id: workshopId });
 
@@ -207,7 +207,7 @@ workshopRoutes.delete('/:workshopId/assignments/:userId', async (c) => {
 
   const membershipId = await findMembershipId(orgId, targetUserId);
 
-  const { error } = await serviceClient()
+  const { error } = await c.get('db')
     .from('workshop_assignments')
     .delete()
     .eq('membership_id', membershipId)
@@ -218,7 +218,12 @@ workshopRoutes.delete('/:workshopId/assignments/:userId', async (c) => {
   return c.body(null, 204);
 });
 
-/** Resuelve el identificador de la membresia, exigiendo que la cuenta sea miembro. */
+/**
+ * Resuelve el identificador de la membresia, exigiendo que la cuenta sea
+ * miembro. Consulta con clave de servicio a proposito: forma parte del control
+ * de la aplicacion, y hacerlo depender de RLS colapsaria las dos capas en una
+ * (ver `lib/supabase.ts`, excepcion 1).
+ */
 async function findMembershipId(orgId: string, userId: string): Promise<string> {
   const membership = await getMembership(orgId, userId);
   if (!membership) {

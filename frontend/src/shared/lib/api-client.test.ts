@@ -50,7 +50,7 @@ describe('apiRequest: credencial y contexto activo', () => {
     expect(capturas[0]!.init.headers.Authorization).toBe('Bearer jwt-de-prueba')
   })
 
-  it('adjunta la organización activa en X-Org-Id', async () => {
+  it('CP-N005 — adjunta la organización activa en X-Org-Id', async () => {
     const capturas = interceptar()
     setActiveOrgId('org-1')
 
@@ -59,7 +59,7 @@ describe('apiRequest: credencial y contexto activo', () => {
     expect(capturas[0]!.init.headers['X-Org-Id']).toBe('org-1')
   })
 
-  it('NO adjunta el taller salvo que el endpoint sea de nivel taller', async () => {
+  it('CP-N005 — NO adjunta el taller salvo que el endpoint sea de nivel taller', async () => {
     const capturas = interceptar()
     setActiveOrgId('org-1')
     setActiveWorkshopId('taller-1')
@@ -72,7 +72,7 @@ describe('apiRequest: credencial y contexto activo', () => {
     expect(capturas[1]!.init.headers['X-Workshop-Id']).toBe('taller-1')
   })
 
-  it('no inventa un contexto cuando no hay ninguno elegido', async () => {
+  it('CP-N005 — no inventa un contexto cuando no hay ninguno elegido', async () => {
     const capturas = interceptar()
     await apiRequest('/api/clients')
     // El servidor rechaza la petición sin contexto, y eso es lo correcto: el
@@ -82,7 +82,7 @@ describe('apiRequest: credencial y contexto activo', () => {
 })
 
 describe('apiRequest: mapeo de errores', () => {
-  it('conserva el código de negocio del Problem Details, no solo el mensaje', async () => {
+  it('CP-N204.1 — conserva el código de negocio del Problem Details, no solo el mensaje', async () => {
     interceptar(403, {
       type: 'about:blank',
       title: 'organization.access_denied',

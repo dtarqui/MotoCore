@@ -1,10 +1,10 @@
 import { Hono } from 'hono';
-import { serviceClient } from '../lib/supabase.js';
 import { requireAuth } from '../lib/auth.js';
 import { requireActiveOrg, type OrgBindings } from '../lib/org-context.js';
 import { conflict, forbidden, internal, notFound } from '../lib/errors.js';
 import { recordAudit } from '../lib/audit.js';
 import { createClientSchema, updateClientSchema } from '../schemas.js';
+import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Role } from '../types.js';
 
 /**
@@ -36,7 +36,7 @@ clientRoutes.get('/', async (c) => {
   const search = c.req.query('search')?.trim();
   const includeInactive = c.req.query('includeInactive') === 'true';
 
-  let query = serviceClient().from('clients').select(CLIENT_COLUMNS).eq('organization_id', orgId);
+  let query = c.get('db').from('clients').select(CLIENT_COLUMNS).eq('organization_id', orgId);
 
   if (!includeInactive) query = query.eq('is_active', true);
   if (search) {
@@ -58,7 +58,7 @@ clientRoutes.post('/', async (c) => {
   const orgId = c.get('orgId');
   const input = createClientSchema.parse(await c.req.json());
 
-  const { data, error } = await serviceClient()
+  const { data, error } = await c.get('db')
     .from('clients')
     .insert({
       organization_id: orgId,
@@ -85,7 +85,7 @@ clientRoutes.post('/', async (c) => {
 
 /** Detalle de un cliente de la organizacion activa. */
 clientRoutes.get('/:clientId', async (c) => {
-  const client = await findInOrg(c.req.param('clientId'), c.get('orgId'));
+  const client = await findInOrg(c.get('db'), c.req.param('clientId'), c.get('orgId'));
   return c.json({ client });
 });
 
@@ -94,7 +94,7 @@ clientRoutes.patch('/:clientId', async (c) => {
   assertCanWrite(c.get('orgRole'));
   const clientId = c.req.param('clientId');
   const orgId = c.get('orgId');
-  await findInOrg(clientId, orgId);
+  await findInOrg(c.get('db'), clientId, orgId);
   const input = updateClientSchema.parse(await c.req.json());
 
   const patch: Record<string, unknown> = { updated_at: new Date().toISOString() };
@@ -106,7 +106,7 @@ clientRoutes.patch('/:clientId', async (c) => {
   if (input.address !== undefined) patch.address = input.address;
   if (input.notes !== undefined) patch.notes = input.notes;
 
-  const { data, error } = await serviceClient()
+  const { data, error } = await c.get('db')
     .from('clients')
     .update(patch)
     .eq('id', clientId)
@@ -136,9 +136,9 @@ clientRoutes.post('/:clientId/deactivate', async (c) => {
   assertCanWrite(c.get('orgRole'));
   const clientId = c.req.param('clientId');
   const orgId = c.get('orgId');
-  await findInOrg(clientId, orgId);
+  await findInOrg(c.get('db'), clientId, orgId);
 
-  const { data, error } = await serviceClient()
+  const { data, error } = await c.get('db')
     .from('clients')
     .update({ is_active: false, updated_at: new Date().toISOString() })
     .eq('id', clientId)
@@ -165,8 +165,12 @@ clientRoutes.post('/:clientId/deactivate', async (c) => {
  * de otra organizacion devuelve "no encontrado", no "prohibido" (RNF-105):
  * distinguir ambos casos revelaria que ese identificador existe en otra parte.
  */
-async function findInOrg(clientId: string, orgId: string): Promise<Record<string, unknown>> {
-  const { data, error } = await serviceClient()
+async function findInOrg(
+  db: SupabaseClient,
+  clientId: string,
+  orgId: string,
+): Promise<Record<string, unknown>> {
+  const { data, error } = await db
     .from('clients')
     .select(CLIENT_COLUMNS)
     .eq('id', clientId)

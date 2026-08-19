@@ -57,7 +57,7 @@ describe('los recursos interiores se resuelven por cabecera, no por ruta anidada
     expect(llamadas[0]!.headers['X-Org-Id']).toBe('org-1')
   })
 
-  it('ninguna ruta anida el identificador de organización', async () => {
+  it('CP-N023 — ninguna ruta anida el identificador de organización', async () => {
     await api.getWorkshops()
     await api.getMembers()
     await api.createWorkshop({ name: 'Taller Centro' })
@@ -78,19 +78,19 @@ describe('los recursos interiores se resuelven por cabecera, no por ruta anidada
 })
 
 describe('método de las transiciones de estado', () => {
-  it('la baja de un taller es POST /deactivate, no PATCH', async () => {
+  it('CP-N026 — la baja de un taller es POST /deactivate, no PATCH', async () => {
     await api.deactivateWorkshop('taller-1')
     expect(llamadas[0]!.method).toBe('POST')
     expect(ruta()).toBe('/api/workshops/taller-1/deactivate')
   })
 
-  it('la baja de un cliente es POST /deactivate, no PATCH', async () => {
+  it('CP-N026 — la baja de un cliente es POST /deactivate, no PATCH', async () => {
     await clientes.deactivateClient('cliente-1')
     expect(llamadas[0]!.method).toBe('POST')
     expect(ruta()).toBe('/api/clients/cliente-1/deactivate')
   })
 
-  it('la remoción de un miembro sigue siendo DELETE: revoca un vínculo', async () => {
+  it('CP-N026 — la remoción de un miembro sigue siendo DELETE: revoca un vínculo', async () => {
     // Excepción declarada en el §2.6: lo que se revoca es la relación entre la
     // cuenta y la organización, no el estado de un recurso propio.
     await api.removeMember('user-1')

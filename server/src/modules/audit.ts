@@ -48,8 +48,10 @@ auditRoutes.get('/', async (c) => {
     ? Math.min(Math.max(limitePedido, 1), LIMITE_MAXIMO)
     : LIMITE_POR_DEFECTO;
 
-  const db = serviceClient();
-  let query = db
+  // El registro se lee con la credencial de quien llama: la politica
+  // `audit_log_select_owner` (migracion 0007) vuelve a exigir el rol en el
+  // motor, de modo que la reserva al Owner no depende solo de este handler.
+  let query = c.get('db')
     .from('audit_log')
     .select(AUDIT_COLUMNS)
     .eq('organization_id', orgId)
@@ -76,9 +78,11 @@ auditRoutes.get('/', async (c) => {
     ),
   ];
 
+  // Los perfiles de otras cuentas exigen clave de servicio: `profiles_select_own`
+  // solo deja leer el propio (ver `lib/supabase.ts`, excepcion 4).
   const perfilesPorId = new Map<string, Record<string, unknown>>();
   if (autores.length > 0) {
-    const { data: perfiles } = await db
+    const { data: perfiles } = await serviceClient()
       .from('profiles')
       .select('id, email, first_name, last_name')
       .in('id', autores);

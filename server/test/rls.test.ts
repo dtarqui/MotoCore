@@ -7,6 +7,11 @@ import { createApp } from '../src/app.js';
  *
  * Es el entregable del objetivo especifico 4 —validar el aislamiento con
  * evidencia reproducible—, y la unica prueba que demuestra la premisa central
+ * Cubre CP-702 (una fila por tabla de negocio), CP-N101 (escritura y borrado)
+ * y CP-N106. La comprobacion complementaria —el aislamiento por la interfaz,
+ * CP-701— vive en integration.test.ts, y la de las dos capas independientes
+ * —CP-N102— en defense-in-depth.test.ts.
+ *
  * del proyecto: que el aislamiento entre organizaciones se sostiene AUNQUE la capa
  * de aplicacion omita sus controles.
  *
@@ -107,25 +112,25 @@ describe.skipIf(!hasEnv)('aislamiento a nivel de base de datos (RLS sin pasar po
     });
   });
 
-  it('B no puede leer la organizacion de A', async () => {
+  it('CP-702 · organizations — B no puede leer la organizacion de A', async () => {
     const { data, error } = await dbAsB.from('organizations').select('id, name').eq('id', orgAId);
     expect(error).toBeNull();
     expect(data).toEqual([]);
   });
 
-  it('B no puede leer los talleres de A', async () => {
+  it('CP-702 · workshops — B no puede leer los talleres de A', async () => {
     const { data, error } = await dbAsB.from('workshops').select('id, name').eq('organization_id', orgAId);
     expect(error).toBeNull();
     expect(data).toEqual([]);
   });
 
-  it('B no puede leer las membresias de A', async () => {
+  it('CP-702 · memberships — B no puede leer las membresias de A', async () => {
     const { data, error } = await dbAsB.from('memberships').select('user_id, role').eq('organization_id', orgAId);
     expect(error).toBeNull();
     expect(data).toEqual([]);
   });
 
-  it('B no puede leer los clientes de A (nivel organizacion)', async () => {
+  it('CP-702 · clients — B no puede leer los clientes de A (nivel organizacion)', async () => {
     const { data, error } = await dbAsB.from('clients').select('id, first_name').eq('organization_id', orgAId);
     expect(error).toBeNull();
     expect(data).toEqual([]);
@@ -137,25 +142,25 @@ describe.skipIf(!hasEnv)('aislamiento a nivel de base de datos (RLS sin pasar po
     expect(direct.data).toEqual([]);
   });
 
-  it('B no puede leer el inventario de A (nivel taller)', async () => {
+  it('CP-702 · parts — B no puede leer el inventario de A (nivel taller)', async () => {
     const { data, error } = await dbAsB.from('parts').select('id, part_number').eq('id', partAId);
     expect(error).toBeNull();
     expect(data).toEqual([]);
   });
 
-  it('B no puede leer los movimientos de existencias de A', async () => {
+  it('CP-702 · part_movements — B no puede leer los movimientos de A', async () => {
     const { data, error } = await dbAsB.from('part_movements').select('id').eq('part_id', partAId);
     expect(error).toBeNull();
     expect(data).toEqual([]);
   });
 
-  it('B no puede leer la auditoria de A', async () => {
+  it('CP-702 · audit_log — B no puede leer la auditoria de A', async () => {
     const { data, error } = await dbAsB.from('audit_log').select('id, action').eq('organization_id', orgAId);
     expect(error).toBeNull();
     expect(data).toEqual([]);
   });
 
-  it('B no puede ESCRIBIR en la organizacion de A', async () => {
+  it('CP-N101 — B no puede ESCRIBIR en la organizacion de A', async () => {
     // El aislamiento no es solo de lectura: la politica de insert exige
     // membresia activa, asi que la escritura debe ser rechazada.
     const { error } = await dbAsB
@@ -164,7 +169,7 @@ describe.skipIf(!hasEnv)('aislamiento a nivel de base de datos (RLS sin pasar po
     expect(error).not.toBeNull();
   });
 
-  it('B no puede modificar los datos de A', async () => {
+  it('CP-N101 — B no puede modificar los datos de A', async () => {
     const { data, error } = await dbAsB
       .from('clients')
       .update({ first_name: 'Alterado' })
@@ -175,14 +180,14 @@ describe.skipIf(!hasEnv)('aislamiento a nivel de base de datos (RLS sin pasar po
     expect(data ?? []).toEqual([]);
   });
 
-  it('B no puede borrar el historial inmutable de A', async () => {
+  it('CP-N101 — B no puede borrar el historial inmutable de A', async () => {
     const { data, error } = await dbAsB.from('part_movements').delete().eq('part_id', partAId).select('id');
     // part_movements no tiene politica de delete: nada se borra.
     expect(data ?? []).toEqual([]);
     if (error) expect(error).toBeTruthy();
   });
 
-  it('B sigue viendo con normalidad sus propios datos', async () => {
+  it('control negativo — B sigue viendo con normalidad sus propios datos', async () => {
     // Control negativo: si estas consultas tambien devolvieran vacio, las
     // pruebas anteriores no probarian aislamiento, sino que RLS bloquea todo.
     const { data, error } = await dbAsB.from('organizations').select('id, name');
@@ -190,7 +195,7 @@ describe.skipIf(!hasEnv)('aislamiento a nivel de base de datos (RLS sin pasar po
     expect((data ?? []).length).toBeGreaterThan(0);
   });
 
-  it('la funcion de busqueda por email no es invocable por un usuario autenticado', async () => {
+  it('CP-N106 — la busqueda por correo no es invocable por una cuenta autenticada', async () => {
     // RNF-106: evita usar la invitacion como mecanismo de enumeracion de cuentas.
     const { error } = await dbAsB.rpc('get_user_id_by_email', { p_email: userA.email });
     expect(error).not.toBeNull();

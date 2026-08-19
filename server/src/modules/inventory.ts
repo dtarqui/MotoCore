@@ -5,6 +5,7 @@ import { requireActiveOrg } from '../lib/org-context.js';
 import { requireActiveWorkshop, assertWorkshopInOrg, type WorkshopBindings } from '../lib/workshop-context.js';
 import { badRequest, conflict, forbidden, internal, notFound } from '../lib/errors.js';
 import { createPartSchema, updatePartSchema, movementSchema, transferSchema } from '../schemas.js';
+import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Role } from '../types.js';
 
 /**
@@ -75,7 +76,7 @@ inventoryRoutes.get('/parts', async (c) => {
   const search = c.req.query('search')?.trim();
   const lowStockOnly = c.req.query('lowStock') === 'true';
 
-  let query = serviceClient()
+  let query = c.get('db')
     .from('parts')
     .select(PART_COLUMNS)
     .eq('organization_id', c.get('orgId'))
@@ -109,7 +110,7 @@ inventoryRoutes.get('/parts', async (c) => {
 inventoryRoutes.post('/parts', async (c) => {
   assertCanManageCatalog(c.get('orgRole'));
   const input = createPartSchema.parse(await c.req.json());
-  const db = serviceClient();
+  const db = c.get('db');
 
   const { data: part, error } = await db
     .from('parts')
@@ -137,7 +138,7 @@ inventoryRoutes.post('/parts', async (c) => {
   }
 
   if ((input.initialStock ?? 0) > 0) {
-    const { error: movErr } = await db.rpc('register_part_movement', {
+    const { error: movErr } = await serviceClient().rpc('register_part_movement', {
       p_part_id: (part as { id: string }).id,
       p_movement_type: 'purchase',
       p_quantity: input.initialStock,
@@ -162,7 +163,7 @@ inventoryRoutes.post('/parts', async (c) => {
 
 /** Detalle de un repuesto del taller activo. */
 inventoryRoutes.get('/parts/:partId', async (c) => {
-  const part = await findInWorkshop(c.req.param('partId'), c.get('orgId'), c.get('workshopId'));
+  const part = await findInWorkshop(c.get('db'), c.req.param('partId'), c.get('orgId'), c.get('workshopId'));
   return c.json({ part });
 });
 
@@ -170,7 +171,7 @@ inventoryRoutes.get('/parts/:partId', async (c) => {
 inventoryRoutes.patch('/parts/:partId', async (c) => {
   assertCanManageCatalog(c.get('orgRole'));
   const partId = c.req.param('partId');
-  await findInWorkshop(partId, c.get('orgId'), c.get('workshopId'));
+  await findInWorkshop(c.get('db'), partId, c.get('orgId'), c.get('workshopId'));
   const input = updatePartSchema.parse(await c.req.json());
 
   const patch: Record<string, unknown> = { updated_at: new Date().toISOString() };
@@ -182,7 +183,7 @@ inventoryRoutes.patch('/parts/:partId', async (c) => {
   if (input.maximumStock !== undefined) patch.maximum_stock = input.maximumStock;
   if (input.unitCost !== undefined) patch.unit_cost = input.unitCost;
 
-  const { data, error } = await serviceClient()
+  const { data, error } = await c.get('db')
     .from('parts')
     .update(patch)
     .eq('id', partId)
@@ -199,9 +200,9 @@ inventoryRoutes.patch('/parts/:partId', async (c) => {
 /** Historial de movimientos de un repuesto — RF-604. */
 inventoryRoutes.get('/parts/:partId/movements', async (c) => {
   const partId = c.req.param('partId');
-  await findInWorkshop(partId, c.get('orgId'), c.get('workshopId'));
+  await findInWorkshop(c.get('db'), partId, c.get('orgId'), c.get('workshopId'));
 
-  const { data, error } = await serviceClient()
+  const { data, error } = await c.get('db')
     .from('part_movements')
     .select('id, part_id, movement_type, quantity, previous_stock, new_stock, unit_cost, total_cost, reference, notes, performed_by, created_at')
     .eq('part_id', partId)
@@ -218,7 +219,7 @@ inventoryRoutes.get('/parts/:partId/movements', async (c) => {
  */
 inventoryRoutes.post('/parts/:partId/movements', async (c) => {
   const partId = c.req.param('partId');
-  await findInWorkshop(partId, c.get('orgId'), c.get('workshopId'));
+  await findInWorkshop(c.get('db'), partId, c.get('orgId'), c.get('workshopId'));
   const input = movementSchema.parse(await c.req.json());
 
   const { data, error } = await serviceClient().rpc('register_part_movement', {
@@ -245,14 +246,14 @@ inventoryRoutes.post('/parts/:partId/transfer', async (c) => {
   assertCanTransfer(c.get('orgRole'));
   const partId = c.req.param('partId');
   const orgId = c.get('orgId');
-  await findInWorkshop(partId, orgId, c.get('workshopId'));
+  await findInWorkshop(c.get('db'), partId, orgId, c.get('workshopId'));
   const input = transferSchema.parse(await c.req.json());
 
   // El taller de destino debe pertenecer a la organizacion activa: una
   // transferencia no puede cruzar el limite de aislamiento.
   await assertWorkshopInOrg(input.toWorkshopId, orgId);
 
-  const { data: target, error: targetErr } = await serviceClient()
+  const { data: target, error: targetErr } = await c.get('db')
     .from('parts')
     .select('id')
     .eq('id', input.toPartId)
@@ -280,11 +281,12 @@ inventoryRoutes.post('/parts/:partId/transfer', async (c) => {
  * taller responde "no encontrado" (RF-602): desde este taller, no existe.
  */
 async function findInWorkshop(
+  db: SupabaseClient,
   partId: string,
   orgId: string,
   workshopId: string,
 ): Promise<Record<string, unknown>> {
-  const { data, error } = await serviceClient()
+  const { data, error } = await db
     .from('parts')
     .select(PART_COLUMNS)
     .eq('id', partId)
