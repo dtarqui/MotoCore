@@ -14,7 +14,7 @@ La documentación se divide en dos: el **anteproyecto** es el documento académi
 
 | # | Capítulo | Qué establece |
 |---|---|---|
-| — | [**Anteproyecto integrado**](anteproyecto/04-anteproyecto-integrado.md) | **El documento de entrega**: responde a los 16 puntos exigidos, incluidos hipótesis, operacionalización de variables, matriz de consistencia, diseño de investigación y población y muestra |
+| — | [**Anteproyecto integrado**](anteproyecto/04-anteproyecto-integrado.md) | **El documento de entrega**: responde a los 16 puntos exigidos, incluidos hipótesis, operacionalización de variables, matriz de consistencia, diseño de investigación y población y muestra; añade los procedimientos de recolección y análisis y las consideraciones éticas |
 | — | [**Perfil de proyecto**](anteproyecto/00-perfil-proyecto.md) | El documento que se presenta para aprobación: condensa los tres capítulos en la estructura del perfil, con matriz de consistencia, cronograma y presupuesto |
 | 1 | [Definición y alcance](anteproyecto/01-definicion-y-alcance.md) | Tema, problema, preguntas, objetivos y fronteras del proyecto |
 | 2 | [Antecedentes y estado del arte](anteproyecto/02-antecedentes-y-estado-del-arte.md) | Contexto del sector, literatura revisada y vacío de investigación |
@@ -84,6 +84,8 @@ Antes de escribir sobre un tema, verificar quién es su responsable. Si ya lo ti
 | Título del proyecto y formulación del objetivo general | [anteproyecto/01-definicion-y-alcance.md](anteproyecto/01-definicion-y-alcance.md) §1.1 y §1.6 |
 | Hipótesis, variables y operacionalización | [anteproyecto/04-anteproyecto-integrado.md](anteproyecto/04-anteproyecto-integrado.md) §10–§12 |
 | Enfoque, diseño de investigación, población y muestra | [anteproyecto/04-anteproyecto-integrado.md](anteproyecto/04-anteproyecto-integrado.md) §14–§16 |
+| Procedimientos de recolección y análisis, validez y confiabilidad de los instrumentos | [anteproyecto/04-anteproyecto-integrado.md](anteproyecto/04-anteproyecto-integrado.md) §17 |
+| Consideraciones éticas | [anteproyecto/04-anteproyecto-integrado.md](anteproyecto/04-anteproyecto-integrado.md) §18 · [ingenieria/11-plan-pruebas.md](ingenieria/11-plan-pruebas.md) §7.5 para la sesión con operadores |
 | Fuentes del estado del arte y su verificación | [anteproyecto/02-antecedentes-y-estado-del-arte.md](anteproyecto/02-antecedentes-y-estado-del-arte.md) §2.2 · [anexo-referencias.md](anteproyecto/anexo-referencias.md) |
 | Definición formal de una tecnología, con su fuente | [anteproyecto/03-marco-teorico-y-conceptual.md](anteproyecto/03-marco-teorico-y-conceptual.md) §3.1 |
 | Teoría o modelo que justifica una decisión | [anteproyecto/03-marco-teorico-y-conceptual.md](anteproyecto/03-marco-teorico-y-conceptual.md) §3.2 |

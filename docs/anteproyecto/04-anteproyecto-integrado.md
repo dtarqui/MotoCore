@@ -206,7 +206,7 @@ Definición formal de las tecnologías propias de esta solución; se excluyen lo
 
 #### 7.2.3 Teorías de frontend — cómo interactúa el usuario
 
-**De las responsabilidades a los componentes.** Krasner y Pope (1988) formularon el paradigma Modelo-Vista-Controlador, cuyo aporte permanente es separar el estado del dominio, su presentación y la gestión de la interacción. Las interfaces web actuales conservan el principio pero cambian la unidad de descomposición: **componentes** que encapsulan estado y presentación con flujo de datos unidireccional (Meta Open Source, s. f.). Nielsen (1993) aporta el criterio de percepción —**0,1 s** para sentir una acción instantánea, **1 s** para no romper el flujo de pensamiento, **10 s** como límite de la atención—, que el proyecto declara como criterio de diseño y **no** como objetivo medido (§17.3); y la opción de aplicación web instalable frente a aplicaciones nativas se apoya en el manifiesto de aplicación web (W3C, 2026).
+**De las responsabilidades a los componentes.** Krasner y Pope (1988) formularon el paradigma Modelo-Vista-Controlador, cuyo aporte permanente es separar el estado del dominio, su presentación y la gestión de la interacción. Las interfaces web actuales conservan el principio pero cambian la unidad de descomposición: **componentes** que encapsulan estado y presentación con flujo de datos unidireccional (Meta Open Source, s. f.). Nielsen (1993) aporta el criterio de percepción —**0,1 s** para sentir una acción instantánea, **1 s** para no romper el flujo de pensamiento, **10 s** como límite de la atención—, que el proyecto declara como criterio de diseño y **no** como objetivo medido (§19.3); y la opción de aplicación web instalable frente a aplicaciones nativas se apoya en el manifiesto de aplicación web (W3C, 2026).
 
 **Evaluación de usabilidad con muestras pequeñas.** Nielsen y Landauer (1993) modelaron el hallazgo de problemas de usabilidad y mostraron que la detección sigue una **curva de rendimientos decrecientes**. La consecuencia debe enunciarse con precisión: una muestra pequeña es adecuada **para detectar problemas**, que es el objetivo aquí, e insuficiente **para estimar un parámetro poblacional**, que no se pretende (§16.5). La satisfacción se mide con la escala de usabilidad del sistema, formulada por Brooke (1996) y cuyo baremo de interpretación estableció Bangor et al. (2008) sobre casi tres mil aplicaciones del instrumento; de ahí el umbral de **68 puntos**.
 
@@ -262,7 +262,7 @@ Ninguna teoría se acepta como verdad absoluta. De cada una se consigna su limit
 | Operadores sin formación previa en la herramienta | Que la jerarquía resulte comprensible para quien la opera | Muestras pequeñas (Nielsen & Landauer, 1993); satisfacción (Bangor et al., 2008) | Evaluación de usabilidad del cambio de contexto |
 | — | Verificar que la separación se cumple | Pruebas como especificación previa (Beck, 2002); integración continua (Humble & Farley, 2010; Forsgren et al., 2018) | Suite de aislamiento por dos vías y pipeline automatizado |
 
-**Auditoría de pertinencia.** La prueba aplicada a cada tema fue la misma —si explicarlo no ayuda a resolver el problema de §2, se excluye—, y por ella quedaron fuera la arquitectura de microservicios en profundidad (solo figura como alternativa descartada en §7.3), el aprendizaje automático, la cadena de bloques —la trazabilidad se resuelve con historial inmutable en una tabla de solo inserción—, la teoría de colas y el modelado de rendimiento —las pruebas de carga están excluidas del alcance (§17.3)—, la criptografía aplicada —la gestión de credenciales está delegada en el proveedor de identidad— y la interoperabilidad con la facturación electrónica del SIN.
+**Auditoría de pertinencia.** La prueba aplicada a cada tema fue la misma —si explicarlo no ayuda a resolver el problema de §2, se excluye—, y por ella quedaron fuera la arquitectura de microservicios en profundidad (solo figura como alternativa descartada en §7.3), el aprendizaje automático, la cadena de bloques —la trazabilidad se resuelve con historial inmutable en una tabla de solo inserción—, la teoría de colas y el modelado de rendimiento —las pruebas de carga están excluidas del alcance (§19.3)—, la criptografía aplicada —la gestión de credenciales está delegada en el proveedor de identidad— y la interoperabilidad con la facturación electrónica del SIN.
 
 ---
 
@@ -354,9 +354,9 @@ Los indicadores de eficiencia se reportan **sin umbral**: con una muestra dimens
 
 ## 13. Matriz de consistencia
 
-| Pregunta / problema | Objetivo general | Objetivos específicos | Hipótesis | Variables e indicadores |
+| Pregunta / problema | Objetivo general | Objetivos específicos | Hipótesis | Variables, indicadores, población, muestra e instrumentos |
 |---|---|---|---|---|
-| **General:** ¿De qué manera una arquitectura multi-tenant jerárquica sobre infraestructura serverless, con aislamiento mediante seguridad a nivel de fila, mejora la gestión centralizada y la seguridad de los datos de operadores de varias organizaciones y talleres de servicio de motocicletas en Bolivia?<br><br>**Específicas:**<br>1. ¿Qué estrategias documenta la literatura y qué carencias presenta la oferta boliviana?<br>2. ¿Qué modelo de datos y qué políticas sostienen un único límite de aislamiento?<br>3. ¿Cómo se implementan identidad, jerarquía y control de acceso por rol con verificación automatizada?<br>4. ¿Cómo se comprueba el aislamiento aun ante fallos de la capa de aplicación, y que el cambio de contexto resulta usable? | Diseñar, implementar y validar una arquitectura multi-tenant jerárquica (organización → talleres) sobre infraestructura serverless, que aplique el aislamiento de datos en el motor de base de datos mediante seguridad a nivel de fila, para permitir la gestión centralizada de varias organizaciones de servicio de motocicletas en Bolivia garantizando la separación verificable de sus datos. | 1. **Analizar** las estrategias de aislamiento multi-tenant de la literatura y las soluciones con presencia en Bolivia.<br><br>2. **Diseñar y especificar** el modelo de datos de la jerarquía organización → talleres y las políticas de seguridad a nivel de fila.<br><br>3. **Implementar y automatizar** la identidad, la jerarquía y el control de acceso por rol, con el corte vertical de clientes e inventario y un pipeline de integración continua.<br><br>4. **Validar** el aislamiento con pruebas por interfaz de programación y por acceso directo a la base de datos, y **evaluar** la usabilidad del cambio de contexto con operadores del rubro. | La implementación de una arquitectura multi-tenant jerárquica, con políticas de seguridad a nivel de fila reforzadas por verificación de membresía en la capa de aplicación, eliminó el acceso cruzado de datos entre organizaciones: redujo a cero (0) las filas ajenas devueltas y sostuvo la separación aun con la verificación de la capa de aplicación deshabilitada. | **V. Independiente:** arquitectura multi-tenant jerárquica con aislamiento en dos capas.<br><br>**V. Dependiente:** separación verificable de datos entre organizaciones; gestión centralizada.<br><br>**Indicadores:**<br>• Filas ajenas devueltas por acceso directo: 0<br>• Tablas con políticas activas: 100 % (7 de 7)<br>• Operaciones con autorización correcta: 100 %<br>• Casos en verde sin capa de aplicación: 100 %<br>• Vías independientes de verificación: 2 |
+| **General:** ¿De qué manera una arquitectura multi-tenant jerárquica sobre infraestructura serverless, con aislamiento mediante seguridad a nivel de fila, mejora la gestión centralizada y la seguridad de los datos de operadores de varias organizaciones y talleres de servicio de motocicletas en Bolivia?<br><br>**Específicas:**<br>1. ¿Qué estrategias documenta la literatura y qué carencias presenta la oferta boliviana?<br>2. ¿Qué modelo de datos y qué políticas sostienen un único límite de aislamiento?<br>3. ¿Cómo se implementan identidad, jerarquía y control de acceso por rol con verificación automatizada?<br>4. ¿Cómo se comprueba el aislamiento aun ante fallos de la capa de aplicación, y que el cambio de contexto resulta usable? | Diseñar, implementar y validar una arquitectura multi-tenant jerárquica (organización → talleres) sobre infraestructura serverless, que aplique el aislamiento de datos en el motor de base de datos mediante seguridad a nivel de fila, para permitir la gestión centralizada de varias organizaciones de servicio de motocicletas en Bolivia garantizando la separación verificable de sus datos. | 1. **Analizar** las estrategias de aislamiento multi-tenant de la literatura y las soluciones con presencia en Bolivia.<br><br>2. **Diseñar y especificar** el modelo de datos de la jerarquía organización → talleres y las políticas de seguridad a nivel de fila.<br><br>3. **Implementar y automatizar** la identidad, la jerarquía y el control de acceso por rol, con el corte vertical de clientes e inventario y un pipeline de integración continua.<br><br>4. **Validar** el aislamiento con pruebas por interfaz de programación y por acceso directo a la base de datos, y **evaluar** la usabilidad del cambio de contexto con operadores del rubro. | La implementación de una arquitectura multi-tenant jerárquica, con políticas de seguridad a nivel de fila reforzadas por verificación de membresía en la capa de aplicación, eliminó el acceso cruzado de datos entre organizaciones: redujo a cero (0) las filas ajenas devueltas y sostuvo la separación aun con la verificación de la capa de aplicación deshabilitada. | **VARIABLES**<br>*Independiente:* arquitectura multi-tenant jerárquica con aislamiento en dos capas —seguridad a nivel de fila reforzada por verificación de membresía—.<br>*Dependientes:* separación verificable de datos entre organizaciones · gestión centralizada · usabilidad del cambio de contexto.<br><br>**INDICADORES**<br>• Filas ajenas devueltas por acceso directo a la base de datos: **0**<br>• Tablas de negocio con políticas de seguridad a nivel de fila activas: **100 % (7 de 7)**<br>• Operaciones con respuesta de autorización correcta: **100 %**<br>• Casos de aislamiento en verde con la verificación de la capa de aplicación deshabilitada: **100 %**<br>• Vías independientes de verificación: **2**<br>• Tasa de éxito por tarea: **≥ 80 %**<br>• Puntuación SUS: **≥ 68**<br><br>**POBLACIÓN**<br>**a) Documental** *(obj. 1)*: publicaciones revisadas por pares sobre aislamiento entre inquilinos en esquema compartido, 2021–2026.<br>**b) De mercado** *(obj. 1)*: plataformas de gestión de talleres con presencia, uso o comercialización en Bolivia.<br>**c) Técnica** *(obj. 2, 3 y 4 — es donde se mide la variable dependiente)*: las **tablas de negocio** del esquema y las **operaciones** expuestas por la interfaz de programación del sistema construido. **No son personas: son datos y operaciones.**<br>**d) De operadores** *(obj. 4 — usabilidad)*: operadores de organizaciones de servicio de motocicletas en Bolivia que administran más de una organización y/o más de un taller. Única población compuesta por personas.<br><br>**MUESTRA**<br>**a)** 5 fuentes — no probabilístico **por criterio**; suficiencia por saturación temática.<br>**b)** 10 plataformas — no probabilístico **intencional**, por accesibilidad de la información pública del producto.<br>**c) Censo: el 100 % de la población** — 7 tablas de negocio y la totalidad de las operaciones del contrato, ejercidas sobre un escenario de 3 cuentas sintéticas, 3 organizaciones y 3 talleres. Muestreo **no probabilístico intencional por caso crítico**: se ejerce el peor escenario de aislamiento —una cuenta sin membresía alguna y una cuenta de otra organización consultando datos ajenos, con y sin la capa de aplicación activa—, no el uso nominal. **No cabe muestreo probabilístico**: una sola tabla sin política activa constituye una fuga, y una muestra parcial podría declarar seguro un sistema que no lo es.<br>**d)** De 5 a 8 participantes — no probabilístico **intencional** por perfil; tamaño justificado por Nielsen y Landauer (1993).<br><br>**INSTRUMENTOS**<br>• **Suite automatizada de pruebas (Vitest)**, niveles N1 a N4, ejecutada sobre una base reconstruida desde las migraciones versionadas — recolecta los indicadores de aislamiento.<br>• **Cliente PostgreSQL autenticado con la identidad de otra cuenta**: vía 2, consulta directa al motor sin pasar por la interfaz de programación.<br>• **Cliente HTTP de contrato** sobre la interfaz de programación: vía 1.<br>• **Banco de pruebas con la verificación de membresía sustituida** por versiones permisivas: condición C2, que aísla el aporte de la capa del motor.<br>• **Pipeline de integración continua (GitHub Actions)**: verificación estática de tipos y ejecución de la suite en cada integración.<br>• **Guion de tareas T1–T3** con observación estructurada, cronometraje y registro de incidencias.<br>• **Cuestionario System Usability Scale** (Brooke, 1996), interpretado con el baremo de Bangor et al. (2008).<br>• **Matriz de extracción bibliográfica** y **matriz comparativa de capacidades** del mercado. |
 
 ---
 
@@ -492,9 +492,100 @@ Tampoco se evalúa la interfaz completa: la evaluación se acota al **cambio de 
 
 ---
 
-## 17. Alcance y exclusiones
+## 17. Procedimientos de recolección y análisis de datos
 
-### 17.1 Alcance funcional
+Los indicadores declarados en §12 no se recogen preguntando a nadie: se obtienen **ejecutando el instrumento sobre el artefacto** y exportando su salida a un formato auditable. El procedimiento se declara aquí de forma exacta porque un resultado cuyo modo de obtención no consta no es verificable por un tercero, y la reproducibilidad es condición del objetivo 4.
+
+### 17.1 Recolección de los datos de aislamiento *(objetivos 2, 3 y 4)*
+
+| Fase | Qué se hace | Qué produce |
+|---|---|---|
+| **1 · Preparar el entorno** | Proyecto de base de datos **dedicado y desechable**, reconstruido desde cero aplicando en orden las migraciones versionadas. Sin datos preexistentes de ninguna clase | Esquema en estado conocido e identificador de la última migración aplicada |
+| **2 · Construir el escenario** | La propia prueba crea las tres cuentas, las tres organizaciones y los tres talleres de §15.4, con correos irrepetibles por ejecución sobre un dominio reservado de pruebas | Escenario base reproducible, independiente del orden de los casos |
+| **3 · Ejecutar** | Se corre la suite completa bajo las condiciones C1, C2 y C3 (§15.2), **una condición por vez** | Resultado binario por caso, con su código de respuesta y el recuento de filas devueltas |
+| **4 · Extraer la evidencia** | Se conservan la salida del ejecutor de pruebas, el guion de construcción del escenario y la versión del esquema contra la que se ejecutó | Registro auditable de la ejecución |
+| **5 · Repetir** | Tres ejecuciones independientes del ciclo completo, en momentos distintos y sobre entornos reconstruidos (*test–retest*) | Confirmación de que el resultado no depende de una ejecución particular |
+
+**Condiciones que hacen limpia la recolección.** No se recolecta sobre el equipo de desarrollo con procesos de fondo compitiendo por recursos, sino sobre un entorno gestionado dedicado exclusivamente a la prueba; los datos son generados por la propia prueba y **nunca provienen de una instalación productiva**; y un caso omitido por falta de credenciales del entorno se reporta como **omitido**, no como pasado ([Plan de pruebas](../ingenieria/11-plan-pruebas.md) §6.2).
+
+### 17.2 Recolección de los datos de usabilidad *(objetivo 4)*
+
+Sesión individual sobre la aplicación desplegada, con el escenario de datos ya cargado —el participante no lo construye—. El orden es fijo: explicación del propósito y firma del consentimiento informado, ejecución de T1, T2 y T3 sin asistencia, cuestionario SUS y comentario abierto sobre qué resultó confuso. Se registra, por participante: éxito o fallo de cada tarea, tiempo, incidencias y las diez respuestas del cuestionario. Una intervención del observador se anota como **fallo** de la tarea, no como éxito asistido.
+
+### 17.3 Análisis de los datos
+
+El proyecto analiza **dos clases de datos de naturaleza distinta**, y las trata con procedimientos distintos.
+
+| Indicador | Dato crudo recolectado | Tratamiento | Resultado que se reporta |
+|---|---|---|---|
+| Filas ajenas devueltas | Recuento de filas por consulta, tabla por tabla | Verificación de igualdad a cero en el censo de 7 tablas | Cero filas ajenas en las 7 tablas, o la tabla exacta donde se produjo la fuga |
+| Tablas con políticas activas | Estado de la seguridad a nivel de fila por tabla | Porcentaje sobre el censo de 7 | Cobertura alcanzada, con el detalle de la tabla que faltara |
+| Operaciones con autorización correcta | Código de estado y código de negocio de cada respuesta | Contraste uno a uno contra el contrato esperado | Porcentaje de coincidencia y lista de discrepancias |
+| Casos en verde sin la capa de aplicación | Resultado por caso bajo C2 | Comparación C1 · C2 · C3 | Si el aislamiento se sostiene por sí solo en el motor |
+| Tasa de éxito por tarea | Éxito o fallo por participante y tarea | Porcentaje por tarea sobre el total de participantes | Porcentaje por tarea, contra el umbral del 80 % |
+| Tiempo y errores por tarea | Segundos y recuento por participante | Media, mediana y rango | **Descriptivo, sin umbral** y sin afirmación de significancia |
+| Puntuación SUS | Diez respuestas por participante | Cálculo de la puntuación estándar por participante y media del grupo | Media contra el umbral de 68 (Bangor et al., 2008) |
+
+**Por qué no se aplica estadística inferencial al aislamiento.** No hay muestra ni azar que controlar: se evalúa el **100 % de la población** y el resultado de cada caso es determinista. Aplicar una prueba de significancia a un censo de resultados binarios sería un error de método, no un refuerzo. La decisión sobre la hipótesis nula se toma con el criterio de conjunción de §10.3 —todas las condiciones se cumplen, o H0 se sostiene—, nunca con un valor *p*.
+
+**Representación de los resultados.** Tabla de cobertura de políticas por tabla de negocio; gráfico comparativo de las condiciones C1, C2 y C3 que muestre si el aislamiento se sostiene en las tres; gráfico de barras de la tasa de éxito por tarea con la línea del umbral trazada; y distribución de las puntuaciones SUS individuales frente al baremo de referencia.
+
+**Herramientas de procesamiento.** El volumen es reducido —decenas de casos y a lo sumo ocho participantes, no millones de registros—, de modo que el procesamiento se realiza con **hoja de cálculo** sobre la salida exportada de la suite y sobre la planilla de las sesiones. No se emplean herramientas de datos masivos porque el problema no lo es; declararlas sería sobredimensionar el método.
+
+### 17.4 Validez y confiabilidad de los instrumentos
+
+La validez del diseño experimental y sus limitaciones están en §15.6; lo que se declara aquí es la de los **instrumentos**.
+
+| Principio | Cómo lo satisface este proyecto |
+|---|---|
+| **Validez** | El aislamiento se mide con el propio motor de base de datos, contando las filas que una identidad ajena obtiene, y con los códigos de respuesta del contrato. **No se pregunta a ningún usuario si percibe que sus datos están aislados**: la percepción no es instrumento válido para medir aislamiento. La única variable medida con instrumento de percepción es la usabilidad, donde la percepción **es** el objeto de medida y se emplea una escala validada (Brooke, 1996) |
+| **Validez de contenido** | La medición cubre el censo completo —las 7 tablas de negocio y la totalidad de las operaciones del contrato—, no una selección |
+| **Validez de criterio** | Las dos vías, interfaz de programación y acceso directo al motor, se contrastan entre sí; una discrepancia entre ellas es en sí misma un hallazgo |
+| **Validez de constructo** | Las condiciones C1, C2 y C3 manipulan **una sola** condición por vez, de modo que el efecto observado sea atribuible a la capa desactivada y no a otro factor |
+| **Confiabilidad** | La recolección está **automatizada de extremo a extremo**: la construye y la ejecuta un guion, no una secuencia de acciones manuales. El escenario se genera con identificadores irrepetibles, el entorno se reconstruye desde las migraciones y el ciclo se repite tres veces en momentos distintos (*test–retest*). El factor humano queda fuera de la recolección del dato cuantitativo |
+
+---
+
+## 18. Consideraciones éticas
+
+La investigación se ejecuta sobre un artefacto de software, no sobre pacientes ni sobre expedientes de personas; eso **no** la exime de compromisos éticos, porque su objeto es precisamente el manejo de datos ajenos. Se declaran cinco.
+
+### 18.1 Manejo de datos y privacidad
+
+**No se emplea ningún dato productivo, real o personal en la validación técnica.** La totalidad del escenario de prueba es **sintética y generada por la propia prueba** en tiempo de ejecución: cuentas, organizaciones, talleres, clientes y repuestos se crean con identificadores irrepetibles sobre un dominio de correo reservado para pruebas, y se descartan junto con el entorno. En ningún momento se descarga, copia ni consulta la base de datos de una organización real, ni se aplica enmascaramiento de datos productivos —porque no hay datos productivos que enmascarar—. La ausencia de información personal identificable es una **propiedad del diseño del experimento**, no una medida correctiva aplicada después.
+
+Si en trabajo posterior el sistema operase con datos reales, el propio objeto de esta tesis —el aislamiento aplicado en el motor de base de datos— sería la garantía técnica que los protegería: la privacidad desde el diseño no es aquí un añadido al método, sino la hipótesis sometida a prueba.
+
+### 18.2 Protección de los entornos productivos
+
+Las pruebas **no se ejecutan contra ningún entorno productivo ni contra infraestructura de terceros**. Se ejecutan sobre un proyecto de base de datos dedicado y desechable, reconstruido desde las migraciones en cada ciclo, cuya destrucción no afecta a nadie. El proyecto **excluye explícitamente** las pruebas de carga, de rendimiento a escala productiva y de penetración (§19.3), de modo que el procedimiento carece por construcción de la capacidad de degradar el servicio de una organización real o de provocar una denegación de servicio accidental.
+
+La credencial privilegiada del sistema se lee **únicamente del entorno**, nunca del repositorio, y su ausencia en el código versionado se verifica por inspección (RNF-103). Ninguna clave, correo o identificador real se incorpora al material de la tesis.
+
+### 18.3 Participación de personas
+
+La evaluación de usabilidad es el único componente en el que participan personas, y se rige por cuatro compromisos: **consentimiento informado** firmado antes de la sesión, con explicación del propósito, del uso de los datos y del derecho a retirarse en cualquier momento y sin dar motivo; **anonimización**, con resultados reportados de forma agregada y participantes identificados como P1…P8; **confidencialidad de sus organizaciones**, que no se nombran ni se describen de modo que permita reconocerlas; y la declaración explícita, al inicio de cada sesión, de que **se evalúa el sistema y no a la persona**, porque condiciona su disposición a intentar sin temor a equivocarse. Ninguna sesión se graba en vídeo ni se registra dato alguno que permita identificar al participante.
+
+### 18.4 Propiedad intelectual y licencias
+
+El sistema se construye sobre componentes de terceros de código abierto —entre otros Node.js, TypeScript, React, Hono, Zod, Vitest y PostgreSQL—, cuyos avisos de licencia se conservan íntegros y cuya autoría **no se atribuye el investigador**; el trabajo propio se publica bajo licencia MIT. Toda fuente bibliográfica se cita en estilo APA (7.ª edición) con su identificador permanente verificado (§20).
+
+Sobre el uso de asistentes de inteligencia artificial se declara el límite adoptado: pueden emplearse para código repetitivo y tareas mecánicas de redacción, pero **el planteamiento del problema, el diseño arquitectónico, las decisiones registradas y la interpretación de los resultados son de autoría intelectual del investigador**. No se reutiliza ningún algoritmo propietario de terceros.
+
+### 18.5 Integridad de los resultados
+
+El fraude característico de una tesis de ingeniería no es el plagio de texto, sino el **maquillaje de la evidencia**: depurar de la salida los casos que fallaron para que la gráfica salga en verde. Se declara por anticipado lo contrario.
+
+- Un caso **omitido** por falta de entorno se reporta como omitido y **no cubre su requisito** ([Plan de pruebas](../ingenieria/11-plan-pruebas.md) §6.2). Un informe con casos omitidos en los niveles de integración y aislamiento no constituye evidencia de cumplimiento.
+- Si **una sola** tabla devolviera filas ajenas, se reporta la fuga con su tabla y su caso, y la hipótesis nula se sostiene (§10.3). El resultado negativo se publica; no se reformula la hipótesis para acomodarlo.
+- Si la usabilidad quedara por debajo de sus umbrales, se reporta y se discute como hallazgo. La hipótesis de la tesis es sobre el aislamiento, y un resultado adverso en usabilidad no se oculta para preservar la apariencia del conjunto.
+- La evidencia conservada (§15.5 y §17.1) permite que un tercero repita la ejecución y contraste los números frente a los declarados. Esa posibilidad de refutación es lo que da valor a la afirmación.
+
+---
+
+## 19. Alcance y exclusiones
+
+### 19.1 Alcance funcional
 
 - Registro que crea una cuenta, su primera organización y su primer taller, con el usuario como propietario.
 - Creación de organizaciones adicionales bajo la misma cuenta y de talleres dentro de cada organización.
@@ -504,7 +595,7 @@ Tampoco se evalúa la interfaz completa: la evaluación se acota al **cambio de 
 - Verificación de aislamiento por dos vías independientes.
 - **Evaluación de usabilidad del cambio de contexto** con operadores del rubro, mediante tareas guiadas.
 
-### 17.2 Alcance técnico
+### 19.2 Alcance técnico
 
 | Componente | Tecnología |
 |---|---|
@@ -515,7 +606,7 @@ Tampoco se evalúa la interfaz completa: la evaluación se acota al **cambio de 
 | Pruebas | Vitest — unitarias, de contrato, de integración y de aislamiento |
 | Integración continua | Pipeline automatizado con verificación de tipos y suite de pruebas |
 
-### 17.3 Exclusiones
+### 19.3 Exclusiones
 
 El objeto de estudio es la **arquitectura**, no la suite funcional completa. No forman parte de este proyecto:
 
@@ -530,7 +621,7 @@ El objeto de estudio es la **arquitectura**, no la suite funcional completa. No 
 
 ---
 
-## 18. Referencias
+## 20. Referencias
 
 Estilo **APA (7.ª edición)**. Todos los identificadores permanentes —DOI e ISBN— fueron verificados contra el registro del editor. La documentación técnica sin autor humano se cita con **autor corporativo** y, al carecer de fecha de publicación fija, con fecha de recuperación; se emplea únicamente como sustento del marco conceptual (§7.1), nunca como sustento teórico.
 

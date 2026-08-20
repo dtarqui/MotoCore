@@ -224,12 +224,21 @@ Las categorías empleadas —tipo, enfoque, alcance, método y diseño— siguen
 | **Método** | **Hipotético-deductivo** aplicado a la verificación: la hipótesis se somete a pruebas capaces de refutarla |
 | **Diseño** | **Experimental sobre caso único**: el artefacto construido es la unidad de observación, y las pruebas manipulan deliberadamente la condición de aislamiento —incluida la omisión de la capa de aplicación— para observar su efecto |
 
-### 9.2 Unidades de análisis
+### 9.2 Población, muestra y unidades de análisis
+
+El proyecto trabaja con **cuatro poblaciones**, porque combina revisión documental, relevamiento de mercado y validación técnica. La población sobre la que se mide la variable dependiente **no son personas: son datos y operaciones**.
+
+| # | Población | Muestra | Tipo de muestreo |
+|---|---|---|---|
+| **a** | Publicaciones revisadas por pares sobre aislamiento entre inquilinos en esquema compartido (2021–2026) *(obj. 1)* | **5 fuentes** | No probabilístico **por criterio**; suficiencia por saturación temática |
+| **b** | Plataformas de gestión de talleres con presencia, uso o comercialización en Bolivia *(obj. 1)* | **10 plataformas** | No probabilístico **intencional**, por accesibilidad de la información pública del producto |
+| **c** | **Las tablas de negocio del esquema y las operaciones expuestas por la interfaz de programación** del sistema construido *(obj. 2, 3 y 4)* — es donde se mide la variable dependiente | **Censo: el 100 %** — 7 tablas y la totalidad de las operaciones del contrato, sobre un escenario de 3 cuentas sintéticas, 3 organizaciones y 3 talleres | No probabilístico **intencional por caso crítico**: se ejerce el peor escenario de aislamiento, no el uso nominal. **No cabe muestreo probabilístico** — una sola tabla sin política activa es una fuga |
+| **d** | Operadores de organizaciones de servicio de motocicletas en Bolivia con más de una organización y/o taller *(obj. 4)* | **De 5 a 8 participantes** | No probabilístico **intencional** por perfil; tamaño justificado por Nielsen y Landauer (1993) |
 
 **Dos unidades de análisis, de naturaleza distinta:**
 
-1. **Técnica** — las tablas de negocio del esquema y las operaciones del contrato de la interfaz. Sus sujetos son cuentas sintéticas construidas por la propia prueba: no intervienen personas.
-2. **De uso** — el cambio de contexto entre organizaciones y talleres, evaluado con **de 5 a 8 operadores** del rubro (muestreo no probabilístico intencional; tamaño justificado por Nielsen y Landauer, 1993, que muestran que la detección de problemas de usabilidad se satura pronto). Aquí **sí participan personas**, lo que exige consentimiento informado, anonimización de los resultados y derecho a retirarse en cualquier momento.
+1. **Técnica** *(poblaciones a, b y c)* — las tablas de negocio del esquema y las operaciones del contrato de la interfaz. Sus sujetos son cuentas sintéticas construidas por la propia prueba: **no intervienen personas**.
+2. **De uso** *(población d)* — el cambio de contexto entre organizaciones y talleres, evaluado con operadores del rubro. Aquí **sí participan personas**, lo que exige consentimiento informado, anonimización de los resultados y derecho a retirarse en cualquier momento (§9.5).
 
 ### 9.3 Técnicas e instrumentos
 
@@ -253,16 +262,32 @@ El resultado de cada caso de prueba es **binario y objetivo** —pasa o no pasa�
 
 Un caso omitido por falta de entorno **no** se contabiliza como cumplido.
 
+**Tratamiento aplicado a cada dato.** El aislamiento se analiza por **censo y criterio binario**: recuento de filas ajenas por tabla, porcentaje de cobertura de políticas sobre las siete tablas, y contraste uno a uno de cada respuesta contra el contrato esperado. **No se aplica estadística inferencial**: se evalúa el 100 % de la población y cada caso es determinista, de modo que una prueba de significancia sobre un censo de resultados binarios sería un error de método. La usabilidad se analiza con **estadística descriptiva** —porcentaje de éxito por tarea, media y rango de tiempos y errores, y puntuación SUS por participante con su media—, sin afirmar significancia con una muestra dimensionada para detectar problemas.
+
+**Representación y herramientas.** Los resultados se representan mediante tabla de cobertura por tabla de negocio, gráfico comparativo de las condiciones C1, C2 y C3, gráfico de barras de tasa de éxito por tarea con la línea del umbral, y distribución de puntuaciones SUS frente al baremo. El volumen es reducido —decenas de casos y a lo sumo ocho participantes—, por lo que el procesamiento se realiza con **hoja de cálculo** sobre la salida exportada de la suite y la planilla de las sesiones; declarar herramientas de datos masivos sobredimensionaría el método.
+
+**Confiabilidad del procedimiento.** La recolección está automatizada de extremo a extremo: la ejecuta un guion, no una secuencia de acciones manuales. El escenario se genera con identificadores irrepetibles, el entorno se reconstruye desde las migraciones versionadas y el ciclo se repite **tres veces en momentos distintos** (*test–retest*), de modo que el factor humano queda fuera de la recolección del dato cuantitativo.
+
+### 9.5 Consideraciones éticas
+
+La investigación se ejecuta sobre un artefacto de software, lo que **no** la exime de compromisos éticos: su objeto es precisamente el manejo de datos ajenos.
+
+- **Datos.** No se emplea ningún dato productivo, real o personal en la validación técnica. La totalidad del escenario de prueba es **sintética y generada por la propia prueba**, con identificadores irrepetibles sobre un dominio de correo reservado, y se descarta con el entorno. No se descarga ni se consulta la base de datos de ninguna organización real.
+- **Producción.** Las pruebas **no se ejecutan contra entornos productivos ni contra infraestructura de terceros**, sino sobre un proyecto de base de datos dedicado y desechable. Las pruebas de carga, de rendimiento a escala productiva y de penetración están excluidas del alcance (§7.4), de modo que el procedimiento no puede degradar el servicio de nadie. La credencial privilegiada se lee solo del entorno y nunca del repositorio.
+- **Personas.** La evaluación de usabilidad es el único componente con participantes humanos: consentimiento informado previo con derecho a retirarse sin dar motivo, resultados agregados con participantes identificados como P1…P8, confidencialidad de sus organizaciones, y declaración explícita de que **se evalúa el sistema, no a la persona**.
+- **Propiedad intelectual.** Los componentes de terceros se usan bajo sus licencias de código abierto conservando sus avisos; el trabajo propio se publica bajo licencia MIT y las fuentes se citan en APA (7.ª ed.). Los asistentes de inteligencia artificial pueden emplearse para código repetitivo, pero **el planteamiento, el diseño arquitectónico y la interpretación de los resultados son de autoría del investigador**.
+- **Integridad.** No se depuran de la evidencia los casos que fallen. Un caso omitido se reporta como omitido; una sola fuga detectada se reporta con su tabla y su caso, y sostiene la hipótesis nula; un resultado de usabilidad por debajo del umbral se discute como hallazgo, no se oculta.
+
 ---
 
 ## 10. Matriz de consistencia
 
-| Pregunta específica | Objetivo específico | Hipótesis · aspecto | Indicador | Instrumento | Entregable |
-|---|---|---|---|---|---|
-| ¿Qué estrategias documenta la literatura y qué carencias presenta la oferta boliviana? | 1 · Analizar | Existe un vacío no resuelto en multi-tenancy jerárquica | Fuentes revisadas por pares con limitación consignada · capacidades ausentes en la oferta relevada | Matriz de extracción · matriz comparativa de mercado | Estado del arte y análisis del mercado |
-| ¿Qué modelo y qué políticas sostienen un único límite de aislamiento? | 2 · Diseñar y especificar | El límite de aislamiento debe situarse en la organización | Niveles modelados · límites de aislamiento · tablas con criterio único de política | Modelo entidad-relación · contrato de interfaz · migraciones | Modelo jerárquico y políticas especificadas |
-| ¿Cómo se implementan identidad, jerarquía, roles y alcance por nivel? | 3 · Implementar y automatizar | La arquitectura es construible con medios de un desarrollador individual | Requisitos `Must` implementados · pipeline en verde por integración | Repositorio con control de versiones · integración continua | Sistema con corte vertical operativo |
-| ¿Cómo se comprueba el aislamiento ante fallos de la aplicación y cómo se comprueba que el cambio de contexto es usable? | 4 · Validar | La separación se sostiene aunque la aplicación omita sus controles (la usabilidad se reporta como evidencia complementaria, fuera de la hipótesis) | **Filas ajenas devueltas = 0** · casos de aislamiento en verde sin la capa de aplicación · tasa de éxito por tarea ≥ 80 % · SUS ≥ 68 | Suite automatizada · informe de ejecución · guion de tareas T1–T3 y cuestionario SUS | Evidencia reproducible de aislamiento · informe de usabilidad |
+| Pregunta específica | Objetivo específico | Hipótesis · aspecto | Indicador | Población y muestra | Instrumento | Entregable |
+|---|---|---|---|---|---|---|
+| ¿Qué estrategias documenta la literatura y qué carencias presenta la oferta boliviana? | 1 · Analizar | Existe un vacío no resuelto en multi-tenancy jerárquica | Fuentes revisadas por pares con limitación consignada · capacidades ausentes en la oferta relevada | Publicaciones 2021–2026 sobre aislamiento en esquema compartido → **5 fuentes** · plataformas con presencia en Bolivia → **10 plataformas**; no probabilístico por criterio e intencional | Matriz de extracción · matriz comparativa de mercado | Estado del arte y análisis del mercado |
+| ¿Qué modelo y qué políticas sostienen un único límite de aislamiento? | 2 · Diseñar y especificar | El límite de aislamiento debe situarse en la organización | Niveles modelados · límites de aislamiento · tablas con criterio único de política | Tablas de negocio del esquema → **censo de las 7** | Modelo entidad-relación · contrato de interfaz · migraciones | Modelo jerárquico y políticas especificadas |
+| ¿Cómo se implementan identidad, jerarquía, roles y alcance por nivel? | 3 · Implementar y automatizar | La arquitectura es construible con medios de un desarrollador individual | Requisitos `Must` implementados · pipeline en verde por integración | Operaciones del contrato → **la totalidad**; integraciones al ramal principal → **todas** | Repositorio con control de versiones · integración continua | Sistema con corte vertical operativo |
+| ¿Cómo se comprueba el aislamiento ante fallos de la aplicación y cómo se comprueba que el cambio de contexto es usable? | 4 · Validar | La separación se sostiene aunque la aplicación omita sus controles (la usabilidad se reporta como evidencia complementaria, fuera de la hipótesis) | **Filas ajenas devueltas = 0** · casos de aislamiento en verde sin la capa de aplicación · tasa de éxito por tarea ≥ 80 % · SUS ≥ 68 | **Censo**: 7 tablas y todas las operaciones, sobre 3 cuentas sintéticas / 3 organizaciones / 3 talleres — muestreo intencional **por caso crítico** · operadores del rubro → **5 a 8 participantes**, intencional por perfil | Suite automatizada (Vitest) · cliente PostgreSQL con identidad ajena · banco de pruebas sin la capa de aplicación · informe de ejecución · guion de tareas T1–T3 y cuestionario SUS | Evidencia reproducible de aislamiento · informe de usabilidad |
 
 ---
 
