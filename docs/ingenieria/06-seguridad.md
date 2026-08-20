@@ -29,6 +29,10 @@ La jerarquía es **organización → talleres** ([Glosario](01-glosario.md)), pe
 
 Como todas las entidades —incluidas las de nivel taller— referencian a la organización, las políticas se evalúan siempre sobre el mismo criterio, sin importar el nivel jerárquico del dato. La pertenencia del taller a la organización activa se valida por separado, en la capa de aplicación.
 
+**Qué hace que la primera capa actúe también en las peticiones a la interfaz.** Las políticas se evalúan sobre la identidad de quien consulta, de modo que solo intervienen si la consulta se hace con la credencial de quien llama. Por eso los datos de negocio se leen y escriben con ella, y no con la del servidor; el conjunto de operaciones que sí exigen privilegio está acotado y enumerado (ADR-008). Consultar con privilegio donde no corresponde no produce un error visible: **desactiva silenciosamente esta capa**, y es la forma más fácil de perderla sin notarlo.
+
+**La verificación de la segunda capa es la excepción deliberada**: consulta con privilegio a propósito. Si dependiera de las políticas para funcionar, ambas capas dejarían de ser independientes, que es justamente la propiedad que se quiere demostrar.
+
 Ambas capas están cubiertas por pruebas automatizadas que verifican que una cuenta no pueda acceder a datos de una organización donde no es miembro.
 
 ## Roles del sistema
@@ -77,7 +81,9 @@ El cumplimiento del aislamiento se comprueba mediante pruebas automatizadas que 
 1. **A través de la interfaz de programación**: una cuenta sin membresía en una organización recibe error de autorización en cualquier operación sobre sus datos.
 2. **Mediante acceso directo a la base de datos**, prescindiendo de la capa de aplicación: las consultas ejecutadas con la identidad de otra cuenta no devuelven registros ajenos.
 
-La segunda vía es la que demuestra que el aislamiento se sostiene aun cuando la capa de aplicación omita sus controles. El diseño de ambas —escenario, tablas cubiertas y evidencia a conservar— está en el [Plan de pruebas](11-plan-pruebas.md) §5.
+La segunda vía es la que demuestra que el aislamiento se sostiene cuando se prescinde por completo de la interfaz. A ellas se suma una tercera comprobación, que es la que verifica la **independencia** de las dos capas: anular el control de membresía de la aplicación —en el banco de pruebas, nunca con un interruptor en producción— y comprobar que las políticas siguen filtrando (RNF-102, caso CP-N102).
+
+El diseño de las tres —escenario, tablas cubiertas y evidencia a conservar— está en el [Plan de pruebas](11-plan-pruebas.md) §5.
 
 ## Fuera del alcance
 

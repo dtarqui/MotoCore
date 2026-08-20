@@ -41,7 +41,7 @@ Es la decisión más fácil de romper sin darse cuenta al añadir un endpoint.
 | `c.get('db')` — atado a la credencial de la petición | **Sí** | Toda lectura y escritura de datos de negocio |
 | `serviceClient()` — clave de servicio | **No, la salta** | Siete excepciones, enumeradas en `src/lib/supabase.ts` |
 
-Si un handler consulta con `serviceClient()`, las políticas **no intervienen** y el aislamiento pasa a depender solo del control de la aplicación. Por eso el reparto está acotado y documentado excepción por excepción.
+Si un handler consulta con `serviceClient()`, las políticas **no intervienen** y el aislamiento pasa a depender solo del control de la aplicación. Por eso el reparto está acotado y documentado excepción por excepción — la decisión y sus alternativas están en **ADR-008** ([Decisiones de diseño](../docs/ingenieria/07-decisiones-diseno.md)).
 
 La de más peso es la primera: **la propia verificación de membresía consulta con clave de servicio**. Es deliberado — si el control de la aplicación dependiera de RLS para funcionar, las dos capas dejarían de ser independientes, que es justo lo que RNF-102 exige demostrar. Esa independencia se verifica en `test/defense-in-depth.test.ts` (CP-N102): allí se anula la capa de aplicación y se comprueba que las políticas siguen filtrando.
 

@@ -45,6 +45,8 @@ Registro de las decisiones estructurales del proyecto, con las alternativas eval
 
 **Consecuencias.** La regla de aislamiento se mantiene en dos lugares (políticas SQL y código TypeScript), con el costo de mantenimiento que eso implica. Se compensa con pruebas automatizadas que cubren ambas capas.
 
+Esta decisión establece **que** hay dos capas, no **cómo** participa la segunda en el camino de la interfaz: eso depende de la identidad con que el servidor consulta la base de datos, y se resuelve en ADR-008.
+
 **Relación con los objetivos.** La comparación fundamentada frente a las alternativas de base por inquilino y esquema por inquilino corresponde al objetivo específico 1, y se desarrolla en el estado del arte.
 
 ---
@@ -156,6 +158,38 @@ El reparto concreto de cada entidad entre los dos niveles, que se deriva de esta
 - Las funciones se ejecutan con privilegios del creador y se conceden **únicamente** a la identidad del servidor, nunca a usuarios autenticados.
 - Las reglas alojadas en funciones **no se pueden verificar sin un motor real**. Sus pruebas quedan condicionadas a la disponibilidad de credenciales, y por tanto no cubren el requisito hasta que se ejecutan.
 - Los errores de negocio se levantan desde la función con el mismo catálogo de códigos `modulo.razon`, para que el contrato de error no dependa de dónde se aplicó la regla.
+
+---
+
+## ADR-008 — Identidad con la que la interfaz consulta los datos
+
+**Estado**: aceptada.
+
+**Contexto.** ADR-002 fija que el aislamiento se aplica en dos capas. Queda por decidir algo que esa decisión no resuelve y que determina si la segunda capa **participa realmente** en el camino de la interfaz: con qué identidad consulta el servidor la base de datos.
+
+El proveedor de datos ofrece dos credenciales. La **clave de servicio** salta las políticas por diseño —está pensada para tareas administrativas—; la **credencial de la petición** actúa con la identidad de quien llama, de modo que las políticas se evalúan sobre ella. La elección no es un detalle de implementación: si toda consulta usa la clave de servicio, las políticas no intervienen en ninguna petición de la interfaz, y la defensa en profundidad se reduce a un solo control por vía. El sistema seguiría aislando, pero RNF-102 —«deshabilitar la verificación de la capa de aplicación no produce fuga»— sería falso para el camino de la interfaz.
+
+**Alternativas consideradas**
+
+| Alternativa | Ventajas | Inconvenientes |
+|---|---|---|
+| **Clave de servicio en todo el servidor** | Un solo cliente, sin casos especiales; ninguna consulta puede fallar por una política mal escrita | Las políticas no intervienen en el camino de la interfaz: el aislamiento pasa a depender **solo** del control de la aplicación. Incumple RNF-102 y deja sin sustento la segunda cláusula de la hipótesis |
+| **Credencial de la petición en todo el servidor** | Máxima coherencia: una sola regla, sin excepciones que recordar | Imposible: el registro ocurre antes de que exista sesión; la creación de una organización exige escribir una membresía que la política aún no permite —el solicitante todavía no es miembro—; y varias funciones están concedidas solo a la identidad del servidor (ADR-007, RNF-106) |
+| **Reparto: credencial de la petición para los datos de negocio, clave de servicio para un conjunto cerrado de excepciones** | Las políticas actúan en el camino de la interfaz; lo privilegiado queda acotado y enumerado | Introduce dos clientes y, con ellos, la posibilidad de equivocarse al añadir un endpoint. Exige que las excepciones estén documentadas una a una |
+
+**Decisión**: la tercera. Los datos de negocio se leen y escriben con la **credencial de la petición**; la clave de servicio queda restringida a **siete excepciones** enumeradas en el código, cada una con su motivo.
+
+**Justificación.** Es la única alternativa que hace verdadera la afirmación de ADR-002 sobre el camino de la interfaz sin bloquear operaciones que ninguna política puede autorizar. Las excepciones no son un residuo: cada una corresponde a un caso donde la política **no puede** conceder el acceso —porque aún no hay sesión, porque el solicitante todavía no es miembro, o porque la operación está deliberadamente reservada al servidor.
+
+**La primera excepción merece énfasis**, porque parece una inconsistencia y es lo contrario: **la propia verificación de membresía de la capa de aplicación consulta con clave de servicio**. Si consultara con la credencial de la petición, el control de la aplicación dependería de las políticas para funcionar, y las dos capas dejarían de ser independientes. La independencia es justo lo que RNF-102 exige demostrar, de modo que hacer aquí lo «coherente» destruiría la propiedad que se busca.
+
+**Consecuencias**
+
+- Conviven dos clientes de datos, y **elegir el equivocado desactiva silenciosamente una capa de seguridad**. Se mitiga concentrando la decisión: el cliente de la petición se construye una sola vez, en el middleware de autenticación, y viaja en el contexto; las excepciones están enumeradas en un único lugar del código.
+- Una consulta legítima puede fallar si su política está mal escrita. Antes, con la clave de servicio, ese error quedaba oculto; ahora se manifiesta. Es el precio de que las políticas intervengan de verdad.
+- Un rechazo de una política se manifiesta como error del motor, no como error de negocio. Como el control de la aplicación se evalúa **antes**, en operación normal es este el que responde con su código; que responda la política indica una discrepancia entre ambas capas, y por eso se propaga como fallo del servidor y no se traduce a un código de negocio.
+- El cliente del servidor puede reutilizarse entre peticiones; el de la petición, no — depende de la credencial de quien llama. Se construye **una sola vez por petición**, en el middleware de autenticación, y viaja en el contexto: crearlo por consulta multiplicaría ese costo en un entorno de funciones efímeras. El cliente no abre conexiones persistentes, de modo que la sobrecarga es la de instanciar un objeto, no la de un arranque de conexión.
+- La independencia de las dos capas pasa a ser **verificable**: el caso CP-N102 anula el control de la aplicación en el banco de pruebas y comprueba que las políticas siguen filtrando. Sin esta decisión, ese caso no podría existir.
 
 ---
 

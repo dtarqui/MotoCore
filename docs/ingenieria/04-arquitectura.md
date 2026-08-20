@@ -45,6 +45,8 @@ Dos capas independientes, ambas obligatorias (detalle en [06-seguridad.md](06-se
 1. **Seguridad a nivel de fila en el motor de base de datos** — las políticas exigen que quien consulta tenga una membresía activa en la organización propietaria del registro. Actúa aunque la capa de aplicación falle u omita un filtro.
 2. **Verificación de membresía en la capa de aplicación** — cada operación valida la membresía y, cuando corresponde, el rol, antes de actuar, y devuelve un error de negocio específico.
 
+Para que la primera capa actúe **también** sobre las peticiones de la interfaz, los servicios consultan los datos de negocio con la credencial de quien llama, no con la del servidor (ADR-008). La verificación de la segunda capa es la excepción deliberada: consulta con privilegio, para no depender de la primera y conservar la independencia entre ambas.
+
 Esta redundancia responde a que la seguridad a nivel de fila, aun siendo un control efectivo, no está exenta de vías de fuga indirectas ni de errores en la aplicación de políticas — evidencia documentada en el estado del arte ([anteproyecto/02-antecedentes-y-estado-del-arte.md](../anteproyecto/02-antecedentes-y-estado-del-arte.md)).
 
 ## Capas y responsabilidades
@@ -52,7 +54,7 @@ Esta redundancia responde a que la seguridad a nivel de fila, aun siendo un cont
 | Capa | Responsabilidad |
 |---|---|
 | **Interfaz de usuario** | Presentación, autenticación contra el proveedor de identidad, y conservación del contexto activo (organización y taller) |
-| **Servicios de aplicación** | Validación de la entrada, verificación de membresía y rol, reglas de negocio, y las operaciones privilegiadas que no pueden ejecutarse desde el cliente: alta de cuenta con su primera organización y taller, cálculo de existencias y registro de auditoría (ADR-007) |
+| **Servicios de aplicación** | Validación de la entrada, verificación de membresía y rol, reglas de negocio, y el conjunto acotado de operaciones privilegiadas que ninguna política puede autorizar — alta de cuenta, creación de una organización con su primera membresía, cálculo de existencias y registro de auditoría (ADR-007, ADR-008) |
 | **Base de datos** | Persistencia, integridad referencial y aplicación de las políticas de aislamiento |
 | **Proveedor de identidad** | Registro, inicio de sesión, renovación de sesión, confirmación de correo y recuperación de contraseña |
 

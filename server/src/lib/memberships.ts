@@ -45,21 +45,3 @@ export async function requireOwner(
     throw forbidden(`${modulo}.insufficient_permissions`, 'Solo el Owner puede realizar esta accion.');
   }
 }
-
-/**
- * Exige que el rol de la cuenta en la organizacion sea uno de los admitidos.
- * El rol es por organizacion, nunca por taller: la asignacion a talleres es
- * operativa y no altera permisos (ADR-006).
- */
-export async function requireRole(
-  orgId: string,
-  userId: string,
-  roles: readonly Role[],
-  modulo: 'organization' | 'workshop' | 'member' | 'inventory' = 'organization',
-): Promise<Role> {
-  const role = await requireMembership(orgId, userId);
-  if (!roles.includes(role)) {
-    throw forbidden(`${modulo}.insufficient_permissions`, 'Tu rol no permite realizar esta accion.');
-  }
-  return role;
-}
