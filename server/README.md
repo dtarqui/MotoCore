@@ -148,13 +148,17 @@ El **login** se hace desde el cliente con Supabase Auth (`signInWithPassword`), 
    supabase/migrations/0008_glossary_terms.sql
    ```
    La `0007` es imprescindible: sin ella la política de `audit_log` no restringe la lectura al Owner y el caso CP-704.2 no puede pasar.
-3. **Configurar el entorno**: copiar `.env.example` a `.env` con los valores de *Project Settings → API*:
+3. **Configurar el entorno**: copiar `.env.example` a `.env` con los valores de *Project Settings → API Keys*:
    ```
-   SUPABASE_URL=...
-   SUPABASE_ANON_KEY=...
-   SUPABASE_SERVICE_ROLE_KEY=...
+   SUPABASE_URL=https://<tu-proyecto>.supabase.co
+   SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
+   SUPABASE_SECRET_KEY=sb_secret_...
    AUTH_AUTO_CONFIRM_EMAIL=true   # dev: permite iniciar sesión sin confirmar correo
    ```
+
+   **Si buscas «anon» y «service_role» y no las encuentras**, es porque Supabase las renombró: son la **publicable** y la **secreta** respectivamente. El servidor usa solo los nombres actuales.
+
+   No hace falta la URL del JWKS: la credencial se verifica llamando a la API de Auth, no comprobando la firma localmente.
 4. **Instalar y ejecutar**:
    ```bash
    npm install
@@ -191,7 +195,7 @@ Esos dos últimos archivos son los que sostienen la premisa central del proyecto
 ## Despliegue en Vercel
 
 - Este directorio (`server/`) es un proyecto Vercel independiente. `vercel.json` reescribe todas las rutas a la función `api/index.ts`, que ejecuta la app Hono completa.
-- Configurar en Vercel `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` y `AUTH_AUTO_CONFIRM_EMAIL` según el entorno. **Nunca** commitear la clave de servicio.
+- Configurar en Vercel `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY` y `AUTH_AUTO_CONFIRM_EMAIL` según el entorno. **Nunca** commitear la clave secreta.
 - El frontend se despliega como sitio estático (otro proyecto Vercel) apuntando a la URL de esta API.
 
 ## Trabajo posterior

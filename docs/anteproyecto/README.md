@@ -4,7 +4,9 @@ Documento académico del proyecto de grado, elaborado **sesión por sesión** ju
 
 ## Documentos de entrega
 
-[**Anteproyecto integrado**](04-anteproyecto-integrado.md) — **el documento que se entrega**. Responde punto por punto a los 16 puntos de su estructura: título, planteamiento, preguntas, justificación, antecedentes, estado del arte, marco teórico y conceptual (en forma condensada; su desarrollo extenso es el capítulo 3), objetivos, hipótesis, variables, operacionalización, matriz de consistencia, enfoque y tipo, diseño, y población y muestra.
+[**Anteproyecto integrado**](04-anteproyecto-integrado.md) — **el documento que se entrega**. Responde punto por punto a los 16 exigidos: título, planteamiento, preguntas, justificación, antecedentes, estado del arte, marco teórico y conceptual (en forma condensada; su desarrollo extenso es el capítulo 3), objetivos, hipótesis, variables, operacionalización, matriz de consistencia, enfoque y tipo, diseño, y población y muestra.
+
+Añade cuatro secciones sobre ese mínimo, porque el diseño metodológico las exige y sin ellas la validación no sería verificable por un tercero: **§17 procedimientos de recolección y análisis** —con la validez y la confiabilidad de los instrumentos—, **§18 consideraciones éticas**, **§19 alcance y exclusiones** y **§20 referencias**.
 
 [**Perfil de proyecto**](00-perfil-proyecto.md) — el documento que se presenta para aprobación. Condensa los tres capítulos en la estructura del perfil de proyecto de grado: antecedentes, planteamiento, objetivos, hipótesis, justificación, alcance, marco teórico resumido, diseño metodológico, matriz de consistencia, cronograma, presupuesto, riesgos, resultados esperados y bibliografía. No sustituye a los capítulos: los resume, y cada afirmación se remite a ellos.
 
@@ -16,7 +18,7 @@ Documento académico del proyecto de grado, elaborado **sesión por sesión** ju
 | 2 | [Antecedentes y estado del arte](02-antecedentes-y-estado-del-arte.md) | Contexto del sector en Bolivia con datos oficiales, matriz de extracción de la literatura revisada por pares, fichas analíticas, vacío de investigación y referencias |
 | 3 | [Marco teórico y conceptual](03-marco-teorico-y-conceptual.md) | Definiciones formales de las tecnologías empleadas, teorías y modelos que justifican cada decisión de ingeniería, revisión crítica de sus limitaciones y alineación metodológica del documento |
 
-Cuando el seminario avance a la siguiente sesión, se incorpora el capítulo correspondiente.
+Cuando el seminario avanza a la siguiente sesión, se incorpora lo que corresponda: el documento de entrega se mantiene al día con lo cubierto, y no se redacta por delante de ello.
 
 **Anexo**: [Verificación de referencias](anexo-referencias.md) — estado de comprobación de cada fuente citada y el método con que se verificó.
 

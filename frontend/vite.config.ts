@@ -23,7 +23,7 @@ export default defineConfig({
     // lanza y arrastra a toda la suite que lo importe en cadena.
     env: {
       VITE_SUPABASE_URL: 'https://proyecto.test.supabase.co',
-      VITE_SUPABASE_ANON_KEY: 'clave-anonima-de-prueba',
+      VITE_SUPABASE_PUBLISHABLE_KEY: 'sb_publishable_de_prueba',
       VITE_API_BASE_URL: 'http://localhost:8787',
     },
   },

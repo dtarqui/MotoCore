@@ -14,7 +14,7 @@ La documentación se divide en dos: el **anteproyecto** es el documento académi
 
 | # | Capítulo | Qué establece |
 |---|---|---|
-| — | [**Anteproyecto integrado**](anteproyecto/04-anteproyecto-integrado.md) | **El documento de entrega**: responde a los 16 puntos exigidos, incluidos hipótesis, operacionalización de variables, matriz de consistencia, diseño de investigación y población y muestra; añade los procedimientos de recolección y análisis y las consideraciones éticas |
+| — | [**Anteproyecto integrado**](anteproyecto/04-anteproyecto-integrado.md) | **El documento de entrega**: responde a los 16 puntos exigidos —incluidos hipótesis, operacionalización, matriz de consistencia, diseño y población y muestra— y añade procedimientos de recolección y análisis, validez y confiabilidad de los instrumentos, y consideraciones éticas |
 | — | [**Perfil de proyecto**](anteproyecto/00-perfil-proyecto.md) | El documento que se presenta para aprobación: condensa los tres capítulos en la estructura del perfil, con matriz de consistencia, cronograma y presupuesto |
 | 1 | [Definición y alcance](anteproyecto/01-definicion-y-alcance.md) | Tema, problema, preguntas, objetivos y fronteras del proyecto |
 | 2 | [Antecedentes y estado del arte](anteproyecto/02-antecedentes-y-estado-del-arte.md) | Contexto del sector, literatura revisada y vacío de investigación |
@@ -106,7 +106,7 @@ Antes de escribir sobre un tema, verificar quién es su responsable. Si ya lo ti
 
 Lo que falta resolver antes de la entrega final —datos por completar, fuentes por verificar y decisiones que corresponden al autor— está en un registro único: **[PENDIENTES.md](PENDIENTES.md)**. Los documentos de entrega se mantienen limpios de notas internas; todo lo que quede por decidir vive ahí.
 
-Su §1 resume lo que ya se resolvió, para que no vuelva a plantearse; el **§6 es el que condiciona el objetivo 4**: la suite de aislamiento está escrita pero **nunca se ha ejecutado contra un entorno real**, y hasta entonces no constituye evidencia.
+Está ordenado por urgencia y abre con una tabla de resumen. El **§2 es el que condiciona el objetivo 4**: la suite de aislamiento está escrita pero **nunca se ha ejecutado contra un entorno real**, y hasta entonces no constituye evidencia.
 
 ## Premisas que rigen toda la documentación
 

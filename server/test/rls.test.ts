@@ -32,7 +32,7 @@ import { createApp } from '../src/app.js';
  * Requiere un Supabase real con las migraciones 0001..0007 aplicadas.
  */
 const hasEnv = Boolean(
-  process.env.SUPABASE_URL && process.env.SUPABASE_ANON_KEY && process.env.SUPABASE_SERVICE_ROLE_KEY,
+  process.env.SUPABASE_URL && process.env.SUPABASE_PUBLISHABLE_KEY && process.env.SUPABASE_SECRET_KEY,
 );
 
 const rnd = () => Math.random().toString(36).slice(2, 10);
@@ -63,8 +63,8 @@ describe.skipIf(!hasEnv)('aislamiento a nivel de base de datos (RLS sin pasar po
 
   beforeAll(async () => {
     const url = process.env.SUPABASE_URL!;
-    const anonKey = process.env.SUPABASE_ANON_KEY!;
-    const anon = createClient(url, anonKey, { auth: { persistSession: false, autoRefreshToken: false } });
+    const publicKey = process.env.SUPABASE_PUBLISHABLE_KEY!;
+    const anon = createClient(url, publicKey, { auth: { persistSession: false, autoRefreshToken: false } });
 
     const provisioned = await register(userA.email, userA.password, `Organizacion A ${rnd()}`);
     orgAId = provisioned.organization.id;
@@ -101,12 +101,12 @@ describe.skipIf(!hasEnv)('aislamiento a nivel de base de datos (RLS sin pasar po
     partAId = ((await partRes.json()) as { part: { id: string } }).part.id;
 
     // A partir de aqui, todo ocurre con la identidad de B y SIN la API.
-    const sessionB = await createClient(url, anonKey, {
+    const sessionB = await createClient(url, publicKey, {
       auth: { persistSession: false, autoRefreshToken: false },
     }).auth.signInWithPassword(userB);
     if (sessionB.error) throw sessionB.error;
 
-    dbAsB = createClient(url, anonKey, {
+    dbAsB = createClient(url, publicKey, {
       auth: { persistSession: false, autoRefreshToken: false },
       global: { headers: { Authorization: `Bearer ${sessionB.data.session!.access_token}` } },
     });
@@ -229,9 +229,9 @@ describe.skipIf(!hasEnv)('auditoria reservada al Owner (RF-704)', () => {
 
   beforeAll(async () => {
     const url = process.env.SUPABASE_URL!;
-    const anonKey = process.env.SUPABASE_ANON_KEY!;
+    const publicKey = process.env.SUPABASE_PUBLISHABLE_KEY!;
     const anon = () =>
-      createClient(url, anonKey, { auth: { persistSession: false, autoRefreshToken: false } });
+      createClient(url, publicKey, { auth: { persistSession: false, autoRefreshToken: false } });
 
     async function registrar(cuenta: { email: string; password: string }, organizacion: string) {
       const res = await app.request('/api/auth/register', {
@@ -267,7 +267,7 @@ describe.skipIf(!hasEnv)('auditoria reservada al Owner (RF-704)', () => {
     if (sesionMecanico.error) throw sesionMecanico.error;
     tokenMecanico = sesionMecanico.data.session!.access_token;
 
-    dbComoMecanico = createClient(url, anonKey, {
+    dbComoMecanico = createClient(url, publicKey, {
       auth: { persistSession: false, autoRefreshToken: false },
       global: { headers: { Authorization: `Bearer ${tokenMecanico}` } },
     });
@@ -275,8 +275,8 @@ describe.skipIf(!hasEnv)('auditoria reservada al Owner (RF-704)', () => {
 
   it('el Owner consulta la auditoria de su organizacion', async () => {
     const url = process.env.SUPABASE_URL!;
-    const anonKey = process.env.SUPABASE_ANON_KEY!;
-    const sesion = await createClient(url, anonKey, {
+    const publicKey = process.env.SUPABASE_PUBLISHABLE_KEY!;
+    const sesion = await createClient(url, publicKey, {
       auth: { persistSession: false, autoRefreshToken: false },
     }).auth.signInWithPassword(owner);
     if (sesion.error) throw sesion.error;

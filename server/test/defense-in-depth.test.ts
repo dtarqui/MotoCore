@@ -42,7 +42,7 @@ vi.mock('../src/lib/memberships.js', async (importOriginal) => {
 const { createApp } = await import('../src/app.js');
 
 const hasEnv = Boolean(
-  process.env.SUPABASE_URL && process.env.SUPABASE_ANON_KEY && process.env.SUPABASE_SERVICE_ROLE_KEY,
+  process.env.SUPABASE_URL && process.env.SUPABASE_PUBLISHABLE_KEY && process.env.SUPABASE_SECRET_KEY,
 );
 
 const rnd = () => Math.random().toString(36).slice(2, 10);
@@ -68,7 +68,7 @@ describe.skipIf(!hasEnv)('CP-N102 — el aislamiento se sostiene sin la capa de 
   };
 
   beforeAll(async () => {
-    anon = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_ANON_KEY!, {
+    anon = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_PUBLISHABLE_KEY!, {
       auth: { persistSession: false, autoRefreshToken: false },
     });
 

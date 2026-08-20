@@ -235,12 +235,14 @@ El proyecto trabaja con **cuatro poblaciones**, porque combina revisión documen
 | **c** | **Las tablas de negocio del esquema y las operaciones expuestas por la interfaz de programación** del sistema construido *(obj. 2, 3 y 4)* — es donde se mide la variable dependiente | **Censo: el 100 %** — 7 tablas y la totalidad de las operaciones del contrato, sobre un escenario de 3 cuentas sintéticas, 3 organizaciones y 3 talleres | No probabilístico **intencional por caso crítico**: se ejerce el peor escenario de aislamiento, no el uso nominal. **No cabe muestreo probabilístico** — una sola tabla sin política activa es una fuga |
 | **d** | Operadores de organizaciones de servicio de motocicletas en Bolivia con más de una organización y/o taller *(obj. 4)* | **De 5 a 8 participantes** | No probabilístico **intencional** por perfil; tamaño justificado por Nielsen y Landauer (1993) |
 
-**Dos unidades de análisis, de naturaleza distinta:**
+**Unidades de análisis.** Las poblaciones **a** y **b** se analizan por revisión documental —fuentes y fichas de producto— y sustentan el objetivo 1. Las dos que soportan la validación son de naturaleza distinta entre sí:
 
-1. **Técnica** *(poblaciones a, b y c)* — las tablas de negocio del esquema y las operaciones del contrato de la interfaz. Sus sujetos son cuentas sintéticas construidas por la propia prueba: **no intervienen personas**.
-2. **De uso** *(población d)* — el cambio de contexto entre organizaciones y talleres, evaluado con operadores del rubro. Aquí **sí participan personas**, lo que exige consentimiento informado, anonimización de los resultados y derecho a retirarse en cualquier momento (§9.5).
+1. **Técnica** *(población c)* — las tablas de negocio del esquema y las operaciones del contrato de la interfaz. Es donde se mide la variable dependiente. Sus sujetos son cuentas sintéticas construidas por la propia prueba: **no intervienen personas**.
+2. **De uso** *(población d)* — el cambio de contexto entre organizaciones y talleres, evaluado con operadores del rubro. Aquí **sí participan personas**, lo que exige consentimiento informado, anonimización de los resultados y derecho a retirarse en cualquier momento (§9.6).
 
 ### 9.3 Técnicas e instrumentos
+
+Un instrumento no queda declarado por su nombre sino por **cómo se ejecuta**: qué indicador recoge y con qué parámetros. La configuración de cada uno está en el [anteproyecto](04-anteproyecto-integrado.md) §17.
 
 | Objetivo | Técnica | Instrumento | Producto |
 |---|---|---|---|
@@ -266,9 +268,17 @@ Un caso omitido por falta de entorno **no** se contabiliza como cumplido.
 
 **Representación y herramientas.** Los resultados se representan mediante tabla de cobertura por tabla de negocio, gráfico comparativo de las condiciones C1, C2 y C3, gráfico de barras de tasa de éxito por tarea con la línea del umbral, y distribución de puntuaciones SUS frente al baremo. El volumen es reducido —decenas de casos y a lo sumo ocho participantes—, por lo que el procesamiento se realiza con **hoja de cálculo** sobre la salida exportada de la suite y la planilla de las sesiones; declarar herramientas de datos masivos sobredimensionaría el método.
 
-**Confiabilidad del procedimiento.** La recolección está automatizada de extremo a extremo: la ejecuta un guion, no una secuencia de acciones manuales. El escenario se genera con identificadores irrepetibles, el entorno se reconstruye desde las migraciones versionadas y el ciclo se repite **tres veces en momentos distintos** (*test–retest*), de modo que el factor humano queda fuera de la recolección del dato cuantitativo.
+### 9.5 Validez y confiabilidad de los instrumentos
 
-### 9.5 Consideraciones éticas
+| Principio | Cómo lo satisface este proyecto |
+|---|---|
+| **Validez** | El aislamiento se mide con el propio motor de base de datos —contando las filas que una identidad ajena obtiene— y con los códigos de respuesta del contrato. **No se pregunta a ningún usuario si percibe que sus datos están aislados**: la percepción no es instrumento válido para medir aislamiento. La única variable medida con instrumento de percepción es la usabilidad, donde la percepción **es** el objeto de medida y se emplea una escala validada (Brooke, 1996) |
+| **De contenido** | La medición cubre el censo completo —las 7 tablas de negocio y la totalidad de las operaciones del contrato—, no una selección |
+| **De criterio** | Las dos vías de verificación, interfaz de programación y acceso directo al motor, se contrastan entre sí; una discrepancia entre ellas es en sí misma un hallazgo |
+| **De constructo** | Las condiciones C1, C2 y C3 manipulan **una sola** condición por vez, de modo que el efecto observado sea atribuible a la capa desactivada y no a otro factor |
+| **Confiabilidad** | La recolección está **automatizada de extremo a extremo**: la ejecuta un guion, no una secuencia de acciones manuales. El escenario se genera con identificadores irrepetibles, el entorno dedicado se reconstruye desde las migraciones versionadas y el ciclo se repite **tres veces en momentos distintos** (*test–retest*). El factor humano queda fuera de la recolección del dato cuantitativo |
+
+### 9.6 Consideraciones éticas
 
 La investigación se ejecuta sobre un artefacto de software, lo que **no** la exime de compromisos éticos: su objeto es precisamente el manejo de datos ajenos.
 

@@ -45,7 +45,7 @@ N6 no evalúa la interfaz: evalúa el **cumplimiento del contrato desde el lado 
 | Que cambiar de organización limpie el taller activo | Si la pantalla resulta comprensible — eso es N5 |
 | Que `X-Org-Id` viaje siempre y `X-Workshop-Id` solo en endpoints de nivel taller | Diseño responsivo (RNF-402) e instalabilidad (RNF-403), que son N0 |
 | Que el código de negocio del error sobreviva al cliente | Recorridos completos de usuario extremo a extremo |
-| Regresión de la regla de rutas (§2.3) y del método de las bajas lógicas (§2.6) | Rendimiento y accesibilidad |
+| Regresión de la regla de rutas y del método de las bajas lógicas ([contrato](10-contrato-api.md) §2.3 y §2.6) | Rendimiento y accesibilidad |
 
 **N6 no sustituye a N5 ni relaja sus umbrales.** RNF-401 y RNF-404 siguen verificándose con operadores reales.
 
@@ -53,7 +53,7 @@ N6 no evalúa la interfaz: evalúa el **cumplimiento del contrato desde el lado 
 
 | Fuera del plan | Motivo |
 |---|---|
-| Pruebas de carga y de rendimiento | Excluidas del alcance (§1.8.3); RNF-501 es criterio cualitativo, no objetivo medido |
+| Pruebas de carga y de rendimiento | Excluidas del alcance ([definición y alcance](../anteproyecto/01-definicion-y-alcance.md) §1.8.3); RNF-501 es criterio cualitativo, no objetivo medido |
 | Pruebas automatizadas de **toda** la interfaz de usuario | El objeto de validación es la arquitectura de aislamiento, que reside en el servidor y en la base de datos. RNF-402 y RNF-403 se verifican por inspección (N0), y RNF-401 y RNF-404 con operadores reales (N5, §7). Lo que sí se automatiza es el subconjunto del nivel N6 (§1.3): el contrato visto desde el cliente |
 | Evaluación de usabilidad de la interfaz completa | La evaluación se acota al **cambio de contexto** entre organizaciones y talleres, por ser la manifestación visible del aporte de la tesis. Las demás pantallas no se someten a prueba con usuarios |
 | Pruebas de penetración | El alcance cubre el aislamiento entre inquilinos, no una evaluación de seguridad ofensiva del despliegue |
@@ -217,12 +217,12 @@ Identificación de casos: **CP-nnn**, donde `nnn` es el número del requisito qu
 | RNF-301 | CP-N301 | N0 | El despliegue se completa sin infraestructura propia que aprovisionar |
 | RNF-302 | CP-N302 | N0 | El modelo de despliegue escala a cero sin tráfico |
 | RNF-303 | CP-N303 | N0 | Cambiar de entorno solo requiere variables distintas, sin tocar código |
-| RNF-304 | CP-N304 | N0 | La base se reconstruye desde cero aplicando las migraciones en orden. Es **operativo, no automatizable en esta suite**: exige un proyecto Supabase desechable. Se ejecuta antes de cada hito y su evidencia es el identificador de la última migración aplicada (§5.4) |
+| RNF-304 | CP-N304 | N0 | La base se reconstruye desde cero aplicando las migraciones en orden. Es **operativo, no automatizable en esta suite**: exige un proyecto Supabase desechable. Se ejecuta antes de cada hito y su evidencia es el identificador de la última migración aplicada (§5.5) |
 | RNF-401 | CP-N401 | N0 · N5 | El cambio de organización y de taller ocurre sin cerrar sesión y los datos mostrados corresponden al nuevo contexto |
 | RNF-401 | CP-N401.1 | **N6** | Cambiar de organización limpia el taller activo: no se arrastra un local de la organización anterior |
 | ADR-005 | CP-N005 | **N6** | El cliente adjunta `X-Org-Id` siempre y `X-Workshop-Id` solo en endpoints de nivel taller; sin contexto elegido no inventa ninguno |
-| §2.3 | CP-N023 | **N6** | Ninguna llamada del cliente anida el identificador de organización en la ruta |
-| §2.6 | CP-N026 | **N6** | Las bajas lógicas se invocan con `POST /…/deactivate`; la revocación de un vínculo, con `DELETE` |
+| Contrato §2.3 | CP-N023 | **N6** | Ninguna llamada del cliente anida el identificador de organización en la ruta |
+| Contrato §2.6 | CP-N026 | **N6** | Las bajas lógicas se invocan con `POST /…/deactivate`; la revocación de un vínculo, con `DELETE` |
 | RNF-204 | CP-N204.1 | **N6** | El código de negocio del error sobrevive al cliente y llega como `ApiError.code` |
 | RNF-402 | CP-N402 | N0 | Interfaz utilizable en anchos de escritorio y móvil |
 | RNF-403 | CP-N403 | N0 | El manifiesto permite instalar la aplicación desde el navegador |
@@ -263,7 +263,20 @@ RNF-102 exige demostrar que las dos capas son **independientes**, no que ambas e
 
 Sin este caso, la defensa en profundidad de ADR-002 sería una afirmación de diseño; con él, es un hecho verificado. Es el argumento que responde directamente a la evidencia de Dar et al. (2023) y a la serie de CVE citada en el estado del arte.
 
-### 5.4 Evidencia a conservar
+### 5.4 Repetición: el resultado no puede depender de una ejecución
+
+Una sola ejecución en verde no distingue entre «el aislamiento se sostiene» y «esta vez se sostuvo». La confiabilidad del procedimiento se asegura repitiendo **el ciclo completo tres veces**, en momentos distintos y sobre entornos reconstruidos desde las migraciones (*test–retest*).
+
+| Condición | Por qué |
+|---|---|
+| **Tres ejecuciones independientes** | Un fallo intermitente —una condición de carrera en la creación del escenario, una política que dependa del orden— se manifiesta al repetir, no a la primera |
+| **Momentos distintos** | Ejecutarlas seguidas comparte el estado del entorno; separarlas es lo que hace independiente la repetición |
+| **Entorno reconstruido en cada ciclo** | Si el escenario se acumulara entre ejecuciones, la segunda no probaría lo mismo que la primera |
+| **Entorno dedicado** | No se recolecta sobre el equipo de desarrollo con procesos de fondo compitiendo por recursos, sino sobre un proyecto de base de datos dedicado y desechable |
+
+El resultado que se reporta es el de las **tres** ejecuciones, no el de la mejor. Una discrepancia entre ellas es en sí misma un hallazgo y se declara como tal.
+
+### 5.5 Evidencia a conservar
 
 Para que la validación sea reproducible por un tercero (objetivo 4), se conserva: el guion de construcción del escenario base, la salida de la ejecución de los casos CP-701, CP-702, CP-704.2, CP-N101 y CP-N102, y la versión del esquema —identificador de la última migración aplicada— contra la que se ejecutaron.
 
@@ -343,11 +356,14 @@ El tiempo y los errores **no llevan umbral a propósito**: con una muestra de ci
 
 ### 7.5 Consideraciones éticas
 
-A diferencia del resto de la validación, aquí **sí participan personas**, lo que impone tres condiciones:
+A diferencia del resto de la validación, aquí **sí participan personas**, lo que impone cuatro compromisos —los que declara el §18.3 del [anteproyecto](../anteproyecto/04-anteproyecto-integrado.md), que es su fuente—:
 
-- **Consentimiento informado** previo, con explicación del propósito, del uso de los datos y del derecho a retirarse en cualquier momento sin dar motivo.
-- **Anonimización**: los resultados se reportan de forma agregada y los participantes se identifican como P1…P8. No se publica ningún dato que permita identificarlos a ellos ni a sus organizaciones.
+- **Consentimiento informado** firmado antes de la sesión, con explicación del propósito, del uso de los datos y del derecho a retirarse en cualquier momento sin dar motivo.
+- **Anonimización**: los resultados se reportan de forma agregada y los participantes se identifican como P1…P8.
+- **Confidencialidad de sus organizaciones**, que no se nombran ni se describen de modo que permita reconocerlas.
 - **Se evalúa el sistema, no a la persona.** Se declara explícitamente al participante al inicio de la sesión, porque condiciona su disposición a intentar sin miedo a equivocarse.
+
+Ninguna sesión se graba en vídeo ni se registra dato alguno que permita identificar al participante.
 
 ### 7.6 Evidencia a conservar
 

@@ -143,8 +143,8 @@ Configura `VITE_API_BASE_URL` en `frontend/.env` apuntando a la URL del backend.
 | Variable | Descripción |
 |---|---|
 | `SUPABASE_URL` | URL del proyecto Supabase |
-| `SUPABASE_ANON_KEY` | Clave anónima (pública) |
-| `SUPABASE_SERVICE_ROLE_KEY` | Clave service-role (privada — nunca commitear) |
+| `SUPABASE_PUBLISHABLE_KEY` | Clave publicable — pública por diseño |
+| `SUPABASE_SECRET_KEY` | Clave secreta — salta las políticas RLS; nunca commitear ni exponer al navegador |
 | `AUTH_AUTO_CONFIRM_EMAIL` | `true` en dev para iniciar sesión sin confirmar email |
 
 **Frontend (`frontend/.env`)**: `VITE_API_BASE_URL` — URL del backend que consume el frontend.

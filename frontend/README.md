@@ -34,9 +34,9 @@ Copia `.env.example` a `.env` y completa:
 |---|---|
 | `VITE_API_BASE_URL` | URL del backend `server/`. Por defecto `http://localhost:8787` (su dev-server) |
 | `VITE_SUPABASE_URL` | Proyecto Supabase, para el inicio de sesión |
-| `VITE_SUPABASE_ANON_KEY` | Clave anónima — es pública por diseño: el acceso lo deciden las políticas de la base de datos, no el secreto de la clave |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | Clave **publicable** (*Project Settings → API Keys*) — es pública por diseño: el acceso lo deciden las políticas de la base de datos, no el secreto de la clave |
 
-**Nunca** pongas la clave *service-role* en este archivo: se empaqueta en el navegador y esa clave salta las políticas de aislamiento.
+**Nunca** pongas la clave **secreta** en este archivo: se empaqueta en el navegador y esa clave salta las políticas de aislamiento.
 
 ### Con Docker
 

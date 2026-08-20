@@ -6,7 +6,7 @@ const noSession = { auth: { persistSession: false, autoRefreshToken: false } };
 let serviceSingleton: SupabaseClient | null = null;
 
 /**
- * Cliente con clave de servicio: **salta las politicas RLS**.
+ * Cliente con la clave **secreta**: salta las politicas RLS.
  *
  * Su uso esta acotado a siete situaciones, cada una por un motivo que no admite
  * la via del usuario. Cualquier otro acceso a datos de negocio va por
@@ -35,7 +35,7 @@ let serviceSingleton: SupabaseClient | null = null;
 export function serviceClient(): SupabaseClient {
   if (serviceSingleton) return serviceSingleton;
   const env = getEnv();
-  serviceSingleton = createClient(env.supabaseUrl, env.supabaseServiceRoleKey, noSession);
+  serviceSingleton = createClient(env.supabaseUrl, env.supabaseSecretKey, noSession);
   return serviceSingleton;
 }
 
@@ -54,7 +54,7 @@ export function serviceClient(): SupabaseClient {
  */
 export function userClient(accessToken: string): SupabaseClient {
   const env = getEnv();
-  return createClient(env.supabaseUrl, env.supabaseAnonKey, {
+  return createClient(env.supabaseUrl, env.supabasePublishableKey, {
     ...noSession,
     global: { headers: { Authorization: `Bearer ${accessToken}` } },
   });

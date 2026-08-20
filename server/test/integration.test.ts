@@ -12,14 +12,14 @@ import { createApp } from '../src/app.js';
  * Requisitos para correrlo:
  *   1. Un proyecto Supabase con `supabase/migrations/*.sql` aplicadas, incluida
  *      0007_audit_owner_policy.sql.
- *   2. Variables SUPABASE_URL / SUPABASE_ANON_KEY / SUPABASE_SERVICE_ROLE_KEY.
+ *   2. Variables SUPABASE_URL / SUPABASE_PUBLISHABLE_KEY / SUPABASE_SECRET_KEY.
  *   3. AUTH_AUTO_CONFIRM_EMAIL=true (para iniciar sesion sin confirmar correo).
  *
  * Cada `it` lleva el identificador CP-nnn de la matriz de trazabilidad, para
  * que la evidencia se lea contra el plan de pruebas sin traduccion intermedia.
  */
 const hasEnv = Boolean(
-  process.env.SUPABASE_URL && process.env.SUPABASE_ANON_KEY && process.env.SUPABASE_SERVICE_ROLE_KEY,
+  process.env.SUPABASE_URL && process.env.SUPABASE_PUBLISHABLE_KEY && process.env.SUPABASE_SECRET_KEY,
 );
 
 const rnd = () => Math.random().toString(36).slice(2, 10);
@@ -69,7 +69,7 @@ describe.skipIf(!hasEnv)('integracion multiorganizacion (Supabase real)', () => 
   const codeOf = async (res: Response) => ((await res.json()) as { title: string }).title;
 
   beforeAll(async () => {
-    anon = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_ANON_KEY!, {
+    anon = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_PUBLISHABLE_KEY!, {
       auth: { persistSession: false, autoRefreshToken: false },
     });
 
