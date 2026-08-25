@@ -110,7 +110,7 @@ erDiagram
 |---|---|---|
 | `mt_organizations` | — (es el tenant) | PK `id`; `owner_id` → `auth.users(id)`; índice por `owner_id` |
 | `mt_workshops` | Organización | PK `id`; `organization_id` → `mt_organizations(id)` en cascada; único `(organization_id, name)`; índice por `organization_id` |
-| `mt_memberships` | Organización | PK `id`; **único `(organization_id, user_id)`**; `role ∈ {owner, mechanic, receptionist}`; índices por `user_id` y por `organization_id` |
+| `mt_memberships` | Organización | PK `id`; **único `(organization_id, user_id)`**; **único parcial por `(organization_id)` donde `role = 'owner'` y la membresía está activa**; `role ∈ {owner, mechanic, receptionist}`; índices por `user_id` y por `organization_id` |
 | `mt_workshop_assignments` | Organización | PK `id`; único `(membership_id, workshop_id)`; ambas FK en cascada |
 
 ### Negocio — corte vertical
@@ -138,6 +138,7 @@ El nivel de cada entidad determina el ámbito de sus claves únicas — es la co
 | Email de cliente | `(organization_id, email)` | Dos organizaciones distintas pueden tener el mismo cliente. Dos talleres de la **misma** organización, no: es el mismo cliente. |
 | Número de parte | `(workshop_id, part_number)` | La misma pieza puede existir en varios talleres, cada una con su propia existencia. |
 | Miembro | `(organization_id, user_id)` | Una cuenta tiene un solo rol por organización, aunque trabaje en varios talleres. |
+| Propietario | `(organization_id)` **donde el rol es `owner` y la membresía está activa** | Una organización tiene **un solo propietario vigente**. El predicado deja fuera las membresías inactivas, de modo que un traspaso de propiedad —hoy no contemplado— no chocaría con el histórico. |
 | Nombre de taller | `(organization_id, name)` | No puede haber dos talleres con el mismo nombre en una organización. |
 
 ## Políticas de aislamiento (RLS)
@@ -178,7 +179,7 @@ Las tablas de nivel taller usan **la misma condición sobre `organization_id`**:
 | Cálculo de existencias | `compra` y `devolucion` suman; `venta` y `merma` restan; `ajuste` **fija** un valor absoluto. La `transferencia` no se registra directamente: genera un movimiento de salida en el origen y uno de entrada en el destino (RF-608). Una operación que dejaría la existencia negativa se rechaza. |
 | Atomicidad del movimiento | La inserción del movimiento y la actualización de la existencia del repuesto deben ocurrir en una sola transacción, resuelta dentro del motor de base de datos ([ADR-007](07-decisiones-diseno.md)). |
 | Registro inicial de stock | Al crear un repuesto con existencia inicial mayor a cero, se genera automáticamente un movimiento de entrada que lo justifica. |
-| Protección del propietario | No se puede cambiar el rol ni remover al `owner_id` de la organización. |
+| Protección del propietario | No se puede cambiar el rol ni remover al `owner_id` de la organización, ni existir un segundo propietario activo. Las tres reglas se aplican en la capa de aplicación (RF-402, RF-405) y la última, además, en el motor mediante un índice único parcial: es la misma defensa en profundidad de [ADR-002](07-decisiones-diseno.md) aplicada a una regla de negocio. |
 | Transferencia entre talleres | Genera dos movimientos vinculados (salida en origen, entrada en destino), ambos en la misma transacción y dentro de la misma organización ([ADR-007](07-decisiones-diseno.md)). |
 
 ## Evolución del esquema

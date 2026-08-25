@@ -7,7 +7,7 @@
 
 Plataforma SaaS para la gestión integral de talleres de motocicletas, evolucionando hacia un modelo **ERP multiorganización**: una cuenta administra varias organizaciones, y cada organización opera varios talleres. **Mercado objetivo por ahora: Bolivia.**
 
-> **Estado — pivote de backend en curso.** El backend se está reescribiendo de **.NET → Node/TypeScript + Supabase** para desplegar en **Vercel**. En el repo conviven dos backends: `server/` (el **nuevo**, objetivo) y `backend/` (**.NET legacy**, referencia hasta que `server/` lo reemplace). El frontend ya consume el backend nuevo. El detalle técnico está en [server/README.md](server/README.md); la especificación que gobierna la construcción, en [docs/](docs/README.md).
+> **Estado — pivote de backend completado.** El backend es **Node/TypeScript + Supabase**, desplegable en **Vercel**; el frontend lo consume y la implementación .NET anterior se retiró del repositorio (sigue en el historial de git). El detalle técnico está en [server/README.md](server/README.md); la especificación que gobierna la construcción, en [docs/](docs/README.md).
 
 ## Resumen
 
@@ -42,81 +42,68 @@ Supabase (PostgreSQL + Auth + RLS + Storage)
 - Aislamiento multi-tenant **por organización**: políticas **RLS** en Postgres + chequeo de membresía en la API (defensa en profundidad).
 - Autenticación por **Supabase Auth** (registro/login/refresh/OAuth); la API verifica el token.
 
-**Legacy (en `backend/`, se reemplaza):** Frontend → API ASP.NET Core (.NET 10) → PostgreSQL.
-
 ## Estructura del repositorio
 
 ```
-server/              NUEVO backend — Node/TS (Hono) + Supabase — ver server/README.md
-backend/             Backend .NET legacy (referencia) — ver backend/README.md
+server/              Backend — Node/TS (Hono) + Supabase — ver server/README.md
 frontend/            React 19 + Vite — ver frontend/README.md
 docs/                Documentación del proyecto de grado — empezar por docs/README.md
   anteproyecto/        Documento académico (definición, estado del arte, marco teórico)
   ingenieria/          Especificación técnica (requisitos, arquitectura, datos, seguridad, plan)
-.github/workflows/   Pipeline de CI (frontend + server; el job .NET está desactivado)
-docker-compose.yml   Stack .NET legacy (Postgres + backend + frontend)
+.github/workflows/   Pipeline de CI (frontend + server)
 ```
 
 ## Stack tecnológico
 
 **Frontend**: React · TypeScript · Vite · TailwindCSS · React Query · React Router
 
-**Backend nuevo (`server/`)**: Node.js · TypeScript · Hono · Zod · Supabase (`@supabase/supabase-js`) · Vitest · desplegado en Vercel
+**Backend (`server/`)**: Node.js · TypeScript · Hono · Zod · Supabase (`@supabase/supabase-js`) · Vitest · desplegado en Vercel
 
-**Backend legacy (`backend/`)**: ASP.NET Core · C# · Clean Architecture · EF Core
-
-**Datos**: PostgreSQL (gestionado por Supabase en el nuevo backend)
+**Datos**: PostgreSQL, gestionado por Supabase
 
 ## Multitenancy ERP
 
-- `auth.users` (Supabase) = identidad global; `profiles` = perfil.
-- `organizations` = **organización**, y es la unidad de aislamiento (*tenant*); **una cuenta puede tener varias**.
-- `workshops` = **taller** dentro de una organización; subdivisión operativa, no unidad de aislamiento.
-- `memberships` = usuario ↔ organización con rol (`owner`/`mechanic`/`receptionist`); el rol es por organización, no global.
-- Todo dato de negocio se scopea por `organization_id`; las entidades de nivel taller llevan además `workshop_id`. El contexto activo se selecciona por petición: cabecera `X-Org-Id` para la organización y `X-Workshop-Id` para el taller.
+Todos los objetos del esquema llevan el prefijo `mt_`, de modo que MotoCore pueda convivir en `public` con otro sistema sin colisionar.
+
+- `auth.users` (Supabase) = identidad global; `mt_profiles` = perfil.
+- `mt_organizations` = **organización**, y es la unidad de aislamiento (*tenant*); **una cuenta puede tener varias**.
+- `mt_workshops` = **taller** dentro de una organización; subdivisión operativa, no unidad de aislamiento.
+- `mt_memberships` = usuario ↔ organización con rol (`owner`/`mechanic`/`receptionist`); el rol es por organización, no global. **Cada organización tiene un solo propietario activo**, y no lo garantiza solo la API: un índice único parcial lo hace cumplir en el motor.
+- Todo dato de negocio se acota por `organization_id`; las entidades de nivel taller llevan además `workshop_id`. El contexto activo se selecciona por petición: cabecera `X-Org-Id` para la organización y `X-Workshop-Id` para el taller.
 
 **La regla de rutas que se deriva de eso**: el identificador de la organización aparece en la URL **solo cuando el recurso es la organización misma** (`/api/organizations/...`). Todo lo interior a ella —talleres, miembros, clientes, inventario, auditoría— vive en rutas planas (`/api/workshops`, `/api/members`, `/api/clients`, `/api/inventory/...`) y se resuelve por cabecera. El servidor nunca asume un contexto por defecto: si falta la cabecera exigida, rechaza la petición (ADR-005, §2.3 del [contrato](docs/ingenieria/10-contrato-api.md)).
 
 ## Módulos y roadmap
 
-**Ya en `server/` (backend nuevo)**: registro atómico que crea cuenta + 1.ª organización + 1.er taller, gestión de organizaciones y miembros, talleres y asignación de miembros a talleres, clientes (nivel organización), inventario y movimientos de stock con transferencia entre talleres (nivel taller), registro de auditoría de acciones críticas y aislamiento por RLS.
+**Construido**: registro atómico que crea cuenta + 1.ª organización + 1.er taller, gestión de organizaciones y miembros, talleres y asignación de miembros a talleres, clientes (nivel organización), inventario y movimientos de stock con transferencia entre talleres (nivel taller), registro de auditoría de acciones críticas y aislamiento por RLS.
 
-**Todavía solo en el backend .NET legacy**, pendiente de portar: motocicletas, órdenes de trabajo (estados, diagnóstico, cierre, entrega), historial de mantenimiento y dashboard. Quedan fuera del alcance del proyecto de grado (ver [Requisitos](docs/ingenieria/02-requisitos.md), RF-800).
+**Pendiente**: motocicletas, órdenes de trabajo (estados, diagnóstico, cierre, entrega), historial de mantenimiento y dashboard. Quedan fuera del alcance del proyecto de grado (ver [Requisitos](docs/ingenieria/02-requisitos.md), RF-800) y se incorporarán reutilizando el mismo patrón de alcance por nivel.
 
 **Funcionalidades identificadas para el mercado boliviano** (ver [docs/ingenieria/09-analisis-mercado.md](docs/ingenieria/09-analisis-mercado.md)): facturación electrónica del SIN, mensajería por WhatsApp, presupuestos con aprobación del cliente, facturación y cobro en línea, agendamiento, inspección digital y portal del cliente.
 
 ## Seguridad
 
-- Autenticación por Supabase Auth (nuevo backend) / JWT con refresh (legacy).
+- Autenticación por Supabase Auth; la API verifica el token, no lo emite (ADR-004).
 - Control de acceso por roles y aislamiento de datos por organización (RLS + chequeo en la API).
-- Los secretos de configuración del backend legacy están reemplazados por placeholders; los del backend nuevo van en variables de entorno (Supabase/Vercel), nunca en el repo.
+- Los secretos van en variables de entorno (Supabase/Vercel), nunca en el repositorio (RNF-103).
 
 Roles: `Owner`, `Mechanic`, `Receptionist`.
 
 ## Cómo ejecutar
 
-### Backend nuevo (`server/`) — Node/TS + Supabase
+### Backend (`server/`) — Node/TS + Supabase
 
 ```bash
 cd server
 npm install
-# 1) Crear un proyecto en Supabase y aplicar supabase/migrations/*.sql en orden
+# 1) Crear un proyecto Supabase y aplicar supabase/migrations/*.sql en orden
+#    (supabase/reset.sql parte de cero; supabase/verify.sql comprueba el resultado)
 # 2) Copiar .env.example a .env con las claves de Supabase
 npm run dev        # http://localhost:8787
 npm test           # unit + HTTP (la integración corre solo con credenciales de Supabase)
 ```
 
 Detalle en [server/README.md](server/README.md).
-
-### Backend legacy (`backend/`) — .NET (referencia)
-
-```bash
-docker compose up --build
-# Backend:  http://localhost:8080  (Swagger en /swagger)
-# Frontend: http://localhost:8081
-```
-
-Detalle en [backend/README.md](backend/README.md).
 
 ### Frontend (`frontend/`)
 
@@ -132,13 +119,12 @@ Configura `VITE_API_BASE_URL` en `frontend/.env` apuntando a la URL del backend.
 
 | Herramienta | Necesaria para |
 |---|---|
-| Node.js 20+ | Backend nuevo (`server/`) y frontend |
+| Node.js 20+ | Backend (`server/`) y frontend |
 | Cuenta de Supabase | Backend nuevo (Postgres + Auth) |
-| .NET 10 SDK / Docker | Solo para el backend .NET legacy |
 
 ## Variables de entorno
 
-**Backend nuevo (`server/.env`)**
+**Backend (`server/.env`)**
 
 | Variable | Descripción |
 |---|---|
@@ -147,21 +133,28 @@ Configura `VITE_API_BASE_URL` en `frontend/.env` apuntando a la URL del backend.
 | `SUPABASE_SECRET_KEY` | Clave secreta — salta las políticas RLS; nunca commitear ni exponer al navegador |
 | `AUTH_AUTO_CONFIRM_EMAIL` | `true` en dev para iniciar sesión sin confirmar email |
 
-**Frontend (`frontend/.env`)**: `VITE_API_BASE_URL` — URL del backend que consume el frontend.
+**Frontend (`frontend/.env`)**
+
+| Variable | Descripción |
+|---|---|
+| `VITE_API_BASE_URL` | URL del backend que consume el frontend |
+| `VITE_SUPABASE_URL` | URL del proyecto Supabase — el login ocurre contra Auth, no contra la API (ADR-004) |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | Clave publicable. **Nunca la secreta**: este archivo se empaqueta en el navegador |
+
+Vite solo expone al navegador las variables con prefijo `VITE_`; una sin él se ignora en silencio.
 
 ## Testing
 
 ```bash
 cd server   && npm test && npm run typecheck   # Node/TS: N1, N2 y —con credenciales— N3 y N4
 cd frontend && npm test && npm run build       # Vitest + React Testing Library
-cd backend  && dotnet test                     # .NET legacy
 ```
 
 Los niveles de prueba, la matriz requisito → caso → evidencia y el criterio de cierre están en el [Plan de pruebas](docs/ingenieria/11-plan-pruebas.md). Los casos de integración y de aislamiento (N3, N4) se saltan sin credenciales de Supabase: **un caso omitido no cubre su requisito**.
 
 ## CI/CD
 
-`.github/workflows/ci.yml` corre en cada push/PR a `main`: lint, test y build del frontend, y typecheck + test del backend nuevo (`server/`). El job del backend .NET legacy está **comentado** en el workflow, en línea con el pivote. El despliegue continuo a Vercel se agrega cuando el proyecto tenga un entorno Supabase de destino.
+`.github/workflows/ci.yml` corre en cada push/PR a `main`: lint, test y build del frontend, y typecheck + test del backend (`server/`). El despliegue continuo a Vercel no forma parte del alcance (RNF-203 solo exige la verificación en cada integración).
 
 ## Documentación
 

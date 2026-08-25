@@ -58,6 +58,7 @@ El rol es **por organización**: la misma cuenta puede tener roles distintos en 
 - No se puede remover al Owner de su propia organización.
 - No se puede cambiar el rol del Owner.
 - No se puede invitar a alguien directamente como Owner: el Owner es quien crea la organización.
+- **Una organización tiene un solo propietario activo.** Es consecuencia de las tres reglas anteriores, y no se confía a ellas: la base de datos la hace cumplir con un índice único parcial sobre la organización, restringido a las membresías activas con rol `owner`. Una regla crítica que solo viviera en el código se perdería entera con un descuido en una consulta — que es el patrón de fallo contra el que se diseñó ADR-002.
 
 ## Autenticación
 

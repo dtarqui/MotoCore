@@ -2,13 +2,13 @@
 -- ============================================================================
 --
 -- Solo lectura: no modifica nada. Se ejecuta en el SQL Editor **despues** de
--- aplicar `migrations/0001…0009` y devuelve una fila por comprobacion.
+-- aplicar `migrations/0001…0010` y devuelve una fila por comprobacion.
 --
 -- Todos los objetos de MotoCore llevan el prefijo `mt_`, de modo que estas
 -- consultas se acotan a el y no dependen de que `public` contenga o no otras
--- tablas: la novena fila lo hace explicito.
+-- tablas: la decima fila lo hace explicito.
 --
--- Para que la base sirva como entorno de validacion, las nueve filas deben
+-- Para que la base sirva como entorno de validacion, las diez filas deben
 -- decir `OK`. Las tres primeras son las que sostienen el objetivo 4: sin las
 -- siete tablas de negocio con RLS activo no hay aislamiento que medir
 -- (RNF-101, CP-N101), y sin la politica de auditoria reservada al Owner el
@@ -112,6 +112,18 @@ select * from (
 
   union all
   select 9,
+         'Restriccion de un solo propietario activo',
+         'mt_memberships_single_owner_idx',
+         coalesce((select indexname from pg_indexes
+                   where schemaname = 'public'
+                     and indexname = 'mt_memberships_single_owner_idx'), '(ninguna)'),
+         case when exists (select 1 from pg_indexes
+                           where schemaname = 'public'
+                             and indexname = 'mt_memberships_single_owner_idx')
+              then 'OK' else 'FALTA — aplicar 0010' end
+
+  union all
+  select 10,
          'Restos sin prefijo del esquema anterior',
          '0',
          count(*)::text,

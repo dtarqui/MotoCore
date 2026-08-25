@@ -14,12 +14,14 @@ Thumbs.db
 !.env.example
 *.local
 
+# Dependencias (cualquier nivel)
+node_modules/
+
 # Logs
 logs/
 *.log
 
 # Frontend
-frontend/node_modules/
 frontend/dist/
 frontend/dist-ssr/
 frontend/coverage/

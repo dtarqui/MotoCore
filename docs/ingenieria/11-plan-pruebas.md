@@ -150,7 +150,8 @@ Identificación de casos: **CP-nnn**, donde `nnn` es el número del requisito qu
 | RF-401 | CP-401.1 | N3 | Tras la invitación el invitado accede; antes recibía `403` |
 | RF-401 | CP-401.2 | N3 | Correo sin cuenta: `404 member.not_found` |
 | RF-401 | CP-401.3 | N3 | Reincorporar a alguien removido **reactiva** su membresía, no la duplica |
-| RF-402 | CP-402 | N2 | Invitar con rol `owner`: rechazo por validación |
+| RF-402 | CP-402.1 | N2 | Invitar con rol `owner`: rechazo por validación |
+| RF-402 | CP-402.2 | **N4 · vía base de datos** | Una inserción directa de una segunda membresía activa con rol `owner` en la misma organización es rechazada por el motor, sin intervención de la aplicación |
 | RF-403 | CP-403 | N3 | El cambio se refleja en el listado y surte efecto inmediato |
 | RF-404 | CP-404 | N3 | El removido pierde el acceso de inmediato |
 | RF-405 | CP-405 | N3 | Cambiar el rol del propietario o removerlo: error de negocio específico |

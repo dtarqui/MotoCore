@@ -2,7 +2,7 @@
 
 Reescritura del backend a **Node/TS + Hono** sobre **Supabase** (Postgres + Auth + RLS), con **multi-tenancy jerárquica**: una cuenta administra varias **organizaciones** (`organizations`) y cada organización opera varios **talleres** (`workshops`). Se despliega en **Vercel** como funciones serverless.
 
-> **Alcance actual**: base multi-tenant (Auth + Organizaciones + Membresías + Talleres) y el corte vertical de negocio — **Clientes** (nivel organización) e **Inventario** (nivel taller) — más el registro de auditoría. Los módulos que siguen solo en el backend .NET (Motorcycles, WorkOrders, MaintenanceHistory, Dashboard) se portarían reusando este patrón; están fuera del alcance del proyecto de grado (RF-800). El backend .NET legacy vive en `backend/`.
+> **Alcance actual**: base multi-tenant (Auth + Organizaciones + Membresías + Talleres) y el corte vertical de negocio — **Clientes** (nivel organización) e **Inventario** (nivel taller) — más el registro de auditoría. Los módulos restantes —motocicletas, órdenes de trabajo, historial de mantenimiento y panel de métricas— se construirán reutilizando este mismo patrón; están fuera del alcance del proyecto de grado (RF-800).
 >
 > **La especificación gobierna este código**, no al revés ([`docs/`](../docs/README.md)): terminología en el [Glosario](../docs/ingenieria/01-glosario.md), reglas en [Requisitos](../docs/ingenieria/02-requisitos.md), esquema en [Modelo de datos](../docs/ingenieria/05-modelo-datos.md) y, sobre todo, la interfaz en el [Contrato de la API](../docs/ingenieria/10-contrato-api.md). Cuando el código difiera de lo especificado, **se corrige el código**.
 
@@ -145,11 +145,11 @@ El **login** se hace desde el cliente con Supabase Auth (`signInWithPassword`), 
    ```
    supabase/migrations/0001_init_multitenancy.sql
    …
-   supabase/migrations/0009_grants.sql
+   supabase/migrations/0010_single_owner.sql
    ```
-   Son **nueve**, y dos de ellas no son opcionales aunque lo parezcan: la `0007`, sin la cual la política de `audit_log` no restringe la lectura al Owner y CP-704.2 no puede pasar; y la `0009`, que declara los permisos de esquema y de tabla. Sin la `0009` el esquema depende de los valores por defecto del proyecto y, en una base donde no estén, todo responde `permission denied for schema public`.
+   Son **diez**, y tres de ellas no son opcionales aunque lo parezcan: la `0007`, sin la cual la política de `audit_log` no restringe la lectura al Owner y CP-704.2 no puede pasar; la `0009`, que declara los permisos de esquema y de tabla —sin ella el esquema depende de los valores por defecto del proyecto y, en una base donde no estén, todo responde `permission denied for schema public`—; y la `0010`, que impide en el motor que una organización acabe con dos propietarios activos.
 
-   Después, ejecutar `supabase/verify.sql` —solo lectura— para comprobar que las nueve tablas, las 28 políticas y los permisos quedaron en su sitio.
+   Después, ejecutar `supabase/verify.sql` —solo lectura— para comprobar que las nueve tablas, las 28 políticas, los permisos y la restricción de propietario único quedaron en su sitio.
 
    > **Partir de cero sobre un proyecto ya usado**: `supabase/reset.sql` deja la base como recién creada. Es **destructivo e irreversible** —borra el esquema `public` entero y todas las cuentas de `auth.users`— y por eso vive fuera de `migrations/`, para que `supabase db push` no lo aplique nunca.
 3. **Configurar el entorno**: copiar `.env.example` a `.env` con los valores de *Project Settings → API Keys*:
@@ -204,6 +204,6 @@ Esos dos últimos archivos son los que sostienen la premisa central del proyecto
 
 ## Trabajo posterior
 
-- Portar los módulos que siguen en el backend .NET (Motorcycles → WorkOrders → MaintenanceHistory → Dashboard) con sus tablas y sus políticas por `organization_id`. Están fuera del alcance del proyecto de grado (RF-800).
+- Construir los módulos restantes (motocicletas → órdenes de trabajo → historial de mantenimiento → panel de métricas) con sus tablas `mt_` y sus políticas por `organization_id`. Están fuera del alcance del proyecto de grado (RF-800).
 - Funcionalidades del [análisis del mercado](../docs/ingenieria/09-analisis-mercado.md): facturación electrónica del SIN, mensajería por WhatsApp, presupuestos con aprobación, agendamiento y portal del cliente.
 - Publicar el esquema OpenAPI desde este servidor, para que el frontend derive sus tipos en lugar de declararlos a mano.

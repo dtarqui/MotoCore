@@ -6,7 +6,7 @@ SPA de React para la gestión de organizaciones de servicio de motocicletas.
 >
 > Rutas expuestas: clientes e inventario (el corte vertical), talleres, equipo y auditoría. Los módulos de **motocicletas, órdenes e historial** conservan su interfaz en el repositorio pero **no están enrutados**: todavía no tienen endpoints en el backend nuevo, y una pantalla accesible que falla al cargar es peor que una que aún no está.
 >
-> **Terminología:** el texto visible sigue el [Glosario](../docs/ingenieria/01-glosario.md) — la unidad de aislamiento es la **organización** (`organizations`) y el local físico es el **taller** (`workshops`). Los términos «empresa» y «sucursal» están retirados del proyecto. Los identificadores del contrato y del esquema se conservan en inglés y **no** se traducen.
+> **Terminología:** el texto visible sigue el [Glosario](../docs/ingenieria/01-glosario.md) — la unidad de aislamiento es la **organización** (`mt_organizations`) y el local físico es el **taller** (`mt_workshops`). Los términos «empresa» y «sucursal» están retirados del proyecto. Los identificadores del contrato y del esquema se conservan en inglés y **no** se traducen.
 
 ## Stack
 
@@ -42,17 +42,15 @@ Copia `.env.example` a `.env` y completa:
 
 ```bash
 docker build -t motocore-frontend .
-# o desde la raíz del repo, junto con el stack .NET legacy:
-docker compose up --build
 ```
 
 Multi-stage: build con `node:20-alpine`, se sirve con `nginx:alpine` (`nginx.conf` incluye fallback de rutas para el SPA).
 
-### Generar tipos desde la API (OpenAPI) — inactivo
+### Tipos de la API
 
-El script `generate:api-types` apunta al `swagger.json` del **backend .NET legacy** (`localhost:7222`), que ya no es el backend de este SPA. El nuevo (`server/`, Hono) no publica un documento OpenAPI, así que hoy los tipos de la API se declaran a mano en cada módulo (`<modulo>-api.ts`).
+Se declaran **a mano** en cada módulo (`<modulo>-api.ts`). El script `generate:api-types` y la dependencia `openapi-typescript` se retiraron junto con el backend .NET: apuntaban a un `swagger.json` que ya no existe, y el servidor actual (`server/`, Hono) no publica un documento OpenAPI.
 
-Queda pendiente decidir si se publica OpenAPI desde `server/` y se retoma la generación, o si se retira el script. Ver [src/shared/api/README.md](src/shared/api/README.md).
+Si algún día se publica OpenAPI desde `server/`, la generación puede retomarse; hasta entonces, el [contrato](../docs/ingenieria/10-contrato-api.md) es la fuente de verdad de la interfaz.
 
 ### Empaquetado multiplataforma (PWA / Capacitor / Electron)
 

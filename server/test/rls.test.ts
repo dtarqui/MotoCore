@@ -44,6 +44,8 @@ describe.skipIf(!hasEnv)('aislamiento a nivel de base de datos (RLS sin pasar po
   const userB = { email: `rls_b_${rnd()}@motocore.test`, password: 'supersecret1' };
 
   let orgAId = '';
+  let orgBId = '';
+  let userAId = '';
   let workshopAId = '';
   let clientAId = '';
   let partAId = '';
@@ -70,12 +72,14 @@ describe.skipIf(!hasEnv)('aislamiento a nivel de base de datos (RLS sin pasar po
     orgAId = provisioned.organization.id;
     workshopAId = provisioned.workshop.id;
 
-    await register(userB.email, userB.password, `Organizacion B ${rnd()}`);
+    const provisionedB = await register(userB.email, userB.password, `Organizacion B ${rnd()}`);
+    orgBId = provisionedB.organization.id;
 
     // La organizacion A crea datos en los dos niveles de la jerarquia.
     const sessionA = await anon.auth.signInWithPassword(userA);
     if (sessionA.error) throw sessionA.error;
     const tokenA = sessionA.data.session!.access_token;
+    userAId = sessionA.data.user!.id;
 
     const headersA = {
       Authorization: `Bearer ${tokenA}`,
@@ -185,6 +189,19 @@ describe.skipIf(!hasEnv)('aislamiento a nivel de base de datos (RLS sin pasar po
     // part_movements no tiene politica de delete: nada se borra.
     expect(data ?? []).toEqual([]);
     if (error) expect(error).toBeTruthy();
+  });
+
+  it('CP-402.2 — la base rechaza un segundo propietario activo en la misma organizacion', async () => {
+    // B es propietario de su propia organizacion, de modo que la politica de
+    // insercion SI le permite escribir esta fila: lo que la rechaza es el
+    // indice unico parcial de la migracion 0010, no el RLS. Esa distincion es
+    // la que hace que este caso pruebe la restriccion y no otra cosa.
+    const { error } = await dbAsB
+      .from('mt_memberships')
+      .insert({ organization_id: orgBId, user_id: userAId, role: 'owner', is_active: true });
+
+    expect(error).not.toBeNull();
+    expect(error!.code).toBe('23505');
   });
 
   it('control negativo — B sigue viendo con normalidad sus propios datos', async () => {

@@ -49,7 +49,7 @@ Requisitos funcionales (RF) y no funcionales (RNF) del proyecto. Cada requisito 
 | ID | Requisito | Prioridad | Alcance | Verificación |
 |---|---|---|---|---|
 | RF-401 | El `Owner` puede invitar a una cuenta existente a su organización, asignándole rol `Mechanic` o `Receptionist`. | Must | Sí | Tras la invitación, el invitado accede a la organización; antes recibía `403`. |
-| RF-402 | El sistema impide invitar a alguien directamente como `Owner`. | Must | Sí | La petición con rol `owner` es rechazada por validación. |
+| RF-402 | El sistema impide invitar a alguien directamente como `Owner`, de modo que cada organización conserve **un solo propietario activo**. | Must | Sí | La petición con rol `owner` es rechazada por validación; además, una inserción directa en la base de datos que crearía un segundo propietario activo es rechazada por el motor. |
 | RF-403 | El `Owner` puede cambiar el rol de un miembro. | Must | Sí | El cambio se refleja en el listado de miembros. |
 | RF-404 | El `Owner` puede remover a un miembro de la organización. | Must | Sí | El removido pierde el acceso inmediatamente. |
 | RF-405 | El sistema impide cambiar el rol del `Owner` de la organización o removerlo. | Must | Sí | Ambas operaciones devuelven error de negocio específico. |
