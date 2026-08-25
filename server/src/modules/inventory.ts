@@ -77,7 +77,7 @@ inventoryRoutes.get('/parts', async (c) => {
   const lowStockOnly = c.req.query('lowStock') === 'true';
 
   let query = c.get('db')
-    .from('parts')
+    .from('mt_parts')
     .select(PART_COLUMNS)
     .eq('organization_id', c.get('orgId'))
     .eq('workshop_id', c.get('workshopId'))
@@ -113,7 +113,7 @@ inventoryRoutes.post('/parts', async (c) => {
   const db = c.get('db');
 
   const { data: part, error } = await db
-    .from('parts')
+    .from('mt_parts')
     .insert({
       organization_id: c.get('orgId'),
       workshop_id: c.get('workshopId'),
@@ -138,7 +138,7 @@ inventoryRoutes.post('/parts', async (c) => {
   }
 
   if ((input.initialStock ?? 0) > 0) {
-    const { error: movErr } = await serviceClient().rpc('register_part_movement', {
+    const { error: movErr } = await serviceClient().rpc('mt_register_part_movement', {
       p_part_id: (part as { id: string }).id,
       p_movement_type: 'purchase',
       p_quantity: input.initialStock,
@@ -150,7 +150,7 @@ inventoryRoutes.post('/parts', async (c) => {
     if (movErr) mapDbError(movErr.message, 'inventory.movement_failed');
 
     const { data: refreshed } = await db
-      .from('parts')
+      .from('mt_parts')
       .select(PART_COLUMNS)
       .eq('id', (part as { id: string }).id)
       .maybeSingle();
@@ -184,7 +184,7 @@ inventoryRoutes.patch('/parts/:partId', async (c) => {
   if (input.unitCost !== undefined) patch.unit_cost = input.unitCost;
 
   const { data, error } = await c.get('db')
-    .from('parts')
+    .from('mt_parts')
     .update(patch)
     .eq('id', partId)
     .eq('workshop_id', c.get('workshopId'))
@@ -203,7 +203,7 @@ inventoryRoutes.get('/parts/:partId/movements', async (c) => {
   await findInWorkshop(c.get('db'), partId, c.get('orgId'), c.get('workshopId'));
 
   const { data, error } = await c.get('db')
-    .from('part_movements')
+    .from('mt_part_movements')
     .select('id, part_id, movement_type, quantity, previous_stock, new_stock, unit_cost, total_cost, reference, notes, performed_by, created_at')
     .eq('part_id', partId)
     .order('created_at', { ascending: false });
@@ -222,7 +222,7 @@ inventoryRoutes.post('/parts/:partId/movements', async (c) => {
   await findInWorkshop(c.get('db'), partId, c.get('orgId'), c.get('workshopId'));
   const input = movementSchema.parse(await c.req.json());
 
-  const { data, error } = await serviceClient().rpc('register_part_movement', {
+  const { data, error } = await serviceClient().rpc('mt_register_part_movement', {
     p_part_id: partId,
     p_movement_type: input.movementType,
     p_quantity: input.quantity,
@@ -254,7 +254,7 @@ inventoryRoutes.post('/parts/:partId/transfer', async (c) => {
   await assertWorkshopInOrg(input.toWorkshopId, orgId);
 
   const { data: target, error: targetErr } = await c.get('db')
-    .from('parts')
+    .from('mt_parts')
     .select('id')
     .eq('id', input.toPartId)
     .eq('organization_id', orgId)
@@ -264,7 +264,7 @@ inventoryRoutes.post('/parts/:partId/transfer', async (c) => {
   if (targetErr) throw internal('parts.select: ' + targetErr.message);
   if (!target) throw notFound('inventory.part_not_found', 'El repuesto de destino no existe en ese taller.');
 
-  const { error } = await serviceClient().rpc('transfer_stock', {
+  const { error } = await serviceClient().rpc('mt_transfer_stock', {
     p_from_part_id: partId,
     p_to_part_id: input.toPartId,
     p_quantity: input.quantity,
@@ -287,7 +287,7 @@ async function findInWorkshop(
   workshopId: string,
 ): Promise<Record<string, unknown>> {
   const { data, error } = await db
-    .from('parts')
+    .from('mt_parts')
     .select(PART_COLUMNS)
     .eq('id', partId)
     .eq('organization_id', orgId)

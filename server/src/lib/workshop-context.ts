@@ -39,7 +39,7 @@ export const requireActiveWorkshop: MiddlewareHandler<WorkshopBindings> = async 
  */
 export async function assertWorkshopInOrg(workshopId: string, orgId: string): Promise<void> {
   const { data, error } = await serviceClient()
-    .from('workshops')
+    .from('mt_workshops')
     .select('id, organization_id')
     .eq('id', workshopId)
     .maybeSingle();

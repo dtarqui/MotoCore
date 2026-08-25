@@ -52,7 +52,7 @@ auditRoutes.get('/', async (c) => {
   // `audit_log_select_owner` (migracion 0007) vuelve a exigir el rol en el
   // motor, de modo que la reserva al Owner no depende solo de este handler.
   let query = c.get('db')
-    .from('audit_log')
+    .from('mt_audit_log')
     .select(AUDIT_COLUMNS)
     .eq('organization_id', orgId)
     .order('created_at', { ascending: false })
@@ -83,7 +83,7 @@ auditRoutes.get('/', async (c) => {
   const perfilesPorId = new Map<string, Record<string, unknown>>();
   if (autores.length > 0) {
     const { data: perfiles } = await serviceClient()
-      .from('profiles')
+      .from('mt_profiles')
       .select('id, email, first_name, last_name')
       .in('id', autores);
     for (const p of perfiles ?? []) {

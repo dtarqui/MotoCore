@@ -36,7 +36,7 @@ clientRoutes.get('/', async (c) => {
   const search = c.req.query('search')?.trim();
   const includeInactive = c.req.query('includeInactive') === 'true';
 
-  let query = c.get('db').from('clients').select(CLIENT_COLUMNS).eq('organization_id', orgId);
+  let query = c.get('db').from('mt_clients').select(CLIENT_COLUMNS).eq('organization_id', orgId);
 
   if (!includeInactive) query = query.eq('is_active', true);
   if (search) {
@@ -59,7 +59,7 @@ clientRoutes.post('/', async (c) => {
   const input = createClientSchema.parse(await c.req.json());
 
   const { data, error } = await c.get('db')
-    .from('clients')
+    .from('mt_clients')
     .insert({
       organization_id: orgId,
       first_name: input.firstName,
@@ -107,7 +107,7 @@ clientRoutes.patch('/:clientId', async (c) => {
   if (input.notes !== undefined) patch.notes = input.notes;
 
   const { data, error } = await c.get('db')
-    .from('clients')
+    .from('mt_clients')
     .update(patch)
     .eq('id', clientId)
     .eq('organization_id', orgId)
@@ -139,7 +139,7 @@ clientRoutes.post('/:clientId/deactivate', async (c) => {
   await findInOrg(c.get('db'), clientId, orgId);
 
   const { data, error } = await c.get('db')
-    .from('clients')
+    .from('mt_clients')
     .update({ is_active: false, updated_at: new Date().toISOString() })
     .eq('id', clientId)
     .eq('organization_id', orgId)
@@ -171,7 +171,7 @@ async function findInOrg(
   orgId: string,
 ): Promise<Record<string, unknown>> {
   const { data, error } = await db
-    .from('clients')
+    .from('mt_clients')
     .select(CLIENT_COLUMNS)
     .eq('id', clientId)
     .eq('organization_id', orgId)

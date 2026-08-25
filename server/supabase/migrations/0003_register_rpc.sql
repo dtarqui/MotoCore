@@ -12,7 +12,7 @@
 -- API de administracion de Supabase puede hacerlo. Es el unico paso que queda
 -- fuera de la transaccion, y por eso la aplicacion lo revierte si esto falla.
 
-create or replace function public.register_account(
+create or replace function public.mt_register_account(
   p_user_id        uuid,
   p_org_name       text,
   p_workshop_name  text
@@ -29,15 +29,15 @@ declare
   v_org_id       uuid;
   v_workshop_id  uuid;
 begin
-  insert into public.organizations (name, owner_id)
+  insert into public.mt_organizations (name, owner_id)
   values (p_org_name, p_user_id)
   returning id into v_org_id;
 
-  insert into public.workshops (organization_id, name)
+  insert into public.mt_workshops (organization_id, name)
   values (v_org_id, coalesce(nullif(btrim(p_workshop_name), ''), p_org_name))
   returning id into v_workshop_id;
 
-  insert into public.memberships (organization_id, user_id, role)
+  insert into public.mt_memberships (organization_id, user_id, role)
   values (v_org_id, p_user_id, 'owner');
 
   return query select v_org_id, v_workshop_id;
@@ -46,5 +46,5 @@ $$;
 
 -- Solo la API (service_role) puede registrar cuentas. Exponerla a usuarios
 -- autenticados permitiria crear organizaciones a nombre de terceros.
-revoke all on function public.register_account(uuid, text, text) from public, anon, authenticated;
-grant execute on function public.register_account(uuid, text, text) to service_role;
+revoke all on function public.mt_register_account(uuid, text, text) from public, anon, authenticated;
+grant execute on function public.mt_register_account(uuid, text, text) to service_role;

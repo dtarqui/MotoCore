@@ -45,7 +45,7 @@ authRoutes.post('/register', async (c) => {
   const userId = created.user.id;
 
   // El trigger on_auth_user_created ya crea el profile; upsert por robustez.
-  await db.from('profiles').upsert({
+  await db.from('mt_profiles').upsert({
     id: userId,
     email: input.email,
     first_name: input.firstName,
@@ -53,7 +53,7 @@ authRoutes.post('/register', async (c) => {
   });
 
   // Organizacion + taller + membresia Owner, en una sola transaccion.
-  const { data: created2, error: rpcErr } = await db.rpc('register_account', {
+  const { data: created2, error: rpcErr } = await db.rpc('mt_register_account', {
     p_user_id: userId,
     p_org_name: input.organizationName,
     p_workshop_name: input.workshopName ?? input.organizationName,
@@ -74,13 +74,13 @@ authRoutes.post('/register', async (c) => {
   };
 
   const { data: org } = await db
-    .from('organizations')
+    .from('mt_organizations')
     .select('id, name, description, address, phone, email, owner_id, is_active, created_at, updated_at')
     .eq('id', orgId)
     .maybeSingle();
 
   const { data: workshop } = await db
-    .from('workshops')
+    .from('mt_workshops')
     .select('id, organization_id, name, address, phone, is_active, created_at, updated_at')
     .eq('id', workshopId)
     .maybeSingle();
@@ -114,14 +114,14 @@ authRoutes.get('/me', requireAuth, async (c) => {
   const db = c.get('db');
 
   const { data: profile } = await db
-    .from('profiles')
+    .from('mt_profiles')
     .select('id, email, first_name, last_name')
     .eq('id', userId)
     .maybeSingle();
 
   const { data: memberships, error } = await db
-    .from('memberships')
-    .select('role, is_active, organizations ( id, name, is_active )')
+    .from('mt_memberships')
+    .select('role, is_active, organizations:mt_organizations ( id, name, is_active )')
     .eq('user_id', userId)
     .eq('is_active', true);
 

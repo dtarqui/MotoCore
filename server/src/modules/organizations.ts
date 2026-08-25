@@ -25,8 +25,8 @@ organizationRoutes.use('*', requireAuth);
 organizationRoutes.get('/', async (c) => {
   const userId = c.get('userId');
   const { data, error } = await c.get('db')
-    .from('memberships')
-    .select(`role, organizations ( ${ORG_COLUMNS} )`)
+    .from('mt_memberships')
+    .select(`role, organizations:mt_organizations ( ${ORG_COLUMNS} )`)
     .eq('user_id', userId)
     .eq('is_active', true);
 
@@ -54,7 +54,7 @@ organizationRoutes.post('/', async (c) => {
   const db = serviceClient();
 
   const { data: org, error: orgErr } = await db
-    .from('organizations')
+    .from('mt_organizations')
     .insert({
       name: input.name,
       description: input.description ?? null,
@@ -69,7 +69,7 @@ organizationRoutes.post('/', async (c) => {
   if (orgErr || !org) throw internal(`organizations.insert: ${orgErr?.message ?? 'sin fila'}`);
 
   const { error: memErr } = await db
-    .from('memberships')
+    .from('mt_memberships')
     .insert({ organization_id: (org as Organization).id, user_id: userId, role: 'owner' });
 
   if (memErr) throw internal(`memberships.insert: ${memErr.message}`);
@@ -83,7 +83,7 @@ organizationRoutes.get('/:orgId', async (c) => {
   await requireMembership(orgId, c.get('userId'));
 
   const { data: org, error } = await c.get('db')
-    .from('organizations')
+    .from('mt_organizations')
     .select(ORG_COLUMNS)
     .eq('id', orgId)
     .maybeSingle();
@@ -107,7 +107,7 @@ organizationRoutes.post('/:orgId/switch', async (c) => {
   const role = await requireMembership(orgId, c.get('userId'));
 
   const { data: org, error } = await c.get('db')
-    .from('organizations')
+    .from('mt_organizations')
     .select(ORG_COLUMNS)
     .eq('id', orgId)
     .maybeSingle();
@@ -125,7 +125,7 @@ organizationRoutes.patch('/:orgId', async (c) => {
   const input = updateOrganizationSchema.parse(await c.req.json());
 
   const { data: org, error } = await c.get('db')
-    .from('organizations')
+    .from('mt_organizations')
     .update({ ...input, updated_at: new Date().toISOString() })
     .eq('id', orgId)
     .select(ORG_COLUMNS)

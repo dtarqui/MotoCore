@@ -5,7 +5,7 @@ import type { Membership, Role } from '../types.js';
 /** Lee la membresia (si existe) de una cuenta en una organizacion. */
 export async function getMembership(orgId: string, userId: string): Promise<Membership | null> {
   const { data, error } = await serviceClient()
-    .from('memberships')
+    .from('mt_memberships')
     .select('organization_id, user_id, role, is_active')
     .eq('organization_id', orgId)
     .eq('user_id', userId)

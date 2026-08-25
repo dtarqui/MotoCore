@@ -8,16 +8,16 @@ Terminología unificada del proyecto. **Fuente de verdad de los términos**: si 
 
 | Término | Definición | Notas |
 |---|---|---|
-| **Cuenta** | La identidad de una persona en la plataforma (email + contraseña). Vive en `auth.users` de Supabase, con datos de perfil en `profiles`. | Una persona = una cuenta, sin importar en cuántas organizaciones participe. |
-| **Organización** | La entidad que opera el negocio de servicio de motocicletas. Es la **unidad de aislamiento de datos** (el *tenant*). Tabla `organizations`. | **Una cuenta puede crear y pertenecer a varias organizaciones** — este es el cambio central del modelo ERP. |
-| **Taller** | El **local físico** donde se presta el servicio. Pertenece a una organización. Tabla `workshops`. | **Una organización puede tener varios talleres** (relación 1:N). El taller **no** es una unidad de aislamiento: es una subdivisión operativa dentro de la organización. |
-| **Membresía** | La relación entre una cuenta y una organización, con un rol. Tabla `memberships`, única por `(organization_id, user_id)`. | Es lo que autoriza el acceso. Sin membresía activa no hay acceso a los datos de esa organización. El rol es **de organización**, no de taller. |
+| **Cuenta** | La identidad de una persona en la plataforma (email + contraseña). Vive en `auth.users` de Supabase, con datos de perfil en `mt_profiles`. | Una persona = una cuenta, sin importar en cuántas organizaciones participe. |
+| **Organización** | La entidad que opera el negocio de servicio de motocicletas. Es la **unidad de aislamiento de datos** (el *tenant*). Tabla `mt_organizations`. | **Una cuenta puede crear y pertenecer a varias organizaciones** — este es el cambio central del modelo ERP. |
+| **Taller** | El **local físico** donde se presta el servicio. Pertenece a una organización. Tabla `mt_workshops`. | **Una organización puede tener varios talleres** (relación 1:N). El taller **no** es una unidad de aislamiento: es una subdivisión operativa dentro de la organización. |
+| **Membresía** | La relación entre una cuenta y una organización, con un rol. Tabla `mt_memberships`, única por `(organization_id, user_id)`. | Es lo que autoriza el acceso. Sin membresía activa no hay acceso a los datos de esa organización. El rol es **de organización**, no de taller. |
 | **Asignación a taller** | Vínculo operativo entre un miembro y uno o varios talleres de su organización (p. ej. en qué taller trabaja un mecánico). | No otorga ni restringe permisos por sí sola: los permisos vienen del rol de la membresía. Sirve para operación y reportes. |
 | **Organización activa** | La organización sobre la que opera el usuario en un momento dado. Se envía por request en el header `X-Org-Id` y se valida contra la membresía. | Permite cambiar de organización sin cerrar sesión (RNF-401). El servidor nunca la asume por defecto. |
 | **Taller activo** | El taller sobre el que se está operando dentro de la organización activa. Se indica por request (header `X-Workshop-Id`) y debe pertenecer a la organización activa. | Necesario para las operaciones que ocurren en un local concreto (órdenes, inventario). |
 | **Tenant** | Sinónimo técnico de *organización*. Se usa al hablar de arquitectura (multi-tenant, aislamiento entre tenants). | Preferir "organización" en documentación de producto; "tenant" en documentación técnica. |
 
-> **Un solo nombre por concepto.** Cada nivel de la jerarquía tiene **un** término en español y **un** identificador técnico, y no se admiten sinónimos: nivel 1 es **organización** (`organizations`, cabecera `X-Org-Id`, códigos `organization.*`) y nivel 2 es **taller** (`workshops`, cabecera `X-Workshop-Id`, códigos `workshop.*`). Los identificadores se conservan en inglés porque nombran objetos del esquema y del contrato; en prosa se emplea siempre la forma en español. Los términos **empresa** y **sucursal** quedan retirados del proyecto.
+> **Un solo nombre por concepto.** Cada nivel de la jerarquía tiene **un** término en español y **un** identificador técnico, y no se admiten sinónimos: nivel 1 es **organización** (`mt_organizations`, cabecera `X-Org-Id`, códigos `organization.*`) y nivel 2 es **taller** (`mt_workshops`, cabecera `X-Workshop-Id`, códigos `workshop.*`). Los identificadores se conservan en inglés porque nombran objetos del esquema y del contrato; en prosa se emplea siempre la forma en español. Los términos **empresa** y **sucursal** quedan retirados del proyecto.
 
 ## Jerarquía y alcance de los datos
 
@@ -83,8 +83,8 @@ Términos que conviene emplear con exactitud para no confundir los dos niveles d
 
 | En lugar de | Usar | Motivo |
 |---|---|---|
-| "Empresa" | **"Organización"** | Término retirado. La unidad de aislamiento se llama organización en todo el proyecto, igual que la tabla `organizations` y la cabecera `X-Org-Id`. |
-| "Sucursal" | **"Taller"** | Término retirado. El local físico se llama taller en todo el proyecto, igual que la tabla `workshops`. |
+| "Empresa" | **"Organización"** | Término retirado. La unidad de aislamiento se llama organización en todo el proyecto, igual que la tabla `mt_organizations` y la cabecera `X-Org-Id`. |
+| "Sucursal" | **"Taller"** | Término retirado. El local físico se llama taller en todo el proyecto, igual que la tabla `mt_workshops`. |
 | "Multi-taller" a secas | **"Multiorganización"** (varias organizaciones por cuenta) o **"varios talleres por organización"** | Es ambiguo: confunde los dos niveles. Emplear el término del nivel del que se habla. |
 | "Taller" como unidad de aislamiento | **"Organización"** | La unidad de aislamiento es la organización; el taller es un local dentro de ella y no constituye frontera de seguridad. |
 | "Usuario de la organización" | **"Miembro"** | El acceso lo otorga la membresía, no la mera existencia de la cuenta. |

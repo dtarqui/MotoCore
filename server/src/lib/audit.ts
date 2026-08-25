@@ -27,7 +27,7 @@ interface AuditEntry {
  * visible sin convertirlo en un error de cara al usuario.
  */
 export async function recordAudit(entry: AuditEntry): Promise<void> {
-  const { error } = await serviceClient().from('audit_log').insert({
+  const { error } = await serviceClient().from('mt_audit_log').insert({
     organization_id: entry.organizationId,
     workshop_id: entry.workshopId ?? null,
     performed_by: entry.performedBy,

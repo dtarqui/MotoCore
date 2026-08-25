@@ -66,7 +66,10 @@ export function getEnv(): Env {
 
   const parsed = envSchema.safeParse(process.env);
   if (!parsed.success) {
-    const detalle = parsed.error.issues.map((i) => i.message).join(' · ');
+    // Con el path delante: «Required» a secas no dice cual de las tres falta.
+    const detalle = parsed.error.issues
+      .map((i) => `${i.path.join('.') || '(raiz)'}: ${i.message}`)
+      .join(' · ');
     throw new Error(`Configuracion invalida. ${detalle} Ver server/.env.example.`);
   }
 

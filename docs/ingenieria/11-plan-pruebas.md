@@ -254,7 +254,7 @@ Verifica la **capa del motor**, y es la que demuestra la premisa del proyecto. S
 
 **Criterio**: las consultas se ejecutan sin error y devuelven **cero filas** de la organización ajena. Que no fallen es parte del resultado: RLS no rechaza la consulta, la filtra — y esa es exactamente la propiedad que se busca demostrar.
 
-Debe cubrir **todas** las tablas de negocio: `clients`, `parts`, `part_movements`, `workshops`, `memberships`, `workshop_assignments` y `audit_log`. Una tabla sin política activa es una fuga, y solo esta vía la detecta: por la interfaz quedaría oculta tras la verificación de la aplicación.
+Debe cubrir **todas** las tablas de negocio: `mt_clients`, `mt_parts`, `mt_part_movements`, `mt_workshops`, `mt_memberships`, `mt_workshop_assignments` y `mt_audit_log`. Una tabla sin política activa es una fuga, y solo esta vía la detecta: por la interfaz quedaría oculta tras la verificación de la aplicación.
 
 ### 5.3 La prueba que justifica la redundancia
 

@@ -8,54 +8,54 @@ Diseño de datos de la arquitectura multi-tenant jerárquica. Corresponde al obj
 
 ```mermaid
 erDiagram
-    AUTH_USERS ||--|| PROFILES : "tiene perfil"
-    AUTH_USERS ||--o{ MEMBERSHIPS : "pertenece a"
-    ORGANIZATIONS ||--o{ MEMBERSHIPS : "tiene miembros"
-    ORGANIZATIONS ||--o{ WORKSHOPS : "tiene talleres"
-    MEMBERSHIPS ||--o{ WORKSHOP_ASSIGNMENTS : "se asigna a"
-    WORKSHOPS ||--o{ WORKSHOP_ASSIGNMENTS : "recibe asignados"
-    ORGANIZATIONS ||--o{ CLIENTS : "nivel organización"
-    ORGANIZATIONS ||--o{ PARTS : "aislamiento"
-    WORKSHOPS ||--o{ PARTS : "nivel taller"
-    PARTS ||--o{ PART_MOVEMENTS : "registra"
-    ORGANIZATIONS ||--o{ PART_MOVEMENTS : "aislamiento"
-    WORKSHOPS ||--o{ PART_MOVEMENTS : "nivel taller"
-    ORGANIZATIONS ||--o{ AUDIT_LOG : "nivel organización"
-    WORKSHOPS |o--o{ AUDIT_LOG : "referencia opcional"
+    AUTH_USERS ||--|| MT_PROFILES : "tiene perfil"
+    AUTH_USERS ||--o{ MT_MEMBERSHIPS : "pertenece a"
+    MT_ORGANIZATIONS ||--o{ MT_MEMBERSHIPS : "tiene miembros"
+    MT_ORGANIZATIONS ||--o{ MT_WORKSHOPS : "tiene talleres"
+    MT_MEMBERSHIPS ||--o{ MT_WORKSHOP_ASSIGNMENTS : "se asigna a"
+    MT_WORKSHOPS ||--o{ MT_WORKSHOP_ASSIGNMENTS : "recibe asignados"
+    MT_ORGANIZATIONS ||--o{ MT_CLIENTS : "nivel organización"
+    MT_ORGANIZATIONS ||--o{ MT_PARTS : "aislamiento"
+    MT_WORKSHOPS ||--o{ MT_PARTS : "nivel taller"
+    MT_PARTS ||--o{ MT_PART_MOVEMENTS : "registra"
+    MT_ORGANIZATIONS ||--o{ MT_PART_MOVEMENTS : "aislamiento"
+    MT_WORKSHOPS ||--o{ MT_PART_MOVEMENTS : "nivel taller"
+    MT_ORGANIZATIONS ||--o{ MT_AUDIT_LOG : "nivel organización"
+    MT_WORKSHOPS |o--o{ MT_AUDIT_LOG : "referencia opcional"
 
     AUTH_USERS { uuid id PK }
-    PROFILES {
+    MT_PROFILES {
         uuid id PK
         text email
         text first_name
         text last_name
     }
-    ORGANIZATIONS {
+    MT_ORGANIZATIONS {
         uuid id PK
         text name
         uuid owner_id FK
         boolean is_active
     }
-    WORKSHOPS {
+    MT_WORKSHOPS {
         uuid id PK
         uuid organization_id FK
         text name
         text address
         boolean is_active
     }
-    MEMBERSHIPS {
+    MT_MEMBERSHIPS {
         uuid id PK
         uuid organization_id FK
         uuid user_id FK
         text role
         boolean is_active
     }
-    WORKSHOP_ASSIGNMENTS {
+    MT_WORKSHOP_ASSIGNMENTS {
         uuid id PK
         uuid membership_id FK
         uuid workshop_id FK
     }
-    CLIENTS {
+    MT_CLIENTS {
         uuid id PK
         uuid organization_id FK
         text email
@@ -63,7 +63,7 @@ erDiagram
         text last_name
         boolean is_active
     }
-    PARTS {
+    MT_PARTS {
         uuid id PK
         uuid organization_id FK
         uuid workshop_id FK
@@ -72,7 +72,7 @@ erDiagram
         int minimum_stock
         boolean is_active
     }
-    PART_MOVEMENTS {
+    MT_PART_MOVEMENTS {
         uuid id PK
         uuid organization_id FK
         uuid workshop_id FK
@@ -82,7 +82,7 @@ erDiagram
         int previous_stock
         int new_stock
     }
-    AUDIT_LOG {
+    MT_AUDIT_LOG {
         uuid id PK
         uuid organization_id FK
         uuid workshop_id FK
@@ -102,32 +102,32 @@ erDiagram
 | Tabla | Descripción | Claves y restricciones |
 |---|---|---|
 | `auth.users` | Gestionada por el proveedor de identidad. Identidad global de la cuenta. | PK `id` |
-| `profiles` | Datos de perfil, 1:1 con la cuenta. Se crea por disparador al registrarse. | PK `id` → `auth.users(id)` en cascada |
+| `mt_profiles` | Datos de perfil, 1:1 con la cuenta. Se crea por disparador al registrarse. | PK `id` → `auth.users(id)` en cascada |
 
 ### Jerarquía organizacional
 
 | Tabla | Nivel | Claves y restricciones |
 |---|---|---|
-| `organizations` | — (es el tenant) | PK `id`; `owner_id` → `auth.users(id)`; índice por `owner_id` |
-| `workshops` | Organización | PK `id`; `organization_id` → `organizations(id)` en cascada; único `(organization_id, name)`; índice por `organization_id` |
-| `memberships` | Organización | PK `id`; **único `(organization_id, user_id)`**; `role ∈ {owner, mechanic, receptionist}`; índices por `user_id` y por `organization_id` |
-| `workshop_assignments` | Organización | PK `id`; único `(membership_id, workshop_id)`; ambas FK en cascada |
+| `mt_organizations` | — (es el tenant) | PK `id`; `owner_id` → `auth.users(id)`; índice por `owner_id` |
+| `mt_workshops` | Organización | PK `id`; `organization_id` → `mt_organizations(id)` en cascada; único `(organization_id, name)`; índice por `organization_id` |
+| `mt_memberships` | Organización | PK `id`; **único `(organization_id, user_id)`**; `role ∈ {owner, mechanic, receptionist}`; índices por `user_id` y por `organization_id` |
+| `mt_workshop_assignments` | Organización | PK `id`; único `(membership_id, workshop_id)`; ambas FK en cascada |
 
 ### Negocio — corte vertical
 
 | Tabla | Nivel | Claves y restricciones |
 |---|---|---|
-| `clients` | **Organización** | PK `id`; `organization_id` FK; **único `(organization_id, email)`**; índice por `organization_id` |
-| `parts` | **Taller** | PK `id`; `organization_id` + `workshop_id` FK; **único `(workshop_id, part_number)`**; índice por `(organization_id, workshop_id)` |
-| `part_movements` | **Taller** | PK `id`; `organization_id` + `workshop_id` + `part_id` FK; **inmutable** (solo inserción); índices por `part_id` y por fecha |
-| `audit_log` | **Organización** | PK `id`; `organization_id`; `workshop_id` nullable; `performed_by` **sin FK real**, para que el registro sobreviva al borrado del usuario |
+| `mt_clients` | **Organización** | PK `id`; `organization_id` FK; **único `(organization_id, email)`**; índice por `organization_id` |
+| `mt_parts` | **Taller** | PK `id`; `organization_id` + `workshop_id` FK; **único `(workshop_id, part_number)`**; índice por `(organization_id, workshop_id)` |
+| `mt_part_movements` | **Taller** | PK `id`; `organization_id` + `workshop_id` + `part_id` FK; **inmutable** (solo inserción); índices por `part_id` y por fecha |
+| `mt_audit_log` | **Organización** | PK `id`; `organization_id`; `workshop_id` nullable; `performed_by` **sin FK real**, para que el registro sobreviva al borrado del usuario |
 
 ### Convenciones comunes
 
 - **Identificadores**: UUID generado por la base de datos.
 - **Marcas de tiempo**: `created_at` con valor por defecto del servidor; `updated_at` nullable, gestionado por la aplicación.
-- **Baja lógica**: `is_active` en las entidades que deben conservar historial (`organizations`, `workshops`, `memberships`, `clients`, `parts`).
-- **Historial inmutable**: `part_movements` y `audit_log` solo admiten inserción; nunca se actualizan ni se borran.
+- **Baja lógica**: `is_active` en las entidades que deben conservar historial (`mt_organizations`, `mt_workshops`, `mt_memberships`, `mt_clients`, `mt_parts`).
+- **Historial inmutable**: `mt_part_movements` y `mt_audit_log` solo admiten inserción; nunca se actualizan ni se borran.
 
 ## Efecto de la jerarquía en las restricciones de unicidad
 
@@ -142,32 +142,32 @@ El nivel de cada entidad determina el ámbito de sus claves únicas — es la co
 
 ## Políticas de aislamiento (RLS)
 
-**Censo de tablas de negocio.** Son **siete**, y todas activan Row-Level Security: `workshops`, `memberships`, `workshop_assignments`, `clients`, `parts`, `part_movements` y `audit_log`. Es el conjunto sobre el que se mide la cobertura de políticas (RNF-101) y el que recorre la verificación por acceso directo ([Plan de pruebas](11-plan-pruebas.md) §5.2).
+**Censo de tablas de negocio.** Son **siete**, y todas activan Row-Level Security: `mt_workshops`, `mt_memberships`, `mt_workshop_assignments`, `mt_clients`, `mt_parts`, `mt_part_movements` y `mt_audit_log`. Es el conjunto sobre el que se mide la cobertura de políticas (RNF-101) y el que recorre la verificación por acceso directo ([Plan de pruebas](11-plan-pruebas.md) §5.2).
 
 Quedan **fuera del censo** las dos tablas que no son de negocio, cada una por un motivo distinto:
 
 | Tabla | Por qué no entra en el censo | Cómo se protege |
 |---|---|---|
-| `organizations` | **Es el tenant, no un dato del tenant.** No porta `organization_id`: lo define. Aplicarle el mismo patrón sería tautológico | Su lectura se limita a las organizaciones donde el solicitante tiene membresía activa (RF-202); la escritura, al `owner` (RF-204) |
-| `profiles` | **Es identidad, no negocio.** Un perfil pertenece a una cuenta, no a una organización, y la misma cuenta puede ser miembro de varias | Cada cuenta accede a su propio perfil; los datos de perfil de otros miembros se exponen solo a través del listado de miembros de la organización activa (RF-407) |
+| `mt_organizations` | **Es el tenant, no un dato del tenant.** No porta `organization_id`: lo define. Aplicarle el mismo patrón sería tautológico | Su lectura se limita a las organizaciones donde el solicitante tiene membresía activa (RF-202); la escritura, al `owner` (RF-204) |
+| `mt_profiles` | **Es identidad, no negocio.** Un perfil pertenece a una cuenta, no a una organización, y la misma cuenta puede ser miembro de varias | Cada cuenta accede a su propio perfil; los datos de perfil de otros miembros se exponen solo a través del listado de miembros de la organización activa (RF-407) |
 
 Ninguna de las dos contiene datos de negocio de una organización, de modo que su exclusión no abre una vía de acceso cruzado: lo que un miembro puede saber de otra organización a través de ellas es, como mucho, lo que ya afirmó al declarar su contexto.
 
-Las políticas se apoyan en dos funciones auxiliares que se ejecutan con privilegios definidos por el creador, para evitar recursión al consultar `memberships` desde una política:
+Las políticas se apoyan en dos funciones auxiliares que se ejecutan con privilegios definidos por el creador, para evitar recursión al consultar `mt_memberships` desde una política:
 
 | Función | Devuelve |
 |---|---|
-| `is_org_member(org)` | Verdadero si la cuenta autenticada tiene membresía **activa** en esa organización |
-| `is_org_owner(org)` | Verdadero si además su rol es `owner` |
+| `mt_is_org_member(org)` | Verdadero si la cuenta autenticada tiene membresía **activa** en esa organización |
+| `mt_is_org_owner(org)` | Verdadero si además su rol es `owner` |
 
 **Patrón aplicado**
 
 | Operación | Regla |
 |---|---|
-| Lectura | `is_org_member(organization_id)` — incluye el listado de miembros y de talleres (RF-302, RF-407) |
-| Escritura de datos de negocio | `is_org_member(organization_id)` + verificación de rol en la capa de aplicación |
-| Escritura administrativa (crear, modificar o desactivar talleres; alta, cambio de rol y baja de miembros) | `is_org_owner(organization_id)` |
-| **Lectura del registro de auditoría** | `is_org_owner(organization_id)` — es la única tabla cuya lectura no basta con ser miembro (RF-704) |
+| Lectura | `mt_is_org_member(organization_id)` — incluye el listado de miembros y de talleres (RF-302, RF-407) |
+| Escritura de datos de negocio | `mt_is_org_member(organization_id)` + verificación de rol en la capa de aplicación |
+| Escritura administrativa (crear, modificar o desactivar talleres; alta, cambio de rol y baja de miembros) | `mt_is_org_owner(organization_id)` |
+| **Lectura del registro de auditoría** | `mt_is_org_owner(organization_id)` — es la única tabla cuya lectura no basta con ser miembro (RF-704) |
 
 Las tablas de nivel taller usan **la misma condición sobre `organization_id`**: la pertenencia del `workshop_id` a la organización activa se valida en la API, no en la política. Esta separación mantiene las políticas simples y auditables (ver [ADR-006](07-decisiones-diseno.md)).
 

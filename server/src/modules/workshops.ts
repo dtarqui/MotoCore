@@ -33,7 +33,7 @@ function assertOwner(c: { get: (k: 'orgRole') => string }): void {
 /** Lista los talleres de la organizacion activa — RF-302. */
 workshopRoutes.get('/', async (c) => {
   const { data, error } = await c.get('db')
-    .from('workshops')
+    .from('mt_workshops')
     .select(WORKSHOP_COLUMNS)
     .eq('organization_id', c.get('orgId'))
     .order('name');
@@ -49,7 +49,7 @@ workshopRoutes.post('/', async (c) => {
   const input = createWorkshopSchema.parse(await c.req.json());
 
   const { data, error } = await c.get('db')
-    .from('workshops')
+    .from('mt_workshops')
     .insert({
       organization_id: orgId,
       name: input.name,
@@ -77,7 +77,7 @@ workshopRoutes.get('/:workshopId', async (c) => {
   await assertWorkshopInOrg(workshopId, c.get('orgId'));
 
   const { data, error } = await c.get('db')
-    .from('workshops')
+    .from('mt_workshops')
     .select(WORKSHOP_COLUMNS)
     .eq('id', workshopId)
     .maybeSingle();
@@ -96,7 +96,7 @@ workshopRoutes.patch('/:workshopId', async (c) => {
   const input = updateWorkshopSchema.parse(await c.req.json());
 
   const { data, error } = await c.get('db')
-    .from('workshops')
+    .from('mt_workshops')
     .update({ ...input, updated_at: new Date().toISOString() })
     .eq('id', workshopId)
     .select(WORKSHOP_COLUMNS)
@@ -128,7 +128,7 @@ workshopRoutes.post('/:workshopId/deactivate', async (c) => {
   await assertWorkshopInOrg(workshopId, orgId);
 
   const { data, error } = await c.get('db')
-    .from('workshops')
+    .from('mt_workshops')
     .update({ is_active: false, updated_at: new Date().toISOString() })
     .eq('id', workshopId)
     .select(WORKSHOP_COLUMNS)
@@ -155,8 +155,8 @@ workshopRoutes.get('/:workshopId/assignments', async (c) => {
   await assertWorkshopInOrg(workshopId, c.get('orgId'));
 
   const { data, error } = await c.get('db')
-    .from('workshop_assignments')
-    .select('id, workshop_id, memberships ( user_id, role, is_active )')
+    .from('mt_workshop_assignments')
+    .select('id, workshop_id, memberships:mt_memberships ( user_id, role, is_active )')
     .eq('workshop_id', workshopId);
 
   if (error) throw internal(`workshop_assignments.select: ${error.message}`);
@@ -184,7 +184,7 @@ workshopRoutes.post('/:workshopId/assignments', async (c) => {
   const membershipId = await findMembershipId(orgId, input.userId);
 
   const { error } = await c.get('db')
-    .from('workshop_assignments')
+    .from('mt_workshop_assignments')
     .insert({ membership_id: membershipId, workshop_id: workshopId });
 
   if (error) {
@@ -208,7 +208,7 @@ workshopRoutes.delete('/:workshopId/assignments/:userId', async (c) => {
   const membershipId = await findMembershipId(orgId, targetUserId);
 
   const { error } = await c.get('db')
-    .from('workshop_assignments')
+    .from('mt_workshop_assignments')
     .delete()
     .eq('membership_id', membershipId)
     .eq('workshop_id', workshopId);
@@ -231,7 +231,7 @@ async function findMembershipId(orgId: string, userId: string): Promise<string> 
   }
 
   const { data, error } = await serviceClient()
-    .from('memberships')
+    .from('mt_memberships')
     .select('id')
     .eq('organization_id', orgId)
     .eq('user_id', userId)

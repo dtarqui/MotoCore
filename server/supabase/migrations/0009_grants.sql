@@ -43,12 +43,12 @@ grant usage on schema public to anon, authenticated, service_role;
 -- Sin `delete`: el modelo conserva historial mediante baja logica (`is_active`),
 -- de modo que ninguna de estas filas se borra nunca.
 grant select, insert, update on
-  public.profiles,
-  public.organizations,
-  public.workshops,
-  public.memberships,
-  public.clients,
-  public.parts
+  public.mt_profiles,
+  public.mt_organizations,
+  public.mt_workshops,
+  public.mt_memberships,
+  public.mt_clients,
+  public.mt_parts
 to authenticated, service_role;
 
 -- ----------------------------------------------------------------------------
@@ -56,7 +56,7 @@ to authenticated, service_role;
 -- ----------------------------------------------------------------------------
 -- La asignacion de un miembro a un taller es el unico vinculo que se retira de
 -- verdad, y por eso es la unica tabla con `delete` (§2.6 del contrato).
-grant select, insert, delete on public.workshop_assignments to authenticated, service_role;
+grant select, insert, delete on public.mt_workshop_assignments to authenticated, service_role;
 
 -- ----------------------------------------------------------------------------
 -- Historial inmutable
@@ -64,8 +64,8 @@ grant select, insert, delete on public.workshop_assignments to authenticated, se
 -- Solo insercion y lectura. Las politicas ya no definen `update` ni `delete`
 -- para estas dos tablas; negarlo tambien en los permisos hace que la
 -- inmutabilidad no dependa de una sola capa.
-grant select, insert on public.part_movements to authenticated, service_role;
-grant select, insert on public.audit_log to authenticated, service_role;
+grant select, insert on public.mt_part_movements to authenticated, service_role;
+grant select, insert on public.mt_audit_log to authenticated, service_role;
 
 -- ----------------------------------------------------------------------------
 -- Al anadir una tabla de negocio

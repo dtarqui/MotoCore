@@ -8,9 +8,9 @@
 -- Unicidad por (organization_id, email): dos organizaciones distintas pueden tener
 -- al mismo cliente; dos talleres de la MISMA organización, no — es el mismo.
 
-create table if not exists public.clients (
+create table if not exists public.mt_clients (
   id               uuid primary key default gen_random_uuid(),
-  organization_id  uuid not null references public.organizations (id) on delete cascade,
+  organization_id  uuid not null references public.mt_organizations (id) on delete cascade,
   first_name       text not null,
   last_name        text not null,
   email            text,
@@ -23,31 +23,31 @@ create table if not exists public.clients (
   updated_at       timestamptz
 );
 
-create index if not exists clients_org_id_idx on public.clients (organization_id);
+create index if not exists mt_clients_org_id_idx on public.mt_clients (organization_id);
 
 -- RF-503. Indice unico parcial en vez de UNIQUE: el email es opcional, y un
 -- UNIQUE normal permitiria varios NULL pero tambien complicaria la baja
 -- logica. Aqui la restriccion aplica solo a los clientes con email.
-create unique index if not exists clients_org_email_unique
-  on public.clients (organization_id, lower(email))
+create unique index if not exists mt_clients_org_email_unique
+  on public.mt_clients (organization_id, lower(email))
   where email is not null;
 
 -- ------------------------------------------------------------------
 -- Row Level Security — sobre organization_id, el unico criterio del esquema
 -- ------------------------------------------------------------------
-alter table public.clients enable row level security;
+alter table public.mt_clients enable row level security;
 
-drop policy if exists clients_select_member on public.clients;
-create policy clients_select_member on public.clients
-  for select using (public.is_org_member(organization_id));
+drop policy if exists mt_clients_select_member on public.mt_clients;
+create policy mt_clients_select_member on public.mt_clients
+  for select using (public.mt_is_org_member(organization_id));
 
-drop policy if exists clients_insert_member on public.clients;
-create policy clients_insert_member on public.clients
-  for insert with check (public.is_org_member(organization_id));
+drop policy if exists mt_clients_insert_member on public.mt_clients;
+create policy mt_clients_insert_member on public.mt_clients
+  for insert with check (public.mt_is_org_member(organization_id));
 
-drop policy if exists clients_update_member on public.clients;
-create policy clients_update_member on public.clients
-  for update using (public.is_org_member(organization_id));
+drop policy if exists mt_clients_update_member on public.mt_clients;
+create policy mt_clients_update_member on public.mt_clients
+  for update using (public.mt_is_org_member(organization_id));
 
 -- Sin politica de DELETE: la baja es logica (is_active), para no perder el
 -- historial del cliente.

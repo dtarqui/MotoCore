@@ -50,7 +50,7 @@ memberRoutes.get('/', async (c) => {
   const orgId = c.get('orgId');
 
   const { data: members, error } = await c.get('db')
-    .from('memberships')
+    .from('mt_memberships')
     .select('user_id, role, is_active, joined_at')
     .eq('organization_id', orgId);
 
@@ -64,7 +64,7 @@ memberRoutes.get('/', async (c) => {
   const profilesById = new Map<string, Record<string, unknown>>();
   if (userIds.length > 0) {
     const { data: profiles } = await serviceClient()
-      .from('profiles')
+      .from('mt_profiles')
       .select('id, email, first_name, last_name')
       .in('id', userIds);
     for (const p of profiles ?? []) profilesById.set((p as { id: string }).id, p as Record<string, unknown>);
@@ -99,7 +99,7 @@ memberRoutes.post('/invite', async (c) => {
   // La busqueda por correo se concede solo a `service_role`: no se expone como
   // operacion consultable, para no ofrecer un mecanismo de enumeracion de
   // cuentas (RNF-106, excepcion 5).
-  const { data: targetUserId, error: rpcErr } = await serviceClient().rpc('get_user_id_by_email', {
+  const { data: targetUserId, error: rpcErr } = await serviceClient().rpc('mt_get_user_id_by_email', {
     p_email: input.email,
   });
   if (rpcErr) throw internal(`get_user_id_by_email: ${rpcErr.message}`);
@@ -114,14 +114,14 @@ memberRoutes.post('/invite', async (c) => {
 
   if (existing) {
     const { error } = await db
-      .from('memberships')
+      .from('mt_memberships')
       .update({ role: input.role, is_active: true, updated_at: new Date().toISOString() })
       .eq('organization_id', orgId)
       .eq('user_id', targetUserId as string);
     if (error) throw internal(`memberships.update: ${error.message}`);
   } else {
     const { error } = await db
-      .from('memberships')
+      .from('mt_memberships')
       .insert({ organization_id: orgId, user_id: targetUserId as string, role: input.role });
     if (error) throw internal(`memberships.insert: ${error.message}`);
   }
@@ -154,7 +154,7 @@ memberRoutes.patch('/:userId/role', async (c) => {
   if (!target) throw notFound('member.not_found', 'La cuenta no es miembro de esta organizacion.');
 
   const { error } = await db
-    .from('memberships')
+    .from('mt_memberships')
     .update({ role: input.role, updated_at: new Date().toISOString() })
     .eq('organization_id', orgId)
     .eq('user_id', targetUserId);
@@ -193,7 +193,7 @@ memberRoutes.delete('/:userId', async (c) => {
   if (!target) throw notFound('member.not_found', 'La cuenta no es miembro de esta organizacion.');
 
   const { error } = await db
-    .from('memberships')
+    .from('mt_memberships')
     .update({ is_active: false, updated_at: new Date().toISOString() })
     .eq('organization_id', orgId)
     .eq('user_id', targetUserId);
@@ -222,7 +222,7 @@ memberRoutes.delete('/:userId', async (c) => {
  */
 async function assertNotOrganizationOwner(orgId: string, userId: string, message: string): Promise<void> {
   const { data, error } = await serviceClient()
-    .from('organizations')
+    .from('mt_organizations')
     .select('owner_id')
     .eq('id', orgId)
     .maybeSingle();

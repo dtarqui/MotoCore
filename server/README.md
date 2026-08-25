@@ -140,14 +140,18 @@ El **login** se hace desde el cliente con Supabase Auth (`signInWithPassword`), 
 
 ## Puesta en marcha
 
-1. **Crear un proyecto Supabase** (https://supabase.com).
+1. **Crear un proyecto Supabase** (https://supabase.com). Debe ser un proyecto **dedicado**: el esquema instala un disparador sobre `auth.users`, que es común a toda aplicación que comparta el proyecto.
 2. **Aplicar las migraciones** en orden, desde el SQL Editor de Supabase o con `supabase db push`:
    ```
    supabase/migrations/0001_init_multitenancy.sql
    …
-   supabase/migrations/0008_glossary_terms.sql
+   supabase/migrations/0009_grants.sql
    ```
-   La `0007` es imprescindible: sin ella la política de `audit_log` no restringe la lectura al Owner y el caso CP-704.2 no puede pasar.
+   Son **nueve**, y dos de ellas no son opcionales aunque lo parezcan: la `0007`, sin la cual la política de `audit_log` no restringe la lectura al Owner y CP-704.2 no puede pasar; y la `0009`, que declara los permisos de esquema y de tabla. Sin la `0009` el esquema depende de los valores por defecto del proyecto y, en una base donde no estén, todo responde `permission denied for schema public`.
+
+   Después, ejecutar `supabase/verify.sql` —solo lectura— para comprobar que las nueve tablas, las 28 políticas y los permisos quedaron en su sitio.
+
+   > **Partir de cero sobre un proyecto ya usado**: `supabase/reset.sql` deja la base como recién creada. Es **destructivo e irreversible** —borra el esquema `public` entero y todas las cuentas de `auth.users`— y por eso vive fuera de `migrations/`, para que `supabase db push` no lo aplique nunca.
 3. **Configurar el entorno**: copiar `.env.example` a `.env` con los valores de *Project Settings → API Keys*:
    ```
    SUPABASE_URL=https://<tu-proyecto>.supabase.co

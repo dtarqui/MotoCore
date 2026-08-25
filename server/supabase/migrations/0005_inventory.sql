@@ -11,10 +11,10 @@
 -- ------------------------------------------------------------------
 -- Tablas
 -- ------------------------------------------------------------------
-create table if not exists public.parts (
+create table if not exists public.mt_parts (
   id               uuid primary key default gen_random_uuid(),
-  organization_id  uuid not null references public.organizations (id) on delete cascade,
-  workshop_id      uuid not null references public.workshops (id) on delete cascade,
+  organization_id  uuid not null references public.mt_organizations (id) on delete cascade,
+  workshop_id      uuid not null references public.mt_workshops (id) on delete cascade,
   part_number      text not null,
   name             text not null,
   description      text,
@@ -31,14 +31,14 @@ create table if not exists public.parts (
   -- existir en varios locales, cada uno con su propia existencia.
   unique (workshop_id, part_number)
 );
-create index if not exists parts_org_workshop_idx on public.parts (organization_id, workshop_id);
+create index if not exists mt_parts_org_workshop_idx on public.mt_parts (organization_id, workshop_id);
 
 -- RF-604: historial inmutable. Solo se inserta; nunca se actualiza ni se borra.
-create table if not exists public.part_movements (
+create table if not exists public.mt_part_movements (
   id               uuid primary key default gen_random_uuid(),
-  organization_id  uuid not null references public.organizations (id) on delete cascade,
-  workshop_id      uuid not null references public.workshops (id) on delete cascade,
-  part_id          uuid not null references public.parts (id) on delete cascade,
+  organization_id  uuid not null references public.mt_organizations (id) on delete cascade,
+  workshop_id      uuid not null references public.mt_workshops (id) on delete cascade,
+  part_id          uuid not null references public.mt_parts (id) on delete cascade,
   movement_type    text not null
                      check (movement_type in ('purchase', 'sale', 'adjustment',
                                               'return', 'transfer', 'damaged')),
@@ -53,8 +53,8 @@ create table if not exists public.part_movements (
   performed_by     uuid,
   created_at       timestamptz not null default now()
 );
-create index if not exists part_movements_part_idx on public.part_movements (part_id, created_at desc);
-create index if not exists part_movements_workshop_idx on public.part_movements (workshop_id, created_at desc);
+create index if not exists mt_part_movements_part_idx on public.mt_part_movements (part_id, created_at desc);
+create index if not exists mt_part_movements_workshop_idx on public.mt_part_movements (workshop_id, created_at desc);
 
 -- ------------------------------------------------------------------
 -- Movimiento de existencias — atomico (RF-604, RF-605, RF-606; ADR-007)
@@ -67,7 +67,7 @@ create index if not exists part_movements_workshop_idx on public.part_movements 
 -- Aritmetica (RF-605): purchase/return/transfer suman, sale/damaged restan, y
 -- adjustment FIJA un valor absoluto — no suma ni resta.
 -- ------------------------------------------------------------------
-create or replace function public.register_part_movement(
+create or replace function public.mt_register_part_movement(
   p_part_id        uuid,
   p_movement_type  text,
   p_quantity       integer,
@@ -76,21 +76,21 @@ create or replace function public.register_part_movement(
   p_notes          text default null,
   p_performed_by   uuid default null
 )
-returns public.part_movements
+returns public.mt_part_movements
 language plpgsql
 security definer
 set search_path = public
 as $$
 declare
-  v_part      public.parts%rowtype;
+  v_part      public.mt_parts%rowtype;
   v_previous  integer;
   v_new       integer;
-  v_movement  public.part_movements%rowtype;
+  v_movement  public.mt_part_movements%rowtype;
 begin
   -- FOR UPDATE serializa los movimientos concurrentes sobre el mismo repuesto:
   -- sin el bloqueo, dos ventas simultaneas podrian leer la misma existencia
   -- previa y dejar el stock por encima de lo real.
-  select * into v_part from public.parts where id = p_part_id for update;
+  select * into v_part from public.mt_parts where id = p_part_id for update;
 
   if not found then
     raise exception 'inventory.part_not_found' using errcode = 'P0002';
@@ -121,7 +121,7 @@ begin
     raise exception 'inventory.insufficient_stock' using errcode = 'P0001';
   end if;
 
-  insert into public.part_movements (
+  insert into public.mt_part_movements (
     organization_id, workshop_id, part_id, movement_type, quantity,
     previous_stock, new_stock, unit_cost, total_cost, reference, notes, performed_by
   ) values (
@@ -132,7 +132,7 @@ begin
   )
   returning * into v_movement;
 
-  update public.parts
+  update public.mt_parts
      set current_stock = v_new,
          updated_at    = now()
    where id = p_part_id;
@@ -146,7 +146,7 @@ $$;
 -- Dos movimientos vinculados en la misma transaccion, ambos dentro de la
 -- MISMA organización: una transferencia nunca cruza el limite de aislamiento.
 -- ------------------------------------------------------------------
-create or replace function public.transfer_stock(
+create or replace function public.mt_transfer_stock(
   p_from_part_id  uuid,
   p_to_part_id    uuid,
   p_quantity      integer,
@@ -169,8 +169,8 @@ begin
     raise exception 'inventory.same_workshop_transfer' using errcode = 'P0001';
   end if;
 
-  select organization_id into v_from_org from public.parts where id = p_from_part_id;
-  select organization_id into v_to_org   from public.parts where id = p_to_part_id;
+  select organization_id into v_from_org from public.mt_parts where id = p_from_part_id;
+  select organization_id into v_to_org   from public.mt_parts where id = p_to_part_id;
 
   if v_from_org is null or v_to_org is null then
     raise exception 'inventory.part_not_found' using errcode = 'P0002';
@@ -180,47 +180,47 @@ begin
     raise exception 'inventory.cross_organization_transfer' using errcode = 'P0001';
   end if;
 
-  perform public.register_part_movement(
+  perform public.mt_register_part_movement(
     p_from_part_id, 'sale', p_quantity, null, 'transfer-out', 'Transferencia entre sucursales', p_performed_by
   );
-  perform public.register_part_movement(
+  perform public.mt_register_part_movement(
     p_to_part_id, 'transfer', p_quantity, null, 'transfer-in', 'Transferencia entre sucursales', p_performed_by
   );
 end;
 $$;
 
-revoke all on function public.register_part_movement(uuid, text, integer, numeric, text, text, uuid)
+revoke all on function public.mt_register_part_movement(uuid, text, integer, numeric, text, text, uuid)
   from public, anon, authenticated;
-grant execute on function public.register_part_movement(uuid, text, integer, numeric, text, text, uuid)
+grant execute on function public.mt_register_part_movement(uuid, text, integer, numeric, text, text, uuid)
   to service_role;
 
-revoke all on function public.transfer_stock(uuid, uuid, integer, uuid) from public, anon, authenticated;
-grant execute on function public.transfer_stock(uuid, uuid, integer, uuid) to service_role;
+revoke all on function public.mt_transfer_stock(uuid, uuid, integer, uuid) from public, anon, authenticated;
+grant execute on function public.mt_transfer_stock(uuid, uuid, integer, uuid) to service_role;
 
 -- ------------------------------------------------------------------
 -- Row Level Security — sobre organization_id (ADR-006)
 -- ------------------------------------------------------------------
-alter table public.parts          enable row level security;
-alter table public.part_movements enable row level security;
+alter table public.mt_parts          enable row level security;
+alter table public.mt_part_movements enable row level security;
 
-drop policy if exists parts_select_member on public.parts;
-create policy parts_select_member on public.parts
-  for select using (public.is_org_member(organization_id));
+drop policy if exists mt_parts_select_member on public.mt_parts;
+create policy mt_parts_select_member on public.mt_parts
+  for select using (public.mt_is_org_member(organization_id));
 
-drop policy if exists parts_insert_member on public.parts;
-create policy parts_insert_member on public.parts
-  for insert with check (public.is_org_member(organization_id));
+drop policy if exists mt_parts_insert_member on public.mt_parts;
+create policy mt_parts_insert_member on public.mt_parts
+  for insert with check (public.mt_is_org_member(organization_id));
 
-drop policy if exists parts_update_member on public.parts;
-create policy parts_update_member on public.parts
-  for update using (public.is_org_member(organization_id));
+drop policy if exists mt_parts_update_member on public.mt_parts;
+create policy mt_parts_update_member on public.mt_parts
+  for update using (public.mt_is_org_member(organization_id));
 
 -- Movimientos: se leen e insertan, nunca se modifican ni se borran. La
 -- ausencia de politicas de update y delete es lo que hace inmutable la tabla.
-drop policy if exists part_movements_select_member on public.part_movements;
-create policy part_movements_select_member on public.part_movements
-  for select using (public.is_org_member(organization_id));
+drop policy if exists mt_part_movements_select_member on public.mt_part_movements;
+create policy mt_part_movements_select_member on public.mt_part_movements
+  for select using (public.mt_is_org_member(organization_id));
 
-drop policy if exists part_movements_insert_member on public.part_movements;
-create policy part_movements_insert_member on public.part_movements
-  for insert with check (public.is_org_member(organization_id));
+drop policy if exists mt_part_movements_insert_member on public.mt_part_movements;
+create policy mt_part_movements_insert_member on public.mt_part_movements
+  for insert with check (public.mt_is_org_member(organization_id));
