@@ -35,6 +35,8 @@ Cada fase materializa uno de los cuatro objetivos específicos.
 | **F3 · Construcción** | 29 de septiembre – 7 de diciembre | 3 | Sistema funcional con el corte vertical e integración continua operativa |
 | **F4 · Validación y cierre** | Diciembre | 4 | Evidencia de aislamiento, evaluación de usabilidad con operadores, documento final y defensa |
 
+> **Qué relación guardan F1 y F2 con el anteproyecto.** El estado del arte, el marco teórico y el diseño que estas dos fases producen **no parten de cero**: el anteproyecto presentado para aprobación ya los adelanta, y lo que F1 y F2 hacen es consolidarlos, ampliarlos con la lectura completa de las fuentes y cerrarlos como artefactos de ingeniería trazables a los requisitos. El anteproyecto es el **insumo** de ambas fases, no su sustituto, y lo que cierra septiembre es su versión revisada por el tutor (hito H1).
+
 ### Detalle por iteración
 
 | Iteración | Fechas | Contenido | Entregable |
@@ -46,9 +48,11 @@ Cada fase materializa uno de los cuatro objetivos específicos.
 | **I5** | 27 oct – 9 nov | Módulo de clientes — entidad de nivel organización | HU-13, HU-14, HU-15 |
 | **I6** | 10–23 nov | Módulo de inventario y movimientos de existencias — entidad de nivel taller | HU-16 a HU-19 (HU-20 si hay margen) |
 | **I7** | 24 nov – 7 dic | Interfaz de usuario: autenticación, selección de organización y taller, diseño responsivo y manifiesto de instalación (RNF-402, RNF-403) | Aplicación utilizable de extremo a extremo |
-| **I8** | 8–21 dic | Pruebas de aislamiento; evaluación de usabilidad con operadores (RNF-404); redacción final y preparación de la defensa | HU-21, HU-22 · Informe de usabilidad · Documento final |
+| **I8** | 8–21 dic | **Ejecución** del ciclo de validación del aislamiento —tres corridas sobre entornos reconstruidos— con conservación de su evidencia; evaluación de usabilidad con operadores (RNF-404); redacción final y preparación de la defensa | HU-21, HU-22 · Evidencia de las tres corridas · Informe de usabilidad · Documento final |
 
 *Reserva: del 22 al 31 de diciembre queda como margen para correcciones posteriores a la revisión del tutor.*
+
+> **Sobre HU-21 y el lugar que ocupa en el cronograma.** Sus casos **no se escriben en I8**: cada módulo incorpora su caso de aislamiento **antes** que la funcionalidad que protege, desde I3, que es la mitigación del riesgo R1 y la regla de orden que fija §1. Lo que I8 concentra es la **ejecución del ciclo completo de validación** —las tres corridas del *test–retest* sobre entornos reconstruidos ([Plan de pruebas](11-plan-pruebas.md) §5.4)— y la conservación de la evidencia que exige el objetivo 4. Los puntos de HU-21 se imputan a I8 porque es ahí donde se produce el entregable, no donde se escribe la primera prueba.
 
 ### Distribución de esfuerzo
 
@@ -71,18 +75,18 @@ Cada fase materializa uno de los cuatro objetivos específicos.
 
 ## 4. Riesgos
 
-Probabilidad e impacto en escala baja / media / alta. Ordenados por exposición.
+Probabilidad e impacto en escala baja / media / alta. Ordenados por **exposición** (probabilidad × impacto): primero el único de impacto alto y probabilidad media, después los dos de probabilidad alta, y al final los de exposición menor. El perfil reproduce el mismo orden sin la columna de contingencia ([perfil §13](../anteproyecto/00-perfil-proyecto.md)).
 
 | ID | Riesgo | Prob. | Impacto | Mitigación | Plan de contingencia |
 |---|---|---|---|---|---|
 | **R1** | Las políticas de aislamiento resultan incorrectas o incompletas y permiten acceso cruzado entre organizaciones | Media | **Alto** | Escribir las pruebas de aislamiento **antes** que la funcionalidad, y ejecutarlas tras cada cambio de esquema o de política | Bloquear el avance hasta corregir; el aislamiento es requisito crítico y no admite deuda |
 | **R2** | El alcance crece más allá de lo planificado (querer implementar más módulos) | **Alta** | Medio | Exclusiones cerradas y explícitas en §1.8.3; el corte vertical está definido | Congelar alcance en H3; lo demás pasa a trabajo futuro |
+| **R8** | No conseguir operadores disponibles para la evaluación de usabilidad en la ventana de I8, o que se retiren tras aceptar | **Alta** | Medio | Contactar y confirmar a los participantes durante I6, no en I8; sobre-reclutar a 8 para asegurar 5 efectivos; permitir sesiones remotas | Reportar la evaluación con los participantes efectivamente conseguidos, declarando el tamaño alcanzado. La hipótesis del proyecto es sobre el aislamiento, de modo que una muestra menor limita este hallazgo pero no invalida la tesis |
 | **R3** | Dependencia de un proveedor externo (Supabase/Vercel): cambios de API, límites de plan gratuito o indisponibilidad | Media | Medio | Aislar el acceso al proveedor tras una capa propia; no usar funciones exclusivas innecesarias | Ejecutar PostgreSQL local para desarrollo y pruebas; el aislamiento por RLS no depende del proveedor |
 | **R4** | Las políticas de aislamiento resultan más complejas de lo previsto al añadir el segundo nivel | Media | Medio | Decisión de ADR-006: un solo criterio de aislamiento (`organization_id`) en todas las tablas | Mantener el nivel taller solo en la capa de aplicación si RLS se vuelve inmanejable |
-| **R5** | Tiempo insuficiente por carga laboral o académica paralela | Media | Medio | Iteraciones cortas con entregable demostrable; reserva de 10 días en diciembre | Reducir a `Could` las historias no esenciales (HU-20, HU-22) |
-| **R8** | No conseguir operadores disponibles para la evaluación de usabilidad en la ventana de I8, o que se retiren tras aceptar | **Alta** | Medio | Contactar y confirmar a los participantes durante I6, no en I8; sobre-reclutar a 8 para asegurar 5 efectivos; permitir sesiones remotas | Reportar la evaluación con los participantes efectivamente conseguidos, declarando el tamaño alcanzado. La hipótesis del proyecto es sobre el aislamiento, de modo que una muestra menor limita este hallazgo pero no invalida la tesis |
-| **R6** | No conseguir fuentes académicas suficientes de los últimos 5 años sobre RLS multi-tenant | Media | Bajo | Ampliar a arquitecturas comparables de otros rubros; usar tesis de maestría además de artículos | Documentar la escasez de literatura como hallazgo del estado del arte |
+| **R5** | Tiempo insuficiente por carga laboral o académica paralela | Media | Medio | Iteraciones cortas con entregable demostrable; reserva de 10 días en diciembre | Aplazar las historias no esenciales: HU-20, ya marcada `Could`, y HU-22, que pasaría a serlo |
 | **R7** | Pérdida de trabajo por fallo de equipo | Baja | Alto | Control de versiones con repositorio remoto; integración frecuente | Recuperar desde el repositorio remoto |
+| **R6** | No conseguir fuentes académicas suficientes de los últimos 5 años sobre RLS multi-tenant | Media | Bajo | Ampliar a arquitecturas comparables de otros rubros; usar tesis de maestría además de artículos | Documentar la escasez de literatura como hallazgo del estado del arte |
 
 ## 5. Recursos
 

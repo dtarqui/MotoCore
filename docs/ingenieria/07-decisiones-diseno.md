@@ -193,12 +193,19 @@ El proveedor de datos ofrece dos credenciales. La **clave de servicio** salta la
 
 ---
 
-## Decisiones abiertas
+## Cuestiones registradas sin ADR propio
 
-Se documentan para dejar constancia de que están identificadas; su resolución corresponde a etapas posteriores al alcance actual.
+Temas que se plantearon durante el diseño y **no** generan un ADR: unos porque su resolución depende de funcionalidad excluida del alcance, y otro porque se resolvió sin alterar la estructura del sistema. Se dejan por escrito para que conste que están identificados y no olvidados (RNF-206).
+
+### Abiertas — se resuelven fuera del alcance actual
 
 | Tema | Situación |
 |---|---|
 | Proveedor de mensajería por WhatsApp | Abierta — depende de funcionalidad fuera del alcance actual (ver [09-analisis-mercado.md](09-analisis-mercado.md)) |
 | Enfoque de integración con la facturación electrónica del SIN: proveedor autorizado frente a implementación propia de firma digital y generación de XML | Abierta — requiere validar la normativa vigente antes de decidir |
-| Si la asignación de un miembro a talleres debe restringir lo que puede ver, o mantenerse informativa | **Cerrada**: se mantiene **operativa**, sin efecto sobre los permisos. Restringir por taller introduciría una segunda frontera de autorización y contradiría el principio de un único límite de aislamiento (ADR-006). Si el negocio llegara a exigirlo, sería un ADR nuevo, no un ajuste de este |
+
+### Cerrada — sin consecuencia estructural
+
+| Tema | Resolución |
+|---|---|
+| Si la asignación de un miembro a talleres debe restringir lo que puede ver, o mantenerse informativa | Se mantiene **operativa**, sin efecto sobre los permisos. Restringir por taller introduciría una segunda frontera de autorización y contradiría el principio de un único límite de aislamiento (ADR-006), de modo que la decisión no abre alternativa arquitectónica: la cierra por coherencia con un ADR vigente. Si el negocio llegara a exigirlo, sería un ADR nuevo y no un ajuste de este documento |

@@ -38,7 +38,7 @@ Requisitos funcionales (RF) y no funcionales (RNF) del proyecto. Cada requisito 
 
 | ID | Requisito | Prioridad | Alcance | Nivel | Verificación |
 |---|---|---|---|---|---|
-| RF-301 | El `Owner` puede crear talleres dentro de su organización. | Must | Sí | Organización | El taller creado aparece en el listado de la organización. |
+| RF-301 | El `Owner` puede crear talleres dentro de su organización y editar sus datos. | Must | Sí | Organización | El taller creado aparece en el listado de la organización; la edición se refleja en su ficha y un no-`Owner` que intenta crear o editar recibe `403`. |
 | RF-302 | El sistema lista los talleres de la organización activa. | Must | Sí | Organización | Solo devuelve talleres de la organización activa. |
 | RF-303 | El usuario puede seleccionar el taller activo, y el sistema rechaza un taller que no pertenezca a la organización activa. | Must | Sí | Organización | Enviar el identificador de un taller ajeno se trata como inexistente: devuelve `404 workshop.not_found` (regla de no divulgación, RNF-105). |
 | RF-304 | El `Owner` puede asignar miembros a uno o varios talleres, sin que ello altere sus permisos. | Should | Sí | Organización | La asignación se registra; el acceso a datos sigue determinado por el rol. |
@@ -78,7 +78,7 @@ Requisitos funcionales (RF) y no funcionales (RNF) del proyecto. Cada requisito 
 | RF-606 | El sistema rechaza un movimiento que dejaría la existencia en negativo. | Must | Sí | Taller | La operación devuelve error de negocio y no altera el stock. |
 | RF-607 | El sistema señala los repuestos cuya existencia está en o por debajo del mínimo. | Should | Sí | Taller | El listado de bajo stock devuelve solo los que cumplen la condición. |
 | RF-608 | El sistema permite transferir existencias entre talleres de la misma organización. | Could | Sí | Taller | La transferencia descuenta en origen y suma en destino de forma consistente. |
-| RF-609 | `Owner` y `Receptionist` pueden crear y editar el catálogo de repuestos; la transferencia entre talleres queda reservada al `Owner`. Cualquier miembro puede consultar el inventario y registrar movimientos. | Should | Sí | Taller | Un `Mechanic` que intenta crear o editar un repuesto recibe `403`; consultar y registrar movimientos sí puede. |
+| RF-609 | `Owner` y `Receptionist` pueden crear y editar el catálogo de repuestos; la transferencia entre talleres queda reservada al `Owner`. Cualquier miembro puede consultar el inventario y registrar movimientos. | Should | Sí | Taller | Un `Mechanic` que intenta crear o editar un repuesto recibe `403`; consultar y registrar movimientos sí puede. La cláusula sobre la transferencia solo se ejerce si RF-608 llega a implementarse (`Could`), de modo que este requisito **no depende de él**: su parte `Should` queda cubierta con el reparto de permisos sobre el catálogo. |
 
 ### RF-700 · Aislamiento y auditoría
 

@@ -100,6 +100,7 @@ Las historias siguen el formato **rol – objetivo – beneficio** («Como… qu
 
 **Criterios de aceptación**
 - Puedo crear un taller indicando nombre, dirección y teléfono.
+- Puedo corregir los datos de un taller ya creado.
 - El listado muestra solo los talleres de la organización activa.
 - Puedo desactivar un taller: deja de aparecer como activo, pero su información histórica se conserva.
 - Un usuario que no es `Owner` recibe error de permisos al intentar crear o desactivar.

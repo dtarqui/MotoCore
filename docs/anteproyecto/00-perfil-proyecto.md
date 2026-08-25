@@ -105,11 +105,11 @@ Cuatro objetivos secuenciales, uno por fase — **Analizar → Diseñar → Impl
 
 ## 5. Hipótesis
 
-Por tratarse de una investigación explicativa que propone aplicar una arquitectura determinada para mejorar una propiedad medible del sistema, corresponde formular hipótesis. Se enuncia como **afirmación factual** —no como promesa futura—, de modo que quede sujeta a comprobación o refutación empírica.
+Por tratarse de una investigación explicativa que propone aplicar una arquitectura determinada para mejorar una propiedad medible del sistema, corresponde formular hipótesis. Se enuncia como **afirmación factual en presente** —no como promesa de resultado ni como resultado ya obtenido—, de modo que quede sujeta a comprobación o refutación empírica: es lo que la validación del objetivo 4 deberá confirmar o refutar, con el criterio de decisión fijado de antemano en §9.4.
 
 **Hipótesis de investigación (H1)**
 
-> **La implementación de una arquitectura multi-tenant jerárquica —que sitúa el límite de aislamiento en la organización y trata el taller como criterio de alcance operativo, con políticas de seguridad a nivel de fila reforzadas por verificación de membresía en la capa de aplicación— eliminó el acceso cruzado de datos entre organizaciones, reduciendo a cero (0) las filas ajenas devueltas, y sostuvo esa separación aun con la verificación de la capa de aplicación deshabilitada.**
+> **La implementación de una arquitectura multi-tenant jerárquica —que sitúa el límite de aislamiento en la organización y trata el taller como criterio de alcance operativo, con políticas de seguridad a nivel de fila reforzadas por verificación de membresía en la capa de aplicación— elimina el acceso cruzado de datos entre organizaciones, reduce a cero (0) las filas ajenas devueltas y sostiene esa separación aun con la verificación de la capa de aplicación deshabilitada.**
 
 **Hipótesis nula (H0)**
 
@@ -219,7 +219,7 @@ Las categorías empleadas —tipo, enfoque, alcance, método y diseño— siguen
 | Dimensión | Definición adoptada |
 |---|---|
 | **Tipo de investigación** | **Aplicada**: no busca conocimiento general, sino resolver un problema concreto mediante un artefacto de software verificable |
-| **Enfoque** | **Mixto con predominio cualitativo**. El componente cualitativo abarca la revisión de literatura, el relevamiento del mercado y el diseño arquitectónico; el cuantitativo se limita a la medición objetiva del aislamiento (filas ajenas devueltas, casos en verde, cobertura de políticas) |
+| **Enfoque** | **Mixto**. El componente cualitativo abarca la revisión de literatura, el relevamiento del mercado, el diseño arquitectónico y la observación de las sesiones con operadores; el cuantitativo, la medición objetiva del aislamiento (filas ajenas devueltas, casos en verde, cobertura de políticas) y las métricas de usabilidad (tasa de éxito, tiempos y puntuación SUS) |
 | **Alcance** | **Descriptivo** en la fase de análisis, **propositivo** en la de diseño y **explicativo-experimental** en la de validación |
 | **Método** | **Hipotético-deductivo** aplicado a la verificación: la hipótesis se somete a pruebas capaces de refutarla |
 | **Diseño** | **Experimental sobre caso único**: el artefacto construido es la unidad de observación, y las pruebas manipulan deliberadamente la condición de aislamiento —incluida la omisión de la capa de aplicación— para observar su efecto |
@@ -283,7 +283,7 @@ Un caso omitido por falta de entorno **no** se contabiliza como cumplido.
 La investigación se ejecuta sobre un artefacto de software, lo que **no** la exime de compromisos éticos: su objeto es precisamente el manejo de datos ajenos.
 
 - **Datos.** No se emplea ningún dato productivo, real o personal en la validación técnica. La totalidad del escenario de prueba es **sintética y generada por la propia prueba**, con identificadores irrepetibles sobre un dominio de correo reservado, y se descarta con el entorno. No se descarga ni se consulta la base de datos de ninguna organización real.
-- **Producción.** Las pruebas **no se ejecutan contra entornos productivos ni contra infraestructura de terceros**, sino sobre un proyecto de base de datos dedicado y desechable. Las pruebas de carga, de rendimiento a escala productiva y de penetración están excluidas del alcance (§7.4), de modo que el procedimiento no puede degradar el servicio de nadie. La credencial privilegiada se lee solo del entorno y nunca del repositorio.
+- **Producción.** Las pruebas **no se ejecutarán contra entornos productivos ni contra infraestructura de terceros**, sino sobre un proyecto de base de datos dedicado y desechable creado para tal fin. Las pruebas de carga, de rendimiento a escala productiva y de penetración están excluidas del alcance (§7.4), de modo que el procedimiento no puede degradar el servicio de nadie. La credencial privilegiada se lee solo del entorno y nunca del repositorio.
 - **Personas.** La evaluación de usabilidad es el único componente con participantes humanos: consentimiento informado previo con derecho a retirarse sin dar motivo, resultados agregados con participantes identificados como P1…P8, confidencialidad de sus organizaciones, y declaración explícita de que **se evalúa el sistema, no a la persona**.
 - **Propiedad intelectual.** Los componentes de terceros se usan bajo sus licencias de código abierto conservando sus avisos; el trabajo propio se publica bajo licencia MIT y las fuentes se citan en APA (7.ª ed.). Los asistentes de inteligencia artificial pueden emplearse para código repetitivo, pero **el planteamiento, el diseño arquitectónico y la interpretación de los resultados son de autoría del investigador**.
 - **Integridad.** No se depuran de la evidencia los casos que fallen. Un caso omitido se reporta como omitido; una sola fuga detectada se reporta con su tabla y su caso, y sostiene la hipótesis nula; un resultado de usabilidad por debajo del umbral se discute como hallazgo, no se oculta.
@@ -368,16 +368,18 @@ El costo de infraestructura es **cero** dentro del alcance: los planes gratuitos
 
 ## 13. Riesgos y mitigación
 
+Ordenados por exposición (probabilidad × impacto). El registro completo, con su plan de contingencia por riesgo, está en el [Plan de trabajo](../ingenieria/08-plan-trabajo.md) §4.
+
 | ID | Riesgo | Prob. | Impacto | Mitigación |
 |---|---|---|---|---|
 | **R1** | Las políticas de aislamiento resultan incorrectas o incompletas y permiten acceso cruzado | Media | **Alto** | Escribir las pruebas de aislamiento **antes** que la funcionalidad y ejecutarlas tras cada cambio de esquema o política |
 | **R2** | El alcance crece más allá de lo planificado | **Alta** | Medio | Exclusiones cerradas y explícitas; corte vertical definido; congelar alcance en H3 |
+| **R8** | No conseguir operadores disponibles para la evaluación de usabilidad en la ventana de I8, o que se retiren tras aceptar | **Alta** | Medio | Contactar y confirmar a los participantes durante I6, no en I8; sobre-reclutar a 8 para asegurar 5 efectivos; permitir sesiones remotas |
 | **R3** | Dependencia de proveedores externos: cambios de interfaz, límites de plan gratuito o indisponibilidad | Media | Medio | Aislar el acceso al proveedor tras una capa propia; el aislamiento reside en el motor, no en el proveedor |
 | **R4** | Las políticas se complican al añadir el segundo nivel | Media | Medio | Un solo criterio de aislamiento en todas las tablas, incluidas las de nivel taller |
 | **R5** | Tiempo insuficiente por carga laboral o académica paralela | Media | Medio | Iteraciones cortas con entregable demostrable; reserva de diez días en diciembre |
-| **R6** | Fuentes académicas insuficientes sobre el tema en los últimos cinco años | Media | Bajo | Ampliar a arquitecturas comparables de otros rubros; admitir tesis de maestría; documentar la escasez como hallazgo |
 | **R7** | Pérdida de trabajo por fallo de equipo | Baja | Alto | Control de versiones con repositorio remoto e integración frecuente |
-| **R8** | No conseguir operadores disponibles para la evaluación de usabilidad en la ventana de I8, o que se retiren tras aceptar | **Alta** | Medio | Contactar y confirmar a los participantes durante I6, no en I8; sobre-reclutar a 8 para asegurar 5 efectivos; permitir sesiones remotas |
+| **R6** | Fuentes académicas insuficientes sobre el tema en los últimos cinco años | Media | Bajo | Ampliar a arquitecturas comparables de otros rubros; admitir tesis de maestría; documentar la escasez como hallazgo |
 
 ---
 
@@ -397,7 +399,7 @@ El costo de infraestructura es **cero** dentro del alcance: los planes gratuitos
 
 ## 15. Bibliografía preliminar
 
-Estilo APA, 7.ª edición. Todos los identificadores permanentes —DOI e ISBN— fueron verificados contra el registro del editor.
+Estilo APA, 7.ª edición. Cada identificador permanente —DOI e ISBN— se contrasta contra el registro del editor; el estado entrada por entrada, incluidas las comprobaciones que quedan por cerrar antes de la entrega final, consta en el [Anexo de verificación de referencias](anexo-referencias.md).
 
 Alobaywi, B., Almutairi, M. G., & Sheldon, F. T. (2026). Performance trade-offs in multi-tenant IoT–cloud security: A systematic review of emerging technologies. *IoT, 7*(1), 21. https://doi.org/10.3390/iot7010021
 

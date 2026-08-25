@@ -55,7 +55,13 @@ Estado de comprobación de cada fuente citada en el anteproyecto. Una referencia
 | Cap. 2 L3 / Cap. 3 L7 | Newman (2021), *Building microservices*, 2.ª ed. | El catálogo fechaba ese ISBN en 2020 | **Confirmado 2021** — O'Reilly Media, 2.ª ed., publicada el 5 de octubre de 2021, ISBN 978-1-4920-3402-5. [Ficha del editor](https://www.oreilly.com/library/view/building-microservices-2nd/9781492034018/) |
 | Cap. 3 L2 | Beck (2002), *Test-driven development: By example* | El catálogo devolvía una reimpresión de 2006 | **Confirmado 2002** — Addison-Wesley Professional, 1.ª ed., 8 de noviembre de 2002, ISBN 978-0-321-14653-3 |
 
-Los **once ISBN** que quedan en el anteproyecto —siete en el bloque A del capítulo 2 y cuatro propios del capítulo 3 (Beck, Brooke, Nielsen y Pierce)— resuelven correctamente contra el catálogo. Sin discrepancias: Bass et al. (2021), Richards & Ford (2020), Kleppmann (2017), Humble & Farley (2010), Forsgren et al. (2018), Nielsen (1993), Pierce (2002) y Hernández-Sampieri & Mendoza (2018).
+De los **once ISBN** que cita el anteproyecto —siete en el bloque A del capítulo 2 y cuatro propios del capítulo 3 (Beck, Brooke, Nielsen y Pierce)—, **diez resuelven correctamente contra el catálogo y uno queda por comprobar**. Sin discrepancias: Bass et al. (2021), Richards & Ford (2020), Kleppmann (2017), Humble & Farley (2010), Forsgren et al. (2018), Nielsen (1993), Pierce (2002) y Hernández-Sampieri & Mendoza (2018), además de los dos resueltos en la tabla anterior.
+
+**La entrada que falta.** Se consigna aquí en lugar de darse por comprobada con el resto, porque la diferencia entre «verificado» y «declarado» es justamente lo que este anexo existe para registrar:
+
+| Ref. | Obra | Estado | Qué falta |
+|---|---|---|---|
+| Cap. 3 L3 | Brooke, J. (1996). SUS: A quick and dirty usability scale. En *Usability evaluation in industry* (pp. 189–194). Taylor & Francis | `Falta` — el ISBN **978-0-7484-0460-5** se declara a partir de la ficha de la obra y **no se ha contrastado contra el catálogo del editor**. Su **contenido** sí está verificado (§2): el capítulo es la fuente primaria de la escala SUS | Contrastar el ISBN contra el catálogo de Taylor & Francis antes de la entrega final ([PENDIENTES](../PENDIENTES.md) §3) |
 
 #### Obras evaluadas y no incorporadas
 
@@ -216,3 +222,5 @@ Instituto Nacional de Estadística de Bolivia. (2026). *Estadísticas del parque
 ## 4. Alcance de esta verificación
 
 Este anexo consigna el **estado por referencia**: qué se comprobó de cada fuente, con qué método y con qué resultado. Las entradas marcadas `Parcial` en la columna «Contenido» tienen sus datos bibliográficos confirmados contra el registro del editor y su afirmación tomada del resumen; las marcadas `OK` fueron contrastadas contra el texto completo. Esa distinción se declara aquí de forma explícita, en lugar de darse por supuesta.
+
+**Lo que queda abierto**, y que ningún otro documento debe dar por cerrado: las cinco entradas `Parcial` por contenido del capítulo 2 —cuya lectura completa corresponde antes de la entrega final—, el ISBN de Brooke (1996) y las fechas de recuperación de la documentación técnica con autor corporativo, que se fijan el día de la entrega. El registro operativo de esas acciones está en [PENDIENTES](../PENDIENTES.md) §3; ni el perfil ni el anteproyecto afirman una verificación mayor que la que esta tabla sostiene.

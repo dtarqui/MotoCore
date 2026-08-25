@@ -135,6 +135,7 @@ Identificación de casos: **CP-nnn**, donde `nnn` es el número del requisito qu
 | RF-204 | CP-204 | N3 | El `Owner` edita; un no-`Owner` recibe `403` |
 | RF-301 | CP-301.1 | N3 | El taller creado aparece en el listado de la organización |
 | RF-301 | CP-301.2 | N3 | Un no-`Owner` que intenta crear recibe `403` |
+| RF-301 | CP-301.3 | N3 | La edición de los datos del taller se refleja en su ficha; un no-`Owner` que intenta editar recibe `403` |
 | RF-302 | CP-302 | N3 | El listado devuelve **solo** talleres de la organización activa |
 | RF-303 | CP-303.1 | N2 | Operación de nivel taller sin `X-Workshop-Id`: `400 workshop.missing_active_workshop` |
 | RF-303 | CP-303.2 | N3 | Taller de otra organización en la cabecera: `404 workshop.not_found` |
@@ -280,7 +281,7 @@ El resultado que se reporta es el de las **tres** ejecuciones, no el de la mejor
 
 Para que la validación sea reproducible por un tercero (objetivo 4), se conserva: el guion de construcción del escenario base, la salida de la ejecución de los casos CP-701, CP-702, CP-704.2, CP-N101 y CP-N102, y la versión del esquema —identificador de la última migración aplicada— contra la que se ejecutaron.
 
-Los tres archivos que producen esa evidencia son `server/test/integration.test.ts` (CP-701 y el resto del flujo), `server/test/rls.test.ts` (CP-702, CP-N101, CP-704.2) y `server/test/defense-in-depth.test.ts` (CP-N102).
+Esa evidencia la producen tres archivos de prueba, uno por vía de verificación: el de **integración** (CP-701 y el resto del flujo por la interfaz de programación), el de **acceso directo al motor** (CP-702, CP-N101 y CP-704.2) y el de **independencia de capas** (CP-N102). Separarlos no es organizativo: cada uno exige un montaje distinto —cliente HTTP, cliente PostgreSQL con identidad ajena y banco de pruebas con la verificación de membresía sustituida— y mezclarlos impediría ejecutar una sola condición experimental por vez (§15.2 del [anteproyecto](../anteproyecto/04-anteproyecto-integrado.md)).
 
 ---
 

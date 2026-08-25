@@ -106,7 +106,7 @@ Antes de escribir sobre un tema, verificar quién es su responsable. Si ya lo ti
 
 Lo que falta resolver antes de la entrega final —datos por completar, fuentes por verificar y decisiones que corresponden al autor— está en un registro único: **[PENDIENTES.md](PENDIENTES.md)**. Los documentos de entrega se mantienen limpios de notas internas; todo lo que quede por decidir vive ahí.
 
-Está ordenado por urgencia y abre con una tabla de resumen. El **§2 es el que condiciona el objetivo 4**: la suite de aislamiento está escrita pero **nunca se ha ejecutado contra un entorno real**, y hasta entonces no constituye evidencia.
+Está ordenado por urgencia y abre con una tabla de resumen. Recoge **lo que falta decidir o comprobar sobre los documentos**, no el avance de la construcción: el estado del sistema se lee en el cronograma ([ingenieria/08-plan-trabajo.md](ingenieria/08-plan-trabajo.md)) y su cumplimiento, en la matriz del plan de pruebas.
 
 ## Premisas que rigen toda la documentación
 
