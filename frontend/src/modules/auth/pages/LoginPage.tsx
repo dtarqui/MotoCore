@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
+import { Network } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from '@/shared/ui/alert'
 import { Button } from '@/shared/ui/button'
 import {
@@ -114,6 +115,14 @@ export function LoginPage() {
             </form>
           </CardContent>
         </Card>
+
+        <Link
+          to="/arquitectura"
+          className="mt-4 flex items-center justify-center gap-2 text-sm text-gray-500 hover:text-brand-600 dark:text-gray-400 dark:hover:text-brand-400"
+        >
+          <Network className="h-4 w-4" aria-hidden="true" />
+          Ver cómo está construido MotoCore
+        </Link>
       </div>
     </div>
   )

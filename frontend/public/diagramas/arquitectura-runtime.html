@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Planta de Runtime MotoCore</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
+<style>
+  :root{
+    --ground:#F4F6F8; --surface:#FFFFFF; --surface-2:#EBEFF3;
+    --ink:#141A20; --ink-2:#38434F; --muted:#5E6A77; --faint:#8A95A1;
+    --line:#D2DAE1; --line-soft:#E3E9EE;
+    --accent:#0B5F86; --accent-soft:#E0EDF4;
+    --warn:#9C4C11;
+    --band-cli:#E9EFF4; --band-app:#FCFBF8; --band-dat:#E9F1EC;
+    --band-cli-edge:#A9BDCC; --band-app-edge:#C9C6BA; --band-dat-edge:#A6C2B1;
+    --shadow:0 1px 2px rgba(20,26,32,.05), 0 8px 24px -16px rgba(20,26,32,.28);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ground:#0F1319; --surface:#161C23; --surface-2:#1D242C;
+      --ink:#E7ECF1; --ink-2:#C0CAD4; --muted:#94A0AC; --faint:#6E7A87;
+      --line:#2B343E; --line-soft:#222A33;
+      --accent:#5DB6DC; --accent-soft:#14313F;
+      --warn:#DB9455;
+      --band-cli:#161E26; --band-app:#191D22; --band-dat:#141F19;
+      --band-cli-edge:#39505F; --band-app-edge:#4A473E; --band-dat-edge:#33513F;
+      --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.7);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#0F1319; --surface:#161C23; --surface-2:#1D242C;
+    --ink:#E7ECF1; --ink-2:#C0CAD4; --muted:#94A0AC; --faint:#6E7A87;
+    --line:#2B343E; --line-soft:#222A33;
+    --accent:#5DB6DC; --accent-soft:#14313F;
+    --warn:#DB9455;
+    --band-cli:#161E26; --band-app:#191D22; --band-dat:#141F19;
+    --band-cli-edge:#39505F; --band-app-edge:#4A473E; --band-dat-edge:#33513F;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.7);
+  }
+
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ground);color:var(--ink);font-family:"Source Serif 4",Georgia,serif;font-size:16.5px;line-height:1.6;-webkit-font-smoothing:antialiased}
+  .shell{max-width:1060px;margin:0 auto;padding:44px 26px 70px}
+  h1,.disp{font-family:Archivo,"Helvetica Neue",Arial,sans-serif;text-wrap:balance}
+  .mono,code{font-family:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace}
+
+  .eyebrow{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:0 0 12px}
+  h1{font-size:clamp(28px,4vw,42px);font-weight:700;letter-spacing:-.02em;line-height:1.08;margin:0 0 10px}
+  .lede{font-size:18px;color:var(--ink-2);max-width:70ch;margin:0}
+
+  .stats{display:flex;flex-wrap:wrap;gap:22px;margin:22px 0 34px;padding-top:18px;border-top:1px solid var(--line)}
+  .stat{font-family:"JetBrains Mono",monospace}
+  .stat b{display:block;font-size:22px;color:var(--ink);font-weight:700}
+  .stat span{font-size:11px;letter-spacing:.06em;color:var(--faint);text-transform:uppercase}
+
+  figure{margin:0}
+  .canvas{background:var(--surface);border:1px solid var(--line);border-radius:3px;box-shadow:var(--shadow);padding:20px 20px 6px;overflow-x:auto}
+  .canvas svg{display:block;width:100%;min-width:820px;height:auto}
+  figcaption{margin-top:14px;min-height:24px;color:var(--ink-2);font-size:15px}
+  figcaption .hint{color:var(--faint);font-size:12.5px;font-family:"JetBrains Mono",monospace}
+
+  .band{stroke-width:1;rx:3}
+  .band-cli{fill:var(--band-cli);stroke:var(--band-cli-edge);stroke-dasharray:5 4}
+  .band-app{fill:var(--band-app);stroke:var(--band-app-edge)}
+  .band-dat{fill:var(--band-dat);stroke:var(--band-dat-edge)}
+  .band-lbl{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.12em;fill:var(--muted);font-weight:700}
+
+  .node rect{fill:var(--surface);stroke:var(--line);stroke-width:1.2;rx:3}
+  .node .n-t{font-family:Archivo,sans-serif;font-size:14.5px;font-weight:600;fill:var(--ink)}
+  .node .n-s{font-family:"JetBrains Mono",monospace;font-size:10px;fill:var(--muted)}
+  .node{cursor:pointer}
+  .node:hover rect{stroke:var(--accent);stroke-width:1.8}
+  .node:hover .n-t{fill:var(--accent)}
+  .node.is-rls rect{stroke:#1A6A47;stroke-width:1.6}
+
+  .edge{fill:none;stroke:var(--faint);stroke-width:1.3}
+  .edge-lbl{font-family:"JetBrains Mono",monospace;font-size:10px;fill:var(--muted)}
+  .p .edge{stroke:var(--accent);stroke-width:2.2}
+  .p .edge-lbl{fill:var(--accent);font-weight:500}
+  .p .pin circle{fill:var(--accent);stroke:var(--surface);stroke-width:1.5}
+  .p .pin text{font-family:"JetBrains Mono",monospace;font-size:10px;font-weight:700;fill:var(--surface)}
+  .svc .edge{stroke:var(--warn);stroke-width:1.6;stroke-dasharray:6 4}
+  .svc .edge-lbl{fill:var(--warn)}
+  .svc circle.junc{fill:var(--warn)}
+
+  .step{transition:opacity .18s ease}
+  .canvas.focused .step{opacity:.15}
+  .canvas.focused .step.on{opacity:1}
+  .canvas.focused .svc{opacity:.15}
+  @media (prefers-reduced-motion:reduce){.step,.canvas.focused .svc{transition:none}}
+
+  .legend{display:flex;flex-wrap:wrap;gap:8px 24px;margin-top:16px;padding-top:14px;border-top:1px solid var(--line-soft);font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--muted)}
+  .legend span{display:flex;align-items:center;gap:8px}
+  .legend i{display:block;width:22px;height:0;border-top-width:2.4px;border-top-style:solid;flex:none}
+  .lg-p{border-color:var(--accent)}
+  .lg-s{border-color:var(--warn);border-top-style:dashed}
+
+  .steps{margin-top:28px;border:1px solid var(--line);border-radius:3px;background:var(--surface);overflow:hidden}
+  .steps-bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;padding:11px 16px;border-bottom:1px solid var(--line-soft);background:var(--surface-2)}
+  .steps-bar h2{flex:1 1 auto;min-width:0;font-family:Archivo,sans-serif;font-size:15px;font-weight:600;margin:0}
+  .reset{font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:transparent;border:1px solid var(--line);color:var(--muted);padding:5px 10px;border-radius:2px;cursor:pointer}
+  .reset:hover{border-color:var(--accent);color:var(--accent)}
+
+  ol.chain{list-style:none;margin:0;padding:0}
+  ol.chain li{border-top:1px solid var(--line-soft)}
+  ol.chain li:first-child{border-top:0}
+  ol.chain button{width:100%;display:flex;align-items:baseline;gap:14px;text-align:left;background:transparent;border:0;padding:10px 16px;cursor:pointer;font:inherit;color:inherit}
+  ol.chain button:hover{background:var(--accent-soft)}
+  ol.chain li.on button{background:var(--accent-soft)}
+  ol.chain li.on .s-n{background:var(--accent);color:var(--surface);border-color:var(--accent)}
+  .s-n{font-family:"JetBrains Mono",monospace;font-size:10px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;width:19px;height:19px;border-radius:50%;border:1.4px solid var(--line);color:var(--muted);flex:none}
+  .s-d{font-size:14.5px;color:var(--ink-2)}
+
+  .note{margin-top:20px;font-size:13.5px;color:var(--muted)}
+  footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-family:"JetBrains Mono",monospace;font-size:10.5px;color:var(--faint)}
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <p class="eyebrow">MotoCore · arquitectura</p>
+  <h1>De la petición del usuario a los datos</h1>
+  <p class="lede">Once piezas del sistema, agrupadas en tres zonas de confianza. La línea azul sigue una petición real, paso a paso, hasta la base de datos.</p>
+
+  <div class="stats">
+    <div class="stat"><b>11</b><span>componentes</span></div>
+    <div class="stat"><b>3</b><span>zonas de confianza</span></div>
+    <div class="stat"><b>9</b><span>pasos del recorrido</span></div>
+  </div>
+
+  <figure>
+    <div class="canvas" id="canvas">
+      <svg viewBox="0 0 1000 880" role="img" aria-label="Arquitectura de MotoCore: once componentes en tres zonas —navegador, servidor y base de datos— con el recorrido de una petición resaltado en nueve pasos hasta la fila de datos filtrada.">
+        <defs>
+          <marker id="ah-p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--accent)"></path></marker>
+          <marker id="ah-s" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--warn)"></path></marker>
+          <marker id="ah-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--faint)"></path></marker>
+        </defs>
+
+        <text class="band-lbl" x="24" y="36">1 · NAVEGADOR</text>
+        <rect class="band band-cli" x="20" y="46" width="960" height="162"></rect>
+        <text class="band-lbl" x="24" y="248">2 · SERVIDOR</text>
+        <rect class="band band-app" x="20" y="258" width="960" height="262"></rect>
+        <text class="band-lbl" x="24" y="572">3 · BASE DE DATOS</text>
+        <rect class="band band-dat" x="20" y="582" width="960" height="272"></rect>
+
+        <g class="node"><title>La aplicación que usa el operador del taller.</title>
+          <rect x="48" y="80" width="250" height="86"></rect>
+          <text class="n-t" x="64" y="122">SPA MotoCore</text>
+          <text class="n-s" x="64" y="142">lo que ve el usuario</text>
+        </g>
+        <g class="node"><title>Gestiona el inicio de sesión y el token de acceso.</title>
+          <rect x="375" y="80" width="250" height="86"></rect>
+          <text class="n-t" x="391" y="122">Supabase Auth</text>
+          <text class="n-s" x="391" y="142">login y token</text>
+        </g>
+        <g class="node"><title>Agrega la credencial y la organización activa a cada llamada.</title>
+          <rect x="700" y="80" width="250" height="86"></rect>
+          <text class="n-t" x="716" y="122">Cliente HTTP</text>
+          <text class="n-s" x="716" y="142">arma la petición</text>
+        </g>
+
+        <g class="node"><title>Punto de entrada del servidor: recibe todas las peticiones.</title>
+          <rect x="48" y="290" width="250" height="82"></rect>
+          <text class="n-t" x="64" y="332">API del servidor</text>
+          <text class="n-s" x="64" y="352">recibe la petición</text>
+        </g>
+        <g class="node"><title>Comprueba que el token de acceso sea válido.</title>
+          <rect x="375" y="290" width="250" height="82"></rect>
+          <text class="n-t" x="391" y="332">Verifica identidad</text>
+          <text class="n-s" x="391" y="352">¿quién eres?</text>
+        </g>
+        <g class="node"><title>Comprueba que el usuario pertenezca a la organización que pide.</title>
+          <rect x="700" y="290" width="250" height="82"></rect>
+          <text class="n-t" x="716" y="332">Verifica organización</text>
+          <text class="n-s" x="716" y="352">¿a cuál perteneces?</text>
+        </g>
+        <g class="node"><title>Clientes, inventario, talleres, equipo — la lógica de cada sección.</title>
+          <rect x="700" y="414" width="250" height="82"></rect>
+          <text class="n-t" x="716" y="456">Lógica de negocio</text>
+          <text class="n-s" x="716" y="476">clientes, inventario…</text>
+        </g>
+        <g class="node"><title>Deja constancia de las acciones críticas: quién, qué y cuándo.</title>
+          <rect x="375" y="414" width="250" height="82"></rect>
+          <text class="n-t" x="391" y="456">Registro de auditoría</text>
+          <text class="n-s" x="391" y="476">qué se hizo</text>
+        </g>
+
+        <g class="node"><title>El mismo proveedor de identidad, ahora consultado desde el servidor.</title>
+          <rect x="48" y="614" width="250" height="82"></rect>
+          <text class="n-t" x="64" y="656">Supabase Auth</text>
+          <text class="n-s" x="64" y="676">confirma el token</text>
+        </g>
+        <g class="node is-rls"><title>La base de datos filtra cada fila según a qué organización pertenece.</title>
+          <rect x="430" y="614" width="460" height="82"></rect>
+          <text class="n-t" x="446" y="656">Base de datos con filtro por fila</text>
+          <text class="n-s" x="446" y="676">solo entrega lo de tu organización</text>
+        </g>
+        <g class="node"><title>Donde vive todo: clientes, talleres, inventario, cuentas.</title>
+          <rect x="48" y="736" width="902" height="82"></rect>
+          <text class="n-t" x="64" y="778">Base de datos</text>
+          <text class="n-s" x="64" y="798">almacena todo</text>
+        </g>
+
+        <g class="p">
+          <g class="step" data-step="1" data-d="El navegador no guarda la clave: la vuelve a pedir en cada petición.">
+            <line class="edge" x1="298" y1="123" x2="367" y2="123" marker-end="url(#ah-p)"></line>
+            <g class="pin"><circle cx="333" cy="123" r="9"></circle><text x="333" y="126.5" text-anchor="middle">1</text></g>
+          </g>
+          <g class="step" data-step="2" data-d="Supabase entrega el token de acceso vigente.">
+            <line class="edge" x1="625" y1="123" x2="692" y2="123" marker-end="url(#ah-p)"></line>
+            <g class="pin"><circle cx="659" cy="123" r="9"></circle><text x="659" y="126.5" text-anchor="middle">2</text></g>
+          </g>
+          <g class="step" data-step="3" data-d="El navegador envía el token y a qué organización se refiere.">
+            <polyline class="edge" points="825,166 825,233 173,233 173,282" marker-end="url(#ah-p)"></polyline>
+            <g class="pin"><circle cx="440" cy="233" r="9"></circle><text x="440" y="236.5" text-anchor="middle">3</text></g>
+          </g>
+          <g class="step" data-step="4" data-d="El servidor recibe la petición. Sin token, la rechaza aquí mismo.">
+            <line class="edge" x1="298" y1="331" x2="367" y2="331" marker-end="url(#ah-p)"></line>
+            <g class="pin"><circle cx="333" cy="331" r="9"></circle><text x="333" y="334.5" text-anchor="middle">4</text></g>
+          </g>
+          <g class="step" data-step="5" data-d="El servidor le pregunta a Supabase si ese token es válido.">
+            <polyline class="edge" points="450,372 450,394 173,394 173,606" marker-end="url(#ah-p)"></polyline>
+            <g class="pin"><circle cx="311" cy="394" r="9"></circle><text x="311" y="397.5" text-anchor="middle">5</text></g>
+          </g>
+          <g class="step" data-step="6" data-d="Identidad confirmada: toda consulta viajará con ella, no con un permiso especial del servidor.">
+            <line class="edge" x1="625" y1="331" x2="692" y2="331" marker-end="url(#ah-p)"></line>
+            <g class="pin"><circle cx="659" cy="331" r="9"></circle><text x="659" y="334.5" text-anchor="middle">6</text></g>
+          </g>
+          <g class="step" data-step="7" data-d="El servidor confirma que el usuario pertenece a esa organización, y con qué rol.">
+            <line class="edge" x1="825" y1="372" x2="825" y2="406" marker-end="url(#ah-p)"></line>
+            <g class="pin"><circle cx="825" cy="389" r="9"></circle><text x="825" y="392.5" text-anchor="middle">7</text></g>
+          </g>
+          <g class="step" data-step="8" data-d="El módulo pide los datos, usando la identidad real del usuario.">
+            <line class="edge" x1="825" y1="496" x2="825" y2="606" marker-end="url(#ah-p)"></line>
+            <g class="pin"><circle cx="825" cy="551" r="9"></circle><text x="825" y="554.5" text-anchor="middle">8</text></g>
+          </g>
+          <g class="step" data-step="9" data-d="La base de datos filtra la respuesta: solo entrega filas de esa organización.">
+            <line class="edge" x1="660" y1="696" x2="660" y2="728" marker-end="url(#ah-p)"></line>
+            <g class="pin"><circle cx="660" cy="712" r="9"></circle><text x="660" y="715.5" text-anchor="middle">9</text></g>
+          </g>
+        </g>
+
+        <g class="svc">
+          <polyline class="edge" points="700,340 662,340 662,545 392,545"></polyline>
+          <circle class="junc" cx="390" cy="545" r="3.2"></circle>
+          <polyline class="edge" points="390,496 390,728" marker-end="url(#ah-s)"></polyline>
+          <text class="edge-lbl" x="402" y="518" text-anchor="start">clave especial · sin filtro</text>
+        </g>
+        <g class="aux">
+          <line class="edge" x1="700" y1="455" x2="633" y2="455" marker-end="url(#ah-a)"></line>
+          <line class="edge" x1="173" y1="696" x2="173" y2="728" marker-end="url(#ah-a)"></line>
+        </g>
+      </svg>
+
+      <div class="legend">
+        <span><i class="lg-p"></i>petición de un usuario (9 pasos)</span>
+        <span><i class="lg-s"></i>escritura interna del sistema (auditoría)</span>
+      </div>
+    </div>
+    <figcaption id="caption">Pasa el cursor sobre cualquier pieza para ver qué hace. <span class="hint">clic en un paso de la lista para resaltarlo</span></figcaption>
+  </figure>
+
+  <div class="steps">
+    <div class="steps-bar">
+      <h2>El recorrido, paso a paso</h2>
+      <button class="reset" id="reset" type="button">Ver todo</button>
+    </div>
+    <ol class="chain" id="chain">
+      <li data-step="1"><button type="button"><span class="s-n">1</span><span class="s-d">El navegador no guarda la clave: la vuelve a pedir en cada petición.</span></button></li>
+      <li data-step="2"><button type="button"><span class="s-n">2</span><span class="s-d">Supabase entrega el token de acceso vigente.</span></button></li>
+      <li data-step="3"><button type="button"><span class="s-n">3</span><span class="s-d">El navegador envía el token y a qué organización se refiere.</span></button></li>
+      <li data-step="4"><button type="button"><span class="s-n">4</span><span class="s-d">El servidor recibe la petición. Sin token, la rechaza aquí mismo.</span></button></li>
+      <li data-step="5"><button type="button"><span class="s-n">5</span><span class="s-d">El servidor le pregunta a Supabase si ese token es válido.</span></button></li>
+      <li data-step="6"><button type="button"><span class="s-n">6</span><span class="s-d">Identidad confirmada: toda consulta viajará con ella, no con un permiso especial del servidor.</span></button></li>
+      <li data-step="7"><button type="button"><span class="s-n">7</span><span class="s-d">El servidor confirma que el usuario pertenece a esa organización, y con qué rol.</span></button></li>
+      <li data-step="8"><button type="button"><span class="s-n">8</span><span class="s-d">El módulo pide los datos, usando la identidad real del usuario.</span></button></li>
+      <li data-step="9"><button type="button"><span class="s-n">9</span><span class="s-d">La base de datos filtra la respuesta: solo entrega filas de esa organización.</span></button></li>
+    </ol>
+  </div>
+
+  <p class="note">No incluido todavía: motocicletas, órdenes de trabajo e historial de mantenimiento — tienen pantalla pero no servidor.</p>
+
+  <footer>MotoCore · plataforma para talleres de motocicletas</footer>
+</div>
+
+<script>
+  (function () {
+    var canvas = document.getElementById('canvas');
+    var chain = document.getElementById('chain');
+    var reset = document.getElementById('reset');
+    var caption = document.getElementById('caption');
+    var defaultCaption = caption.innerHTML;
+    var stepGroups = canvas.querySelectorAll('.step');
+    var items = chain.querySelectorAll('li');
+
+    function clear() {
+      canvas.classList.remove('focused');
+      stepGroups.forEach(function (g) { g.classList.remove('on'); });
+      items.forEach(function (li) { li.classList.remove('on'); });
+      caption.innerHTML = defaultCaption;
+    }
+
+    function focusStep(n) {
+      var already = chain.querySelector('li.on[data-step="' + n + '"]');
+      clear();
+      if (already) return;
+      canvas.classList.add('focused');
+      var text = '';
+      stepGroups.forEach(function (g) {
+        if (g.getAttribute('data-step') === n) { g.classList.add('on'); text = g.getAttribute('data-d'); }
+      });
+      items.forEach(function (li) { if (li.getAttribute('data-step') === n) li.classList.add('on'); });
+      if (text) caption.textContent = 'Paso ' + n + ' — ' + text;
+    }
+
+    items.forEach(function (li) {
+      li.querySelector('button').addEventListener('click', function () {
+        focusStep(li.getAttribute('data-step'));
+      });
+    });
+    reset.addEventListener('click', clear);
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,34 @@
+-- MotoCore — índice compuesto para la comprobación de membresía
+-- ============================================================================
+--
+-- OPTIMIZACIÓN.
+--
+-- `mt_is_org_member(org)` y `mt_is_org_owner(org)` (migración 0001) son las
+-- dos funciones que evalúa TODA política RLS del esquema, sobre CADA fila de
+-- CADA tabla protegida, en CADA petición: son, con diferencia, la consulta más
+-- ejecutada de todo el sistema. Ambas resuelven:
+--
+--   select 1 from mt_memberships
+--   where organization_id = $1 and user_id = auth.uid() and is_active [and role = 'owner']
+--
+-- Antes de esta migración, `mt_memberships` solo tenía dos índices de una sola
+-- columna —`organization_id` y `user_id`, de la migración 0001—. El
+-- planificador puede combinarlos con un Bitmap Index Scan sobre cada uno y un
+-- BitmapAnd, pero eso es dos recorridos de índice y su combinación en memoria
+-- para una consulta que se repite en el camino más caliente del sistema.
+--
+-- Un índice compuesto sobre `(organization_id, user_id)` resuelve el mismo
+-- predicado con un único Index Scan: `organization_id` como primera columna
+-- porque siempre llega fijo (es el argumento de la función), `user_id` como
+-- segunda porque `auth.uid()` lo acota más allá de eso. `is_active` y `role`
+-- quedan fuera del índice a propósito: son columnas de baja cardinalidad
+-- (booleano y un enum de tres valores) que el motor filtra barato una vez
+-- localizada la fila por los dos primeros campos; añadirlas no reduce el
+-- trabajo lo suficiente para justificar un índice más ancho.
+--
+-- No sustituye a los índices de la 0001: `mt_memberships_user_id_idx` sigue
+-- siendo el que resuelve "las organizaciones de esta cuenta" (RF-202), que
+-- filtra únicamente por `user_id`.
+
+create index if not exists mt_memberships_org_user_idx
+  on public.mt_memberships (organization_id, user_id);

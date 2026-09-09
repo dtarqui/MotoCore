@@ -1,16 +1,39 @@
-import { useState } from 'react'
+import { useState, type FormEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { Users } from 'lucide-react'
 import { useAuth } from '@/modules/auth/hooks/useAuth'
 import { PageHeader } from '@/shared/ui/PageHeader'
 import { Button } from '@/shared/ui/button'
 import { Input } from '@/shared/ui/input'
+import { Select } from '@/shared/ui/select'
 import { Alert } from '@/shared/ui/alert'
 import { Badge } from '@/shared/ui/badge'
-import { getActiveOrgId } from '@/shared/lib/active-context'
+import { EmptyState } from '@/shared/ui/empty-state'
+import { Skeleton } from '@/shared/ui/skeleton'
+import { ConfirmDialog } from '@/shared/ui/confirm-dialog'
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/shared/ui/dialog'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shared/ui/table'
+import { useToast } from '@/shared/ui/toast-context'
+import { useActiveOrgId } from '@/shared/lib/active-context'
 import { ROLE_LABELS } from '@/modules/auth/types'
 import { getMembers, inviteMember, removeMember, updateMemberRole } from '../organizaciones-api'
 
 type InvitableRole = 'mechanic' | 'receptionist'
+
+function describeMember(member: { profile: { email: string; first_name: string; last_name: string } | null; userId: string }) {
+  if (!member.profile) return member.userId
+  const name = `${member.profile.first_name} ${member.profile.last_name}`.trim()
+  return name || member.profile.email
+}
 
 /**
  * Equipo de la organización activa (HU-09 a HU-12).
@@ -21,9 +44,11 @@ type InvitableRole = 'mechanic' | 'receptionist'
 export function EquipoPage() {
   const { hasAnyRole, me } = useAuth()
   const queryClient = useQueryClient()
-  const orgId = getActiveOrgId()
+  const { toast } = useToast()
+  const orgId = useActiveOrgId()
 
   const isOwner = hasAnyRole(['owner'])
+  const [inviteOpen, setInviteOpen] = useState(false)
   const [invite, setInvite] = useState<{ email: string; role: InvitableRole }>({
     email: '',
     role: 'mechanic',
@@ -41,23 +66,30 @@ export function EquipoPage() {
   const inviteMutation = useMutation({
     mutationFn: () => inviteMember(invite),
     onSuccess: async () => {
+      setInviteOpen(false)
       setInvite({ email: '', role: 'mechanic' })
       setError(null)
+      toast({ title: 'Invitación enviada', description: invite.email, variant: 'success' })
       await invalidate()
     },
     onError: (err: Error) => setError(err.message),
   })
 
   const roleMutation = useMutation({
-    mutationFn: ({ userId, role }: { userId: string; role: InvitableRole }) =>
-      updateMemberRole(userId, role),
-    onSuccess: invalidate,
+    mutationFn: ({ userId, role }: { userId: string; role: InvitableRole }) => updateMemberRole(userId, role),
+    onSuccess: async () => {
+      toast({ title: 'Rol actualizado', variant: 'success' })
+      await invalidate()
+    },
     onError: (err: Error) => setError(err.message),
   })
 
   const removeMutation = useMutation({
     mutationFn: (userId: string) => removeMember(userId),
-    onSuccess: invalidate,
+    onSuccess: async () => {
+      toast({ title: 'Miembro removido', variant: 'success' })
+      await invalidate()
+    },
     onError: (err: Error) => setError(err.message),
   })
 
@@ -68,89 +100,135 @@ export function EquipoPage() {
       <PageHeader
         title="Equipo"
         description="El rol se otorga sobre la organización, no sobre un taller concreto."
+        actions={
+          isOwner ? (
+            <Dialog
+              open={inviteOpen}
+              onOpenChange={(next) => {
+                setInviteOpen(next)
+                if (next) setError(null)
+              }}
+            >
+              <DialogTrigger asChild>
+                <Button type="button">Invitar</Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Invitar a la organización</DialogTitle>
+                  <DialogDescription>
+                    La cuenta debe existir de antemano; no se puede invitar como Propietario.
+                  </DialogDescription>
+                </DialogHeader>
+                <form
+                  className="space-y-3"
+                  onSubmit={(event: FormEvent) => {
+                    event.preventDefault()
+                    inviteMutation.mutate()
+                  }}
+                >
+                  <Input
+                    required
+                    type="email"
+                    placeholder="Email de una cuenta existente"
+                    value={invite.email}
+                    onChange={(e) => setInvite({ ...invite, email: e.target.value })}
+                  />
+                  <Select
+                    value={invite.role}
+                    onChange={(e) => setInvite({ ...invite, role: e.target.value as InvitableRole })}
+                  >
+                    <option value="mechanic">{ROLE_LABELS.mechanic}</option>
+                    <option value="receptionist">{ROLE_LABELS.receptionist}</option>
+                  </Select>
+                  {error ? <Alert variant="destructive">{error}</Alert> : null}
+                  <DialogFooter>
+                    <DialogClose asChild>
+                      <Button type="button" variant="outline">
+                        Cancelar
+                      </Button>
+                    </DialogClose>
+                    <Button type="submit" disabled={inviteMutation.isPending}>
+                      {inviteMutation.isPending ? 'Invitando…' : 'Invitar'}
+                    </Button>
+                  </DialogFooter>
+                </form>
+              </DialogContent>
+            </Dialog>
+          ) : null
+        }
       />
 
-      {error ? <Alert variant="destructive">{error}</Alert> : null}
-
-      {isOwner ? (
-        <form
-          className="flex flex-wrap items-end gap-2 rounded-lg border border-slate-200 p-4"
-          onSubmit={(event) => {
-            event.preventDefault()
-            inviteMutation.mutate()
-          }}
-        >
-          <Input
-            required
-            type="email"
-            placeholder="Email de una cuenta existente"
-            value={invite.email}
-            onChange={(e) => setInvite({ ...invite, email: e.target.value })}
-          />
-          <select
-            className="rounded-md border border-slate-300 px-2 py-2 text-sm"
-            value={invite.role}
-            onChange={(e) => setInvite({ ...invite, role: e.target.value as InvitableRole })}
-          >
-            <option value="mechanic">{ROLE_LABELS.mechanic}</option>
-            <option value="receptionist">{ROLE_LABELS.receptionist}</option>
-          </select>
-          <Button type="submit" disabled={inviteMutation.isPending}>
-            Invitar
-          </Button>
-        </form>
-      ) : null}
+      {error && !inviteOpen ? <Alert variant="destructive">{error}</Alert> : null}
 
       {membersQuery.isLoading ? (
-        <p className="text-sm text-slate-500">Cargando el equipo…</p>
+        <div className="space-y-2">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <Skeleton key={i} className="h-12 w-full" />
+          ))}
+        </div>
+      ) : members.length === 0 ? (
+        <EmptyState icon={Users} title="Todavía no hay miembros en esta organización" />
       ) : (
-        <ul className="divide-y divide-slate-200 rounded-lg border border-slate-200">
-          {members.map((member) => {
-            const isSelf = member.userId === me?.userId
-            const isOwnerRow = member.role === 'owner'
-            return (
-              <li key={member.userId} className="flex flex-wrap items-center justify-between gap-2 p-3">
-                <div>
-                  <p className="font-medium text-slate-800">
-                    {member.profile
-                      ? `${member.profile.first_name} ${member.profile.last_name}`.trim() ||
-                        member.profile.email
-                      : member.userId}{' '}
-                    {isSelf ? <Badge variant="secondary">Tú</Badge> : null}
-                  </p>
-                  <p className="text-xs text-slate-500">
-                    {member.profile?.email} · {ROLE_LABELS[member.role]}
-                  </p>
-                </div>
-
-                {isOwner && !isOwnerRow ? (
-                  <div className="flex gap-2">
-                    <select
-                      className="rounded-md border border-slate-300 px-2 py-1 text-sm"
-                      value={member.role}
-                      onChange={(e) =>
-                        roleMutation.mutate({
-                          userId: member.userId,
-                          role: e.target.value as InvitableRole,
-                        })
-                      }
-                    >
-                      <option value="mechanic">{ROLE_LABELS.mechanic}</option>
-                      <option value="receptionist">{ROLE_LABELS.receptionist}</option>
-                    </select>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => removeMutation.mutate(member.userId)}
-                    >
-                      Remover
-                    </Button>
-                  </div>
-                ) : null}
-              </li>
-            )
-          })}
-        </ul>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Nombre</TableHead>
+              <TableHead>Email</TableHead>
+              <TableHead>Rol</TableHead>
+              {isOwner ? <TableHead className="text-right">Acciones</TableHead> : null}
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {members.map((member) => {
+              const isSelf = member.userId === me?.userId
+              const isOwnerRow = member.role === 'owner'
+              return (
+                <TableRow key={member.userId}>
+                  <TableCell className="font-medium text-gray-900 dark:text-white">
+                    <span className="inline-flex items-center gap-2">
+                      {describeMember(member)}
+                      {isSelf ? <Badge variant="secondary">Tú</Badge> : null}
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-gray-500 dark:text-gray-400">{member.profile?.email ?? '—'}</TableCell>
+                  <TableCell>
+                    {isOwner && !isOwnerRow ? (
+                      <Select
+                        className="h-8 w-auto py-1"
+                        value={member.role}
+                        onChange={(e) =>
+                          roleMutation.mutate({ userId: member.userId, role: e.target.value as InvitableRole })
+                        }
+                      >
+                        <option value="mechanic">{ROLE_LABELS.mechanic}</option>
+                        <option value="receptionist">{ROLE_LABELS.receptionist}</option>
+                      </Select>
+                    ) : (
+                      <Badge variant={isOwnerRow ? 'default' : 'secondary'}>{ROLE_LABELS[member.role]}</Badge>
+                    )}
+                  </TableCell>
+                  {isOwner ? (
+                    <TableCell className="text-right">
+                      {!isOwnerRow ? (
+                        <ConfirmDialog
+                          trigger={
+                            <Button size="sm" variant="outline">
+                              Remover
+                            </Button>
+                          }
+                          title={`¿Remover a ${describeMember(member)}?`}
+                          description="Pierde el acceso a esta organización de inmediato."
+                          confirmLabel="Remover"
+                          onConfirm={() => removeMutation.mutate(member.userId)}
+                        />
+                      ) : null}
+                    </TableCell>
+                  ) : null}
+                </TableRow>
+              )
+            })}
+          </TableBody>
+        </Table>
       )}
     </div>
   )

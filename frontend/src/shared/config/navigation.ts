@@ -44,3 +44,9 @@ export const navigationItems: NavigationItem[] = [
     allowedRoles: ['owner'],
   },
 ]
+
+/**
+ * Los diagramas de arquitectura (`/arquitectura`) NO están aquí: son de
+ * acceso público, para quien todavía no tiene cuenta, así que su enlace vive
+ * en `LoginPage`, no en el menú de la aplicación autenticada.
+ */

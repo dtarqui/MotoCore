@@ -10,7 +10,7 @@ export function ProtectedRoute() {
   // Mientras se restaura la sesión guardada no se sabe aún si hay usuario.
   // Sin esta espera, recargar una página protegida rebotaría al login.
   if (isLoading) {
-    return <p className="p-6 text-sm text-slate-500">Cargando…</p>
+    return <p className="p-6 text-sm text-gray-500">Cargando…</p>
   }
 
   if (!isAuthenticated) {
@@ -30,7 +30,7 @@ export function RoleRoute({ allowedRoles, children }: RoleRouteProps) {
 
   // El perfil llega tras autenticarse; sin él aún no se conoce el rol.
   if (!me) {
-    return <p className="p-6 text-sm text-slate-500">Cargando…</p>
+    return <p className="p-6 text-sm text-gray-500">Cargando…</p>
   }
 
   if (!hasAnyRole(allowedRoles)) {

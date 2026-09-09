@@ -3,7 +3,8 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import type { ReactNode } from 'react'
-import type { MeResponse, Workshop } from '../auth/types'
+import { ToastProvider } from '@/shared/ui/toast'
+import type { MeResponse, Organization, OrganizationMembership, UserRole, Workshop } from '../auth/types'
 
 /**
  * Cambio de contexto entre organizaciones y talleres (RNF-401, HU-05, HU-07).
@@ -15,12 +16,34 @@ import type { MeResponse, Workshop } from '../auth/types'
  */
 
 const getWorkshopsMock = vi.fn<() => Promise<Workshop[]>>()
+const getOrganizationsMock = vi.fn<() => Promise<OrganizationMembership[]>>()
+const createOrganizationMock = vi.fn<(payload: unknown) => Promise<Organization>>()
+const updateOrganizationMock = vi.fn<(orgId: string, payload: unknown) => Promise<Organization>>()
 const reloadMe = vi.fn(async () => {})
 
-vi.mock('./organizaciones-api', () => ({ getWorkshops: () => getWorkshopsMock() }))
+vi.mock('./organizaciones-api', () => ({
+  getWorkshops: () => getWorkshopsMock(),
+  getOrganizations: () => getOrganizationsMock(),
+  createOrganization: (payload: unknown) => createOrganizationMock(payload),
+  updateOrganization: (orgId: string, payload: unknown) => updateOrganizationMock(orgId, payload),
+}))
 
 let me: MeResponse | null = null
-vi.mock('../auth/hooks/useAuth', () => ({ useAuth: () => ({ me, reloadMe }) }))
+// Refleja `hasAnyRole` real: el rol se comprueba en la organización ACTIVA, no globalmente.
+vi.mock('../auth/hooks/useAuth', async () => {
+  const { getActiveOrgId } = await import('@/shared/lib/active-context')
+  return {
+    useAuth: () => ({
+      me,
+      reloadMe,
+      hasAnyRole: (roles: UserRole[]) => {
+        const orgId = getActiveOrgId()
+        const membership = me?.organizations.find((m) => m.organization.id === orgId)
+        return membership ? roles.includes(membership.role) : false
+      },
+    }),
+  }
+})
 
 const { ContextSelectors } = await import('./ContextSelectors')
 const { getActiveOrgId, getActiveWorkshopId, setActiveOrgId } = await import(
@@ -41,14 +64,40 @@ const meDeDosOrganizaciones: MeResponse = {
   email: 'operador@motocore.test',
   profile: null,
   organizations: [
-    { role: 'owner', organization: { id: 'org-1', name: 'Motos del Sur', is_active: true } },
-    { role: 'owner', organization: { id: 'org-2', name: 'Motos del Norte', is_active: true } },
+    {
+      role: 'owner',
+      organization: {
+        id: 'org-1',
+        name: 'Motos del Sur',
+        description: null,
+        address: null,
+        phone: null,
+        email: null,
+        is_active: true,
+      },
+    },
+    {
+      role: 'owner',
+      organization: {
+        id: 'org-2',
+        name: 'Motos del Norte',
+        description: null,
+        address: null,
+        phone: null,
+        email: null,
+        is_active: true,
+      },
+    },
   ],
 }
 
 function envolver(children: ReactNode) {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
-  return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  return (
+    <QueryClientProvider client={queryClient}>
+      <ToastProvider>{children}</ToastProvider>
+    </QueryClientProvider>
+  )
 }
 
 beforeEach(() => {
@@ -56,6 +105,10 @@ beforeEach(() => {
   setActiveOrgId(null)
   getWorkshopsMock.mockReset()
   getWorkshopsMock.mockResolvedValue([taller('t-1', 'Taller Centro'), taller('t-2', 'Taller Sur')])
+  getOrganizationsMock.mockReset()
+  getOrganizationsMock.mockResolvedValue(meDeDosOrganizaciones.organizations)
+  createOrganizationMock.mockReset()
+  updateOrganizationMock.mockReset()
 })
 
 describe('selectores de contexto', () => {
@@ -125,5 +178,80 @@ describe('selectores de contexto', () => {
 
     await waitFor(() => expect(getActiveWorkshopId()).toBe('t-viva'))
     expect(screen.getByRole('option', { name: /Taller Cerrado \(inactivo\)/ })).toBeInTheDocument()
+  })
+})
+
+describe('RF-201 — crear una organización adicional', () => {
+  it('crea la organización y la deja como contexto activo', async () => {
+    const user = userEvent.setup()
+    createOrganizationMock.mockResolvedValue({
+      id: 'org-3',
+      name: 'Taller Nuevo SRL',
+      description: null,
+      address: null,
+      phone: null,
+      email: null,
+      is_active: true,
+    })
+
+    render(envolver(<ContextSelectors />))
+    await waitFor(() => expect(getActiveOrgId()).toBe('org-1'))
+
+    await user.click(screen.getByRole('button', { name: 'Nueva organización' }))
+    await user.type(screen.getByPlaceholderText('Nombre de la organización'), 'Taller Nuevo SRL')
+    await user.click(screen.getByRole('button', { name: 'Crear organización' }))
+
+    expect(createOrganizationMock).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'Taller Nuevo SRL' }),
+    )
+    // Aunque "org-3" todavía no está en las membresías del mock de useAuth, el
+    // contexto activo ya cambió: es lo que hace la app al recargar el perfil.
+    await waitFor(() => expect(getActiveOrgId()).toBe('org-3'))
+    expect(reloadMe).toHaveBeenCalled()
+  })
+})
+
+describe('RF-204 — editar la organización activa (solo Owner)', () => {
+  it('un no-Owner no ve el botón de editar', async () => {
+    me = {
+      ...meDeDosOrganizaciones,
+      organizations: meDeDosOrganizaciones.organizations.map((m) => ({ ...m, role: 'mechanic' })),
+    }
+    render(envolver(<ContextSelectors />))
+    await waitFor(() => expect(getActiveOrgId()).toBe('org-1'))
+
+    expect(screen.queryByRole('button', { name: 'Editar organización' })).not.toBeInTheDocument()
+  })
+
+  it('el Owner edita el nombre de la organización activa', async () => {
+    const user = userEvent.setup()
+    updateOrganizationMock.mockResolvedValue({
+      id: 'org-1',
+      name: 'Motos del Sur (renombrada)',
+      description: null,
+      address: null,
+      phone: null,
+      email: null,
+      is_active: true,
+    })
+
+    render(envolver(<ContextSelectors />))
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: 'Editar organización' })).toBeInTheDocument(),
+    )
+
+    await user.click(screen.getByRole('button', { name: 'Editar organización' }))
+    // No se usa `getByDisplayValue`: el <select> de organización también
+    // "muestra" Motos del Sur en su opción elegida y produce ambigüedad.
+    const nombre = await screen.findByPlaceholderText('Nombre')
+    await user.clear(nombre)
+    await user.type(nombre, 'Motos del Sur (renombrada)')
+    await user.click(screen.getByRole('button', { name: 'Guardar cambios' }))
+
+    expect(updateOrganizationMock).toHaveBeenCalledWith(
+      'org-1',
+      expect.objectContaining({ name: 'Motos del Sur (renombrada)' }),
+    )
+    await waitFor(() => expect(reloadMe).toHaveBeenCalled())
   })
 })

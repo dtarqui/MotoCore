@@ -26,6 +26,27 @@ export function createOrganization(payload: { name: string; address?: string; ph
   }).then((r) => r.organization)
 }
 
+export type UpdateOrganizationPayload = Partial<{
+  name: string
+  description: string
+  address: string
+  phone: string
+  email: string
+}>
+
+/**
+ * Edita los datos de la organización activa (solo Owner) — RF-204.
+ *
+ * Única función del módulo cuya ruta lleva el identificador de organización:
+ * aquí la organización es el recurso, no el contexto (§2.3 del contrato).
+ */
+export function updateOrganization(orgId: string, payload: UpdateOrganizationPayload) {
+  return apiRequest<{ organization: Organization }>(`/api/organizations/${orgId}`, {
+    method: 'PATCH',
+    body: JSON.stringify(payload),
+  }).then((r) => r.organization)
+}
+
 /** Talleres de la organización activa — RF-302. */
 export function getWorkshops() {
   return apiRequest<{ workshops: Workshop[] }>('/api/workshops').then((r) => r.workshops)
@@ -49,6 +70,45 @@ export function deactivateWorkshop(workshopId: string) {
   return apiRequest<{ workshop: Workshop }>(`/api/workshops/${workshopId}/deactivate`, {
     method: 'POST',
   }).then((r) => r.workshop)
+}
+
+/** Edita los datos de un taller (solo Owner) — RF-301. */
+export function updateWorkshop(
+  workshopId: string,
+  payload: Partial<{ name: string; address: string; phone: string }>,
+) {
+  return apiRequest<{ workshop: Workshop }>(`/api/workshops/${workshopId}`, {
+    method: 'PATCH',
+    body: JSON.stringify(payload),
+  }).then((r) => r.workshop)
+}
+
+/** Asignación operativa de un miembro a un taller: indica dónde trabaja, no cambia lo que puede ver (RF-304, ADR-006). */
+export type WorkshopAssignment = {
+  id: string
+  userId: string | null
+  role: UserRole | null
+  isActive: boolean | null
+}
+
+/** Miembros asignados al taller — RF-304. */
+export function getWorkshopAssignments(workshopId: string) {
+  return apiRequest<{ assignments: WorkshopAssignment[] }>(`/api/workshops/${workshopId}/assignments`).then(
+    (r) => r.assignments,
+  )
+}
+
+/** Asigna un miembro al taller (solo Owner) — RF-304. */
+export function assignMemberToWorkshop(workshopId: string, userId: string) {
+  return apiRequest<{ workshopId: string; userId: string }>(`/api/workshops/${workshopId}/assignments`, {
+    method: 'POST',
+    body: JSON.stringify({ userId }),
+  })
+}
+
+/** Retira la asignación de un miembro al taller (solo Owner) — RF-304. */
+export function removeWorkshopAssignment(workshopId: string, userId: string) {
+  return apiRequest<void>(`/api/workshops/${workshopId}/assignments/${userId}`, { method: 'DELETE' })
 }
 
 export type Member = {

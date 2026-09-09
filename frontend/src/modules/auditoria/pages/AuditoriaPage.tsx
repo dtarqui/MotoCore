@@ -1,9 +1,14 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { ClipboardList } from 'lucide-react'
 import { PageHeader } from '@/shared/ui/PageHeader'
 import { Alert } from '@/shared/ui/alert'
 import { Badge } from '@/shared/ui/badge'
-import { getActiveOrgId } from '@/shared/lib/active-context'
+import { Select } from '@/shared/ui/select'
+import { EmptyState } from '@/shared/ui/empty-state'
+import { Skeleton } from '@/shared/ui/skeleton'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shared/ui/table'
+import { useActiveOrgId } from '@/shared/lib/active-context'
 import { ApiError } from '@/shared/lib/api-client'
 import {
   AUDIT_ACTION_LABELS,
@@ -45,7 +50,7 @@ function describirAutor(entry: AuditEntry) {
  * usuario, no el control de acceso.
  */
 export function AuditoriaPage() {
-  const orgId = getActiveOrgId()
+  const orgId = useActiveOrgId()
   const [accion, setAccion] = useState<AuditAction | ''>('')
 
   const auditQuery = useQuery({
@@ -73,12 +78,12 @@ export function AuditoriaPage() {
       ) : null}
 
       <div className="flex flex-wrap items-center gap-2">
-        <label className="text-sm text-slate-600" htmlFor="filtro-accion">
+        <label className="text-sm text-gray-600 dark:text-gray-400" htmlFor="filtro-accion">
           Acción
         </label>
-        <select
+        <Select
           id="filtro-accion"
-          className="rounded-md border border-slate-300 px-2 py-2 text-sm"
+          className="w-auto"
           value={accion}
           onChange={(e) => setAccion(e.target.value as AuditAction | '')}
         >
@@ -88,31 +93,44 @@ export function AuditoriaPage() {
               {etiqueta}
             </option>
           ))}
-        </select>
+        </Select>
       </div>
 
       {auditQuery.isLoading ? (
-        <p className="text-sm text-slate-500">Cargando el registro…</p>
-      ) : entradas.length === 0 && !error ? (
-        <p className="text-sm text-slate-500">
-          Todavía no hay acciones registradas en esta organización.
-        </p>
-      ) : (
-        <ul className="divide-y divide-slate-200 rounded-lg border border-slate-200">
-          {entradas.map((entry) => (
-            <li key={entry.id} className="flex flex-wrap items-start justify-between gap-2 p-3">
-              <div>
-                <p className="font-medium text-slate-800">
-                  {AUDIT_ACTION_LABELS[entry.action] ?? entry.action}{' '}
-                  <Badge variant="secondary">{entry.entity}</Badge>
-                </p>
-                <p className="text-xs text-slate-500">
-                  {describirAutor(entry)} · {formatearFecha(entry.createdAt)}
-                </p>
-              </div>
-            </li>
+        <div className="space-y-2">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="h-12 w-full" />
           ))}
-        </ul>
+        </div>
+      ) : entradas.length === 0 && !error ? (
+        <EmptyState icon={ClipboardList} title="Todavía no hay acciones registradas en esta organización" />
+      ) : (
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Acción</TableHead>
+              <TableHead>Entidad</TableHead>
+              <TableHead>Autor</TableHead>
+              <TableHead>Fecha</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {entradas.map((entry) => (
+              <TableRow key={entry.id}>
+                <TableCell className="font-medium text-gray-900 dark:text-white">
+                  {AUDIT_ACTION_LABELS[entry.action] ?? entry.action}
+                </TableCell>
+                <TableCell>
+                  <Badge variant="secondary">{entry.entity}</Badge>
+                </TableCell>
+                <TableCell className="text-gray-500 dark:text-gray-400">{describirAutor(entry)}</TableCell>
+                <TableCell className="tabular-nums text-gray-500 dark:text-gray-400">
+                  {formatearFecha(entry.createdAt)}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       )}
     </div>
   )

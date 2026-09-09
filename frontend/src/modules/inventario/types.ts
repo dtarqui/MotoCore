@@ -24,6 +24,18 @@ export type Part = {
 export const MOVEMENT_TYPES = ['purchase', 'sale', 'adjustment', 'return', 'transfer', 'damaged'] as const
 export type MovementType = (typeof MOVEMENT_TYPES)[number]
 
+/**
+ * Tipos que el usuario puede registrar DIRECTAMENTE (RF-604), espejo de
+ * `DIRECT_MOVEMENT_TYPES` en `server/src/schemas.ts`. `transfer` queda fuera:
+ * no se registra a mano, lo genera la transferencia entre talleres (RF-608)
+ * como par de movimientos vinculados — ofrecerlo aquí produciría un envío que
+ * el backend rechaza con `inventory.invalid_movement_type`.
+ */
+export const DIRECT_MOVEMENT_TYPES = MOVEMENT_TYPES.filter((t) => t !== 'transfer') as readonly Exclude<
+  MovementType,
+  'transfer'
+>[]
+
 export const MOVEMENT_LABELS: Record<MovementType, string> = {
   purchase: 'Compra',
   sale: 'Venta',
@@ -66,4 +78,22 @@ export type CreateMovementPayload = {
   unitCost?: number
   reference?: string
   notes?: string
+}
+
+/** RF-609: el número de parte no se edita — identifica la pieza dentro del taller. */
+export type UpdatePartPayload = {
+  name?: string
+  description?: string | null
+  brand?: string | null
+  category?: string | null
+  minimumStock?: number
+  maximumStock?: number | null
+  unitCost?: number | null
+}
+
+/** RF-608: transferencia entre talleres de la misma organización. */
+export type TransferPartPayload = {
+  toWorkshopId: string
+  toPartId: string
+  quantity: number
 }

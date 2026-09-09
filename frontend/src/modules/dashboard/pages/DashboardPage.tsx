@@ -1,8 +1,10 @@
 import { useQuery } from '@tanstack/react-query'
+import { Building2, Package, Users, Wrench } from 'lucide-react'
 import { useAuth } from '@/modules/auth/hooks/useAuth'
 import { PageHeader } from '@/shared/ui/PageHeader'
-import { Card } from '@/shared/ui/card'
-import { getActiveOrgId, getActiveWorkshopId } from '@/shared/lib/active-context'
+import { StatCard } from '@/shared/ui/stat-card'
+import { Badge } from '@/shared/ui/badge'
+import { useActiveOrgId, useActiveWorkshopId } from '@/shared/lib/active-context'
 import { ROLE_LABELS } from '@/modules/auth/types'
 import { getWorkshops } from '@/modules/organizaciones/organizaciones-api'
 import { getClients } from '@/modules/clientes/clientes-api'
@@ -15,8 +17,8 @@ import { getParts } from '@/modules/inventario/inventario-api'
  */
 export function DashboardPage() {
   const { me } = useAuth()
-  const orgId = getActiveOrgId()
-  const workshopId = getActiveWorkshopId()
+  const orgId = useActiveOrgId()
+  const workshopId = useActiveWorkshopId()
 
   const membership = me?.organizations.find((m) => m.organization.id === orgId)
 
@@ -54,32 +56,41 @@ export function DashboardPage() {
       />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card className="p-4">
-          <p className="text-xs uppercase tracking-wide text-slate-500">Organizaciones</p>
-          <p className="mt-1 text-2xl font-semibold">{me?.organizations.length ?? 0}</p>
-          <p className="text-xs text-slate-500">donde tienes membresía activa</p>
-        </Card>
+        <StatCard
+          label="Organizaciones"
+          value={me?.organizations.length ?? 0}
+          helper="donde tienes membresía activa"
+          icon={Building2}
+        />
 
-        <Card className="p-4">
-          <p className="text-xs uppercase tracking-wide text-slate-500">Talleres</p>
-          <p className="mt-1 text-2xl font-semibold">{workshopsQuery.data?.length ?? 0}</p>
-          <p className="text-xs text-slate-500">en la organización activa</p>
-        </Card>
+        <StatCard
+          label="Talleres"
+          value={workshopsQuery.data?.length ?? 0}
+          helper="en la organización activa"
+          icon={Wrench}
+          isLoading={workshopsQuery.isLoading}
+        />
 
-        <Card className="p-4">
-          <p className="text-xs uppercase tracking-wide text-slate-500">Clientes</p>
-          <p className="mt-1 text-2xl font-semibold">{clientsQuery.data?.length ?? 0}</p>
-          <p className="text-xs text-slate-500">nivel organización · visibles desde cualquier taller</p>
-        </Card>
+        <StatCard
+          label="Clientes"
+          value={clientsQuery.data?.length ?? 0}
+          helper="nivel organización · visibles desde cualquier taller"
+          icon={Users}
+          isLoading={clientsQuery.isLoading}
+        />
 
-        <Card className="p-4">
-          <p className="text-xs uppercase tracking-wide text-slate-500">Repuestos</p>
-          <p className="mt-1 text-2xl font-semibold">{parts.length}</p>
-          <p className="text-xs text-slate-500">
-            {activeWorkshop ? `en ${activeWorkshop.name}` : 'sin taller activo'}
-            {lowStock > 0 ? ` · ${lowStock} bajo mínimo` : ''}
-          </p>
-        </Card>
+        <StatCard
+          label="Repuestos"
+          value={parts.length}
+          icon={Package}
+          isLoading={partsQuery.isLoading}
+          helper={
+            <>
+              <span>{activeWorkshop ? `en ${activeWorkshop.name}` : 'sin taller activo'}</span>
+              {lowStock > 0 ? <Badge variant="warning">{lowStock} bajo mínimo</Badge> : null}
+            </>
+          }
+        />
       </div>
     </div>
   )

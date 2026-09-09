@@ -1,11 +1,27 @@
-import { useState } from 'react'
+import { useState, type FormEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { Users } from 'lucide-react'
 import { useAuth } from '@/modules/auth/hooks/useAuth'
 import { PageHeader } from '@/shared/ui/PageHeader'
 import { Button } from '@/shared/ui/button'
 import { Input } from '@/shared/ui/input'
 import { Alert } from '@/shared/ui/alert'
 import { Badge } from '@/shared/ui/badge'
+import { EmptyState } from '@/shared/ui/empty-state'
+import { Skeleton } from '@/shared/ui/skeleton'
+import { ConfirmDialog } from '@/shared/ui/confirm-dialog'
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/shared/ui/dialog'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shared/ui/table'
+import { useToast } from '@/shared/ui/toast-context'
 import { createClient, deactivateClient, getClients, updateClient } from '../clientes-api'
 import type { Client, ClientUpsertPayload } from '../types'
 
@@ -18,10 +34,12 @@ const EMPTY: ClientUpsertPayload = { firstName: '', lastName: '', email: '', pho
 export function ClientesPage() {
   const { hasAnyRole } = useAuth()
   const queryClient = useQueryClient()
+  const { toast } = useToast()
 
   const canWrite = hasAnyRole(['owner', 'receptionist'])
 
   const [search, setSearch] = useState('')
+  const [dialogOpen, setDialogOpen] = useState(false)
   const [editing, setEditing] = useState<Client | null>(null)
   const [form, setForm] = useState<ClientUpsertPayload>(EMPTY)
   const [error, setError] = useState<string | null>(null)
@@ -36,10 +54,16 @@ export function ClientesPage() {
   const saveMutation = useMutation({
     mutationFn: (payload: ClientUpsertPayload) =>
       editing ? updateClient(editing.id, payload) : createClient(payload),
-    onSuccess: async () => {
+    onSuccess: async (client) => {
+      setDialogOpen(false)
       setForm(EMPTY)
-      setEditing(null)
       setError(null)
+      toast({
+        title: editing ? 'Cliente actualizado' : 'Cliente registrado',
+        description: `${client.first_name} ${client.last_name}`.trim(),
+        variant: 'success',
+      })
+      setEditing(null)
       await invalidate()
     },
     onError: (err: Error) => setError(err.message),
@@ -47,11 +71,21 @@ export function ClientesPage() {
 
   const deactivateMutation = useMutation({
     mutationFn: (clientId: string) => deactivateClient(clientId),
-    onSuccess: invalidate,
+    onSuccess: async () => {
+      toast({ title: 'Cliente dado de baja', variant: 'success' })
+      await invalidate()
+    },
     onError: (err: Error) => setError(err.message),
   })
 
-  function startEdit(client: Client) {
+  function openCreate() {
+    setEditing(null)
+    setForm(EMPTY)
+    setError(null)
+    setDialogOpen(true)
+  }
+
+  function openEdit(client: Client) {
     setEditing(client)
     setForm({
       firstName: client.first_name,
@@ -62,6 +96,8 @@ export function ClientesPage() {
       address: client.address ?? '',
       notes: client.notes ?? '',
     })
+    setError(null)
+    setDialogOpen(true)
   }
 
   const clients = clientsQuery.data ?? []
@@ -71,122 +107,161 @@ export function ClientesPage() {
       <PageHeader
         title="Clientes"
         description="Los clientes pertenecen a la organización y se atienden desde cualquiera de sus talleres."
+        actions={
+          canWrite ? (
+            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+              <DialogTrigger asChild>
+                <Button type="button" onClick={openCreate}>
+                  Nuevo cliente
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>{editing ? `Editar a ${editing.first_name} ${editing.last_name}` : 'Nuevo cliente'}</DialogTitle>
+                  <DialogDescription>
+                    {editing
+                      ? 'Los cambios se aplican de inmediato.'
+                      : 'Se registra en la organización activa, visible desde cualquiera de sus talleres.'}
+                  </DialogDescription>
+                </DialogHeader>
+                <form
+                  className="grid gap-3 sm:grid-cols-2"
+                  onSubmit={(event: FormEvent) => {
+                    event.preventDefault()
+                    saveMutation.mutate(form)
+                  }}
+                >
+                  <Input
+                    required
+                    placeholder="Nombre"
+                    value={form.firstName}
+                    onChange={(e) => setForm({ ...form, firstName: e.target.value })}
+                  />
+                  <Input
+                    required
+                    placeholder="Apellido"
+                    value={form.lastName}
+                    onChange={(e) => setForm({ ...form, lastName: e.target.value })}
+                  />
+                  <Input
+                    type="email"
+                    placeholder="Email (único dentro de la organización)"
+                    value={form.email}
+                    onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  />
+                  <Input
+                    placeholder="Teléfono"
+                    value={form.phone}
+                    onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                  />
+                  <Input
+                    placeholder="Documento de identidad"
+                    value={form.documentId}
+                    onChange={(e) => setForm({ ...form, documentId: e.target.value })}
+                  />
+                  <Input
+                    placeholder="Dirección"
+                    value={form.address}
+                    onChange={(e) => setForm({ ...form, address: e.target.value })}
+                  />
+
+                  {error ? (
+                    <div className="sm:col-span-2">
+                      <Alert variant="destructive">{error}</Alert>
+                    </div>
+                  ) : null}
+
+                  <DialogFooter className="sm:col-span-2">
+                    <DialogClose asChild>
+                      <Button type="button" variant="outline">
+                        Cancelar
+                      </Button>
+                    </DialogClose>
+                    <Button type="submit" disabled={saveMutation.isPending}>
+                      {saveMutation.isPending ? 'Guardando…' : editing ? 'Guardar cambios' : 'Registrar cliente'}
+                    </Button>
+                  </DialogFooter>
+                </form>
+              </DialogContent>
+            </Dialog>
+          ) : null
+        }
       />
 
-      {error ? <Alert variant="destructive">{error}</Alert> : null}
+      {error && !dialogOpen ? <Alert variant="destructive">{error}</Alert> : null}
+      {!canWrite ? <Alert>Tu rol permite consultar clientes, pero no crearlos ni editarlos.</Alert> : null}
 
-      <div className="flex gap-2">
-        <Input
-          placeholder="Buscar por nombre, email o documento"
-          value={search}
-          onChange={(event) => setSearch(event.target.value)}
-        />
-      </div>
-
-      {canWrite ? (
-        <form
-          className="grid gap-3 rounded-lg border border-slate-200 p-4 sm:grid-cols-2"
-          onSubmit={(event) => {
-            event.preventDefault()
-            saveMutation.mutate(form)
-          }}
-        >
-          <h2 className="sm:col-span-2 text-sm font-semibold text-slate-700">
-            {editing ? `Editando: ${editing.first_name} ${editing.last_name}` : 'Nuevo cliente'}
-          </h2>
-
-          <Input
-            required
-            placeholder="Nombre"
-            value={form.firstName}
-            onChange={(e) => setForm({ ...form, firstName: e.target.value })}
-          />
-          <Input
-            required
-            placeholder="Apellido"
-            value={form.lastName}
-            onChange={(e) => setForm({ ...form, lastName: e.target.value })}
-          />
-          <Input
-            type="email"
-            placeholder="Email (único dentro de la organización)"
-            value={form.email}
-            onChange={(e) => setForm({ ...form, email: e.target.value })}
-          />
-          <Input
-            placeholder="Teléfono"
-            value={form.phone}
-            onChange={(e) => setForm({ ...form, phone: e.target.value })}
-          />
-          <Input
-            placeholder="Documento de identidad"
-            value={form.documentId}
-            onChange={(e) => setForm({ ...form, documentId: e.target.value })}
-          />
-          <Input
-            placeholder="Dirección"
-            value={form.address}
-            onChange={(e) => setForm({ ...form, address: e.target.value })}
-          />
-
-          <div className="sm:col-span-2 flex gap-2">
-            <Button type="submit" disabled={saveMutation.isPending}>
-              {editing ? 'Guardar cambios' : 'Registrar cliente'}
-            </Button>
-            {editing ? (
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => {
-                  setEditing(null)
-                  setForm(EMPTY)
-                }}
-              >
-                Cancelar
-              </Button>
-            ) : null}
-          </div>
-        </form>
-      ) : (
-        <Alert>Tu rol permite consultar clientes, pero no crearlos ni editarlos.</Alert>
-      )}
+      <Input
+        placeholder="Buscar por nombre, email o documento"
+        value={search}
+        onChange={(event) => setSearch(event.target.value)}
+        className="max-w-md"
+      />
 
       {clientsQuery.isLoading ? (
-        <p className="text-sm text-slate-500">Cargando clientes…</p>
-      ) : clients.length === 0 ? (
-        <p className="text-sm text-slate-500">No hay clientes registrados en esta organización.</p>
-      ) : (
-        <ul className="divide-y divide-slate-200 rounded-lg border border-slate-200">
-          {clients.map((client) => (
-            <li key={client.id} className="flex flex-wrap items-center justify-between gap-2 p-3">
-              <div>
-                <p className="font-medium text-slate-800">
-                  {client.first_name} {client.last_name}{' '}
-                  {client.is_active ? null : <Badge variant="secondary">Inactivo</Badge>}
-                </p>
-                <p className="text-xs text-slate-500">
-                  {[client.email, client.phone, client.document_id].filter(Boolean).join(' · ') || '—'}
-                </p>
-              </div>
-              {canWrite ? (
-                <div className="flex gap-2">
-                  <Button size="sm" variant="outline" onClick={() => startEdit(client)}>
-                    Editar
-                  </Button>
-                  {client.is_active ? (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => deactivateMutation.mutate(client.id)}
-                    >
-                      Dar de baja
-                    </Button>
-                  ) : null}
-                </div>
-              ) : null}
-            </li>
+        <div className="space-y-2">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="h-12 w-full" />
           ))}
-        </ul>
+        </div>
+      ) : clients.length === 0 ? (
+        <EmptyState
+          icon={Users}
+          title="No hay clientes registrados en esta organización"
+          description={canWrite ? 'Registra el primero con el botón "Nuevo cliente".' : undefined}
+        />
+      ) : (
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Nombre</TableHead>
+              <TableHead>Contacto</TableHead>
+              <TableHead>Estado</TableHead>
+              {canWrite ? <TableHead className="text-right">Acciones</TableHead> : null}
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {clients.map((client) => (
+              <TableRow key={client.id}>
+                <TableCell className="font-medium text-gray-900 dark:text-white">
+                  {client.first_name} {client.last_name}
+                </TableCell>
+                <TableCell className="text-gray-500 dark:text-gray-400">
+                  {[client.email, client.phone, client.document_id].filter(Boolean).join(' · ') || '—'}
+                </TableCell>
+                <TableCell>
+                  {client.is_active ? (
+                    <Badge variant="secondary">Activo</Badge>
+                  ) : (
+                    <Badge variant="outline">Inactivo</Badge>
+                  )}
+                </TableCell>
+                {canWrite ? (
+                  <TableCell className="text-right">
+                    <div className="flex justify-end gap-2">
+                      <Button size="sm" variant="outline" onClick={() => openEdit(client)}>
+                        Editar
+                      </Button>
+                      {client.is_active ? (
+                        <ConfirmDialog
+                          trigger={
+                            <Button size="sm" variant="outline">
+                              Dar de baja
+                            </Button>
+                          }
+                          title={`¿Dar de baja a ${client.first_name} ${client.last_name}?`}
+                          description="Se conserva su historial; deja de aparecer en los listados activos."
+                          confirmLabel="Dar de baja"
+                          onConfirm={() => deactivateMutation.mutate(client.id)}
+                        />
+                      ) : null}
+                    </div>
+                  </TableCell>
+                ) : null}
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       )}
     </div>
   )

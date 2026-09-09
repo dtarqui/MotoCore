@@ -34,10 +34,17 @@ beforeEach(() => {
         method: init.method ?? 'GET',
         headers: init.headers as Record<string, string>,
       })
-      return new Response(JSON.stringify({ workshops: [], members: [], workshop: {}, client: {} }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' },
-      })
+      return new Response(
+        JSON.stringify({
+          workshops: [],
+          members: [],
+          workshop: {},
+          client: {},
+          organization: {},
+          assignments: [],
+        }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      )
     }),
   )
 })
@@ -65,6 +72,10 @@ describe('los recursos interiores se resuelven por cabecera, no por ruta anidada
     await api.updateMemberRole('user-1', 'receptionist')
     await api.removeMember('user-1')
     await api.deactivateWorkshop('taller-1')
+    await api.updateWorkshop('taller-1', { name: 'Nuevo nombre' })
+    await api.getWorkshopAssignments('taller-1')
+    await api.assignMemberToWorkshop('taller-1', 'user-1')
+    await api.removeWorkshopAssignment('taller-1', 'user-1')
 
     for (const llamada of llamadas) {
       expect(new URL(llamada.url).pathname, llamada.url).not.toMatch(/\/api\/organizations\/[^/]+\//)
@@ -74,6 +85,38 @@ describe('los recursos interiores se resuelven por cabecera, no por ruta anidada
   it('la organización SÍ conserva su identificador en la ruta: ahí es el recurso', async () => {
     await api.getOrganizations()
     expect(ruta()).toBe('/api/organizations')
+  })
+
+  it('las asignaciones de un taller se piden a /api/workshops/:id/assignments, no anidadas bajo la organización', async () => {
+    await api.getWorkshopAssignments('taller-1')
+    expect(ruta()).toBe('/api/workshops/taller-1/assignments')
+    expect(llamadas[0]!.headers['X-Org-Id']).toBe('org-1')
+  })
+})
+
+describe('RF-204, RF-301, RF-304 — funciones agregadas al cerrar huecos de funcionalidad', () => {
+  it('RF-204 — editar la organización es PATCH /api/organizations/:orgId', async () => {
+    await api.updateOrganization('org-1', { name: 'Nuevo nombre' })
+    expect(llamadas[0]!.method).toBe('PATCH')
+    expect(ruta()).toBe('/api/organizations/org-1')
+  })
+
+  it('RF-301 — editar un taller es PATCH /api/workshops/:workshopId', async () => {
+    await api.updateWorkshop('taller-1', { name: 'Sucursal Norte' })
+    expect(llamadas[0]!.method).toBe('PATCH')
+    expect(ruta()).toBe('/api/workshops/taller-1')
+  })
+
+  it('RF-304 — asignar un miembro es POST /api/workshops/:workshopId/assignments', async () => {
+    await api.assignMemberToWorkshop('taller-1', 'user-1')
+    expect(llamadas[0]!.method).toBe('POST')
+    expect(ruta()).toBe('/api/workshops/taller-1/assignments')
+  })
+
+  it('RF-304 — quitar una asignación es DELETE /api/workshops/:workshopId/assignments/:userId', async () => {
+    await api.removeWorkshopAssignment('taller-1', 'user-1')
+    expect(llamadas[0]!.method).toBe('DELETE')
+    expect(ruta()).toBe('/api/workshops/taller-1/assignments/user-1')
   })
 })
 

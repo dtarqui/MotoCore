@@ -12,9 +12,14 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 
 // El módulo de Supabase exige variables de entorno al importarse y abre un
 // cliente real; aquí solo interesa el token que devuelve la sesión.
+const signOutMock = vi.fn(async () => ({ error: null }))
+
 vi.mock('@/shared/lib/supabase', () => ({
   supabase: {
-    auth: { getSession: vi.fn(async () => ({ data: { session: { access_token: 'jwt-de-prueba' } } })) },
+    auth: {
+      getSession: vi.fn(async () => ({ data: { session: { access_token: 'jwt-de-prueba' } } })),
+      signOut: signOutMock,
+    },
   },
 }))
 
@@ -72,6 +77,19 @@ describe('apiRequest: credencial y contexto activo', () => {
     expect(capturas[1]!.init.headers['X-Workshop-Id']).toBe('taller-1')
   })
 
+  it('workshopId explícito gana sobre el taller activo — lectura puntual de otro taller (RF-608)', async () => {
+    const capturas = interceptar()
+    setActiveOrgId('org-1')
+    setActiveWorkshopId('taller-1')
+
+    await apiRequest('/api/inventory/parts', { workshopId: 'taller-2' })
+    expect(capturas[0]!.init.headers['X-Workshop-Id']).toBe('taller-2')
+
+    // withWorkshop sigue funcionando igual cuando no se fuerza ninguno.
+    await apiRequest('/api/inventory/parts', { withWorkshop: true })
+    expect(capturas[1]!.init.headers['X-Workshop-Id']).toBe('taller-1')
+  })
+
   it('CP-N005 — no inventa un contexto cuando no hay ninguno elegido', async () => {
     const capturas = interceptar()
     await apiRequest('/api/clients')
@@ -123,5 +141,33 @@ describe('apiRequest: mapeo de errores', () => {
   it('devuelve undefined en un 204 sin cuerpo', async () => {
     interceptar(204)
     await expect(apiRequest('/api/members/abc')).resolves.toBeUndefined()
+  })
+})
+
+describe('apiRequest: sesión vencida', () => {
+  beforeEach(() => {
+    signOutMock.mockClear()
+  })
+
+  it('un 401 fuerza el cierre de sesión — el cliente no debe seguir mostrando la app como si hubiera sesión', async () => {
+    interceptar(401, {
+      title: 'auth.invalid_token',
+      status: 401,
+      detail: 'Credencial invalida, expirada o revocada.',
+    })
+
+    await expect(apiRequest('/api/clients')).rejects.toMatchObject({ code: 'auth.invalid_token' })
+    await vi.waitFor(() => expect(signOutMock).toHaveBeenCalledTimes(1))
+  })
+
+  it('un 403 NO cierra la sesión — es un permiso insuficiente, no una credencial inválida', async () => {
+    interceptar(403, {
+      title: 'organization.access_denied',
+      status: 403,
+      detail: 'No tienes acceso a esta organizacion.',
+    })
+
+    await expect(apiRequest('/api/clients')).rejects.toMatchObject({ code: 'organization.access_denied' })
+    expect(signOutMock).not.toHaveBeenCalled()
   })
 })

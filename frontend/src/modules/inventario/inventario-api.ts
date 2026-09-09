@@ -1,5 +1,12 @@
 import { apiRequest } from '@/shared/lib/api-client'
-import type { CreateMovementPayload, CreatePartPayload, Part, PartMovement } from './types'
+import type {
+  CreateMovementPayload,
+  CreatePartPayload,
+  Part,
+  PartMovement,
+  TransferPartPayload,
+  UpdatePartPayload,
+} from './types'
 
 /**
  * Inventario: nivel taller. TODAS las llamadas usan `withWorkshop`, porque el
@@ -23,6 +30,21 @@ export function getLowStockParts() {
   return getParts({ lowStock: true })
 }
 
+/**
+ * Catálogo de un taller que NO es el activo — lectura puntual para elegir el
+ * repuesto de destino de una transferencia (RF-608) sin abandonar el taller
+ * de origen.
+ */
+export function getPartsInWorkshop(workshopId: string, options?: { search?: string }) {
+  const params = new URLSearchParams()
+  if (options?.search?.trim()) params.set('search', options.search.trim())
+  const query = params.toString() ? `?${params.toString()}` : ''
+
+  return apiRequest<{ parts: Part[] }>(`/api/inventory/parts${query}`, { workshopId }).then(
+    (r) => r.parts,
+  )
+}
+
 export function createPart(payload: CreatePartPayload) {
   const body: Record<string, unknown> = {
     partNumber: payload.partNumber.trim(),
@@ -40,6 +62,15 @@ export function createPart(payload: CreatePartPayload) {
     ...withWorkshop,
     method: 'POST',
     body: JSON.stringify(body),
+  }).then((r) => r.part)
+}
+
+/** Edita el catálogo de un repuesto — RF-609. El número de parte no se incluye: no se edita. */
+export function updatePart(partId: string, payload: UpdatePartPayload) {
+  return apiRequest<{ part: Part }>(`/api/inventory/parts/${partId}`, {
+    ...withWorkshop,
+    method: 'PATCH',
+    body: JSON.stringify(payload),
   }).then((r) => r.part)
 }
 
@@ -68,4 +99,16 @@ export function createMovement(partId: string, payload: CreateMovementPayload) {
     method: 'POST',
     body: JSON.stringify(body),
   }).then((r) => r.movement)
+}
+
+/**
+ * Transfiere existencias al repuesto equivalente en otro taller — RF-608.
+ * Reservada al Owner; el origen es el taller activo, por eso usa `withWorkshop`.
+ */
+export function transferPart(partId: string, payload: TransferPartPayload) {
+  return apiRequest<{ transferred: number; toPartId: string }>(`/api/inventory/parts/${partId}/transfer`, {
+    ...withWorkshop,
+    method: 'POST',
+    body: JSON.stringify(payload),
+  })
 }

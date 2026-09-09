@@ -6,6 +6,7 @@ import { InventarioPage } from '../modules/inventario/pages/InventarioPage'
 import { TalleresPage } from '../modules/organizaciones/pages/TalleresPage'
 import { EquipoPage } from '../modules/organizaciones/pages/EquipoPage'
 import { AuditoriaPage } from '../modules/auditoria/pages/AuditoriaPage'
+import { ArquitecturaPage } from '../modules/arquitectura/pages/ArquitecturaPage'
 import { LoginPage } from '../modules/auth/pages/LoginPage'
 import { RegisterPage } from '../modules/auth/pages/RegisterPage'
 import { UnauthorizedPage } from '../modules/auth/pages/UnauthorizedPage'
@@ -25,6 +26,13 @@ export const appRouter = createBrowserRouter([
   {
     path: '/register',
     element: <RegisterPage />,
+  },
+  {
+    // Fuera de ProtectedRoute a propósito: son diagramas para presentar el
+    // proyecto, no datos de negocio, y deben abrirse sin depender de una
+    // sesión iniciada.
+    path: '/arquitectura',
+    element: <ArquitecturaPage />,
   },
   {
     element: <ProtectedRoute />,

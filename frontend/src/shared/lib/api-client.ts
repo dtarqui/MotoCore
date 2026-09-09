@@ -45,9 +45,38 @@ async function toApiError(response: Response) {
   }
 }
 
+/**
+ * Fuerza el cierre de sesión cuando el servidor rechaza la credencial — 401
+ * es siempre `auth.missing_token` o `auth.invalid_token` en este catálogo,
+ * nunca un permiso insuficiente (eso es 403). El cliente puede seguir
+ * creyendo que hay sesión —el token en memoria no avisa solo de que expiró—,
+ * así que es el propio rechazo del servidor el que debe disparar la salida.
+ *
+ * `supabase.auth.signOut()` dispara `onAuthStateChange` en `AuthContext`, que
+ * limpia `session`/`me`/el contexto activo; `ProtectedRoute` reacciona a eso
+ * y redirige a `/login`. No hay que navegar a mano desde aquí.
+ */
+let cerrandoSesionPorExpirar = false
+
+async function forzarCierrePorSesionExpirada() {
+  if (cerrandoSesionPorExpirar) return
+  cerrandoSesionPorExpirar = true
+  try {
+    await supabase.auth.signOut()
+  } finally {
+    cerrandoSesionPorExpirar = false
+  }
+}
+
 export type ApiRequestOptions = RequestInit & {
   /** Adjunta el taller activo. Solo para endpoints de nivel taller. */
   withWorkshop?: boolean
+  /**
+   * Fuerza un taller distinto del activo, para una lectura puntual — p. ej.
+   * elegir el repuesto de destino de una transferencia (RF-608) sin abandonar
+   * el taller de origen. Gana sobre `withWorkshop` cuando ambos se indican.
+   */
+  workshopId?: string
 }
 
 /**
@@ -62,7 +91,7 @@ export type ApiRequestOptions = RequestInit & {
  * membresía: enviarlas no concede acceso, solo indica sobre qué se opera.
  */
 export async function apiRequest<T>(path: string, options: ApiRequestOptions = {}): Promise<T> {
-  const { withWorkshop, ...init } = options
+  const { withWorkshop, workshopId: forcedWorkshopId, ...init } = options
 
   const { data } = await supabase.auth.getSession()
   const accessToken = data.session?.access_token
@@ -77,14 +106,20 @@ export async function apiRequest<T>(path: string, options: ApiRequestOptions = {
   const orgId = getActiveOrgId()
   if (orgId) headers['X-Org-Id'] = orgId
 
-  if (withWorkshop) {
+  if (forcedWorkshopId) {
+    headers['X-Workshop-Id'] = forcedWorkshopId
+  } else if (withWorkshop) {
     const workshopId = getActiveWorkshopId()
     if (workshopId) headers['X-Workshop-Id'] = workshopId
   }
 
   const response = await fetch(buildApiUrl(path), { ...init, headers })
 
-  if (!response.ok) throw await toApiError(response)
+  if (!response.ok) {
+    const error = await toApiError(response)
+    if (response.status === 401) void forzarCierrePorSesionExpirada()
+    throw error
+  }
   if (response.status === 204) return undefined as T
 
   return (await response.json()) as T
