@@ -21,7 +21,7 @@
 -- puede convivir en `public` con otro sistema sin pisarlo.
 --
 -- USO: pegar entero en el SQL Editor y ejecutar UNA vez. Despues aplicar
--- `migrations/0001…0011` en orden y comprobar con `verify.sql`.
+-- `migrations/0001…0004` en orden y comprobar con `verify.sql`.
 --
 -- ============================================================================
 

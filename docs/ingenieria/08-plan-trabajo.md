@@ -26,14 +26,16 @@ Prácticas adoptadas:
 
 ## 2. Fases y cronograma
 
-Cada fase materializa uno de los cuatro objetivos específicos.
+Cada fase materializa uno de los **tres** objetivos específicos. Entre el diseño y la validación se intercala el **desarrollo del artefacto**, que no es una fase de la investigación: es la construcción del instrumento sin el cual el objetivo 3 no tendría sobre qué medir, y por eso el título no la nombra.
 
 | Fase | Período | Objetivo | Resultado |
 |---|---|---|---|
 | **F1 · Análisis** | Septiembre (sem. 1–2) | 1 | Estado del arte con matriz de extracción, análisis del mercado y vacío de investigación |
 | **F2 · Diseño** | Septiembre (sem. 3–4) | 2 | Marco teórico y conceptual, modelo de datos jerárquico, políticas de aislamiento, decisiones registradas, contrato de la interfaz y plan de pruebas |
-| **F3 · Construcción** | 29 de septiembre – 7 de diciembre | 3 | Sistema funcional con el corte vertical e integración continua operativa |
-| **F4 · Validación y cierre** | Diciembre | 4 | Evidencia de aislamiento, evaluación de usabilidad con operadores, documento final y defensa |
+| *Desarrollo del artefacto* | 29 de septiembre – 7 de diciembre | — *(instrumental)* | Sistema con el corte vertical e integración continua operativa: el objeto sobre el que se mide |
+| **F3 · Validación y cierre** | Diciembre | 3 | Evidencia de aislamiento y de su inmutabilidad, evaluación de usabilidad con operadores, documento final y defensa |
+
+> **Por qué el desarrollo no cuenta como fase.** Una fase de esta investigación cierra con un **resultado de conocimiento**: un vacío identificado, un diseño fundamentado, una evidencia contrastada contra una hipótesis. Construir el sistema no produce ninguno de los tres — produce la **unidad de observación**. Declararlo fase obligaría a defender la construcción como aporte, y el aporte está en el diseño de la arquitectura y en el procedimiento con que se comprueba que su aislamiento no se puede desactivar.
 
 > **Qué relación guardan F1 y F2 con el anteproyecto.** El estado del arte, el marco teórico y el diseño que estas dos fases producen **no parten de cero**: el anteproyecto presentado para aprobación ya los adelanta, y lo que F1 y F2 hacen es consolidarlos, ampliarlos con la lectura completa de las fuentes y cerrarlos como artefactos de ingeniería trazables a los requisitos. El anteproyecto es el **insumo** de ambas fases, no su sustituto, y lo que cierra septiembre es su versión revisada por el tutor (hito H1).
 
@@ -52,16 +54,16 @@ Cada fase materializa uno de los cuatro objetivos específicos.
 
 *Reserva: del 22 al 31 de diciembre queda como margen para correcciones posteriores a la revisión del tutor.*
 
-> **Sobre HU-21 y el lugar que ocupa en el cronograma.** Sus casos **no se escriben en I8**: cada módulo incorpora su caso de aislamiento **antes** que la funcionalidad que protege, desde I3, que es la mitigación del riesgo R1 y la regla de orden que fija §1. Lo que I8 concentra es la **ejecución del ciclo completo de validación** —las tres corridas del *test–retest* sobre entornos reconstruidos ([Plan de pruebas](11-plan-pruebas.md) §5.4)— y la conservación de la evidencia que exige el objetivo 4. Los puntos de HU-21 se imputan a I8 porque es ahí donde se produce el entregable, no donde se escribe la primera prueba.
+> **Sobre HU-21 y el lugar que ocupa en el cronograma.** Sus casos **no se escriben en I8**: cada módulo incorpora su caso de aislamiento **antes** que la funcionalidad que protege, desde I3, que es la mitigación del riesgo R1 y la regla de orden que fija §1. Lo que I8 concentra es la **ejecución del ciclo completo de validación** —las tres corridas del *test–retest* sobre entornos reconstruidos ([Plan de pruebas](11-plan-pruebas.md) §5.4)— y la conservación de la evidencia que exige el objetivo 3. Los puntos de HU-21 se imputan a I8 porque es ahí donde se produce el entregable, no donde se escribe la primera prueba.
 
 ### Distribución de esfuerzo
 
-| Fase | Puntos de historia | Proporción |
+| Bloque | Puntos de historia | Proporción |
 |---|---|---|
 | F1 · Análisis | — | Investigación |
 | F2 · Diseño | — | Modelado |
-| F3 · Construcción | 65 | 86 % |
-| F4 · Validación y cierre | 11 | 14 % |
+| *Desarrollo del artefacto* | 65 | 86 % |
+| F3 · Validación y cierre | 11 | 14 % |
 
 ## 3. Hitos
 
@@ -71,7 +73,7 @@ Cada fase materializa uno de los cuatro objetivos específicos.
 | **H2 · Jerarquía operativa** | 12 de octubre | Una organización gestiona varios talleres; el aislamiento sigue vigente |
 | **H3 · Corte vertical completo** | 23 de noviembre | Clientes (nivel organización) e Inventario (nivel taller) funcionando y probados |
 | **H4 · Sistema integrado** | 7 de diciembre | Frontend conectado; flujo completo desde el registro hasta la operación |
-| **H5 · Validación concluida** | 21 de diciembre | Evidencia de aislamiento reproducible; evaluación de usabilidad ejecutada con al menos cinco operadores; documento final entregado |
+| **H5 · Validación concluida** | 21 de diciembre | Evidencia de aislamiento reproducible **y de su inmutabilidad** (CP-N102); evaluación de usabilidad ejecutada con al menos cinco operadores; documento final entregado |
 
 ## 4. Riesgos
 
@@ -102,4 +104,4 @@ El costo de infraestructura es cero dentro del alcance del proyecto: los planes 
 
 ## 6. Criterio de cierre
 
-El proyecto se considera concluido cuando los cuatro objetivos específicos cuentan con su entregable verificable —según la tabla de trazabilidad de [anteproyecto/01-definicion-y-alcance.md](../anteproyecto/01-definicion-y-alcance.md) §1.7— y la suite de pruebas de aislamiento se ejecuta en verde de forma reproducible, con el detalle de condiciones que fija [Plan de pruebas](11-plan-pruebas.md) §6.3. Las funcionalidades excluidas del alcance (§1.8.3) no condicionan ese cierre.
+El proyecto se considera concluido cuando los tres objetivos específicos cuentan con su entregable verificable —según la tabla de trazabilidad de [anteproyecto/01-definicion-y-alcance.md](../anteproyecto/01-definicion-y-alcance.md) §1.7— y la suite de pruebas de aislamiento se ejecuta en verde de forma reproducible, con el detalle de condiciones que fija [Plan de pruebas](11-plan-pruebas.md) §6.3. Las funcionalidades excluidas del alcance (§1.8.3) no condicionan ese cierre.

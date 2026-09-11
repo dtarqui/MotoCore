@@ -36,7 +36,7 @@ Registro de las decisiones estructurales del proyecto, con las alternativas eval
 
 **Alternativas consideradas**
 1. Aislamiento únicamente en la capa de aplicación.
-2. Row-Level Security como único mecanismo.
+2. Row Level Security como único mecanismo.
 3. Ambos: RLS + verificación explícita en la API (defensa en profundidad).
 
 **Decisión**: opción 3.

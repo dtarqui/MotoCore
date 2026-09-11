@@ -77,7 +77,7 @@ La definición formal de cada tecnología y la teoría que respalda su elección
 
 ## Integración continua
 
-Cada integración al ramal principal ejecuta de forma automatizada la verificación estática de tipos y la suite de pruebas; un fallo impide la integración (RNF-203). El diseño del pipeline forma parte del objetivo específico 3. Qué se ejecuta en cada integración y qué exige un entorno real está en el [Plan de pruebas](11-plan-pruebas.md) §1.2.
+Cada integración al ramal principal ejecuta de forma automatizada la verificación estática de tipos y la suite de pruebas; un fallo impide la integración (RNF-203). El diseño del pipeline responde a RNF-203. Qué se ejecuta en cada integración y qué exige un entorno real está en el [Plan de pruebas](11-plan-pruebas.md) §1.2.
 
 ## Alcance de plataformas
 

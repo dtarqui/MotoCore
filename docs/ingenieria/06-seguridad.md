@@ -77,12 +77,12 @@ Los errores se devuelven en un formato uniforme y normalizado, con códigos esta
 
 ## Verificación del aislamiento
 
-El cumplimiento del aislamiento se comprueba mediante pruebas automatizadas que operan por dos vías independientes (objetivo específico 4):
+El cumplimiento del aislamiento se comprueba mediante pruebas automatizadas que operan por dos vías independientes (objetivo específico 3):
 
 1. **A través de la interfaz de programación**: una cuenta sin membresía en una organización recibe error de autorización en cualquier operación sobre sus datos.
 2. **Mediante acceso directo a la base de datos**, prescindiendo de la capa de aplicación: las consultas ejecutadas con la identidad de otra cuenta no devuelven registros ajenos.
 
-La segunda vía es la que demuestra que el aislamiento se sostiene cuando se prescinde por completo de la interfaz. A ellas se suma una tercera comprobación, que es la que verifica la **independencia** de las dos capas: anular el control de membresía de la aplicación —en el banco de pruebas, nunca con un interruptor en producción— y comprobar que las políticas siguen filtrando (RNF-102, caso CP-N102).
+La segunda vía es la que demuestra que el aislamiento se sostiene cuando se prescinde por completo de la interfaz — es decir, que es **inmutable**: ninguna decisión tomada en la capa de aplicación puede apagarlo. A ellas se suma una tercera comprobación, que es la que verifica la **independencia** de las dos capas: anular el control de membresía de la aplicación —en el banco de pruebas, nunca con un interruptor en producción— y comprobar que las políticas siguen filtrando (RNF-102, caso CP-N102).
 
 El diseño de las tres —escenario, tablas cubiertas y evidencia a conservar— está en el [Plan de pruebas](11-plan-pruebas.md) §5.
 

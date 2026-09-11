@@ -63,9 +63,10 @@ Uso interno de cada término. La definición formal con su fuente citable está 
 
 | Término | Uso en este proyecto |
 |---|---|
-| **RLS** (Row-Level Security) | Mecanismo de PostgreSQL que restringe, en el propio motor de base de datos, qué filas puede leer o escribir cada usuario. Es la capa de fondo del aislamiento entre organizaciones. |
+| **RLS** (Row Level Security) | Mecanismo de PostgreSQL que restringe, en el propio motor de base de datos, qué filas puede leer o escribir cada usuario. Es la capa de fondo del aislamiento entre organizaciones. |
 | **Serverless** | Modelo de despliegue donde el backend corre como funciones efímeras bajo demanda, sin servidor propio que administrar y sin costo fijo cuando no hay tráfico. |
 | **Defensa en profundidad** | Aquí: el aislamiento se aplica **dos veces** — políticas RLS en la base de datos *y* verificación de membresía en la API. Si una falla, la otra sostiene. Su fundamento está en §3.2.4 del marco teórico. |
+| **Inmutabilidad del aislamiento** | Propiedad que **el título del proyecto nombra**: la separación entre organizaciones **no puede desactivarse desde la aplicación**. No existe interruptor, configuración ni ruta de código que la apague, porque reside en el motor de base de datos y se evalúa sobre la identidad de quien consulta. Es verificable: anulando la verificación de membresía de la capa de aplicación, las políticas siguen filtrando (RNF-102, caso CP-N102). **No confundir con el historial inmutable**, que es una propiedad de dos tablas y no del aislamiento. |
 | **Problem Details** | Formato estándar de respuesta de error (RFC 9457, que sustituye al RFC 7807) que usa la API. Los códigos siguen el patrón `modulo.razon` (ej. `organization.access_denied`). |
 | **Contexto activo** | El par organización activa + taller activo que acompaña a cada petición. El servidor no asume ninguno por defecto: si falta, rechaza la petición. |
 

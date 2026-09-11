@@ -7,7 +7,7 @@ import { defineConfig } from 'vitest/config';
  * Sin esto, los niveles N3 y N4 se saltan **siempre**: sus `describe.skipIf`
  * consultan `process.env`, y nada lo poblaba aunque el `.env` estuviera
  * completo. El sintoma era una suite en verde que en realidad no habia
- * ejecutado nada de lo que sostiene el objetivo 4.
+ * ejecutado nada de lo que sostiene el objetivo 3.
  *
  * Lo que ya venga en el entorno **no se pisa**: en integracion continua las
  * variables llegan por el runner, y ahi el archivo no existe. Su ausencia no es

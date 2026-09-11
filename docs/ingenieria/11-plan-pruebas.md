@@ -1,6 +1,6 @@
 # Plan de pruebas y validación
 
-Estrategia de verificación del sistema y matriz de trazabilidad **requisito → caso de prueba → evidencia**. Materializa RNF-202 —toda regla de aislamiento y de negocio tiene prueba automatizada— y sostiene el objetivo específico 4: validar el aislamiento con evidencia reproducible ([anteproyecto/01](../anteproyecto/01-definicion-y-alcance.md) §1.7).
+Estrategia de verificación del sistema y matriz de trazabilidad **requisito → caso de prueba → evidencia**. Materializa RNF-202 —toda regla de aislamiento y de negocio tiene prueba automatizada— y sostiene el objetivo específico 3: validar el aislamiento con evidencia reproducible ([anteproyecto/01](../anteproyecto/01-definicion-y-alcance.md) §1.7).
 
 > Requisitos: [02-requisitos.md](02-requisitos.md) · Contrato verificado: [10-contrato-api.md](10-contrato-api.md) · Políticas: [05-modelo-datos.md](05-modelo-datos.md) · Cronograma: [08-plan-trabajo.md](08-plan-trabajo.md)
 >
@@ -235,7 +235,7 @@ RNF-501 no aparece: está fuera de alcance como objetivo medible.
 
 ---
 
-## 5. Verificación del aislamiento (objetivo específico 4)
+## 5. Verificación del aislamiento (objetivo específico 3)
 
 Es el entregable central del proyecto. Se detalla aparte porque su diseño —no su cantidad— es lo que sostiene la tesis.
 
@@ -257,13 +257,13 @@ Verifica la **capa del motor**, y es la que demuestra la premisa del proyecto. S
 
 Debe cubrir **todas** las tablas de negocio: `mt_clients`, `mt_parts`, `mt_part_movements`, `mt_workshops`, `mt_memberships`, `mt_workshop_assignments` y `mt_audit_log`. Una tabla sin política activa es una fuga, y solo esta vía la detecta: por la interfaz quedaría oculta tras la verificación de la aplicación.
 
-### 5.3 La prueba que justifica la redundancia
+### 5.3 La prueba que justifica la redundancia — y que sostiene la inmutabilidad
 
 RNF-102 exige demostrar que las dos capas son **independientes**, no que ambas existen. Se verifica omitiendo deliberadamente la verificación de membresía de la capa de aplicación y comprobando que el acceso cruzado sigue sin producirse.
 
 **Cómo se deshabilita.** No existe —ni debe existir— un interruptor en el código de producción que apague la comprobación: sería una vía de escalada esperando a que alguien la active por error. La capa se anula **en el banco de pruebas**, sustituyendo las funciones de verificación por versiones que conceden acceso sin comprobar nada; el resto del sistema queda intacto. La petición atraviesa entonces la capa de aplicación como si el solicitante fuera miembro, llega a la consulta, y no devuelve nada: el cliente de datos está atado a **su** credencial y las políticas se evalúan sobre su identidad real.
 
-Sin este caso, la defensa en profundidad de ADR-002 sería una afirmación de diseño; con él, es un hecho verificado. Es el argumento que responde directamente a la evidencia de Dar et al. (2023) y a la serie de CVE citada en el estado del arte.
+Sin este caso, la defensa en profundidad de ADR-002 sería una afirmación de diseño; con él, es un hecho verificado — y es exactamente lo que el título llama **aislamiento inmutable**: una separación que la capa de aplicación no puede apagar ni degradar. Es el argumento que responde directamente a la evidencia de Dar et al. (2023) y a la serie de CVE citada en el estado del arte.
 
 ### 5.4 Repetición: el resultado no puede depender de una ejecución
 
@@ -280,7 +280,7 @@ El resultado que se reporta es el de las **tres** ejecuciones, no el de la mejor
 
 ### 5.5 Evidencia a conservar
 
-Para que la validación sea reproducible por un tercero (objetivo 4), se conserva: el guion de construcción del escenario base, la salida de la ejecución de los casos CP-701, CP-702, CP-704.2, CP-N101 y CP-N102, y la versión del esquema —identificador de la última migración aplicada— contra la que se ejecutaron.
+Para que la validación sea reproducible por un tercero (objetivo 3), se conserva: el guion de construcción del escenario base, la salida de la ejecución de los casos CP-701, CP-702, CP-704.2, CP-N101 y CP-N102, y la versión del esquema —identificador de la última migración aplicada— contra la que se ejecutaron.
 
 Esa evidencia la producen tres archivos de prueba, uno por vía de verificación: el de **integración** (CP-701 y el resto del flujo por la interfaz de programación), el de **acceso directo al motor** (CP-702, CP-N101 y CP-704.2) y el de **independencia de capas** (CP-N102). Separarlos no es organizativo: cada uno exige un montaje distinto —cliente HTTP, cliente PostgreSQL con identidad ajena y banco de pruebas con la verificación de membresía sustituida— y mezclarlos impediría ejecutar una sola condición experimental por vez (§15.2 del [anteproyecto](../anteproyecto/04-anteproyecto-integrado.md)).
 
@@ -301,7 +301,7 @@ Una iteración no se cierra mientras no se cumplan las cuatro condiciones ([08-p
 
 Los casos de N3 y N4 exigen credenciales de un entorno real. Cuando faltan, esos casos se **omiten**, no se dan por pasados.
 
-La consecuencia debe declararse sin atenuantes: **un caso omitido no cubre su requisito**. Es la misma limitación que ADR-007 asume para las reglas alojadas en funciones del motor —no pueden verificarse sin un motor real—, y por eso la validación del objetivo 4 se ejecuta contra un entorno real antes de cada hito, no solo en la integración continua.
+La consecuencia debe declararse sin atenuantes: **un caso omitido no cubre su requisito**. Es la misma limitación que ADR-007 asume para las reglas alojadas en funciones del motor —no pueden verificarse sin un motor real—, y por eso la validación del objetivo 3 se ejecuta contra un entorno real antes de cada hito, no solo en la integración continua.
 
 Un informe de ejecución que muestre casos omitidos en N3 o N4 **no** constituye evidencia de cumplimiento.
 
@@ -313,7 +313,7 @@ La usabilidad se reporta **aunque no alcance sus umbrales**. Un resultado por de
 
 ---
 
-## 7. Evaluación de usabilidad del cambio de contexto (objetivo específico 4)
+## 7. Evaluación de usabilidad del cambio de contexto (objetivo específico 3)
 
 Complementa la verificación del aislamiento. Responde a una pregunta que las pruebas automatizadas no pueden responder: si el modelo jerárquico que la tesis propone resulta **comprensible para quien debe operarlo**. Una arquitectura correcta que el operador no sabe manejar no resuelve el problema planteado.
 

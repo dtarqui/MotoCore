@@ -10,7 +10,7 @@
 
 ## PERFIL DE PROYECTO DE GRADO
 
-### Diseño, implementación y validación de una arquitectura multi-tenant jerárquica con aislamiento verificable en la base de datos para organizaciones de servicio de motocicletas en Bolivia
+### Diseño y validación de una arquitectura multi-tenant jerárquica con Row Level Security (RLS), aislamiento verificable e inmutable en la base de datos, para el servicio de mantenimiento mecánico
 
 ---
 
@@ -33,7 +33,7 @@ La Paz – Bolivia
 
 | Campo | Detalle |
 |---|---|
-| **Título** | Diseño, implementación y validación de una arquitectura multi-tenant jerárquica con aislamiento verificable en la base de datos para organizaciones de servicio de motocicletas en Bolivia |
+| **Título** | Diseño y validación de una arquitectura multi-tenant jerárquica con Row Level Security (RLS), aislamiento verificable e inmutable en la base de datos, para el servicio de mantenimiento mecánico |
 | **Programa** | Maestría en Full Stack Development |
 | **Línea de investigación** | Arquitectura de software y seguridad de datos en aplicaciones de software como servicio |
 | **Modalidad** | Proyecto de Grado |
@@ -79,8 +79,7 @@ La Paz – Bolivia
 
 1. ¿Qué estrategias de aislamiento multi-tenant documenta la literatura, con qué ventajas y limitaciones, y qué carencias presentan frente al modelo multiorganización las soluciones de gestión de talleres disponibles en Bolivia?
 2. ¿Qué modelo de datos y qué políticas de seguridad a nivel de fila permiten representar la jerarquía organización → talleres sin fragmentar la información del cliente y sosteniendo un único límite de aislamiento?
-3. ¿Cómo se implementan la identidad, la jerarquía organizacional, el control de acceso por rol y el alcance diferenciado de datos sobre una plataforma serverless con verificación automatizada en cada integración?
-4. ¿Cómo se comprueba, con evidencia reproducible, que el aislamiento entre organizaciones se cumple incluso ante fallos de la capa de aplicación, y que el cambio de contexto entre organizaciones y talleres resulta usable para el operador?
+3. ¿Cómo se comprueba, con evidencia reproducible, que el aislamiento entre organizaciones se cumple incluso ante fallos de la capa de aplicación —es decir, que es **inmutable**— y que el cambio de contexto entre organizaciones y talleres resulta usable para el operador?
 
 ---
 
@@ -88,28 +87,27 @@ La Paz – Bolivia
 
 ### 4.1 Objetivo general
 
-> **Diseñar, implementar y validar una arquitectura multi-tenant jerárquica (organización → talleres) sobre infraestructura serverless, que aplique el aislamiento de datos en el motor de base de datos mediante seguridad a nivel de fila, para permitir la gestión centralizada de varias organizaciones de servicio de motocicletas en Bolivia garantizando la separación verificable de sus datos.**
+> **Diseñar y validar una arquitectura multi-tenant jerárquica (organización → talleres) sobre infraestructura serverless, que aplique el aislamiento de datos en el motor de base de datos mediante seguridad a nivel de fila y lo sostenga con independencia de la capa de aplicación, para permitir la gestión centralizada de varias organizaciones de servicio de mantenimiento mecánico garantizando la separación verificable e inmutable de sus datos.**
 
 ### 4.2 Objetivos específicos
 
-Cuatro objetivos secuenciales, uno por fase — **Analizar → Diseñar → Implementar → Validar** —, cada uno correlativo a una pregunta de la sistematización y cerrado con un entregable verificable.
+Tres objetivos secuenciales, uno por fase — **Analizar → Diseñar → Validar** —, cada uno correlativo a una pregunta de la sistematización y cerrado con un entregable verificable. La construcción del artefacto no es un objetivo: es el instrumento del objetivo 3.
 
 | # | Objetivo específico | Entregable verificable |
 |---|---|---|
 | 1 | **Analizar** las estrategias de aislamiento multi-tenant documentadas en la literatura —base por inquilino, esquema por inquilino y esquema compartido con seguridad a nivel de fila— y las soluciones de gestión de talleres con presencia en Bolivia, para fundamentar la selección arquitectónica e identificar el vacío que justifica el proyecto | Matriz de extracción del estado del arte · análisis del mercado con el vacío identificado |
 | 2 | **Diseñar** el modelo de datos de la jerarquía organización → talleres —con el alcance de cada entidad según su nivel y las restricciones que de él se derivan— y **especificar** las políticas de seguridad a nivel de fila y las funciones de verificación de membresía que sostienen un único límite de aislamiento | Modelo entidad-relación con alcance por nivel · contrato de la interfaz de programación · migración con políticas y funciones de verificación |
-| 3 | **Implementar** sobre infraestructura serverless la capa de identidad, la jerarquía organizacional y el control de acceso por rol, junto con el corte vertical que demuestra el alcance diferenciado de datos, y **automatizar** un pipeline de integración continua | Sistema con registro, organizaciones, talleres, miembros, clientes e inventario operativos · pipeline en verde en cada integración |
-| 4 | **Validar** el aislamiento mediante pruebas automatizadas que comprueben, tanto por la interfaz de programación como por acceso directo a la base de datos, que una organización no accede a datos de otra aun cuando la capa de aplicación omita sus controles, y **evaluar** con operadores del rubro la usabilidad del cambio de contexto entre organizaciones y talleres | Suite de pruebas de aislamiento con su matriz requisito → caso → evidencia, reproducible desde una base vacía · informe de evaluación de usabilidad con tasa de éxito por tarea y puntuación SUS |
+| 3 | **Validar** el aislamiento mediante pruebas automatizadas que comprueben, tanto por la interfaz de programación como por acceso directo a la base de datos, que una organización no accede a datos de otra aun cuando la capa de aplicación omita sus controles, y **evaluar** con operadores del rubro la usabilidad del cambio de contexto entre organizaciones y talleres | Suite de pruebas de aislamiento con su matriz requisito → caso → evidencia, reproducible desde una base vacía · informe de evaluación de usabilidad con tasa de éxito por tarea y puntuación SUS |
 
 ---
 
 ## 5. Hipótesis
 
-Por tratarse de una investigación explicativa que propone aplicar una arquitectura determinada para mejorar una propiedad medible del sistema, corresponde formular hipótesis. Se enuncia como **afirmación factual en presente** —no como promesa de resultado ni como resultado ya obtenido—, de modo que quede sujeta a comprobación o refutación empírica: es lo que la validación del objetivo 4 deberá confirmar o refutar, con el criterio de decisión fijado de antemano en §9.4.
+Por tratarse de una investigación explicativa que propone aplicar una arquitectura determinada para mejorar una propiedad medible del sistema, corresponde formular hipótesis. Se enuncia como **afirmación factual en presente** —no como promesa de resultado ni como resultado ya obtenido—, de modo que quede sujeta a comprobación o refutación empírica: es lo que la validación del objetivo 3 deberá confirmar o refutar, con el criterio de decisión fijado de antemano en §9.4.
 
 **Hipótesis de investigación (H1)**
 
-> **La implementación de una arquitectura multi-tenant jerárquica —que sitúa el límite de aislamiento en la organización y trata el taller como criterio de alcance operativo, con políticas de seguridad a nivel de fila reforzadas por verificación de membresía en la capa de aplicación— elimina el acceso cruzado de datos entre organizaciones, reduce a cero (0) las filas ajenas devueltas y sostiene esa separación aun con la verificación de la capa de aplicación deshabilitada.**
+> **Una arquitectura multi-tenant jerárquica —que sitúa el límite de aislamiento en la organización y trata el taller como criterio de alcance operativo, con políticas de seguridad a nivel de fila reforzadas por verificación de membresía en la capa de aplicación— elimina el acceso cruzado de datos entre organizaciones, reduce a cero (0) las filas ajenas devueltas y sostiene esa separación aun con la verificación de la capa de aplicación deshabilitada: el aislamiento es, por tanto, verificable e inmutable.**
 
 **Hipótesis nula (H0)**
 
@@ -120,7 +118,7 @@ Por tratarse de una investigación explicativa que propone aplicar una arquitect
 | Tipo | Variable | Indicadores | Instrumento de medición |
 |---|---|---|---|
 | **Independiente** | Arquitectura multi-tenant jerárquica con aislamiento en dos capas | Número de niveles jerárquicos modelados · número de límites de aislamiento · cobertura de tablas de negocio con políticas activas | Modelo de datos y migraciones versionadas |
-| **Dependiente** | Separación verificable de datos entre organizaciones | **Filas ajenas devueltas por acceso directo a la base de datos = 0** · respuestas de autorización correctas en el 100 % de las operaciones del contrato · casos de aislamiento en verde con la verificación de la aplicación deshabilitada | Suite automatizada de pruebas de aislamiento |
+| **Dependiente** | Separación verificable e inmutable de datos entre organizaciones | **Filas ajenas devueltas por acceso directo a la base de datos = 0** · respuestas de autorización correctas en el 100 % de las operaciones del contrato · casos de aislamiento en verde con la verificación de la aplicación deshabilitada | Suite automatizada de pruebas de aislamiento |
 | **Dependiente** | Gestión centralizada | El cliente registrado en un taller es accesible desde cualquier otro de la misma organización · cambio de organización y de taller activos sin cerrar sesión | Casos de prueba de alcance por nivel |
 | **Dependiente** | Usabilidad del cambio de contexto | Tasa de éxito por tarea · tiempo y errores por tarea (descriptivos) · puntuación SUS | Observación estructurada de tareas guiadas · cuestionario SUS |
 | **Interviniente** | Modelo de despliegue serverless | Condición de ejecución que impone ausencia de estado entre peticiones y costo proporcional al uso; no se manipula, se mantiene constante | — |
@@ -232,8 +230,8 @@ El proyecto trabaja con **cuatro poblaciones**, porque combina revisión documen
 |---|---|---|---|
 | **a** | Publicaciones revisadas por pares sobre aislamiento entre inquilinos en esquema compartido (2021–2026) *(obj. 1)* | **5 fuentes** | No probabilístico **por criterio**; suficiencia por saturación temática |
 | **b** | Plataformas de gestión de talleres con presencia, uso o comercialización en Bolivia *(obj. 1)* | **10 plataformas** | No probabilístico **intencional**, por accesibilidad de la información pública del producto |
-| **c** | **Las tablas de negocio del esquema y las operaciones expuestas por la interfaz de programación** del sistema construido *(obj. 2, 3 y 4)* — es donde se mide la variable dependiente | **Censo: el 100 %** — 7 tablas y la totalidad de las operaciones del contrato, sobre un escenario de 3 cuentas sintéticas, 3 organizaciones y 3 talleres | No probabilístico **intencional por caso crítico**: se ejerce el peor escenario de aislamiento, no el uso nominal. **No cabe muestreo probabilístico** — una sola tabla sin política activa es una fuga |
-| **d** | Operadores de organizaciones de servicio de motocicletas en Bolivia con más de una organización y/o taller *(obj. 4)* | **De 5 a 8 participantes** | No probabilístico **intencional** por perfil; tamaño justificado por Nielsen y Landauer (1993) |
+| **c** | **Las tablas de negocio del esquema y las operaciones expuestas por la interfaz de programación** del sistema construido *(obj. 2 y 3)* — es donde se mide la variable dependiente | **Censo: el 100 %** — 7 tablas y la totalidad de las operaciones del contrato, sobre un escenario de 3 cuentas sintéticas, 3 organizaciones y 3 talleres | No probabilístico **intencional por caso crítico**: se ejerce el peor escenario de aislamiento, no el uso nominal. **No cabe muestreo probabilístico** — una sola tabla sin política activa es una fuga |
+| **d** | Operadores de organizaciones de servicio de motocicletas en Bolivia con más de una organización y/o taller *(obj. 3)* | **De 5 a 8 participantes** | No probabilístico **intencional** por perfil; tamaño justificado por Nielsen y Landauer (1993) |
 
 **Unidades de análisis.** Las poblaciones **a** y **b** se analizan por revisión documental —fuentes y fichas de producto— y sustentan el objetivo 1. Las dos que soportan la validación son de naturaleza distinta entre sí:
 
@@ -249,13 +247,13 @@ Un instrumento no queda declarado por su nombre sino por **cómo se ejecuta**: q
 | 1 | Revisión sistemática de literatura con criterios de inclusión y exclusión (2021–2026, revisión por pares) | Matriz de extracción | Estado del arte con vacío identificado |
 | 1 | Análisis documental de la oferta del mercado | Matriz comparativa de capacidades | Análisis del mercado boliviano |
 | 2 | Modelado conceptual y lógico de datos | Diagrama entidad-relación · especificación de políticas | Modelo jerárquico y contrato de interfaz |
-| 3 | Desarrollo iterativo e incremental | Control de versiones · integración continua | Sistema funcional con corte vertical |
-| 4 | **Experimentación controlada** por dos vías independientes | Suite automatizada de pruebas · matriz requisito → caso → evidencia | Evidencia reproducible de aislamiento |
-| 4 | **Observación estructurada** de tareas guiadas con operadores | Guion de tareas T1–T3 · cuestionario SUS (Brooke, 1996), interpretado según el baremo de Bangor et al. (2008) | Informe de usabilidad del cambio de contexto |
+| — | Desarrollo iterativo e incremental *(instrumental: construye el objeto de medida, no es objetivo)* | Control de versiones · integración continua | Sistema funcional con corte vertical |
+| 3 | **Experimentación controlada** por dos vías independientes | Suite automatizada de pruebas · matriz requisito → caso → evidencia | Evidencia reproducible de aislamiento |
+| 3 | **Observación estructurada** de tareas guiadas con operadores | Guion de tareas T1–T3 · cuestionario SUS (Brooke, 1996), interpretado según el baremo de Bangor et al. (2008) | Informe de usabilidad del cambio de contexto |
 
 ### 9.4 Procesamiento y análisis de los resultados
 
-El resultado de cada caso de prueba es **binario y objetivo** —pasa o no pasa—, sin interpretación del investigador. La validación del objetivo 4 se considera cumplida solo si:
+El resultado de cada caso de prueba es **binario y objetivo** —pasa o no pasa—, sin interpretación del investigador. La validación del objetivo 3 se considera cumplida solo si:
 
 1. Toda consulta ejecutada con la identidad de una cuenta ajena devuelve **cero filas** de otra organización, en **todas** las tablas de negocio.
 2. Toda operación del contrato sobre datos ajenos responde con el error de autorización especificado, sin revelar la existencia del recurso.
@@ -296,21 +294,20 @@ La investigación se ejecuta sobre un artefacto de software, lo que **no** la ex
 |---|---|---|---|---|---|---|
 | ¿Qué estrategias documenta la literatura y qué carencias presenta la oferta boliviana? | 1 · Analizar | Existe un vacío no resuelto en multi-tenancy jerárquica | Fuentes revisadas por pares con limitación consignada · capacidades ausentes en la oferta relevada | Publicaciones 2021–2026 sobre aislamiento en esquema compartido → **5 fuentes** · plataformas con presencia en Bolivia → **10 plataformas**; no probabilístico por criterio e intencional | Matriz de extracción · matriz comparativa de mercado | Estado del arte y análisis del mercado |
 | ¿Qué modelo y qué políticas sostienen un único límite de aislamiento? | 2 · Diseñar y especificar | El límite de aislamiento debe situarse en la organización | Niveles modelados · límites de aislamiento · tablas con criterio único de política | Tablas de negocio del esquema → **censo de las 7** | Modelo entidad-relación · contrato de interfaz · migraciones | Modelo jerárquico y políticas especificadas |
-| ¿Cómo se implementan identidad, jerarquía, roles y alcance por nivel? | 3 · Implementar y automatizar | La arquitectura es construible con medios de un desarrollador individual | Requisitos `Must` implementados · pipeline en verde por integración | Operaciones del contrato → **la totalidad**; integraciones al ramal principal → **todas** | Repositorio con control de versiones · integración continua | Sistema con corte vertical operativo |
-| ¿Cómo se comprueba el aislamiento ante fallos de la aplicación y cómo se comprueba que el cambio de contexto es usable? | 4 · Validar | La separación se sostiene aunque la aplicación omita sus controles (la usabilidad se reporta como evidencia complementaria, fuera de la hipótesis) | **Filas ajenas devueltas = 0** · casos de aislamiento en verde sin la capa de aplicación · tasa de éxito por tarea ≥ 80 % · SUS ≥ 68 | **Censo**: 7 tablas y todas las operaciones, sobre 3 cuentas sintéticas / 3 organizaciones / 3 talleres — muestreo intencional **por caso crítico** · operadores del rubro → **5 a 8 participantes**, intencional por perfil | Suite automatizada (Vitest) · cliente PostgreSQL con identidad ajena · banco de pruebas sin la capa de aplicación · informe de ejecución · guion de tareas T1–T3 y cuestionario SUS | Evidencia reproducible de aislamiento · informe de usabilidad |
+| ¿Cómo se comprueba el aislamiento ante fallos de la aplicación y cómo se comprueba que el cambio de contexto es usable? | 3 · Validar | La separación se sostiene aunque la aplicación omita sus controles: es **inmutable** (la usabilidad se reporta como evidencia complementaria, fuera de la hipótesis) | **Filas ajenas devueltas = 0** · casos de aislamiento en verde sin la capa de aplicación · tasa de éxito por tarea ≥ 80 % · SUS ≥ 68 | **Censo**: 7 tablas y todas las operaciones, sobre 3 cuentas sintéticas / 3 organizaciones / 3 talleres — muestreo intencional **por caso crítico** · operadores del rubro → **5 a 8 participantes**, intencional por perfil | Suite automatizada (Vitest) · cliente PostgreSQL con identidad ajena · banco de pruebas sin la capa de aplicación · informe de ejecución · guion de tareas T1–T3 y cuestionario SUS | Evidencia reproducible de aislamiento · informe de usabilidad |
 
 ---
 
 ## 11. Cronograma
 
-Cuatro fases, ocho iteraciones de dos semanas. Cada fase materializa un objetivo específico.
+Tres fases y ocho iteraciones de dos semanas. Cada fase materializa un objetivo específico; el desarrollo del artefacto se intercala entre el diseño y la validación y **no es una fase de la investigación**, sino la construcción del instrumento sobre el que esta mide.
 
 | Fase | Período | Obj. | Resultado |
 |---|---|---|---|
 | **F1 · Análisis** | Septiembre, semanas 1–2 | 1 | Estado del arte con matriz de extracción, análisis del mercado y vacío de investigación |
 | **F2 · Diseño** | Septiembre, semanas 3–4 | 2 | Marco teórico, modelo de datos jerárquico, políticas, contrato de interfaz y plan de pruebas |
-| **F3 · Construcción** | 29 de septiembre – 7 de diciembre | 3 | Sistema funcional con el corte vertical e integración continua operativa |
-| **F4 · Validación y cierre** | Diciembre | 4 | Evidencia de aislamiento, evaluación de usabilidad con operadores, documento final y defensa |
+| *Desarrollo del artefacto* | 29 de septiembre – 7 de diciembre | — *(instrumental)* | Sistema con el corte vertical e integración continua operativa: el objeto sobre el que se mide |
+| **F3 · Validación y cierre** | Diciembre | 3 | Evidencia de aislamiento y de su inmutabilidad, evaluación de usabilidad con operadores, documento final y defensa |
 
 ### Detalle por iteración
 
@@ -389,8 +386,8 @@ Ordenados por exposición (probabilidad × impacto). El registro completo, con s
 2. **Análisis del mercado boliviano** con las capacidades desatendidas por la oferta existente.
 3. **Modelo de datos jerárquico** con el alcance de cada entidad por nivel y las restricciones de integridad derivadas.
 4. **Especificación de las políticas de aislamiento** y del contrato de la interfaz de programación.
-5. **Sistema funcional** con identidad, jerarquía organizacional, control de acceso por rol y el corte vertical de clientes e inventario.
-6. **Pipeline de integración continua** que verifica tipos y ejecuta la suite en cada integración.
+5. **Sistema funcional** con identidad, jerarquía organizacional, control de acceso por rol y el corte vertical de clientes e inventario — *artefacto instrumental: es la unidad de observación, no un resultado de investigación*.
+6. **Pipeline de integración continua** que verifica tipos y ejecuta la suite en cada integración — *instrumental, por el mismo motivo*.
 7. **Evidencia reproducible de aislamiento** por dos vías independientes, con su matriz de trazabilidad.
 8. **Informe de evaluación de usabilidad** del cambio de contexto, con tasa de éxito por tarea, puntuación SUS y lista de problemas detectados.
 9. **Documento final** de proyecto de grado y defensa.

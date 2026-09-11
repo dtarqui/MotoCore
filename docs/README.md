@@ -1,6 +1,6 @@
 # Documentación del proyecto de grado
 
-**Diseño, implementación y validación de una arquitectura multi-tenant jerárquica con aislamiento verificable en la base de datos para organizaciones de servicio de motocicletas en Bolivia.**
+**Diseño y validación de una arquitectura multi-tenant jerárquica con Row Level Security (RLS), aislamiento verificable e inmutable en la base de datos, para el servicio de mantenimiento mecánico.**
 
 Maestría en Full Stack Development · Universidad Católica Boliviana "San Pablo" · Septiembre – diciembre de 2026
 
@@ -110,8 +110,10 @@ Está ordenado por urgencia y abre con una tabla de resumen. Recoge **lo que fal
 
 ## Premisas que rigen toda la documentación
 
-- **Mercado objetivo**: Bolivia.
+- **Dominio y delimitación**: el título declara la aplicabilidad al **servicio de mantenimiento mecánico**; el estudio se **valida** sobre el servicio de motocicletas en **Bolivia**, que es de donde proceden los datos oficiales, la oferta relevada y los operadores de la evaluación de usabilidad.
 - **Modelo jerárquico**: una cuenta administra varias **organizaciones**; cada organización opera varios **talleres**. La organización es la unidad de aislamiento; el taller, una subdivisión operativa.
 - **Aislamiento en dos capas**: políticas en el motor de base de datos, más verificación en la capa de aplicación.
+- **Inmutabilidad del aislamiento**: la separación **no puede desactivarse desde la aplicación**, y eso es comprobable — se anula la verificación de membresía y las políticas siguen filtrando (RNF-102, CP-N102). Es la propiedad que el título nombra; no confundir con el historial inmutable, que es de dos tablas.
+- **Tres objetivos, no cuatro**: analizar, diseñar y validar. Construir el artefacto **no es un objetivo de investigación** sino el instrumento del tercero, y por eso el título no lo nombra.
 - **Alcance acotado**: se especifica el sistema completo, pero se construye y valida el corte vertical que demuestra el modelo jerárquico. Lo excluido está declarado de forma explícita.
 - **La documentación precede a la construcción**: define el sistema a construir; no describe un estado de avance. Cuando la implementación difiera de lo aquí especificado, **se corrige la implementación** — salvo que la diferencia revele un error de la especificación, en cuyo caso se enmienda el documento responsable y, si la decisión era estructural, se registra un ADR.

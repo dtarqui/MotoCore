@@ -118,8 +118,8 @@ RNF-404 es `Should` de forma deliberada: la hipótesis del proyecto es sobre el 
 
 | ID | Requisito | Criterio de aceptación | Alcance |
 |---|---|---|---|
-| RNF-101 | El aislamiento entre organizaciones se aplica en el motor de base de datos, no solo en la aplicación. | Existen políticas de Row-Level Security activas en las **siete tablas de negocio** censadas en el [Modelo de datos](05-modelo-datos.md); una consulta directa a la base de datos con la identidad de otro usuario no devuelve filas ajenas en ninguna de ellas. | Sí |
-| RNF-102 | El aislamiento se aplica en dos capas independientes (defensa en profundidad). | Deshabilitar la verificación de la capa de aplicación no produce fuga de datos: RLS lo impide. Se comprueba con una prueba dedicada. | Sí |
+| RNF-101 | El aislamiento entre organizaciones se aplica en el motor de base de datos, no solo en la aplicación. | Existen políticas de Row Level Security activas en las **siete tablas de negocio** censadas en el [Modelo de datos](05-modelo-datos.md); una consulta directa a la base de datos con la identidad de otro usuario no devuelve filas ajenas en ninguna de ellas. | Sí |
+| RNF-102 | El aislamiento es **inmutable**: se aplica en dos capas independientes y no puede desactivarse desde la aplicación (defensa en profundidad). | Deshabilitar la verificación de la capa de aplicación no produce fuga de datos: las políticas del motor lo impiden. Se comprueba con una prueba dedicada (CP-N102), que es la que sostiene la cláusula de inmutabilidad del título y de la hipótesis. | Sí |
 | RNF-103 | Las credenciales privilegiadas no se exponen al cliente ni al repositorio. | Búsqueda en el repositorio sin resultados de claves; la clave de servicio solo se lee de variables de entorno del servidor. | Sí |
 | RNF-104 | La contraseña nunca se almacena ni se transmite en texto plano. | La gestión de credenciales está delegada en el proveedor de identidad; el sistema nunca recibe ni persiste contraseñas. | Sí |
 | RNF-105 | Los mensajes de error no revelan la existencia de recursos de otras organizaciones. | Un recurso de otra organización devuelve el mismo error que uno inexistente. | Sí |
@@ -164,11 +164,16 @@ RNF-404 es `Should` de forma deliberada: la hipótesis del proyecto es sobre el 
 
 ## 3. Trazabilidad requisito → objetivo
 
-| # | Objetivo específico ([§1.7](../anteproyecto/01-definicion-y-alcance.md)) | Requisitos que lo materializan |
+Los objetivos son **tres** —Analizar, Diseñar, Validar ([§1.7](../anteproyecto/01-definicion-y-alcance.md))— porque construir el artefacto no es un objetivo de investigación, sino el instrumento con el que el tercero obtiene su evidencia. De ahí se sigue el reparto: el objetivo 2 **especifica** todo lo que el sistema debe cumplir, y el objetivo 3 **comprueba** lo que se puede comprobar.
+
+| # | Objetivo específico | Requisitos |
 |---|---|---|
 | 1 | **Analizar** las estrategias de aislamiento y la oferta boliviana | — (fundamenta RNF-101 y RNF-102, el alcance funcional y los RF-800) |
-| 2 | **Diseñar** el modelo jerárquico y **especificar** las políticas de aislamiento | RF-301, RF-302, RF-303, RF-502, RF-602, RF-603, RF-701, RF-702, RNF-101, RNF-105, RNF-106, RNF-206, RNF-304 |
-| 3 | **Implementar** la arquitectura y **automatizar** su verificación | RF-101 a RF-104, RF-201 a RF-204, RF-304, RF-305, RF-401 a RF-407, RF-501 a RF-505, RF-601 a RF-609, RF-703, RF-704, RNF-103, RNF-104, RNF-201 a RNF-205, RNF-301 a RNF-303, RNF-401 a RNF-403 |
-| 4 | **Validar** el aislamiento con evidencia reproducible y **evaluar** la usabilidad del cambio de contexto | RF-701, RF-702, RNF-102, RNF-404 |
+| 2 | **Diseñar** el modelo jerárquico y **especificar** las políticas de aislamiento | **Todos los de alcance `Sí`**: RF-101 a RF-104, RF-201 a RF-204, RF-301 a RF-305, RF-401 a RF-407, RF-501 a RF-505, RF-601 a RF-609, RF-701 a RF-704, RNF-101 a RNF-106, RNF-201 a RNF-206, RNF-301 a RNF-304, RNF-401 a RNF-404 |
+| 3 | **Validar** el aislamiento con evidencia reproducible y **evaluar** la usabilidad del cambio de contexto | Todo requisito `Must` de alcance `Sí` con caso ejecutable en la matriz del [Plan de pruebas](11-plan-pruebas.md); de forma señalada RF-701, RF-702, RNF-101, **RNF-102** —la inmutabilidad del aislamiento— y RNF-404 |
 
-Todo requisito con alcance `Sí` aparece al menos en una fila de esta tabla. Cinco aparecen en dos, porque un objetivo los **especifica** y otro los **materializa**: RF-502, RF-602 y RF-603 se diseñan en el objetivo 2 —son las reglas de alcance por nivel— y se implementan en el 3; RF-701 y RF-702 se especifican en el objetivo 2 y se validan en el 4. RNF-501 no aparece por estar fuera de alcance.
+**Por qué el objetivo 2 los reúne todos.** Un requisito es una condición que la arquitectura debe satisfacer, y fijarla es un acto de diseño: es ahí donde se decide qué debe cumplir el sistema y con qué criterio se dará por cumplido. La construcción posterior no añade requisitos —los realiza—, de modo que atribuirle una lista propia duplicaría la tabla sin aportar trazabilidad.
+
+**Por qué el objetivo 3 no los repite uno a uno.** La correspondencia requisito → caso → evidencia ya la lleva la matriz del plan de pruebas, que es su documento responsable. Reproducirla aquí obligaría a mantener dos listas sincronizadas, y la primera en desactualizarse sería esta.
+
+RNF-501 no aparece: está fuera de alcance como objetivo medible.

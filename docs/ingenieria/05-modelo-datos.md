@@ -110,7 +110,7 @@ erDiagram
 |---|---|---|
 | `mt_organizations` | — (es el tenant) | PK `id`; `owner_id` → `auth.users(id)`; índice por `owner_id` |
 | `mt_workshops` | Organización | PK `id`; `organization_id` → `mt_organizations(id)` en cascada; único `(organization_id, name)`; índice por `organization_id` |
-| `mt_memberships` | Organización | PK `id`; **único `(organization_id, user_id)`**; **único parcial por `(organization_id)` donde `role = 'owner'` y la membresía está activa**; `role ∈ {owner, mechanic, receptionist}`; índices por `user_id` y por `organization_id` |
+| `mt_memberships` | Organización | PK `id`; **único `(organization_id, user_id)`**; **único parcial por `(organization_id)` donde `role = 'owner'` y la membresía está activa**; `role ∈ {owner, mechanic, receptionist}`; índice por `user_id` |
 | `mt_workshop_assignments` | Organización | PK `id`; único `(membership_id, workshop_id)`; ambas FK en cascada |
 
 ### Negocio — corte vertical
@@ -143,7 +143,7 @@ El nivel de cada entidad determina el ámbito de sus claves únicas — es la co
 
 ## Políticas de aislamiento (RLS)
 
-**Censo de tablas de negocio.** Son **siete**, y todas activan Row-Level Security: `mt_workshops`, `mt_memberships`, `mt_workshop_assignments`, `mt_clients`, `mt_parts`, `mt_part_movements` y `mt_audit_log`. Es el conjunto sobre el que se mide la cobertura de políticas (RNF-101) y el que recorre la verificación por acceso directo ([Plan de pruebas](11-plan-pruebas.md) §5.2).
+**Censo de tablas de negocio.** Son **siete**, y todas activan Row Level Security: `mt_workshops`, `mt_memberships`, `mt_workshop_assignments`, `mt_clients`, `mt_parts`, `mt_part_movements` y `mt_audit_log`. Es el conjunto sobre el que se mide la cobertura de políticas (RNF-101) y el que recorre la verificación por acceso directo ([Plan de pruebas](11-plan-pruebas.md) §5.2).
 
 Quedan **fuera del censo** las dos tablas que no son de negocio, cada una por un motivo distinto:
 
@@ -182,6 +182,22 @@ Las tablas de nivel taller usan **la misma condición sobre `organization_id`**:
 | Protección del propietario | No se puede cambiar el rol ni remover al `owner_id` de la organización, ni existir un segundo propietario activo. Las tres reglas se aplican en la capa de aplicación (RF-402, RF-405) y la última, además, en el motor mediante un índice único parcial: es la misma defensa en profundidad de [ADR-002](07-decisiones-diseno.md) aplicada a una regla de negocio. |
 | Transferencia entre talleres | Genera dos movimientos vinculados (salida en origen, entrada en destino), ambos en la misma transacción y dentro de la misma organización ([ADR-007](07-decisiones-diseno.md)). |
 
+## Índices: lo que la restricción ya provee
+
+Una restricción `unique` o `primary key` **se implementa con un índice** sobre sus columnas, en el orden declarado. Declarar además un índice propio sobre esas mismas columnas —o sobre un prefijo de ellas— no acelera ninguna lectura y encarece cada escritura.
+
+El caso que lo ilustra es `mt_memberships`, la tabla más consultada del esquema: sus dos funciones auxiliares se evalúan en toda política, sobre cada fila y en cada petición, filtrando por `(organization_id, user_id)`. Ese acceso **ya lo resuelve** el índice de la restricción única, sin declarar nada más.
+
+| Índice | Origen | Para qué |
+|---|---|---|
+| `(organization_id, user_id)`, único | La restricción `unique` de la tabla | La comprobación de membresía — el acceso más frecuente del sistema |
+| `(user_id)` | Declarado | «Las organizaciones de esta cuenta» (RF-202), que filtra solo por la **segunda** columna del índice anterior y por tanto no puede aprovecharlo |
+| `(organization_id)` donde el rol es `owner` y está activa, único parcial | Declarado | No acelera: **impide** un segundo propietario activo |
+
+La regla que se sigue de aquí, y que rige al añadir cualquier tabla: **antes de declarar un índice, comprobar si una restricción ya lo provee**. Un índice sobre el prefijo de otro es redundante; uno sobre su sufijo, no.
+
 ## Evolución del esquema
 
-El esquema se construye mediante **migraciones versionadas** (RNF-304): cada cambio es un archivo aplicable de forma reproducible, lo que permite reconstruir la base desde cero y mantener alineados los entornos de desarrollo y despliegue. El orden de construcción sigue la dependencia entre entidades —identidad y jerarquía primero, entidades de negocio después— y se detalla en el cronograma ([08-plan-trabajo.md](08-plan-trabajo.md)).
+El esquema se construye mediante **migraciones versionadas** (RNF-304): cada archivo es aplicable de forma reproducible, lo que permite reconstruir la base desde cero y mantener alineados los entornos.
+
+Son **cuatro**, agrupadas por tema y no por orden histórico —identidad y jerarquía, negocio, auditoría y permisos—, y su orden viene dado por las dependencias: el negocio y la auditoría necesitan las tablas y funciones de la primera, y los permisos se conceden sobre todo lo anterior. Agruparlas así, en lugar de acumular una migración por corrección, tiene una consecuencia que importa para la validación: **el archivo que define una tabla es también el que explica por qué está definida así**, sin que haya que reconstruir la intención leyendo un historial de enmiendas. El orden de construcción sigue la dependencia entre entidades —identidad y jerarquía primero, entidades de negocio después— y se detalla en el cronograma ([08-plan-trabajo.md](08-plan-trabajo.md)).

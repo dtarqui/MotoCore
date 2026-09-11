@@ -2,14 +2,14 @@
 -- ============================================================================
 --
 -- Solo lectura: no modifica nada. Se ejecuta en el SQL Editor **despues** de
--- aplicar `migrations/0001…0011` y devuelve una fila por comprobacion.
+-- aplicar `migrations/0001…0004` y devuelve una fila por comprobacion.
 --
 -- Todos los objetos de MotoCore llevan el prefijo `mt_`, de modo que estas
 -- consultas se acotan a el y no dependen de que `public` contenga o no otras
 -- tablas: la decima fila lo hace explicito.
 --
 -- Para que la base sirva como entorno de validacion, las once filas deben
--- decir `OK`. Las tres primeras son las que sostienen el objetivo 4: sin las
+-- decir `OK`. Las tres primeras son las que sostienen el objetivo 3: sin las
 -- siete tablas de negocio con RLS activo no hay aislamiento que medir
 -- (RNF-101, CP-N101), y sin la politica de auditoria reservada al Owner el
 -- caso CP-704.2 no puede pasar.
@@ -56,7 +56,7 @@ select * from (
          'Lectura de mt_audit_log reservada al Owner',
          'mt_audit_log_select_owner',
          coalesce(string_agg(policyname, ', '), '(ninguna)'),
-         case when count(*) = 1 then 'OK' else 'FALTA — aplicar 0007' end
+         case when count(*) = 1 then 'OK' else 'FALTA — aplicar 0003' end
   from pg_policies
   where schemaname = 'public'
     and tablename = 'mt_audit_log'
@@ -97,7 +97,7 @@ select * from (
          'true',
          has_schema_privilege('authenticated', 'public', 'usage')::text,
          case when has_schema_privilege('authenticated', 'public', 'usage')
-              then 'OK' else 'FALTA — aplicar 0009' end
+              then 'OK' else 'FALTA — aplicar 0004' end
 
   union all
   select 8,
@@ -105,7 +105,7 @@ select * from (
          '9',
          count(distinct table_name)::text,
          case when count(distinct table_name) = 9 then 'OK'
-              else 'FALTA — aplicar 0009' end
+              else 'FALTA — aplicar 0004' end
   from information_schema.role_table_grants
   where table_schema = 'public' and grantee = 'authenticated'
     and table_name like 'mt\_%'
@@ -120,7 +120,7 @@ select * from (
          case when exists (select 1 from pg_indexes
                            where schemaname = 'public'
                              and indexname = 'mt_memberships_single_owner_idx')
-              then 'OK' else 'FALTA — aplicar 0010' end
+              then 'OK' else 'FALTA — aplicar 0001' end
 
   union all
   select 10,
@@ -137,15 +137,14 @@ select * from (
 
   union all
   select 11,
-         'Indice compuesto para mt_is_org_member/owner',
-         'mt_memberships_org_user_idx',
-         coalesce((select indexname from pg_indexes
-                   where schemaname = 'public'
-                     and indexname = 'mt_memberships_org_user_idx'), '(ninguna)'),
-         case when exists (select 1 from pg_indexes
-                           where schemaname = 'public'
-                             and indexname = 'mt_memberships_org_user_idx')
-              then 'OK' else 'FALTA — aplicar 0011' end
+         'Indices redundantes en mt_memberships',
+         '0',
+         count(*)::text,
+         case when count(*) = 0 then 'OK'
+              else 'sobran — no deberian existir' end
+  from pg_indexes
+  where schemaname = 'public'
+    and indexname in ('mt_memberships_org_user_idx', 'mt_memberships_org_id_idx')
 
 ) c
 order by orden;

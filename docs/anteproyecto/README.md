@@ -14,7 +14,7 @@ Añade cuatro secciones sobre ese mínimo, porque el diseño metodológico las e
 
 | # | Capítulo | Contenido |
 |---|---|---|
-| 1 | [Definición y alcance](01-definicion-y-alcance.md) | Tema, problema (síntoma, causa e impacto), delimitación, pregunta general y específicas, objetivo general, cuatro objetivos específicos con su trazabilidad, alcance funcional y técnico, y exclusiones |
+| 1 | [Definición y alcance](01-definicion-y-alcance.md) | Tema, problema (síntoma, causa e impacto), delimitación, pregunta general y específicas, objetivo general, tres objetivos específicos con su trazabilidad, alcance funcional y técnico, y exclusiones |
 | 2 | [Antecedentes y estado del arte](02-antecedentes-y-estado-del-arte.md) | Contexto del sector en Bolivia con datos oficiales, matriz de extracción de la literatura revisada por pares, fichas analíticas, vacío de investigación y referencias |
 | 3 | [Marco teórico y conceptual](03-marco-teorico-y-conceptual.md) | Definiciones formales de las tecnologías empleadas, teorías y modelos que justifican cada decisión de ingeniería, revisión crítica de sus limitaciones y alineación metodológica del documento |
 

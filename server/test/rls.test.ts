@@ -5,7 +5,7 @@ import { createApp } from '../src/app.js';
 /**
  * PRUEBA DE AISLAMIENTO POR ACCESO DIRECTO A LA BASE DE DATOS — RF-702.
  *
- * Es el entregable del objetivo especifico 4 —validar el aislamiento con
+ * Es el entregable del objetivo especifico 3 —validar el aislamiento con
  * evidencia reproducible—, y la unica prueba que demuestra la premisa central
  * Cubre CP-702 (una fila por tabla de negocio), CP-N101 (escritura y borrado)
  * y CP-N106. La comprobacion complementaria —el aislamiento por la interfaz,

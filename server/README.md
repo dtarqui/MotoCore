@@ -143,15 +143,19 @@ El **login** se hace desde el cliente con Supabase Auth (`signInWithPassword`), 
 1. **Crear un proyecto Supabase** (https://supabase.com). Debe ser un proyecto **dedicado**: el esquema instala un disparador sobre `auth.users`, que es común a toda aplicación que comparta el proyecto.
 2. **Aplicar las migraciones** en orden, desde el SQL Editor de Supabase o con `supabase db push`:
    ```
-   supabase/migrations/0001_init_multitenancy.sql
-   …
-   supabase/migrations/0010_single_owner.sql
+   supabase/migrations/0001_identidad_y_jerarquia.sql   Cuentas, organizaciones, talleres, membresías, funciones y políticas
+   supabase/migrations/0002_negocio.sql                 Clientes (nivel organización) e inventario (nivel taller)
+   supabase/migrations/0003_auditoria.sql               Registro de acciones críticas, lectura reservada al Owner
+   supabase/migrations/0004_permisos.sql                Permisos de esquema y de tabla
    ```
-   Son **diez**, y tres de ellas no son opcionales aunque lo parezcan: la `0007`, sin la cual la política de `audit_log` no restringe la lectura al Owner y CP-704.2 no puede pasar; la `0009`, que declara los permisos de esquema y de tabla —sin ella el esquema depende de los valores por defecto del proyecto y, en una base donde no estén, todo responde `permission denied for schema public`—; y la `0010`, que impide en el motor que una organización acabe con dos propietarios activos.
+   Son **cuatro**, agrupadas por tema y no por orden histórico. El orden importa: la `0002` y la `0003` dependen de las tablas y funciones de la `0001`, y la `0004` concede sobre todo lo anterior — por eso va la última.
 
-   Después, ejecutar `supabase/verify.sql` —solo lectura— para comprobar que las nueve tablas, las 28 políticas, los permisos y la restricción de propietario único quedaron en su sitio.
+   Ninguna es opcional. Sin la `0003` la auditoría no queda reservada al Owner y CP-704.2 no puede pasar; sin la `0004` el esquema depende de los valores por defecto del proyecto y, en una base donde no estén, todo responde `permission denied for schema public`.
 
-   > **Partir de cero sobre un proyecto ya usado**: `supabase/reset.sql` deja la base como recién creada. Es **destructivo e irreversible** —borra el esquema `public` entero y todas las cuentas de `auth.users`— y por eso vive fuera de `migrations/`, para que `supabase db push` no lo aplique nunca.
+   Después, ejecutar `supabase/verify.sql` —solo lectura— para comprobar que las nueve tablas, las 28 políticas, los permisos y la restricción de propietario único quedaron en su sitio: son **once comprobaciones** y todas deben decir `OK`.
+
+   > **Partir de cero sobre un proyecto ya usado**: `supabase/reset.sql` retira **solo los objetos `mt_`** —las nueve tablas, sus ocho funciones, su disparador sobre `auth.users` y las cuentas que tenían perfil en MotoCore—, sin tocar nada más del esquema `public`. Es **destructivo e irreversible** para los datos de MotoCore, y vive fuera de `migrations/` para que `supabase db push` no lo aplique nunca.
+
 3. **Configurar el entorno**: copiar `.env.example` a `.env` con los valores de *Project Settings → API Keys*:
    ```
    SUPABASE_URL=https://<tu-proyecto>.supabase.co
@@ -194,7 +198,7 @@ Los niveles siguen el [plan de pruebas](../docs/ingenieria/11-plan-pruebas.md). 
 
 Esos dos últimos archivos son los que sostienen la premisa central del proyecto: uno demuestra que el aislamiento se mantiene cuando se prescinde de la API, y el otro que se mantiene **dentro** de la API aunque su control de membresía falle.
 
-> **Un caso omitido no cubre su requisito.** Si N3 y N4 se saltan por falta de credenciales, la suite pasa en verde pero **no** constituye evidencia de cumplimiento (§6.2 del plan de pruebas). La validación del objetivo 4 se ejecuta contra un entorno real antes de cada hito.
+> **Un caso omitido no cubre su requisito.** Si N3 y N4 se saltan por falta de credenciales, la suite pasa en verde pero **no** constituye evidencia de cumplimiento (§6.2 del plan de pruebas). La validación del objetivo 3 se ejecuta contra un entorno real antes de cada hito.
 
 ## Despliegue en Vercel
 
