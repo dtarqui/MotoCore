@@ -1,6 +1,6 @@
 # Anteproyecto
 
-Documento académico del proyecto de grado, elaborado **sesión por sesión** junto al Seminario del Proyecto de Maestría (material fuente en [../diapositivas/](../diapositivas/)). No se redactan capítulos que el seminario aún no haya cubierto.
+Documento académico del proyecto de grado, elaborado **sesión por sesión** junto al Seminario del Proyecto de Maestría, cuyo material de sesión es la fuente de la estructura exigida. No se redactan capítulos que el seminario aún no haya cubierto.
 
 ## Documentos de entrega
 
@@ -27,7 +27,7 @@ Cuando el seminario avanza a la siguiente sesión, se incorpora lo que correspon
 Cada capítulo enuncia en su entradilla los criterios que lo gobiernan. Los que rigen el conjunto:
 
 - **El alcance es un contrato**: incluye lo funcional, lo técnico y, sobre todo, las exclusiones explícitas.
-- **Objetivos con verbos de ingeniería**: analizar, diseñar, especificar, implementar, automatizar y validar; nunca verbos de comprensión como conocer o entender.
+- **Objetivos con verbos de ingeniería**: analizar, diseñar, especificar y validar; nunca verbos de comprensión como conocer o entender. Construir el artefacto no figura entre ellos: es el instrumento del objetivo 3, no un objetivo de investigación.
 - **De cada fuente se busca su limitación**, no su resumen: ahí está el vacío que el proyecto viene a cubrir.
 - **Revisión crítica antes que adopción**: de cada teoría se consignan sus limitaciones y su viabilidad real en el contexto boliviano; se retiene el principio y se descarta la implantación cuando esta excede los medios disponibles.
 - **Toda afirmación no propia lleva cita en APA 7**, y toda cita del cuerpo tiene su referencia completa al final del capítulo.

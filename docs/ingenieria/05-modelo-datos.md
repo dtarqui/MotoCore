@@ -111,7 +111,7 @@ erDiagram
 | `mt_organizations` | — (es el tenant) | PK `id`; `owner_id` → `auth.users(id)`; índice por `owner_id` |
 | `mt_workshops` | Organización | PK `id`; `organization_id` → `mt_organizations(id)` en cascada; único `(organization_id, name)`; índice por `organization_id` |
 | `mt_memberships` | Organización | PK `id`; **único `(organization_id, user_id)`**; **único parcial por `(organization_id)` donde `role = 'owner'` y la membresía está activa**; `role ∈ {owner, mechanic, receptionist}`; índice por `user_id` |
-| `mt_workshop_assignments` | Organización | PK `id`; único `(membership_id, workshop_id)`; ambas FK en cascada |
+| `mt_workshop_assignments` | Organización | PK `id`; `organization_id` → `mt_organizations(id)` en cascada; único `(membership_id, workshop_id)`; ambas FK en cascada; índice por `workshop_id` |
 
 ### Negocio — corte vertical
 
@@ -169,8 +169,11 @@ Las políticas se apoyan en dos funciones auxiliares que se ejecutan con privile
 | Escritura de datos de negocio | `mt_is_org_member(organization_id)` + verificación de rol en la capa de aplicación |
 | Escritura administrativa (crear, modificar o desactivar talleres; alta, cambio de rol y baja de miembros) | `mt_is_org_owner(organization_id)` |
 | **Lectura del registro de auditoría** | `mt_is_org_owner(organization_id)` — es la única tabla cuya lectura no basta con ser miembro (RF-704) |
+| **Inserción en el registro de auditoría** | **Reservada al servidor**: la escritura de auditoría es una de las excepciones enumeradas de [ADR-008](07-decisiones-diseno.md) y siempre ocurre con la credencial privilegiada. Apoyarla en `mt_is_org_member` dejaría que un miembro insertara entradas por acceso directo y falseara el registro, que es justamente lo que RF-703 debe impedir |
 
 Las tablas de nivel taller usan **la misma condición sobre `organization_id`**: la pertenencia del `workshop_id` a la organización activa se valida en la API, no en la política. Esta separación mantiene las políticas simples y auditables (ver [ADR-006](07-decisiones-diseno.md)).
+
+> **Por qué `mt_workshop_assignments` también porta `organization_id`.** Es un vínculo entre dos entidades que ya pertenecen a la organización, de modo que la columna es redundante en términos de integridad —y deliberadamente no lo es en términos de aislamiento—: sin ella, su política tendría que resolver el inquilino navegando hasta `mt_workshops`, lo que exigiría una función auxiliar adicional y rompería el principio rector de un criterio único. La redundancia se paga una vez en el modelo y se cobra en cada política.
 
 ## Reglas de negocio con impacto en los datos
 

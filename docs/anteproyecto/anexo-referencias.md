@@ -61,7 +61,7 @@ De los **once ISBN** que cita el anteproyecto —siete en el bloque A del capít
 
 | Ref. | Obra | Estado | Qué falta |
 |---|---|---|---|
-| Cap. 3 L3 | Brooke, J. (1996). SUS: A quick and dirty usability scale. En *Usability evaluation in industry* (pp. 189–194). Taylor & Francis | `Falta` — el ISBN **978-0-7484-0460-5** se declara a partir de la ficha de la obra y **no se ha contrastado contra el catálogo del editor**. Su **contenido** sí está verificado (§2): el capítulo es la fuente primaria de la escala SUS | Contrastar el ISBN contra el catálogo de Taylor & Francis antes de la entrega final ([PENDIENTES](../PENDIENTES.md) §3) |
+| Cap. 3 L3 | Brooke, J. (1996). SUS: A quick and dirty usability scale. En *Usability evaluation in industry* (pp. 189–194). Taylor & Francis | `Falta` — el ISBN **978-0-7484-0460-5** se declara a partir de la ficha de la obra y **no se ha contrastado contra el catálogo del editor**. Su **contenido** sí está verificado (§2): el capítulo es la fuente primaria de la escala SUS | Contrastar el ISBN contra el catálogo de Taylor & Francis antes de la entrega final ([PENDIENTES](../PENDIENTES.md) §2) |
 
 #### Obras evaluadas y no incorporadas
 
@@ -223,4 +223,4 @@ Instituto Nacional de Estadística de Bolivia. (2026). *Estadísticas del parque
 
 Este anexo consigna el **estado por referencia**: qué se comprobó de cada fuente, con qué método y con qué resultado. Las entradas marcadas `Parcial` en la columna «Contenido» tienen sus datos bibliográficos confirmados contra el registro del editor y su afirmación tomada del resumen; las marcadas `OK` fueron contrastadas contra el texto completo. Esa distinción se declara aquí de forma explícita, en lugar de darse por supuesta.
 
-**Lo que queda abierto**, y que ningún otro documento debe dar por cerrado: las cinco entradas `Parcial` por contenido del capítulo 2 —cuya lectura completa corresponde antes de la entrega final—, el ISBN de Brooke (1996) y las fechas de recuperación de la documentación técnica con autor corporativo, que se fijan el día de la entrega. El registro operativo de esas acciones está en [PENDIENTES](../PENDIENTES.md) §3; ni el perfil ni el anteproyecto afirman una verificación mayor que la que esta tabla sostiene.
+**Lo que queda abierto**, y que ningún otro documento debe dar por cerrado: las cinco entradas `Parcial` por contenido —cuatro del capítulo 2 y una del capítulo 3—, cuya lectura completa corresponde antes de la entrega final; el ISBN de Brooke (1996); y las fechas de recuperación de la documentación técnica con autor corporativo, que se fijan el día de la entrega. El registro operativo de esas acciones está en [PENDIENTES](../PENDIENTES.md) §2; ni el perfil ni el anteproyecto afirman una verificación mayor que la que esta tabla sostiene.

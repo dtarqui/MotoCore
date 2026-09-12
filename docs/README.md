@@ -1,6 +1,6 @@
 # Documentación del proyecto de grado
 
-**Diseño y validación de una arquitectura multi-tenant jerárquica con Row Level Security (RLS), aislamiento verificable e inmutable en la base de datos, para el servicio de mantenimiento mecánico.**
+**Diseño y validación de una arquitectura multi-tenant jerárquica y Row Level Security (RLS) con aislamiento verificable e inmutabilidad de aislamiento en la base de datos para aplicar en el servicio de mantenimiento mecánico.**
 
 Maestría en Full Stack Development · Universidad Católica Boliviana "San Pablo" · Septiembre – diciembre de 2026
 
@@ -104,9 +104,9 @@ Antes de escribir sobre un tema, verificar quién es su responsable. Si ya lo ti
 
 ## Pendientes
 
-Lo que falta resolver antes de la entrega final —datos por completar, fuentes por verificar y decisiones que corresponden al autor— está en un registro único: **[PENDIENTES.md](PENDIENTES.md)**. Los documentos de entrega se mantienen limpios de notas internas; todo lo que quede por decidir vive ahí.
+Lo que falta resolver antes de la entrega final —datos por completar, fuentes por leer y decisiones que corresponden al autor— está en un registro único: **[PENDIENTES.md](PENDIENTES.md)**. Los documentos de entrega se mantienen limpios de notas internas; todo lo que quede por decidir vive ahí.
 
-Está ordenado por urgencia y abre con una tabla de resumen. Recoge **lo que falta decidir o comprobar sobre los documentos**, no el avance de la construcción: el estado del sistema se lee en el cronograma ([ingenieria/08-plan-trabajo.md](ingenieria/08-plan-trabajo.md)) y su cumplimiento, en la matriz del plan de pruebas.
+Abre con una tabla de resumen y se ordena por tipo de acción: carátula, fuentes, datos y normativa, condiciones de la validación, trabajo de campo y decisiones abiertas. Recoge **lo que falta decidir o comprobar sobre los documentos**, no el avance de la construcción: cuándo se hace cada cosa se lee en el cronograma ([ingenieria/08-plan-trabajo.md](ingenieria/08-plan-trabajo.md)) y con qué evidencia se da por cumplido un requisito, en la matriz del plan de pruebas.
 
 ## Premisas que rigen toda la documentación
 

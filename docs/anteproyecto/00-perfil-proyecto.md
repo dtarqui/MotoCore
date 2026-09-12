@@ -10,7 +10,7 @@
 
 ## PERFIL DE PROYECTO DE GRADO
 
-### Diseño y validación de una arquitectura multi-tenant jerárquica con Row Level Security (RLS), aislamiento verificable e inmutable en la base de datos, para el servicio de mantenimiento mecánico
+### Diseño y validación de una arquitectura multi-tenant jerárquica y Row Level Security (RLS) con aislamiento verificable e inmutabilidad de aislamiento en la base de datos para aplicar en el servicio de mantenimiento mecánico
 
 ---
 
@@ -33,7 +33,7 @@ La Paz – Bolivia
 
 | Campo | Detalle |
 |---|---|
-| **Título** | Diseño y validación de una arquitectura multi-tenant jerárquica con Row Level Security (RLS), aislamiento verificable e inmutable en la base de datos, para el servicio de mantenimiento mecánico |
+| **Título** | Diseño y validación de una arquitectura multi-tenant jerárquica y Row Level Security (RLS) con aislamiento verificable e inmutabilidad de aislamiento en la base de datos para aplicar en el servicio de mantenimiento mecánico |
 | **Programa** | Maestría en Full Stack Development |
 | **Línea de investigación** | Arquitectura de software y seguridad de datos en aplicaciones de software como servicio |
 | **Modalidad** | Proyecto de Grado |
@@ -73,7 +73,7 @@ La Paz – Bolivia
 
 ### 3.2 Formulación del problema
 
-> **¿De qué manera el diseño e implementación de una arquitectura multi-tenant jerárquica sobre infraestructura serverless, con aislamiento aplicado mediante seguridad a nivel de fila, mejora la gestión centralizada y la seguridad de los datos de operadores de varias organizaciones y talleres de servicio de motocicletas en Bolivia?**
+> **¿De qué manera una arquitectura multi-tenant jerárquica y Row Level Security (RLS) sobre infraestructura serverless sostiene un aislamiento verificable e inmutable en la base de datos y mejora la gestión centralizada y la seguridad de los datos de operadores de varias organizaciones y talleres de servicio de mantenimiento mecánico en Bolivia?**
 
 ### 3.3 Sistematización del problema
 
@@ -87,7 +87,7 @@ La Paz – Bolivia
 
 ### 4.1 Objetivo general
 
-> **Diseñar y validar una arquitectura multi-tenant jerárquica (organización → talleres) sobre infraestructura serverless, que aplique el aislamiento de datos en el motor de base de datos mediante seguridad a nivel de fila y lo sostenga con independencia de la capa de aplicación, para permitir la gestión centralizada de varias organizaciones de servicio de mantenimiento mecánico garantizando la separación verificable e inmutable de sus datos.**
+> **Diseñar y validar una arquitectura multi-tenant jerárquica (organización → talleres) y Row Level Security (RLS) sobre infraestructura serverless, que sostenga un aislamiento verificable e inmutable en la base de datos, para permitir la gestión centralizada de varias organizaciones de servicio de mantenimiento mecánico.**
 
 ### 4.2 Objetivos específicos
 
@@ -220,7 +220,7 @@ Las categorías empleadas —tipo, enfoque, alcance, método y diseño— siguen
 | **Enfoque** | **Mixto**. El componente cualitativo abarca la revisión de literatura, el relevamiento del mercado, el diseño arquitectónico y la observación de las sesiones con operadores; el cuantitativo, la medición objetiva del aislamiento (filas ajenas devueltas, casos en verde, cobertura de políticas) y las métricas de usabilidad (tasa de éxito, tiempos y puntuación SUS) |
 | **Alcance** | **Descriptivo** en la fase de análisis, **propositivo** en la de diseño y **explicativo-experimental** en la de validación |
 | **Método** | **Hipotético-deductivo** aplicado a la verificación: la hipótesis se somete a pruebas capaces de refutarla |
-| **Diseño** | **Experimental sobre caso único**: el artefacto construido es la unidad de observación, y las pruebas manipulan deliberadamente la condición de aislamiento —incluida la omisión de la capa de aplicación— para observar su efecto |
+| **Diseño** | **Experimental sobre caso único**: el artefacto que se construya será la unidad de observación, y las pruebas manipularán deliberadamente la condición de aislamiento —incluida la omisión de la capa de aplicación— para observar su efecto |
 
 ### 9.2 Población, muestra y unidades de análisis
 
@@ -230,7 +230,7 @@ El proyecto trabaja con **cuatro poblaciones**, porque combina revisión documen
 |---|---|---|---|
 | **a** | Publicaciones revisadas por pares sobre aislamiento entre inquilinos en esquema compartido (2021–2026) *(obj. 1)* | **5 fuentes** | No probabilístico **por criterio**; suficiencia por saturación temática |
 | **b** | Plataformas de gestión de talleres con presencia, uso o comercialización en Bolivia *(obj. 1)* | **10 plataformas** | No probabilístico **intencional**, por accesibilidad de la información pública del producto |
-| **c** | **Las tablas de negocio del esquema y las operaciones expuestas por la interfaz de programación** del sistema construido *(obj. 2 y 3)* — es donde se mide la variable dependiente | **Censo: el 100 %** — 7 tablas y la totalidad de las operaciones del contrato, sobre un escenario de 3 cuentas sintéticas, 3 organizaciones y 3 talleres | No probabilístico **intencional por caso crítico**: se ejerce el peor escenario de aislamiento, no el uso nominal. **No cabe muestreo probabilístico** — una sola tabla sin política activa es una fuga |
+| **c** | **Las tablas de negocio del esquema y las operaciones expuestas por la interfaz de programación** del sistema a construir *(obj. 2 y 3)* — es donde se mide la variable dependiente | **Censo: el 100 %** — 7 tablas y la totalidad de las operaciones del contrato, sobre un escenario de 3 cuentas sintéticas, 3 organizaciones y 3 talleres | No probabilístico **intencional por caso crítico**: se ejerce el peor escenario de aislamiento, no el uso nominal. **No cabe muestreo probabilístico** — una sola tabla sin política activa es una fuga |
 | **d** | Operadores de organizaciones de servicio de motocicletas en Bolivia con más de una organización y/o taller *(obj. 3)* | **De 5 a 8 participantes** | No probabilístico **intencional** por perfil; tamaño justificado por Nielsen y Landauer (1993) |
 
 **Unidades de análisis.** Las poblaciones **a** y **b** se analizan por revisión documental —fuentes y fichas de producto— y sustentan el objetivo 1. Las dos que soportan la validación son de naturaleza distinta entre sí:

@@ -4,9 +4,9 @@
 
 **Título del proyecto**
 
-> **Diseño y validación de una arquitectura multi-tenant jerárquica con Row Level Security (RLS), aislamiento verificable e inmutable en la base de datos, para el servicio de mantenimiento mecánico**
+> **Diseño y validación de una arquitectura multi-tenant jerárquica y Row Level Security (RLS) con aislamiento verificable e inmutabilidad de aislamiento en la base de datos para aplicar en el servicio de mantenimiento mecánico**
 
-**Formulación extendida del tema.** Diseño y validación de una arquitectura multi-tenant jerárquica (organización → talleres) sobre infraestructura serverless, con aislamiento de datos aplicado en el motor de base de datos mediante seguridad a nivel de fila y **sostenido con independencia de la capa de aplicación**, para la gestión centralizada de organizaciones de servicio de mantenimiento mecánico. El estudio se delimita al servicio de **motocicletas en Bolivia** (§1.3), que es el caso sobre el que la arquitectura se valida.
+**Formulación extendida del tema.** Diseño y validación de una arquitectura multi-tenant jerárquica (organización → talleres) y de las políticas de Row Level Security que la sostienen, sobre infraestructura serverless, con el aislamiento de datos aplicado en el motor de base de datos y **sostenido con independencia de la capa de aplicación** —de ahí que sea verificable e inmutable—, para aplicar en la gestión centralizada de organizaciones de servicio de mantenimiento mecánico. El estudio se delimita al servicio de **motocicletas en Bolivia** (§1.3), que es el caso sobre el que la arquitectura se valida.
 
 > El **título** es la forma canónica y se emplea en portada, índices y referencias a este proyecto; la formulación extendida solo desarrolla su contenido técnico.
 
@@ -36,7 +36,7 @@ El software de gestión de talleres relevado con presencia en Bolivia (AutoSoft 
 
 ## 1.4 Pregunta general
 
-> **¿De qué manera el diseño e implementación de una arquitectura multi-tenant jerárquica sobre infraestructura serverless, con aislamiento aplicado mediante Row Level Security, mejora la gestión centralizada y la seguridad de los datos de operadores de varias organizaciones y talleres de servicio de motocicletas en Bolivia?**
+> **¿De qué manera una arquitectura multi-tenant jerárquica y Row Level Security (RLS) sobre infraestructura serverless sostiene un aislamiento verificable e inmutable en la base de datos y mejora la gestión centralizada y la seguridad de los datos de operadores de varias organizaciones y talleres de servicio de mantenimiento mecánico en Bolivia?**
 
 ## 1.5 Preguntas específicas
 
@@ -48,7 +48,7 @@ El software de gestión de talleres relevado con presencia en Bolivia (AutoSoft 
 
 ## 1.6 Objetivo general
 
-> **Diseñar y validar una arquitectura multi-tenant jerárquica (organización → talleres) sobre infraestructura serverless, que aplique el aislamiento de datos en el motor de base de datos mediante seguridad a nivel de fila y lo sostenga con independencia de la capa de aplicación, para permitir la gestión centralizada de varias organizaciones de servicio de mantenimiento mecánico garantizando la separación verificable e inmutable de sus datos.**
+> **Diseñar y validar una arquitectura multi-tenant jerárquica (organización → talleres) y Row Level Security (RLS) sobre infraestructura serverless, que sostenga un aislamiento verificable e inmutable en la base de datos, para permitir la gestión centralizada de varias organizaciones de servicio de mantenimiento mecánico.**
 
 > Las tecnologías concretas que materializan este objetivo —Node.js/TypeScript, Supabase (PostgreSQL) y despliegue en Vercel— se declaran en el **alcance técnico** (§1.8.2), no en el enunciado del objetivo: son medios sustituibles, y atarlos aquí envejecería la formulación.
 
