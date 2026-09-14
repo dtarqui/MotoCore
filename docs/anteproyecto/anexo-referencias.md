@@ -2,7 +2,7 @@
 
 Estado de comprobación de cada fuente citada en el anteproyecto. Una referencia con datos incorrectos compromete la trazabilidad de la información tanto como una inventada, de modo que cada identificador se contrastó contra el registro del editor.
 
-**Última comprobación**: 18 de agosto de 2026. En esa fecha se verificaron contra el **texto completo del editor** las entradas antes marcadas `Parcial` por metadatos, y se añadió a cada fuente un **enlace de acceso** localizado en las bases consultadas: [Google Scholar](https://scholar.google.com/), [OATD](https://oatd.org/), [BASE](https://api.base-search.net/), Scopus / Web of Science, IEEE Xplore y ACM DL.
+**Última comprobación**: 14 de septiembre de 2026, para las cuatro fuentes incorporadas al ajustar la documentación a la guía metodológica —Cronbach (1951), Hevner et al. (2004), Brown (s. f.) y la Constitución Política del Estado—. La comprobación general anterior es del 18 de agosto de 2026: en esa fecha se verificaron contra el **texto completo del editor** las entradas antes marcadas `Parcial` por metadatos, y se añadió a cada fuente un **enlace de acceso** localizado en las bases consultadas: [Google Scholar](https://scholar.google.com/), [OATD](https://oatd.org/), [BASE](https://api.base-search.net/), Scopus / Web of Science, IEEE Xplore y ACM DL.
 
 ## Cómo se verificó cada tipo de fuente
 
@@ -45,6 +45,8 @@ Estado de comprobación de cada fuente citada en el anteproyecto. Una referencia
 | 3 | A12 | Saltzer & Schroeder (1975) | OK — *Proceedings of the IEEE*, 63(9), pp. 1278–1308 | OK — obra canónica | [doi.org/10.1109/PROC.1975.9939](https://doi.org/10.1109/PROC.1975.9939) |
 | 3 | A13 | Sandhu, Coyne, Feinstein & Youman (1996) | OK — *Computer*, 29(2), pp. 38–47 · IEEE | OK — obra canónica | [doi.org/10.1109/2.485845](https://doi.org/10.1109/2.485845) |
 | 3 | A14 | Simić et al. (2024) | Ver capítulo 2, ref. A4 | Ver capítulo 2, ref. A4 | Ver capítulo 2, ref. A4 |
+| 3 | A15 | **Cronbach (1951)** | OK — *Psychometrika*, 16(3), pp. 297–334 · confirmado por Crossref el 14-09-2026 | `Parcial` — se toma de él el coeficiente α; texto no leído | [doi.org/10.1007/BF02310555](https://doi.org/10.1007/BF02310555) |
+| 3 | A16 | Hevner, March, Park & Ram (2004) | OK — *MIS Quarterly*, 28(1), pp. 75–106 · cuatro autores confirmados por Crossref el 14-09-2026 | `Parcial` — solo resumen | [doi.org/10.2307/25148625](https://doi.org/10.2307/25148625) |
 
 ### 1.2 Libros
 
@@ -52,10 +54,10 @@ Estado de comprobación de cada fuente citada en el anteproyecto. Una referencia
 
 | Ref. | Obra | Discrepancia que reportaba el catálogo | Resolución contra el editor |
 |---|---|---|---|
-| Cap. 2 L3 / Cap. 3 L7 | Newman (2021), *Building microservices*, 2.ª ed. | El catálogo fechaba ese ISBN en 2020 | **Confirmado 2021** — O'Reilly Media, 2.ª ed., publicada el 5 de octubre de 2021, ISBN 978-1-4920-3402-5. [Ficha del editor](https://www.oreilly.com/library/view/building-microservices-2nd/9781492034018/) |
+| Cap. 3 L7 | Newman (2021), *Building microservices*, 2.ª ed. | El catálogo fechaba ese ISBN en 2020 | **Confirmado 2021** — O'Reilly Media, 2.ª ed., publicada el 5 de octubre de 2021, ISBN 978-1-4920-3402-5. [Ficha del editor](https://www.oreilly.com/library/view/building-microservices-2nd/9781492034018/) |
 | Cap. 3 L2 | Beck (2002), *Test-driven development: By example* | El catálogo devolvía una reimpresión de 2006 | **Confirmado 2002** — Addison-Wesley Professional, 1.ª ed., 8 de noviembre de 2002, ISBN 978-0-321-14653-3 |
 
-De los **once ISBN** que cita el anteproyecto —siete en el bloque A del capítulo 2 y cuatro propios del capítulo 3 (Beck, Brooke, Nielsen y Pierce)—, **diez resuelven correctamente contra el catálogo y uno queda por comprobar**. Sin discrepancias: Bass et al. (2021), Richards & Ford (2020), Kleppmann (2017), Humble & Farley (2010), Forsgren et al. (2018), Nielsen (1993), Pierce (2002) y Hernández-Sampieri & Mendoza (2018), además de los dos resueltos en la tabla anterior.
+De los **once ISBN** que cita el anteproyecto —diez en la lista de libros del capítulo 3 y uno, Hernández-Sampieri y Mendoza (2018), en las listas del perfil y del anteproyecto integrado—, **diez resuelven correctamente contra el catálogo y uno queda por comprobar**. Sin discrepancias: Bass et al. (2021), Richards & Ford (2020), Kleppmann (2017), Humble & Farley (2010), Forsgren et al. (2018), Nielsen (1993), Pierce (2002) y Hernández-Sampieri & Mendoza (2018), además de los dos resueltos en la tabla anterior.
 
 **La entrada que falta.** Se consigna aquí en lugar de darse por comprobada con el resto, porque la diferencia entre «verificado» y «declarado» es justamente lo que este anexo existe para registrar:
 
@@ -65,7 +67,7 @@ De los **once ISBN** que cita el anteproyecto —siete en el bloque A del capít
 
 #### Obras evaluadas y no incorporadas
 
-APA 7 no admite referencias sin cita. Estas cinco obras se evaluaron para el bloque A del capítulo 2 y no se incorporaron. **Todas son obras publicadas y verificables**, de modo que la exclusión no obedece a falta de fiabilidad sino a **falta de pertinencia**: ninguna sostiene una afirmación del anteproyecto, y conservarlas habría sido engrosar la bibliografía sin uso —lo que la auditoría de pertinencia del §7.4 descarta expresamente—.
+APA 7 no admite referencias sin cita. Estas cinco obras se evaluaron como bibliografía de base y no se incorporaron. **Todas son obras publicadas y verificables**, de modo que la exclusión no obedece a falta de fiabilidad sino a **falta de pertinencia**: ninguna sostiene una afirmación del anteproyecto, y conservarlas habría sido engrosar la bibliografía sin uso —lo que la auditoría de pertinencia del capítulo 3 (§3.4.2) descarta expresamente—.
 
 | Obra | Por qué no se cita | Qué la sustituye |
 |---|---|---|
@@ -85,6 +87,7 @@ APA 7 no admite referencias sin cita. Estas cinco obras se evaluaron para el blo
 | N4 | Jonas et al. (2019) — Berkeley View on Serverless | OK — arXiv accesible | [arxiv.org/abs/1902.03383](https://arxiv.org/abs/1902.03383) |
 | N5 | Fielding (2000) — Tesis doctoral | OK — alojada en el sitio institucional de UC Irvine | [ics.uci.edu/~fielding/pubs/dissertation/top.htm](https://ics.uci.edu/~fielding/pubs/dissertation/top.htm) |
 | N6 | W3C — Web Application Manifest | OK — accesible. **Corrección aplicada**: es un *Working Draft* fechado el 13 de agosto de 2026, no de 2023 | [w3.org/TR/appmanifest/](https://www.w3.org/TR/appmanifest/) |
+| — | Estado Plurinacional de Bolivia (2009) — Constitución Política del Estado | OK — texto consultado el 14-09-2026; promulgación del 7 de febrero de 2009 confirmada. **Art. 21, num. 2 verificado literalmente**: «A la privacidad, intimidad, honra, honor, propia imagen y dignidad». Es el único artículo que cita el anteproyecto | [lexivox.org/norms/BO-CPE-20090207.html](https://www.lexivox.org/norms/BO-CPE-20090207.html) |
 
 ### 1.4 Documentación técnica con autor corporativo
 
@@ -99,6 +102,7 @@ Incorporada al §7.1 del anteproyecto. Se emplea **solo como sustento del marco 
 | Zod — *Zod documentation* | [zod.dev](https://zod.dev/) | `Falta` — ídem |
 | Meta Open Source — *React documentation* | [react.dev](https://react.dev/) | `Falta` — ídem |
 | Schwaber & Sutherland (2020) — *The Scrum Guide* | [scrumguides.org](https://scrumguides.org/) | `Falta` — ídem |
+| Brown (s. f.) — *The C4 model* | [c4model.com](https://c4model.com/) | `Falta` — accesible el 14-09-2026; autoría de Simon Brown y los cuatro niveles del modelo confirmados en la página; re-comprobar y fechar |
 | Chong, Carraro & Wolter (2006) — *Multi-tenant data architecture* | [Copia archivada (Wayback, 30-05-2017)](https://web.archive.org/web/20170530080303/https://msdn.microsoft.com/en-us/library/aa479086.aspx) | **Sustituida** — la URL original de MSDN devuelve 404. La atribución teórica se trasladó a Krebs et al. (2012) |
 
 ---
@@ -131,6 +135,8 @@ Bezemer, C.-P., & Zaidman, A. (2010). Multi-tenant SaaS applications: Maintenanc
 
 Codd, E. F. (1970). A relational model of data for large shared data banks. *Communications of the ACM, 13*(6), 377–387. https://doi.org/10.1145/362384.362685
 
+Cronbach, L. J. (1951). Coefficient alpha and the internal structure of tests. *Psychometrika, 16*(3), 297–334. https://doi.org/10.1007/BF02310555
+
 Dar, C., Hershcovitch, M., & Morrison, A. (2023). RLS side channels: Investigating leakage of row-level security protected data through query execution time. *Proceedings of the ACM on Management of Data, 1*(1), Artículo 89, 1–25. https://doi.org/10.1145/3588943
 
 Gao, Z., Bird, C., & Barr, E. T. (2017). To type or not to type: Quantifying detectable bugs in JavaScript. En *2017 IEEE/ACM 39th International Conference on Software Engineering (ICSE)* (pp. 758–769). IEEE. https://doi.org/10.1109/ICSE.2017.75
@@ -138,6 +144,8 @@ Gao, Z., Bird, C., & Barr, E. T. (2017). To type or not to type: Quantifying det
 Gilbert, S., & Lynch, N. (2002). Brewer's conjecture and the feasibility of consistent, available, partition-tolerant web services. *ACM SIGACT News, 33*(2), 51–59. https://doi.org/10.1145/564585.564601
 
 Haerder, T., & Reuter, A. (1983). Principles of transaction-oriented database recovery. *ACM Computing Surveys, 15*(4), 287–317. https://doi.org/10.1145/289.291
+
+Hevner, A. R., March, S. T., Park, J., & Ram, S. (2004). Design science in information systems research. *MIS Quarterly, 28*(1), 75–106. https://doi.org/10.2307/25148625
 
 Krasner, G. E., & Pope, S. T. (1988). A cookbook for using the model-view-controller user interface paradigm in Smalltalk-80. *Journal of Object-Oriented Programming, 1*(3), 26–49. https://dl.acm.org/doi/10.5555/50757.50759
 
@@ -179,6 +187,8 @@ Richards, M., & Ford, N. (2020). *Fundamentals of software architecture: An engi
 
 ### Documentos normativos e informes
 
+Estado Plurinacional de Bolivia. (2009). *Constitución Política del Estado* (promulgada el 7 de febrero de 2009). Recuperado el 14 de septiembre de 2026, de https://www.lexivox.org/norms/BO-CPE-20090207.html
+
 Fielding, R. T. (2000). *Architectural styles and the design of network-based software architectures* [Tesis doctoral, University of California, Irvine]. https://ics.uci.edu/~fielding/pubs/dissertation/top.htm
 
 Jonas, E., Schleier-Smith, J., Sreekanti, V., Tsai, C.-C., Khandelwal, A., Pu, Q., Shankar, V., Carreira, J., Krauth, K., Yadwadkar, N., Gonzalez, J. E., Popa, R. A., Stoica, I., & Patterson, D. A. (2019). *Cloud programming simplified: A Berkeley view on serverless computing* (Informe técnico N.º UCB/EECS-2019-3). University of California, Berkeley. https://arxiv.org/abs/1902.03383
@@ -194,6 +204,8 @@ World Wide Web Consortium. (2026). *Web application manifest* (W3C Working Draft
 ### Documentación técnica con autor corporativo
 
 *Al carecer de fecha de publicación fija, cada entrada lleva su fecha de recuperación.*
+
+Brown, S. (s. f.). *The C4 model*. Recuperado el 14 de septiembre de 2026, de https://c4model.com/
 
 Meta Open Source. (s. f.). *React documentation*. Recuperado el 14 de agosto de 2026, de https://react.dev/
 
@@ -223,4 +235,4 @@ Instituto Nacional de Estadística de Bolivia. (2026). *Estadísticas del parque
 
 Este anexo consigna el **estado por referencia**: qué se comprobó de cada fuente, con qué método y con qué resultado. Las entradas marcadas `Parcial` en la columna «Contenido» tienen sus datos bibliográficos confirmados contra el registro del editor y su afirmación tomada del resumen; las marcadas `OK` fueron contrastadas contra el texto completo. Esa distinción se declara aquí de forma explícita, en lugar de darse por supuesta.
 
-**Lo que queda abierto**, y que ningún otro documento debe dar por cerrado: las cinco entradas `Parcial` por contenido —cuatro del capítulo 2 y una del capítulo 3—, cuya lectura completa corresponde antes de la entrega final; el ISBN de Brooke (1996); y las fechas de recuperación de la documentación técnica con autor corporativo, que se fijan el día de la entrega. El registro operativo de esas acciones está en [PENDIENTES](../PENDIENTES.md) §2; ni el perfil ni el anteproyecto afirman una verificación mayor que la que esta tabla sostiene.
+**Lo que queda abierto**, y que ningún otro documento debe dar por cerrado: las seis entradas citadas a partir de su resumen —cuatro del capítulo 2 y dos del capítulo 3, Bezemer y Zaidman (2010) y Hevner et al. (2004)—, cuya lectura completa corresponde antes de la entrega final; el ISBN de Brooke (1996); y las fechas de recuperación de la documentación técnica con autor corporativo y de las fuentes consultadas en línea, que se fijan el día de la entrega. El registro operativo de esas acciones está en [PENDIENTES](../PENDIENTES.md) §2; ni el perfil ni el anteproyecto afirman una verificación mayor que la que esta tabla sostiene.

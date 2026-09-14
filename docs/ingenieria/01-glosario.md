@@ -70,6 +70,18 @@ Uso interno de cada término. La definición formal con su fuente citable está 
 | **Problem Details** | Formato estándar de respuesta de error (RFC 9457, que sustituye al RFC 7807) que usa la API. Los códigos siguen el patrón `modulo.razon` (ej. `organization.access_denied`). |
 | **Contexto activo** | El par organización activa + taller activo que acompaña a cada petición. El servidor no asume ninguno por defecto: si falta, rechaza la petición. |
 
+## Términos de la investigación
+
+| Término | Uso en este proyecto |
+|---|---|
+| **Línea base** | El aislamiento resuelto **solo en la capa de aplicación**, que es lo que hace hoy la oferta relevada. Se reproduce en la condición experimental C0 —políticas del motor deshabilitadas y control de aplicación omitido, solo en el proyecto de validación desechable— y es el término de comparación de la hipótesis. En la evaluación de usabilidad, la línea base es el **cambio de cuenta**: una cuenta por local |
+| **Condición experimental** | Configuración de capas bajo la que se ejecuta la suite de aislamiento: **C0** línea base · **C1** arquitectura completa · **C2** sin verificación de aplicación · **C3** acceso directo al motor ([anteproyecto](../anteproyecto/04-anteproyecto-integrado.md) §15.2) |
+| **Objetivo núcleo** | Uno de los cuatro objetivos específicos que responden la pregunta general: diagnosticar, diseñar, desarrollar y validar. No puede descartarse |
+| **Objetivo complementario** | Objetivo específico que amplía la evidencia sin condicionar la tesis —usabilidad del cambio de contexto y costo operativo—, sujeto a un criterio de continuidad |
+| **Criterio de continuidad** | Condición verificable, con fecha fija, que decide si un objetivo complementario se mantiene o se descarta de forma explícita |
+| **Corte vertical** | Funcionalidad completada de punta a punta —cliente web, interfaz de programación y base de datos— antes de expandir el sistema: aquí, clientes (nivel organización) e inventario (nivel taller) |
+| **MVP** | Los requisitos funcionales `Must` más los no funcionales que bloquean la salida a producción ([Requisitos](02-requisitos.md) §6) |
+
 ## Términos del mercado boliviano
 
 | Término | Definición |

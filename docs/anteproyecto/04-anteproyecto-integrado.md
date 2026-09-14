@@ -10,13 +10,13 @@
 
 ## ANTEPROYECTO
 
-### Diseño y validación de una arquitectura multi-tenant jerárquica y Row Level Security (RLS) con aislamiento verificable e inmutabilidad de aislamiento en la base de datos para aplicar en el servicio de mantenimiento mecánico
+### Diseño y validación de una arquitectura multi-tenant jerárquica con RLS para aislamiento verificable e inmutable en mantenimiento mecánico
 
 ---
 
 **Postulante:** Daniel Mauricio Tarqui Apaza
 
-**Tutor / Asesor:** _________________________
+**Tutor / Asesor:** Juan Perez
 
 **Unidad Académica:** La Paz
 
@@ -29,88 +29,120 @@ La Paz – Bolivia
 
 ---
 
+## Índice
+
+**Parte I — Investigación**
+
+1. Título del proyecto · 2. Planteamiento del problema · 3. Preguntas de investigación · 4. Justificación · 5. Antecedentes · 6. Estado del arte · 7. Marco teórico y conceptual · 8. Objetivo general · 9. Objetivos específicos · 10. Hipótesis · 11. Variables · 12. Operacionalización · 13. Matriz de consistencia · 14. Enfoque y tipo · 15. Diseño de investigación · 16. Población y muestra · 17. Técnicas e instrumentos · 18. Estrategia de análisis · 19. Consideraciones éticas
+
+**Parte II — Propuesta técnica**
+
+20. Antecedentes tecnológicos relevantes · 21. Propuesta de solución tecnológica · 22. Arquitectura preliminar del sistema · 23. Tecnologías y herramientas · 24. Diseño técnico preliminar · 25. Estrategia de implementación · 26. Cronograma de trabajo · 27. Resultados esperados · 28. Viabilidad técnica · 29. Referencias
+
+**Anexo A** — Revisión de consistencia
+
+---
+
+# Parte I — Investigación
+
 ## 1. Título del proyecto
 
-> **Diseño y validación de una arquitectura multi-tenant jerárquica y Row Level Security (RLS) con aislamiento verificable e inmutabilidad de aislamiento en la base de datos para aplicar en el servicio de mantenimiento mecánico**
+> **Diseño y validación de una arquitectura multi-tenant jerárquica con RLS para aislamiento verificable e inmutable en mantenimiento mecánico**
 
 | Campo | Detalle |
 |---|---|
 | **Línea de investigación** | Arquitectura de software y seguridad de datos en aplicaciones de software como servicio |
 | **Área de conocimiento** | Ingeniería de software · Bases de datos · Computación en la nube |
 | **Período de ejecución** | Septiembre a diciembre de 2026 |
-| **Ámbito de aplicación** | Organizaciones de servicio y reparación de motocicletas en Bolivia |
+| **Ámbito de aplicación** | Servicio de mantenimiento mecánico; validación sobre organizaciones de servicio de motocicletas en Bolivia |
+
+El título tiene 18 palabras e indica la **tecnología** (arquitectura multi-tenant jerárquica con RLS), el **objeto de estudio** (aislamiento verificable e inmutable) y el **dominio de impacto** (mantenimiento mecánico).
 
 ---
 
 ## 2. Planteamiento del problema
 
-### 2.1 Situación problemática
+### 2.1 Árbol de problemas
 
-**Síntoma.** Un operador que administra una o varias organizaciones de servicio de motocicletas, cada una con uno o varios talleres, no dispone en Bolivia de una plataforma que le permita gestionarlas desde una sola cuenta con visión consolidada. Hoy debe elegir entre dos malas opciones: llevar cada local como una cuenta independiente —perdiendo la vista unificada del cliente y su historial— o recurrir a hojas de cálculo y software genérico no especializado.
+```mermaid
+flowchart TD
+    E1["Historial del cliente fragmentado<br/>entre talleres"] --> PC
+    E2["Fuga de datos entre organizaciones<br/>ante un solo error de consulta"] --> PC
+    E3["Gestión en hojas de cálculo<br/>o cuentas separadas por local"] --> PC
+    E4["Barrera de costo de entrada"] --> PC
+    PC["<b>Problema central</b><br/>Sin plataforma que centralice varias organizaciones<br/>y talleres sin exponer sus datos a otras"]
+    PC --> C1["Arquitectura de un solo inquilino:<br/>un taller por cuenta"]
+    PC --> C2["Aislamiento resuelto solo<br/>en el código de la aplicación"]
+    PC --> C3["Sin modelo jerárquico que distinga<br/>el alcance de cada entidad"]
+    PC --> C4["Infraestructura con costo fijo<br/>por instalación"]
+```
 
-**Causa.** El software de gestión de talleres relevado con presencia en Bolivia (AutoSoft Taller, ServitechApp, TuneraTaller) y el regional (Appli-Car, Garage App) está construido sobre arquitecturas de **un solo inquilino** (*single-tenant*): asumen un taller por cuenta. No modelan ni la pertenencia de varias organizaciones a una misma cuenta, ni la de varios talleres a una misma organización. Cuando existe algún aislamiento entre clientes del sistema, se resuelve **únicamente en el código de la aplicación**: basta que una consulta omita el filtro correspondiente para que se produzca una fuga de datos, porque no hay ningún control por debajo que lo impida.
+**Efectos.** El historial del cliente queda fragmentado entre talleres de una misma organización —la gestión de varias organizaciones desde una cuenta está ausente en las 10 plataformas relevadas (§16.2)—; un solo error de consulta expone datos de una organización a otra, riesgo que la evidencia de fallos recurrentes en la aplicación de políticas de seguridad de fila vuelve concreto (§6.4); el operador que crece lleva cada local como una cuenta independiente o recurre a hojas de cálculo; y el costo de entrada excluye a buena parte de un sector con 84,2 % de informalidad laboral (§5.1).
 
-**Impacto.**
+**Problema central.** Los operadores que gestionan **varias organizaciones y talleres de servicio de mantenimiento mecánico** no disponen de un sistema que centralice su información sin exponerla a otras organizaciones: el software disponible es de un solo inquilino y, cuando separa datos entre clientes del sistema, lo hace **únicamente en el código de la aplicación**.
 
-| Efecto | Consecuencia |
-|---|---|
-| Pérdida de la visión consolidada | El historial del cliente queda fragmentado entre talleres de la misma organización, que es justamente lo que se busca al centralizar |
-| Riesgo de fuga de datos entre organizaciones | Al depender el aislamiento de que cada consulta esté correctamente escrita, un solo error de programación expone información de un cliente del sistema a otro |
-| Barrera de costo | La infraestructura tradicional (servidor propio, despliegue manual) eleva el costo de entrada, factor crítico en un sector con alta informalidad y bajo presupuesto de tecnología |
+**Causas raíz.**
+
+| # | Decisión de ingeniería | Consecuencia |
+|---|---|---|
+| 1 | **Arquitectura de un solo inquilino**: el software relevado con presencia en Bolivia (AutoSoft Taller, ServitechApp, TuneraTaller) y el regional (Appli-Car, Garage App) asume un taller por cuenta | No modela la pertenencia de varias organizaciones a una cuenta ni la de varios talleres a una organización |
+| 2 | **Aislamiento solo en la capa de aplicación** | Basta que una consulta omita el filtro para que se produzca una fuga: no hay control por debajo que lo impida |
+| 3 | **Sin modelo jerárquico** que distinga qué entidades pertenecen a la organización y cuáles al taller | Centralizar obliga a fragmentar al cliente o a mezclar inventarios de locales distintos |
+| 4 | **Infraestructura con costo fijo por instalación** | El costo de entrada no se adapta a unidades de negocio pequeñas |
 
 ### 2.2 Delimitación del problema
 
-| Dimensión | Delimitación |
-|---|---|
-| **Espacial / organizacional** | Organizaciones de servicio y reparación de motocicletas en Bolivia; específicamente, operadores que administran —o planean administrar— más de una organización y/o más de un taller |
-| **Temporal** | Desarrollo y validación entre septiembre y diciembre de 2026 (cuatro meses) |
-| **Técnica** | La capa de identidad, jerarquía organizacional y aislamiento de datos: cuentas, organizaciones, talleres, membresías con rol, y las políticas de seguridad que las hacen cumplir en la base de datos. **No** abarca la totalidad de los módulos operativos |
+| # | Dimensión | Delimitación |
+|---|---|---|
+| 1 | **Temática / tecnológica** | La capa de identidad, jerarquía organizacional y aislamiento de datos de un sistema web multiorganización: TypeScript en servidor (Node.js, Hono, Zod) y cliente (React), PostgreSQL con seguridad a nivel de fila sobre Supabase, y funciones serverless en Vercel |
+| 2 | **Contextual** | Organizaciones de servicio y reparación de motocicletas en Bolivia cuyos operadores administran —o planean administrar— más de una organización y/o más de un taller |
+| 3 | **Temporal** | Septiembre a diciembre de 2026; recolección de las métricas de validación en I8 (8 al 21 de diciembre de 2026) |
+| 4 | **Límites y exclusiones** | No se construyen los módulos operativos fuera del corte vertical (motocicletas, órdenes de trabajo, historial de mantenimiento, panel de métricas); no se integran WhatsApp ni la factura electrónica del SIN; no hay aplicaciones nativas, migración de datos productivos, pruebas de carga o estrés, contenedores, pruebas de penetración ni evaluación de usabilidad de la interfaz completa. El detalle, en §21.6 |
 
 ### 2.3 Formulación del problema
 
-> **¿De qué manera una arquitectura multi-tenant jerárquica y Row Level Security (RLS) sobre infraestructura serverless sostiene un aislamiento verificable e inmutable en la base de datos y mejora la gestión centralizada y la seguridad de los datos de operadores de varias organizaciones y talleres de servicio de mantenimiento mecánico en Bolivia?**
+> **¿De qué manera una arquitectura multi-tenant jerárquica con Row Level Security (RLS) sobre infraestructura serverless sostiene un aislamiento verificable e inmutable —cero filas ajenas devueltas aun cuando la capa de aplicación omite sus controles—, frente al aislamiento resuelto solo en la aplicación, en la gestión centralizada de varias organizaciones y talleres de servicio de mantenimiento mecánico en Bolivia?**
 
 ---
 
 ## 3. Preguntas de investigación
 
-**Pregunta general.** La formulación del problema (§2.3) constituye la pregunta general del estudio.
+**Pregunta general.** La formulación del problema (§2.3) constituye la pregunta general. Se estructura como tecnología + efecto esperado + magnitud + condición + contexto, contrastada con la alternativa del mercado, y es directamente resoluble construyendo el sistema y midiendo sobre él.
 
 **Preguntas específicas.** Una por cada objetivo específico, en el mismo orden:
 
-1. ¿Qué estrategias de aislamiento multi-tenant documenta la literatura, con qué ventajas y limitaciones, y qué carencias presentan frente al modelo multiorganización las soluciones de gestión de talleres disponibles en Bolivia? *(Análisis)*
-2. ¿Qué modelo de datos y qué políticas de seguridad a nivel de fila permiten representar la jerarquía organización → talleres sin fragmentar la información del cliente y sosteniendo un único límite de aislamiento? *(Diseño)*
-3. ¿Cómo se comprueba, con evidencia reproducible, que el aislamiento entre organizaciones se cumple incluso ante fallos de la capa de aplicación —es decir, que es **inmutable**— y que el cambio de contexto entre organizaciones y talleres resulta usable para el operador? *(Validación)*
+1. ¿Qué estrategias de aislamiento multi-tenant documenta la literatura, con qué limitaciones, y qué carencias presentan las soluciones de gestión de talleres disponibles en Bolivia frente al modelo multiorganización? *(Diagnóstico)*
+2. ¿Qué modelo de datos, qué políticas de seguridad a nivel de fila y qué contrato de interfaz permiten representar la jerarquía organización → talleres sosteniendo un único límite de aislamiento? *(Diseño)*
+3. ¿Cómo se construye el corte vertical del sistema sobre infraestructura serverless de modo que conserve el diseño de aislamiento y quede verificado en cada integración? *(Desarrollo)*
+4. ¿En qué medida la arquitectura propuesta reduce las filas ajenas devueltas frente a la línea base de aislamiento solo en la aplicación, y se sostiene esa reducción con la verificación de membresía deshabilitada? *(Validación)*
+5. ¿Resulta el cambio de contexto entre organizaciones y talleres más eficiente y satisfactorio para el operador que el cambio de cuenta que exige el software de un solo inquilino? *(Complementaria)*
+6. ¿Cuál es el costo operativo mensual por organización del despliegue serverless frente a un despliegue en servidor dedicado? *(Complementaria)*
 
 ---
 
 ## 4. Justificación
 
-### 4.1 Justificación teórica
+### 4.1 Técnica
 
-El estado del arte aborda el aislamiento entre inquilinos en modelos **planos**, de un solo nivel. Este proyecto extiende el problema a una **multi-tenancy jerárquica**, donde el inquilino posee una subdivisión interna y las entidades no comparten el mismo alcance: unas siguen al cliente y pertenecen a la organización, otras responden a la existencia física de un local y pertenecen al taller. Sostener un aislamiento verificable bajo esa asimetría, con un único límite de seguridad, es el aporte que el proyecto disputa a la literatura revisada.
+El proyecto aporta una solución replicable a un problema conocido del software como servicio: sostener el aislamiento entre inquilinos en un esquema compartido sin que dependa de que cada consulta esté bien escrita. Lo resuelve situando el control en el motor de base de datos, reforzándolo con una verificación independiente en la aplicación, y extendiéndolo a un inquilino **jerárquico** —organización con varios talleres— cuyas entidades no comparten el mismo alcance. El patrón es aplicable a cualquier sistema multiorganización de esquema compartido, con independencia del rubro.
 
-### 4.2 Justificación práctica
+### 4.2 Económica / de negocio
 
-Ofrece a los operadores bolivianos de servicio de motocicletas una capacidad que hoy no existe en su mercado: administrar varias organizaciones desde una sola cuenta, con visión consolidada del cliente entre talleres y con separación de datos demostrable. El relevamiento confirma que la gestión de varias organizaciones por cuenta está **ausente** en la oferta local, y que ninguna solución relevada documenta su aislamiento entre organizaciones.
+El despliegue serverless, con escalado a cero y sin costo fijo por organización, reduce el costo de infraestructura a lo que se consume: la especificación del proyecto cabe en la capa gratuita de sus proveedores (§28.3), condición necesaria para ofrecer software especializado a un sector con 84,2 % de informalidad laboral. Administrar varias organizaciones y talleres desde una sola cuenta elimina, además, la duplicación de cuentas y registros que hoy impone el software de un solo inquilino. El objetivo complementario 6 cuantifica ese costo por organización.
 
-### 4.3 Justificación metodológica
+### 4.3 De conocimiento
 
-Aporta un procedimiento reproducible para **verificar** el aislamiento multi-tenant, no solo para afirmarlo: dos vías independientes de comprobación —por la interfaz de programación y por acceso directo al motor de base de datos— con un escenario de datos construido por la propia prueba y una matriz que traza cada requisito hasta su evidencia. El procedimiento es aplicable a cualquier sistema de esquema compartido, con independencia del rubro.
-
-### 4.4 Justificación social y económica
-
-El modelo de despliegue serverless, con escalado a cero y sin costo fijo por organización, hace económicamente viable ofrecer software especializado a un sector con **84,2 % de informalidad laboral** y presupuesto de tecnología mínimo. La barrera de costo identificada en el planteamiento del problema es, en sí misma, una condición de diseño del proyecto.
+El proyecto documenta un procedimiento reproducible para **verificar** el aislamiento multi-tenant, no solo para afirmarlo: dos vías independientes de comprobación, una línea base contra la que se contrasta, un escenario de datos construido por la propia prueba y una matriz que traza cada requisito hasta su evidencia. La suite y su evidencia quedan disponibles como referencia reutilizable para evaluar otros sistemas de esquema compartido.
 
 ---
 
 ## 5. Antecedentes
 
-**El parque de motocicletas y la demanda de servicio.** La motocicleta es el vehículo más numeroso de Bolivia. Según el Instituto Nacional de Estadística (INE), a partir de los registros del Registro Único para la Administración Tributaria Municipal (RUAT), en **2025** se contabilizaron **931.205 motocicletas**, el **34,8 %** del parque automotor nacional, encabezándolo por delante de vagonetas, automóviles y camionetas. Su crecimiento es sostenido y superior al del parque en conjunto: pasó de **657.718 unidades en 2021** a **872.550 en 2024** y a **931.205 en 2025**, un incremento del **41,6 % en cuatro años**, frente al +20,0 % del parque automotor total en el mismo período. Cada una de esas unidades requiere mantenimiento periódico y reparaciones, lo que sostiene una red amplia de talleres de servicio distribuida por todo el territorio — una base de negocio que crece año a año y que, al hacerlo, empuja a los operadores más exitosos a abrir locales adicionales.
+### 5.1 Contexto del sector
 
-**Condiciones del sector que explican el problema.** Ese crecimiento ocurre, sin embargo, en una economía marcadamente informal: el indicador de **informalidad laboral del 84,2 % en 2024**, procedente de la Encuesta Continua de Empleo del INE, describe una tendencia agravada de forma sostenida durante las últimas dos décadas. Se emplea como caracterización cualitativa del sector y no interviene en ningún cálculo de este documento. Para el rubro de talleres esto se traduce en unidades de negocio pequeñas, con presupuesto de tecnología muy limitado y baja adopción de software especializado, donde la gestión se apoya todavía en registros en papel u hojas de cálculo. En ese contexto, el operador que crece —el que abre un segundo o tercer taller, o constituye más de una organización— se encuentra sin herramientas que le permitan administrarlas de forma centralizada. Este es precisamente el escenario que el presente proyecto aborda.
+**El parque de motocicletas y la demanda de servicio.** La motocicleta es el vehículo más numeroso de Bolivia. Según el Instituto Nacional de Estadística (INE), a partir de los registros del Registro Único para la Administración Tributaria Municipal (RUAT), en **2025** se contabilizaron **931.205 motocicletas**, el **34,8 %** del parque automotor nacional, encabezándolo por delante de vagonetas, automóviles y camionetas. Su crecimiento es sostenido y superior al del parque en conjunto: pasó de **657.718 unidades en 2021** a **872.550 en 2024** y a **931.205 en 2025**, un incremento del **41,6 % en cuatro años**, frente al +20,0 % del parque automotor total en el mismo período. Cada una de esas unidades requiere mantenimiento periódico y reparaciones, lo que sostiene una red amplia de talleres de servicio que crece año a año y empuja a los operadores más exitosos a abrir locales adicionales.
 
-**Fuentes de los antecedentes**
+**Condiciones del sector que explican el problema.** Ese crecimiento ocurre en una economía marcadamente informal: el indicador de **informalidad laboral del 84,2 % en 2024**, procedente de la Encuesta Continua de Empleo del INE, se emplea como caracterización cualitativa del sector y no interviene en ningún cálculo de este documento. Para el rubro de talleres esto se traduce en unidades de negocio pequeñas, con presupuesto de tecnología muy limitado y gestión apoyada todavía en registros en papel u hojas de cálculo.
 
 | Fuente | Tipo |
 |---|---|
@@ -119,36 +151,55 @@ El modelo de despliegue serverless, con escalado a cero y sin costo fijo por org
 | INE — *Estadísticas del parque automotor 2003–2025* (1 de julio de 2026) | Primaria (oficial) |
 | INE — *Encuesta Continua de Empleo* (indicador de informalidad laboral) | Secundaria — dato por remitir a su cuadro oficial |
 
+### 5.2 Revisión crítica de soluciones previas y arquitecturas legadas
+
+| Etapa | Solución | Limitación frente al problema |
+|---|---|---|
+| **Software de escritorio por local** | Instalación local de un programa de gestión de taller, con su base de datos en el propio equipo | Cada local es una isla: no hay visión consolidada ni acceso remoto, y el costo de mantenimiento recae en cada instalación |
+| **SaaS de un solo inquilino por cuenta** | La oferta relevada con presencia en Bolivia y en la región (§16.2) | Traslada el sistema a la nube pero conserva el supuesto de un taller por cuenta; el aislamiento entre cuentas, cuando existe, vive en el código |
+| **Multi-tenancy con base o esquema por inquilino** | Una base de datos o un esquema separados por cliente del sistema (Krebs et al., 2012) | Aísla con fuerza, pero impone costo fijo y operación por inquilino, incompatibles con el presupuesto del sector |
+| **Esquema compartido con discriminador en la aplicación** | Todas las organizaciones en las mismas tablas, filtradas por un identificador en cada consulta (Krebs et al., 2012) | Aprovecha recursos, pero dispersa la conciencia de inquilino por toda la base de código: un solo olvido produce una fuga (Bezemer & Zaidman, 2010) |
+| **Esquema compartido con políticas en el motor** | Políticas de seguridad a nivel de fila evaluadas por el propio motor de base de datos (PostgreSQL Global Development Group, s. f.-b) | Traslada la condición de inquilino al motor, pero la literatura la estudia sobre inquilinos **planos** y documenta fallos del propio mecanismo (§6) |
+
 ---
 
 ## 6. Estado del arte
 
-Construido únicamente con literatura revisada por pares publicada entre **2021 y 2026**, admitiendo tesis de maestría o doctorado en ciencias de la computación y trabajos con problemas arquitectónicos similares aunque el rubro sea distinto. Se excluyen soluciones sobre tecnologías legadas y artículos de opinión sin validación métrica. De cada fuente se consigna su **limitación**, que es donde se abre la oportunidad de este proyecto.
+### 6.1 Protocolo de revisión
 
-### 6.1 Matriz de extracción
+La revisión sigue las cuatro etapas de una revisión sistemática de literatura:
 
-| Referencia (Autor, Año) | Solución tecnológica (arquitectura) | Resultados clave | Vacío identificado (*Research Gap*) |
+| Etapa | Aplicación |
+|---|---|
+| **Planificación** | Pregunta de revisión: ¿qué arquitecturas y mecanismos sostienen el aislamiento entre inquilinos en esquemas compartidos, y con qué limitaciones? Ventana de **2021 a 2026** |
+| **Búsqueda** | Cadena booleana `("multi-tenant" OR "multi-tenancy" OR "multitenancy") AND ("row-level security" OR "tenant isolation" OR "data isolation") AND ("SaaS" OR "shared schema" OR "cloud")`, con términos del *ACM Computing Classification System* —*Security and privacy → Database and storage security*; *Software and its engineering → Software architectures*—, en ACM Digital Library, IEEE Xplore, Scopus, Google Scholar, BASE y OATD |
+| **Selección** | Lectura progresiva título → resumen → conclusiones. Inclusión: revisión por pares o tesis de posgrado en ciencias de la computación; problema arquitectónico comparable aunque el rubro difiera. Exclusión: soluciones sobre tecnologías legadas y artículos de opinión sin validación métrica |
+| **Síntesis** | Análisis **crítico**: de cada trabajo se consigna dónde falla frente al problema, y esa columna alimenta el enunciado del vacío (§6.5) |
+
+### 6.2 Matriz del estado del arte
+
+| Autor | Metodología | Aporte | Limitaciones |
 |---|---|---|---|
-| **Dar, Hershcovitch & Morrison (2023)** · *Proc. ACM Management of Data* (SIGMOD), art. 89 · DOI 10.1145/3588943 | Seguridad a nivel de fila (RLS) sobre PostgreSQL y SQL Server, en instancias propias y gestionadas en AWS; proponen un esquema de consulta *data-oblivious* como defensa | RLS impide devolver datos no autorizados, **pero el tiempo de ejecución de la consulta filtra información**: mediante consultas que usan índices, un atacante determina si existe un valor que no está autorizado a ver y, en ciertos casos, cuántas veces existe | Modelo de inquilinos **plano y de un solo nivel**, en la capa de consulta. No abordan dónde ubicar el límite de aislamiento cuando el inquilino tiene una subdivisión interna |
-| **Alobaywi, Almutairi & Sheldon (2026)** · *IoT* (MDPI), 7(1), art. 21 · DOI 10.3390/iot7010021 | Revisión sistemática guiada por PRISMA de marcos de seguridad para entornos multi-inquilino IoT–nube | Categorizan las amenazas de intersección entre inquilinos: **fuga de datos entre inquilinos, canal lateral y escalamiento de privilegios** | Al ser una revisión, **no propone ni valida una arquitectura concreta**. Su contexto son dispositivos IoT, no SaaS de gestión empresarial con estructura jerárquica |
-| **Andriianenko (2026)** · Tesis de maestría, Universitatea Tehnică a Moldovei | SaaS de gestión de proyectos con microservicios; diseña, implementa y evalúa **esquema compartido** frente a **base por inquilino** | El esquema compartido reduce recursos pero incrementa complejidad y riesgo de aislamiento; la base por inquilino separa mejor a costa de sobrecarga operativa | Evalúa ambos modelos como **alternativas planas y excluyentes**, sin considerar RLS como refuerzo *dentro* del esquema compartido ni una jerarquía de dos niveles |
-| **Simić, Dedeić, Stojkov & Prokić (2024)** · *IEEE Access*, 12, pp. 32597–32617 · DOI 10.1109/ACCESS.2024.3369031 | Jerarquía de espacios de nombres sobre nube distribuida en el borde, para crear nubes virtuales con redistribución de CPU, RAM y almacenamiento | La jerarquía de *namespaces* sostiene aislamiento lógico entre inquilinos de distinto nivel, permitiendo que un nivel superior reorganice recursos del inferior | El aislamiento jerárquico es de **infraestructura física**, no de filas de una base relacional compartida. No hay políticas a nivel de fila ni reparto de entidades de negocio por nivel |
-| **Olabanji, Fitch & Matthew (2023)** · *WSEAS Transactions on Computers*, 22, pp. 25–43 · DOI 10.37394/23205.2023.22.4 | Revisión de mapeo sistemático sobre multi-tenancy en arquitecturas *cloud-native*: 64 estudios revisados por pares seleccionados de 921 relevados | Documentan retos y tendencias de la multi-tenancy en contenedores y orquestación, confirmando que el aislamiento entre inquilinos es un problema abierto y activo | Cataloga el estado del conocimiento **sin proponer ni validar arquitectura propia**; su dominio es *cloud-native*, no la jerarquía organizacional de dos niveles |
+| **Dar, Hershcovitch & Morrison (2023)** · *Proc. ACM Management of Data*, art. 89 · DOI 10.1145/3588943 | Experimental: ataques de canal lateral temporal sobre PostgreSQL y SQL Server, en instancias propias y gestionadas en AWS; diseño y medición de una defensa *data-oblivious* | La seguridad a nivel de fila impide devolver datos no autorizados, **pero el tiempo de ejecución de la consulta filtra información** sobre su existencia | Modelo de inquilinos **plano y de un solo nivel**, en la capa de consulta; no aborda dónde situar el límite de aislamiento cuando el inquilino tiene subdivisiones |
+| **Alobaywi, Almutairi & Sheldon (2026)** · *IoT* (MDPI), 7(1), art. 21 · DOI 10.3390/iot7010021 | Revisión sistemática guiada por PRISMA de marcos de seguridad multi-inquilino IoT–nube | Clasifica las amenazas de intersección entre inquilinos: **fuga de datos, canal lateral y escalamiento de privilegios** | Al ser una revisión, **no propone ni valida una arquitectura**; su contexto son dispositivos IoT, no SaaS de gestión con estructura jerárquica |
+| **Andriianenko (2026)** · Tesis de maestría, Universitatea Tehnică a Moldovei | Diseño y evaluación comparativa de **esquema compartido** frente a **base por inquilino** sobre un SaaS de gestión de proyectos con microservicios | El esquema compartido reduce recursos pero incrementa complejidad y riesgo de aislamiento; la base por inquilino separa mejor con mayor sobrecarga operativa | Evalúa ambos modelos como **alternativas planas y excluyentes**, sin la seguridad a nivel de fila como refuerzo dentro del esquema compartido ni una jerarquía de dos niveles |
+| **Simić, Dedeić, Stojkov & Prokić (2024)** · *IEEE Access*, 12, pp. 32597–32617 · DOI 10.1109/ACCESS.2024.3369031 | Diseño e implementación de una jerarquía de espacios de nombres sobre nube distribuida en el borde, con evaluación del aislamiento y la redistribución de recursos | La jerarquía sostiene el aislamiento lógico entre inquilinos de distinto nivel | Su jerarquía organiza **recursos de infraestructura**, no filas de una base relacional compartida; no reparte entidades de negocio por nivel |
+| **Olabanji, Fitch & Matthew (2023)** · *WSEAS Transactions on Computers*, 22, pp. 25–43 · DOI 10.37394/23205.2023.22.4 | Mapeo sistemático: 64 estudios revisados por pares seleccionados de 921 relevados (2015–2022) | Confirma que el aislamiento entre inquilinos en entornos *cloud-native* sigue siendo un problema abierto | Cataloga el conocimiento **sin proponer ni validar arquitectura**; su dominio son contenedores y orquestación |
 
-### 6.2 Síntesis comparativa
+### 6.3 Síntesis comparativa
 
 | Criterio | Dar et al. (2023) | Alobaywi et al. (2026) | Andriianenko (2026) | Simić et al. (2024) | Olabanji et al. (2023) | **Este proyecto** |
 |---|---|---|---|---|---|---|
-| Tipo de trabajo | Experimental | Revisión sistemática | Tesis con implementación | Experimental | Revisión de mapeo | **Tesis con validación empírica** |
+| Tipo de trabajo | Experimental | Revisión sistemática | Tesis con implementación | Experimental | Revisión de mapeo | **Design Science Research con validación cuasiexperimental** |
 | Niveles de inquilino | Uno (plano) | Uno (plano) | Uno (plano) | Jerárquico (infraestructura) | Uno (plano) | **Dos (jerárquico, datos)** |
 | Mecanismo de aislamiento | RLS | Varios marcos | Esquema compartido / base por inquilino | Espacios de nombres | Varios | **RLS + verificación en aplicación** |
 | ¿Propone arquitectura? | No | No | Sí | Sí | No | Sí |
-| ¿Valida empíricamente? | Sí | No | Sí | Sí | No | Sí |
+| ¿Valida frente a una línea base? | Sí | No | Sí | Sí | No | Sí |
 | Dominio | Genérico | IoT–nube | SaaS gestión de proyectos | Nube distribuida | *Cloud-native* | **SaaS gestión de talleres (Bolivia)** |
 
-### 6.3 Evidencia técnica complementaria
+### 6.4 Evidencia técnica complementaria
 
-No constituye literatura académica —son registros oficiales de vulnerabilidad— pero aporta evidencia verificable de que la aplicación de políticas RLS ha fallado de forma **recurrente** en producción, lo que sustenta no depender de una única capa de aislamiento:
+No constituye literatura académica —son registros oficiales de vulnerabilidad— pero aporta evidencia verificable de que la aplicación de políticas de seguridad de fila ha fallado de forma **recurrente** en producción:
 
 | Identificador | Año | Descripción |
 |---|---|---|
@@ -156,21 +207,23 @@ No constituye literatura académica —son registros oficiales de vulnerabilidad
 | **CVE-2023-2455** | 2023 | Nuevo caso del mismo tipo, no cubierto por la corrección anterior |
 | **CVE-2024-10976** | 2024 | Seguimiento incompleto de tablas con seguridad de fila en PostgreSQL; aplicar una política incorrecta puede permitir lecturas y modificaciones prohibidas. CVSS 5.4, CWE-1250 |
 
-### 6.4 Vacío de investigación
+### 6.5 Vacío de investigación
 
-La solución de **Dar et al. (2023)** demuestra empíricamente que la seguridad a nivel de fila cumple su función como control de acceso; **sin embargo**, su análisis se limita a un modelo de inquilinos plano y se concentra en la capa de consulta, sin abordar la decisión arquitectónica previa: **dónde ubicar el límite de aislamiento cuando el inquilino posee una subdivisión interna** cuyas entidades no comparten el mismo alcance. **Alobaywi et al. (2026)** y **Olabanji et al. (2023)** sistematizan amenazas y tendencias, **pero**, al ser revisiones, identifican riesgos sin proponer ni validar una arquitectura aplicable a un SaaS de gestión empresarial. **Andriianenko (2026)** compara esquema compartido frente a base por inquilino, **no obstante** los evalúa como alternativas planas y excluyentes. **Simić et al. (2024)** sí modelan una jerarquía, **aunque** su aislamiento opera sobre recursos de infraestructura y no sobre filas de una base relacional compartida. A ello se suma que la serie de CVE evidencia que confiar en una sola capa de aislamiento resulta insuficiente en la práctica.
+**Enunciado del vacío** — tecnología + condición + deficiencia:
 
-El presente proyecto aborda esta deficiencia mediante el **diseño y validación de una arquitectura multi-tenant jerárquica (organización → talleres)** que mantiene un **único límite de aislamiento verificable** a nivel de organización, tratando el taller como criterio de alcance operativo y no como segunda frontera de seguridad; refuerza la seguridad a nivel de fila con **verificación de membresía en la capa de aplicación**; y **valida empíricamente la separación de datos** por dos vías independientes.
+> **Seguridad a nivel de fila** en esquemas compartidos cuyos **inquilinos son jerárquicos y sus entidades tienen alcance distinto por nivel**: falta una arquitectura que sitúe el único límite de aislamiento y **lo valide empíricamente frente a una línea base, con independencia de la capa de aplicación**.
+
+**Dar et al. (2023)** demuestran que la seguridad a nivel de fila cumple su función como control de acceso; **sin embargo**, su análisis se limita a inquilinos planos y a la capa de consulta, sin abordar dónde ubicar el límite de aislamiento cuando el inquilino posee una subdivisión interna. **Alobaywi et al. (2026)** y **Olabanji et al. (2023)** sistematizan amenazas y tendencias, **pero** no proponen ni validan una arquitectura aplicable a un SaaS de gestión empresarial. **Andriianenko (2026)** compara esquema compartido frente a base por inquilino, **no obstante** los evalúa como alternativas planas y excluyentes. **Simić et al. (2024)** sí modelan una jerarquía, **aunque** su aislamiento opera sobre recursos de infraestructura y no sobre filas de una base relacional compartida. A ello se suma que la serie de CVE evidencia que confiar en una sola capa de aislamiento resulta insuficiente.
+
+El presente proyecto aborda esta deficiencia mediante el **diseño, desarrollo y validación de una arquitectura multi-tenant jerárquica (organización → talleres)** que mantiene un **único límite de aislamiento verificable** a nivel de organización, tratando el taller como criterio de alcance operativo; refuerza la seguridad a nivel de fila con **verificación de membresía en la capa de aplicación**; y **contrasta la separación obtenida con una línea base** de aislamiento solo en la aplicación, por dos vías independientes.
 
 ---
 
 ## 7. Marco teórico y conceptual
 
-El **marco conceptual** responde *«¿qué herramientas se usan?»*; el **marco teórico**, *«¿por qué se usan?»*. Atendiendo a la instrucción de la entrega, este punto se presenta **condensado**: se enuncia cada teoría con la decisión de ingeniería que gobierna, y su desarrollo extenso —con la discusión completa de limitaciones— corresponde a la fase siguiente de la investigación ([capítulo 3](03-marco-teorico-y-conceptual.md)). Toda afirmación no propia lleva crédito en APA 7.ª edición, con autor corporativo cuando la fuente es documentación técnica.
+El **marco conceptual** *nombra*: define la taxonomía técnica del proyecto. El **marco teórico** *fundamenta*: expone los modelos de ingeniería ya probados que rigen las decisiones del sistema. Este punto se presenta condensado; su desarrollo extenso, con la discusión completa de limitaciones, está en el [capítulo 3](03-marco-teorico-y-conceptual.md).
 
-### 7.1 Marco conceptual — el «qué»
-
-Tecnologías propias de esta solución; se excluyen los conceptos universales o básicos.
+### 7.1 Marco conceptual — glosario técnico operacional
 
 | # | Término | Definición formal | Fuente |
 |---|---|---|---|
@@ -184,6 +237,7 @@ Tecnologías propias de esta solución; se excluyen los conceptos universales o 
 | 8 | **Validación por esquema** | Forma esperada de un dato declarada como esquema ejecutable, del cual se **deriva** el tipo estático. | Zod (s. f.) |
 | 9 | **Progressive Web App (PWA)** | Aplicación web que, mediante manifiesto y *service worker*, resulta instalable sin pasar por una tienda de aplicaciones. | World Wide Web Consortium [W3C] (2026) |
 | 10 | **Problem Details** | Formato normalizado de error para interfaces HTTP: tipo, título, estado y detalle. Estándar RFC 9457, que sustituye al 7807. | Nottingham et al. (2023) |
+| 11 | **Modelo C4** | Notación de diagramas de arquitectura en cuatro niveles —contexto del sistema, contenedores, componentes y código—, de lo general a lo particular. | Brown (s. f.) |
 
 ### 7.2 Marco teórico — el «por qué»
 
@@ -191,176 +245,185 @@ Tecnologías propias de esta solución; se excluyen los conceptos universales o 
 
 **Base arquitectónica.** La restricción *stateless* de Fielding (2000) —cada petición contiene todo lo necesario para ser atendida— es lo que hace posible el despliegue serverless. Bass et al. (2021) fijan que la arquitectura se determina por sus **atributos de calidad** y no por su funcionalidad: aquí el atributo rector es el aislamiento entre organizaciones. Richards y Ford (2020) añaden que toda decisión arquitectónica es un intercambio cuyo valor documental está en registrar lo descartado.
 
-**Multi-tenancy y su punto débil.** De las tres estrategias conocidas —base por inquilino, esquema por inquilino y **esquema compartido con discriminador**—, Krebs et al. (2012) sistematizan sus compromisos entre aprovechamiento de recursos y aislamiento, y Bezemer y Zaidman (2010) advierten que compartir instancia dispersa la conciencia de inquilino por toda la base de código: el olvido en un solo punto compromete el aislamiento. Se elige esquema compartido por el costo proporcional al uso que hace viable el escalado a cero (Jonas et al., 2019) en un sector de presupuesto reducido (§5), y esa elección **obliga a un mecanismo por debajo de la aplicación**: RLS lo aporta al mover la condición de inquilino desde la consulta hacia el motor.
+**Multi-tenancy y su punto débil.** De las tres estrategias conocidas —base por inquilino, esquema por inquilino y **esquema compartido con discriminador**—, Krebs et al. (2012) sistematizan sus compromisos entre aprovechamiento de recursos y aislamiento, y Bezemer y Zaidman (2010) advierten que compartir instancia dispersa la conciencia de inquilino por toda la base de código. Se elige esquema compartido por el costo proporcional al uso que hace viable el escalado a cero (Jonas et al., 2019), y esa elección **obliga a un mecanismo por debajo de la aplicación**: la seguridad a nivel de fila lo aporta al mover la condición de inquilino desde la consulta hacia el motor.
 
-**El vacío que el proyecto resuelve.** Esa taxonomía supone inquilinos **planos** e indivisibles, y aquí no lo son: la organización opera varios talleres cuyas entidades no comparten el mismo alcance. Simić et al. (2024) son quienes más se aproximan a formalizar una jerarquía de inquilinos, pero la suya organiza recursos de infraestructura, no filas de una base relacional compartida. Queda planteado el problema teórico: **dónde situar el límite de aislamiento cuando el inquilino tiene subdivisiones**. Situarlo en la subdivisión fragmenta la información que se quería centralizar; no modelarla impide distinguir dónde ocurre cada operación; situarlo en el nivel superior y tratar la subdivisión como criterio de alcance conserva ambas propiedades, a costa de que el alcance de cada entidad sea una **decisión de diseño explícita**. En esa vía reside el aporte.
+**El vacío que el proyecto resuelve.** Esa taxonomía supone inquilinos **planos**, y aquí no lo son. Simić et al. (2024) son quienes más se aproximan a formalizar una jerarquía de inquilinos, pero la suya organiza recursos de infraestructura, no filas de una base relacional compartida. Queda planteado el problema teórico: **dónde situar el límite de aislamiento cuando el inquilino tiene subdivisiones**. Situarlo en el nivel superior y tratar la subdivisión como criterio de alcance conserva la centralización y la trazabilidad por local, a costa de que el alcance de cada entidad sea una **decisión de diseño explícita**.
 
 #### 7.2.2 Persistencia, tipos e interfaz
 
-**Datos y consistencia.** Codd (1970) hizo independiente la descripción lógica de los datos de su representación física, lo que permite expresar una regla de acceso como condición lógica sobre una relación —una política— y no como código disperso. De las propiedades ACID de Haerder y Reuter (1983) se deriva una regla concreta: registrar un movimiento de existencias y actualizar la existencia del repuesto **deben ocurrir en una sola transacción**. Gilbert y Lynch (2002) probaron que ante particiones de red no caben consistencia y disponibilidad a la vez, y Kleppmann (2017) matiza que su modelo de fallo es estrecho; como el aislamiento exige **consistencia fuerte** y el volumen esperado no justifica un almacén distribuido, se adopta un motor relacional único y la escalabilidad se obtiene en la capa de cómputo.
+**Datos y consistencia.** Codd (1970) hizo independiente la descripción lógica de los datos de su representación física, lo que permite expresar una regla de acceso como condición lógica sobre una relación —una política—. De las propiedades ACID de Haerder y Reuter (1983) se deriva una regla concreta: registrar un movimiento de existencias y actualizar la existencia del repuesto **deben ocurrir en una sola transacción**. Gilbert y Lynch (2002) probaron que ante particiones de red no caben consistencia y disponibilidad a la vez, y Kleppmann (2017) matiza que su modelo de fallo es estrecho; como el aislamiento exige **consistencia fuerte**, se adopta un motor relacional único y la escalabilidad se obtiene en la capa de cómputo.
 
-**Tipos, interfaz y uso.** Pierce (2002) define el sistema de tipos como verificación formal ligera previa a la ejecución, y Gao et al. (2017) acotan su beneficio a cerca del **15 %** de los errores públicos en proyectos JavaScript: fundamenta la elección de lenguaje y a la vez delimita su alcance. Krasner y Pope (1988) aportan la separación entre estado del dominio, presentación e interacción, hoy materializada en **componentes** con flujo unidireccional (Meta Open Source, s. f.); Nielsen (1993) fija los umbrales de percepción como criterio de diseño y **no** como objetivo medido (§19.3), y la opción de aplicación instalable frente a la nativa se apoya en el manifiesto de aplicación web (W3C, 2026). Nielsen y Landauer (1993) muestran que la detección de problemas de uso sigue una **curva de rendimientos decrecientes** —sirve para detectar problemas, no para estimar parámetros (§16.5)—, y la satisfacción se mide con la escala de Brooke (1996) según el baremo de Bangor et al. (2008), de donde procede el umbral de **68 puntos**.
+**Tipos, interfaz y uso.** Pierce (2002) define el sistema de tipos como verificación formal ligera previa a la ejecución, y Gao et al. (2017) acotan su beneficio a cerca del **15 %** de los errores públicos en proyectos JavaScript. Krasner y Pope (1988) aportan la separación entre estado, presentación e interacción, hoy materializada en **componentes** con flujo unidireccional (Meta Open Source, s. f.); Nielsen (1993) fija los umbrales de percepción como criterio de diseño y **no** como objetivo medido, y la aplicación instalable se apoya en el manifiesto de aplicación web (W3C, 2026). Nielsen y Landauer (1993) muestran que la detección de problemas de uso sigue una **curva de rendimientos decrecientes**: cinco participantes bastan para detectar la mayoría de los problemas, pero no para estimar parámetros. Por eso la evaluación del objetivo 5 amplía la muestra a treinta participantes, que es lo que exige el contraste inferencial frente a la línea base (§18.2). La satisfacción se mide con la escala de Brooke (1996), según el baremo de Bangor et al. (2008), de donde procede el umbral de **68 puntos**; su consistencia interna se estima con el coeficiente alfa de Cronbach (1951).
 
 #### 7.2.3 Modelos de seguridad
 
-Cuatro de los principios de Saltzer y Schroeder (1975) gobiernan decisiones directas del sistema:
-
-| Principio | Enunciado | Materialización en el proyecto |
+| Principio (Saltzer & Schroeder, 1975) | Enunciado | Materialización en el proyecto |
 |---|---|---|
 | **Mediación completa** | Todo acceso a todo objeto debe ser verificado | Las políticas se evalúan en el motor: ninguna consulta las elude |
 | **Valores por defecto seguros** | La decisión predeterminada es denegar | Sin membresía activa no hay acceso; sin cabecera de contexto se rechaza |
 | **Mínimo privilegio** | Permisos mínimos necesarios por sujeto | El rol se otorga por organización; lo administrativo, al propietario |
 | **Economía del mecanismo** | La protección debe poder inspeccionarse | Un **único** criterio de aislamiento en todas las tablas |
 
-El cuarto explica lo que de otro modo parecería una simplificación: modelar el taller como segunda frontera de seguridad habría duplicado la complejidad de las políticas, y un mecanismo que no puede inspeccionarse con confianza deja de proteger.
+**Roles y confianza cero.** Sandhu et al. (1996) asignan permisos a roles adquiridos por pertenencia, con el concepto de sesión; el proyecto aplica RBAC plano con una particularidad —**el rol no es un atributo global del usuario, sino de su relación con la organización**— y la sesión equivale al contexto activo declarado en cada petición. Rose et al. (2020) suprimen la confianza implícita basada en la ubicación de red: cada solicitud se autentica y autoriza individualmente.
 
-**Roles y confianza cero.** Sandhu et al. (1996) asignan permisos a roles adquiridos por pertenencia, con el concepto de sesión; el proyecto aplica RBAC plano con una particularidad del modelo multiorganización —**el rol no es un atributo global del usuario, sino de su relación con la organización**— y la sesión equivale al contexto activo declarado en cada petición. Rose et al. (2020) suprimen además la confianza implícita basada en la ubicación de red: cada solicitud se autentica y autoriza individualmente.
+**Defensa en profundidad e inmutabilidad del aislamiento.** Dar et al. (2023) demostraron que la seguridad a nivel de fila filtra información por el tiempo de ejecución de la consulta, y la serie de CVE evidencia fallos recurrentes del mecanismo (§6.4): confiar el aislamiento a una sola capa es insostenible. Situar la verificación en el motor —mediación completa— convierte además el aislamiento de **decisión de la aplicación** en **propiedad del dato**: ninguna ruta de código de la capa de aplicación puede apagarlo. Es una propiedad **comprobable** —se anula la verificación de membresía y se observa si las políticas siguen filtrando— y acotada: no afirma que el aislamiento sea inviolable ni que resista credenciales privilegiadas del motor.
 
-**Defensa en profundidad.** Dar et al. (2023) demostraron que RLS, aun impidiendo devolver datos no autorizados, filtra información por el **tiempo de ejecución** de la consulta, y la serie CVE-2016-2193, CVE-2023-2455 y CVE-2024-10976 evidencia fallos recurrentes del mecanismo en producción (§6.3). Confiar el aislamiento a una sola capa es, a esa luz, insostenible.
+#### 7.2.4 Metodología de investigación y de desarrollo
 
-**Inmutabilidad del aislamiento.** De ahí se sigue la propiedad que el título nombra. Situar la verificación en el motor y no en la aplicación —mediación completa (Saltzer & Schroeder, 1975)— convierte el aislamiento de **decisión de la aplicación** en **propiedad del dato**: ninguna bandera ni ruta de código de la capa de aplicación puede apagarlo, porque las políticas se evalúan sobre la identidad de quien consulta. Es una propiedad **comprobable** —se anula la verificación de membresía y se observa si las políticas siguen filtrando— y acotada: no afirma que el aislamiento sea inviolable, ni que resista credenciales privilegiadas del motor. Tampoco debe confundirse con el historial inmutable del modelo de datos, que es una propiedad de dos tablas y no del aislamiento.
+**Design Science Research.** Hevner et al. (2004) establecen que en la investigación en sistemas de información la contribución puede ser un **artefacto** —un constructo, modelo, método o instancia— siempre que se diseñe para resolver un problema relevante y se **evalúe con rigor**. Es el marco que legitima que el resultado de este proyecto sea un sistema y no solo un informe: el diseño responde al vacío de §6.5 y la evaluación es la validación cuasiexperimental del objetivo 4.
 
-#### 7.2.4 Metodología de desarrollo
-
-Larman y Basili (2003) sitúan la ventaja del desarrollo iterativo en obtener retroalimentación verificable antes de comprometer la totalidad del esfuerzo: se adoptan iteraciones de dos semanas cerradas con software ejecutable y verificado. De Scrum (Schwaber & Sutherland, 2020) se conserva únicamente lo que aporta valor a un desarrollador único, porque sus roles y ceremonias suponen un equipo que aquí no existe. Humble y Farley (2010) establecen que automatizar compilación, prueba y despliegue vuelve la entrega rutinaria y repetible, y Forsgren et al. (2018) lo validan empíricamente; Beck (2002) fija el orden de escritura —la prueba antes que el código, como especificación ejecutable—, que el proyecto aplica escribiendo las **pruebas de aislamiento antes** que la funcionalidad que protegen.
+**Desarrollo iterativo y verificación continua.** Larman y Basili (2003) sitúan la ventaja del desarrollo iterativo en obtener retroalimentación verificable antes de comprometer la totalidad del esfuerzo; de Scrum (Schwaber & Sutherland, 2020) se conserva lo que aporta valor a un desarrollador único. Humble y Farley (2010) establecen que automatizar compilación, prueba y despliegue vuelve la entrega rutinaria y repetible, y Forsgren et al. (2018) lo validan empíricamente; Beck (2002) fija el orden de escritura —la prueba antes que el código—, que el proyecto aplica escribiendo las **pruebas de aislamiento antes** que la funcionalidad que protegen. La arquitectura se documenta con el modelo C4 (Brown, s. f.) en sus niveles de contenedores y componentes.
 
 ### 7.3 Revisión crítica de la literatura
 
-De cada teoría se consigna su limitación documentada y la adaptación que impone el contexto real: una organización pequeña boliviana, con presupuesto de tecnología reducido (§5) y un único desarrollador.
-
 | Teoría o modelo | Limitación documentada | Adaptación adoptada |
 |---|---|---|
-| **Serverless** (Jonas et al., 2019) | Arranque en frío y dependencia del proveedor, señalados por los propios autores | Se asume el arranque en frío —uso interno— y el aislamiento reside en el motor, no en el proveedor |
-| **Row Level Security** (PostgreSQL GDG, s. f.-b) | Canal lateral temporal (Dar et al., 2023) y fallos recurrentes de aplicación (serie de CVE) | No es control único: se refuerza con verificación de membresía; el canal lateral queda fuera del alcance de mitigación |
-| **Esquema compartido** (Krebs et al., 2012) | Dispersa la conciencia de inquilino y degrada la mantenibilidad (Bezemer & Zaidman, 2010) | Se elige igualmente: una base por inquilino impone costo fijo por organización. La regla se concentra en el motor |
-| **Microservicios** (Newman, 2021) | Complejidad operativa que el propio autor desaconseja sin una organización que la sostenga | Se descartan pese a que el comparable más cercano (Andriianenko, 2026) los emplea |
-| **Confianza cero** (Rose et al., 2020) | Supone una arquitectura empresarial completa, inviable a esta escala | Se adopta el **principio**, no la arquitectura: verificación explícita en cada petición |
-| **Tipado estático** (Pierce, 2002; Gao et al., 2017) | Beneficio medido en torno al **15 %**; no verifica reglas de negocio | Se combina con la suite de pruebas: primera barrera, no garantía de corrección |
-| **Multi-tenancy jerárquica** (Simić et al., 2024) | Organiza recursos de infraestructura, no el reparto de entidades entre niveles | Se traslada el principio a la capa de datos, con el reparto como decisión explícita |
-| **Muestras pequeñas** (Nielsen & Landauer, 1993) | Detecta problemas, no estima parámetros poblacionales | De 5 a 8 participantes, declarando qué **no** permite concluir (§16.5) |
-
-Criticar la teoría consiste aquí en **retener el principio y descartar la implantación** cuando esta excede los medios disponibles: la literatura de arquitectura asume multirregión, equipos de plataforma y observabilidad que no se sostienen en un sector con 84,2 % de informalidad laboral (§5).
+| **Serverless** (Jonas et al., 2019) | Arranque en frío y dependencia del proveedor | Se asume el arranque en frío —uso interno, sin exigencia de latencia estricta— y el aislamiento reside en el motor, no en el proveedor |
+| **Row Level Security** (PostgreSQL GDG, s. f.-b) | Canal lateral temporal (Dar et al., 2023) y fallos recurrentes de aplicación | No es control único: se refuerza con verificación de membresía; el canal lateral queda fuera del alcance de mitigación |
+| **Esquema compartido** (Krebs et al., 2012) | Dispersa la conciencia de inquilino (Bezemer & Zaidman, 2010) | Se elige igualmente por costo; la regla se concentra en el motor |
+| **Microservicios** (Newman, 2021) | Complejidad operativa que el propio autor desaconseja sin una organización que la sostenga | Se descartan pese a que el comparable más cercano (Andriianenko, 2026) los emplea: se adopta un monolito modular desplegado como funciones |
+| **Confianza cero** (Rose et al., 2020) | Supone una arquitectura empresarial completa | Se adopta el **principio**: verificación explícita en cada petición |
+| **Tipado estático** (Pierce, 2002; Gao et al., 2017) | Beneficio medido en torno al **15 %** | Se combina con la suite de pruebas y con un umbral de cobertura |
+| **Multi-tenancy jerárquica** (Simić et al., 2024) | Organiza recursos de infraestructura | Se traslada el principio a la capa de datos |
+| **Muestras pequeñas** (Nielsen & Landauer, 1993) | Detectan problemas, no estiman parámetros | La evaluación del objetivo 5 usa treinta participantes para sostener el contraste inferencial; los cinco primeros siguen sirviendo para la lista de problemas |
+| **Design Science Research** (Hevner et al., 2004) | Exige que la evaluación sea rigurosa, no una demostración | La evaluación se ancla en una línea base y en un criterio de decisión fijado de antemano (§10.3) |
 
 ### 7.4 Alineación metodológica
 
-Si el antecedente describe un riesgo de fuga de datos y el problema busca cómo evitarlo, el marco teórico debe consistir en modelos de aislamiento y control de acceso — y en nada más.
-
-| Antecedente (§5) | Problema (§2) | Teoría que lo sustenta (§7.2) | Artefacto del proyecto |
+| Antecedente (§5) | Problema (§2) | Teoría (§7.2) | Objetivo · artefacto |
 |---|---|---|---|
-| Operadores que abren más de un local | Pérdida de la visión consolidada del cliente | Multi-tenancy (Krebs et al., 2012) | Jerarquía organización → talleres con alcance por nivel |
-| Aislamiento resuelto solo en el código | Fuga entre organizaciones ante un solo error | Mediación completa (Saltzer & Schroeder, 1975); RBAC (Sandhu et al., 1996) | Políticas a nivel de fila más verificación de membresía |
-| Fallos del mecanismo en producción | Insuficiencia de una única capa | Defensa en profundidad (Dar et al., 2023) | Aislamiento en dos capas independientes |
-| Informalidad y bajo presupuesto de TI | Barrera de costo de la infraestructura | Serverless y escalado a cero (Jonas et al., 2019) | Despliegue en funciones sin costo fijo |
-| Ausencia de plataforma consolidada | Operar varias organizaciones desde una cuenta | Ausencia de estado (Fielding, 2000) | Contexto activo declarado por petición |
-| Operadores sin formación previa | Que la jerarquía resulte comprensible | Muestras pequeñas (Nielsen & Landauer, 1993); satisfacción (Bangor et al., 2008) | Evaluación del cambio de contexto |
-| — | Verificar que la separación se cumple | Prueba como especificación (Beck, 2002); integración continua (Humble & Farley, 2010; Forsgren et al., 2018) | Suite por dos vías y pipeline automatizado |
-
-**Auditoría de pertinencia.** Quedaron fuera, por no ayudar a resolver el problema de §2: los microservicios en profundidad, el aprendizaje automático, la cadena de bloques —la trazabilidad se resuelve con historial inmutable—, la teoría de colas y el modelado de rendimiento —las pruebas de carga están excluidas (§19.3)—, la criptografía aplicada —delegada en el proveedor de identidad— y la facturación electrónica del SIN.
+| Operadores que abren más de un local | Historial del cliente fragmentado | Multi-tenancy (Krebs et al., 2012) | O2 · jerarquía organización → talleres con alcance por nivel |
+| Aislamiento resuelto solo en el código | Fuga ante un solo error de consulta | Mediación completa (Saltzer & Schroeder, 1975); RBAC (Sandhu et al., 1996) | O2 · políticas a nivel de fila más verificación de membresía |
+| Fallos del mecanismo en producción | Insuficiencia de una única capa | Defensa en profundidad (Dar et al., 2023) | O4 · validación frente a la línea base, con la aplicación deshabilitada |
+| Informalidad y bajo presupuesto | Barrera de costo | Serverless (Jonas et al., 2019) | O3 · despliegue en funciones · O6 · costo por organización |
+| Ausencia de plataforma consolidada | Operar varias organizaciones desde una cuenta | Ausencia de estado (Fielding, 2000) | O3 · contexto activo declarado por petición |
+| Cuentas separadas por local | Cambio de contexto costoso | Muestras y satisfacción (Nielsen & Landauer, 1993; Bangor et al., 2008) | O5 · evaluación frente al cambio de cuenta |
+| — | Construir y verificar el artefacto | Design Science Research (Hevner et al., 2004); integración continua (Humble & Farley, 2010) | O3 · corte vertical con pipeline en verde |
 
 ---
 
 ## 8. Objetivo general
 
-> **Diseñar y validar una arquitectura multi-tenant jerárquica (organización → talleres) y Row Level Security (RLS) sobre infraestructura serverless, que sostenga un aislamiento verificable e inmutable en la base de datos, para permitir la gestión centralizada de varias organizaciones de servicio de mantenimiento mecánico.**
+> **Diseñar, desarrollar y validar una arquitectura multi-tenant jerárquica con Row Level Security (RLS) sobre infraestructura serverless que sostenga un aislamiento verificable e inmutable —cero filas ajenas devueltas aun cuando la capa de aplicación omita sus controles—, para que los operadores de varias organizaciones y talleres de servicio de mantenimiento mecánico gestionen su información de forma centralizada.**
+
+Sintetiza **qué** se construye, **para quién** y **con qué impacto**, y está ligado al título y al problema central (§2.1).
 
 ---
 
 ## 9. Objetivos específicos
 
-Tres objetivos secuenciales, uno por fase —**Analizar → Diseñar → Validar**—, cada uno correlativo a una pregunta específica y cerrado con un entregable verificable. La construcción del artefacto no es un objetivo: es el instrumento del objetivo 3.
+### 9.1 Objetivos núcleo
+
+Cuatro objetivos secuenciales —**Diagnosticar → Diseñar → Desarrollar → Validar**—, acotados a lo mínimo necesario para responder la pregunta general:
 
 | # | Objetivo específico | Entregable verificable |
 |---|---|---|
-| 1 | **Analizar** las estrategias de aislamiento multi-tenant documentadas en la literatura —base por inquilino, esquema por inquilino y esquema compartido con seguridad a nivel de fila— y las soluciones de gestión de talleres con presencia en Bolivia, para fundamentar la selección arquitectónica e identificar el vacío que justifica el proyecto | Matriz de extracción del estado del arte · análisis del mercado con el vacío identificado |
-| 2 | **Diseñar** el modelo de datos de la jerarquía organización → talleres —con el alcance de cada entidad según su nivel y las restricciones de integridad que de él se derivan— y **especificar** las políticas de seguridad a nivel de fila, junto con las funciones auxiliares de verificación de membresía, que sostienen un único límite de aislamiento | Modelo entidad-relación con alcance por nivel · contrato de la interfaz de programación · migración con políticas y funciones de verificación |
-| 3 | **Validar** el aislamiento mediante pruebas automatizadas que comprueben, tanto por la interfaz de programación como por acceso directo a la base de datos, que una organización no puede acceder a datos de otra aun cuando la capa de aplicación omita sus controles, y **evaluar** con operadores del rubro la usabilidad del cambio de contexto entre organizaciones y talleres | Suite de pruebas de aislamiento con su matriz requisito → caso → evidencia, reproducible desde una base vacía · informe de evaluación de usabilidad con tasa de éxito por tarea y puntuación SUS |
+| 1 | **Diagnosticar** las estrategias de aislamiento multi-tenant documentadas en la literatura y las capacidades de las soluciones de gestión de talleres con presencia en Bolivia, para identificar el vacío que justifica el proyecto y fijar como línea base el aislamiento resuelto solo en la capa de aplicación | Matriz del estado del arte · análisis del mercado · enunciado del vacío · definición operativa de la línea base |
+| 2 | **Diseñar** el modelo de datos de la jerarquía organización → talleres, las políticas de seguridad a nivel de fila y el contrato de la interfaz de programación que sostienen un único límite de aislamiento entre organizaciones | Especificación de requerimientos · modelo entidad-relación con alcance por nivel · políticas y funciones de verificación · diagramas C4 · contrato de la interfaz |
+| 3 | **Desarrollar** el corte vertical del sistema —identidad, organizaciones, talleres, miembros, clientes e inventario— sobre el diseño del objetivo 2, con integración continua | Sistema en *staging* con el corte vertical operativo · pipeline en verde · cobertura ≥ 80 % en servicios de dominio |
+| 4 | **Validar** el aislamiento mediante pruebas automatizadas por la interfaz de programación y por acceso directo a la base de datos, contrastando la arquitectura propuesta con la línea base y comprobando que la separación se sostiene con la verificación de membresía deshabilitada | Suite de aislamiento con matriz requisito → caso → evidencia · resultados de C0 a C3 en tres corridas reproducibles |
+
+### 9.2 Objetivos complementarios — evaluables y descartables
+
+| # | Objetivo específico | Criterio de continuidad | Fecha de decisión | Si se descarta |
+|---|---|---|---|---|
+| 5 | **Evaluar** con operadores del rubro la usabilidad del cambio de contexto entre organizaciones y talleres, frente al cambio de cuenta que exige el software de un solo inquilino | Al menos 30 operadores confirmados | 23 de noviembre de 2026 | Se reporta como hallazgo exploratorio, sin inferencia |
+| 6 | **Evaluar** el costo operativo mensual por organización del despliegue serverless frente a un despliegue en servidor dedicado | Métricas de consumo suficientes para imputar costo por organización | 7 de diciembre de 2026 | El costo queda como análisis de viabilidad económica (§28.4) |
+
+Su descarte no afecta la hipótesis (§10) ni el criterio de cierre del proyecto.
 
 ---
 
 ## 10. Hipótesis
 
-Por tratarse de una investigación explicativa que propone aplicar una arquitectura determinada para mejorar una propiedad medible del sistema, corresponde formular hipótesis. Se enuncia como **afirmación factual en presente** —no como promesa de resultado ni como resultado ya obtenido—, de modo que quede sujeta a comprobación o refutación empírica. En el momento de presentar este anteproyecto la validación **no se ha ejecutado**: la hipótesis es lo que el objetivo 3 deberá confirmar o refutar, y el criterio con que se decidirá entre ambas salidas queda fijado de antemano en §10.3.
+Corresponde formular hipótesis porque la validación del objetivo 4 compara la arquitectura propuesta con una **línea base** mediante pruebas empíricas automatizadas. Se formula como hipótesis de trabajo **verificable y comparativa**. En el momento de presentar este anteproyecto la validación **no se ha ejecutado**.
 
 ### 10.1 Hipótesis de investigación (H1)
 
-> **Una arquitectura multi-tenant jerárquica —que sitúa el límite de aislamiento en la organización y trata el taller como criterio de alcance operativo, con políticas de seguridad a nivel de fila reforzadas por verificación de membresía en la capa de aplicación— elimina el acceso cruzado de datos entre organizaciones, reduce a cero (0) las filas ajenas devueltas y sostiene esa separación aun con la verificación de la capa de aplicación deshabilitada: el aislamiento es, por tanto, verificable e inmutable.**
+> **Si se implementa una arquitectura multi-tenant jerárquica con Row Level Security reforzada por verificación de membresía en la capa de aplicación en el sistema de gestión de talleres de mantenimiento mecánico, entonces las filas ajenas devueltas ante la omisión de los controles de la capa de aplicación se reducirán en un 100 % —a cero en las siete tablas de negocio— en comparación con el aislamiento resuelto solo en la capa de aplicación (línea base).**
 
 ### 10.2 Hipótesis nula (H0)
 
-> La arquitectura propuesta no produce una mejora medible del aislamiento: al menos una consulta ejecutada con la identidad de una cuenta ajena devuelve filas de otra organización, o la separación deja de sostenerse cuando la capa de aplicación omite sus controles.
+> La arquitectura propuesta no reduce a cero las filas ajenas devueltas frente a la línea base en al menos una de las siete tablas de negocio, o la reducción deja de sostenerse cuando se deshabilita la verificación de membresía de la capa de aplicación.
 
 ### 10.3 Criterio de decisión
 
-La H0 se rechaza únicamente si **todas** las condiciones siguientes se cumplen de forma reproducible: cero filas ajenas devueltas por acceso directo a la base de datos en la totalidad de las tablas de negocio, respuesta de autorización correcta en el 100 % de las operaciones evaluadas, y persistencia de ambos resultados con la verificación de la capa de aplicación deshabilitada. Un solo caso en contrario sostiene la H0.
+La H0 se rechaza únicamente si **todas** las condiciones siguientes se cumplen en las **tres** corridas:
+
+1. **La línea base discrimina**: bajo C0 (§15.2) la consulta con identidad ajena devuelve filas ajenas en las siete tablas de negocio. Si la línea base no fuga, el experimento no distingue entre arquitecturas y se declara **no concluyente**, no confirmatorio.
+2. Bajo C1, C2 y C3 se devuelven **cero filas ajenas** en las siete tablas.
+3. Bajo C1, el **100 %** de las operaciones del contrato sobre datos ajenos responde con el error de autorización especificado.
+
+Un solo caso en contrario sostiene la H0.
+
+### 10.4 Contraste estadístico del objetivo 5
+
+Si el objetivo 5 continúa, su comparación con la línea base se somete a contraste sin predecir una magnitud: *H0*: el tiempo medio de las tareas de cambio de contexto con el selector es igual al del cambio de cuenta; *H1*: es menor. La puntuación SUS media se contrasta contra el umbral de 68. El procedimiento está en §18.2. No forma parte de la hipótesis de la tesis.
 
 ---
 
-## 11. Variables/categorías de investigación
+## 11. Variables
 
-| Tipo | Variable | Definición conceptual |
-|---|---|---|
-| **Independiente** (causa) | **Arquitectura multi-tenant jerárquica con aislamiento en dos capas** | Modelo de organización de datos que sitúa el límite de aislamiento en la organización y el taller como subdivisión operativa, con políticas de seguridad a nivel de fila en el motor de base de datos reforzadas por verificación de membresía en la capa de aplicación |
-| **Dependiente** (efecto) | **Separación verificable e inmutable de datos entre organizaciones** | Grado en que los datos de una organización resultan inaccesibles para cuentas sin membresía activa en ella, comprobable por vías independientes (**verificable**) y sostenido con independencia de que la capa de aplicación aplique o no sus controles (**inmutable**) |
-| **Dependiente** (efecto) | **Gestión centralizada** | Capacidad de administrar varias organizaciones y talleres desde una sola cuenta conservando la visión consolidada del cliente y su historial |
-| **Dependiente** (efecto) | **Usabilidad del cambio de contexto** | Grado en que un operador del rubro, sin formación previa, logra situarse en la organización y el taller correctas y percibir el alcance de los datos que está viendo |
-| **Interviniente** | Modelo de despliegue serverless | Condición de ejecución que impone ausencia de estado entre peticiones y costo proporcional al uso; no se manipula, se mantiene constante |
+| Tipo | Variable | Definición conceptual | Objetivo |
+|---|---|---|---|
+| **Independiente** | **Arquitectura de aislamiento** | Capas de aislamiento activas en el sistema: ninguna efectiva (línea base), ambas, solo el motor, o acceso directo al motor | 4 |
+| **Dependiente** | **Aislamiento entre organizaciones** | Grado en que los datos de una organización resultan inaccesibles para cuentas sin membresía activa en ella, comprobable por vías independientes (**verificable**) y sostenido con independencia de la capa de aplicación (**inmutable**) | 4 |
+| **Dependiente** | **Gestión centralizada** | Capacidad de administrar varias organizaciones y talleres desde una sola cuenta conservando la visión consolidada del cliente | 4 |
+| **Independiente** | **Modelo de cambio de contexto** | Selector de organización y taller activos, frente al cambio de cuenta del software de un solo inquilino | 5 |
+| **Dependiente** | **Usabilidad del cambio de contexto** | Eficacia, eficiencia y satisfacción con que un operador sin formación previa se sitúa en la organización y el taller correctos | 5 |
+| **Independiente** | **Modelo de despliegue** | Funciones serverless con escalado a cero, frente a servidor dedicado de costo fijo | 6 |
+| **Dependiente** | **Costo operativo** | Gasto mensual de infraestructura imputable a cada organización | 6 |
+| **Interviniente** | **Calidad del código** | Mantenibilidad y corrección estática del artefacto; condiciona la confianza en el resultado sin ser su causa | 3 |
+| **Interviniente** | **Arranque en frío** | Latencia de la primera invocación de una función serverless; no se manipula, se mantiene constante | — |
 
 ---
 
-## 12. Operacionalización de variables
+## 12. Operacionalización
 
-### 12.1 Variable dependiente: Separación verificable e inmutable de datos entre organizaciones
-
-| Dimensión | Indicadores (unidad de medida) | Instrumento / herramienta |
-|---|---|---|
-| **Aislamiento en el motor de base de datos** | • Filas ajenas devueltas por consulta directa (cantidad, entero)<br>• Tablas de negocio con políticas de seguridad a nivel de fila activas (porcentaje %) | • Suite de pruebas de aislamiento (Vitest)<br>• Cliente PostgreSQL autenticado con la identidad de otra cuenta |
-| **Aislamiento en la capa de aplicación** | • Operaciones con respuesta de autorización correcta (porcentaje %)<br>• Respuestas que respetan la regla de no divulgación —mismo error para recurso ajeno e inexistente— (porcentaje %) | • Pruebas de contrato HTTP (Vitest)<br>• Cliente HTTP sobre la interfaz de programación |
-| **Inmutabilidad del aislamiento** — independencia entre capas | • Casos de aislamiento en verde con la verificación de la aplicación deshabilitada (porcentaje %)<br>• Vías independientes de verificación ejecutadas (cantidad, entero) | • Ejecución de la suite con la verificación de membresía desactivada deliberadamente |
-
-### 12.2 Variable dependiente: Gestión centralizada
-
-| Dimensión | Indicadores (unidad de medida) | Instrumento / herramienta |
-|---|---|---|
-| **Alcance de datos por nivel** | • Entidades de nivel organización accesibles desde cualquier taller (porcentaje %)<br>• Entidades de nivel taller visibles fuera de su taller (cantidad; esperado 0) | • Casos de prueba de alcance por nivel (Vitest) |
-| **Cambio de contexto** | • Organizaciones administrables por cuenta (cantidad, entero)<br>• Operaciones que exigen reautenticación al cambiar de contexto (cantidad; esperado 0) | • Pruebas de integración sobre el cambio de organización y taller activos |
-
-### 12.3 Variable dependiente: Usabilidad del cambio de contexto
-
-| Dimensión | Indicadores (unidad de medida) | Instrumento / herramienta |
-|---|---|---|
-| **Eficacia** | • Tasa de éxito por tarea (porcentaje %; umbral ≥ 80 %)<br>• Tareas completadas sin asistencia (cantidad sobre 3) | • Observación estructurada de tarea guiada<br>• Guion de tareas T1–T3 |
-| **Eficiencia** | • Tiempo por tarea (segundos)<br>• Errores por tarea (cantidad) | • Cronometraje de la sesión<br>• Registro de incidencias |
-| **Satisfacción** | • Puntuación SUS (escala 0 a 100; umbral ≥ 68, promedio de la industria) | • Cuestionario System Usability Scale (Brooke, 1996), interpretado con el baremo de Bangor et al. (2008) |
-
-Los indicadores de eficiencia se reportan **sin umbral**: con una muestra dimensionada para detectar problemas no procede afirmar significancia estadística sobre tiempos ni sobre recuentos de error.
-
-### 12.4 Variable independiente: Arquitectura multi-tenant jerárquica
-
-| Dimensión | Indicadores (unidad de medida) | Instrumento / herramienta |
-|---|---|---|
-| **Jerarquía organizacional** | • Niveles jerárquicos modelados (cantidad; esperado 2)<br>• Límites de aislamiento definidos (cantidad; esperado 1)<br>• Tablas de negocio que portan el identificador de organización (porcentaje %) | • Modelo entidad-relación<br>• Migraciones versionadas del esquema |
-| **Control de acceso** | • Roles definidos por organización (cantidad; esperado 3)<br>• Funciones de verificación de membresía (cantidad; esperado 2) | • Revisión del esquema y de las políticas declaradas |
+| Variable | Tipo | Dimensión | Indicador | Instrumento / Escala | Obj. |
+|---|---|---|---|---|---|
+| Arquitectura de aislamiento | VI (cualitativa) | Capas activas | Condición experimental C0 · C1 · C2 · C3 | Banco de pruebas / nominal | 4 |
+| Aislamiento entre organizaciones | VD (cuantitativa) | Aislamiento en el motor | Filas ajenas devueltas por consulta directa (filas; esperado 0) · tablas de negocio con políticas activas (%; esperado 100) | Cliente PostgreSQL con identidad ajena (Vitest) / razón | 4 |
+| | | Aislamiento en la aplicación | Operaciones con respuesta de autorización correcta (%; esperado 100) · respuestas indistinguibles entre recurso ajeno e inexistente (%; esperado 100) | Cliente HTTP de contrato (Vitest) / razón | 4 |
+| | | Inmutabilidad | Casos en verde con la verificación de membresía deshabilitada (%; esperado 100) | Banco de pruebas con la verificación sustituida (Vitest) / razón | 4 |
+| Gestión centralizada | VD (cuantitativa) | Alcance por nivel | Entidades de nivel organización accesibles desde cualquier taller (%; esperado 100) · entidades de nivel taller visibles fuera de su taller (cantidad; esperado 0) | Pruebas de integración (Vitest) / razón | 4 |
+| | | Cambio de contexto | Operaciones que exigen reautenticación al cambiar de contexto (cantidad; esperado 0) | Pruebas de integración y de contrato desde el cliente (Vitest) / razón | 4 |
+| Modelo de cambio de contexto | VI (cualitativa) | Condición de tarea | Selector de contexto · cambio de cuenta | Guion de tareas / nominal | 5 |
+| Usabilidad del cambio de contexto | VD (cuantitativa) | Eficacia | Tasa de éxito por tarea (%; umbral ≥ 80) | Observación estructurada / razón | 5 |
+| | | Eficiencia | Tiempo por tarea (s) · errores por tarea (cantidad) | Cronometraje y registro de incidencias / razón | 5 |
+| | | Satisfacción | Puntuación SUS (0–100; umbral ≥ 68) · α de Cronbach (umbral > 0,8) | Cuestionario SUS / intervalo | 5 |
+| Modelo de despliegue | VI (cualitativa) | Modelo | Serverless · servidor dedicado de referencia | Tarifas publicadas / nominal | 6 |
+| Costo operativo | VD (cuantitativa) | Costo por organización | USD por organización al mes | Paneles de consumo de los proveedores y tarifas publicadas / razón | 6 |
+| Calidad del código | Interviniente | Mantenibilidad | Cobertura de pruebas en servicios de dominio (%; umbral ≥ 80) · errores de verificación de tipos (cantidad; esperado 0) · vulnerabilidades críticas o altas en dependencias (cantidad; esperado 0) | Vitest con cobertura · verificador de tipos · auditoría de dependencias / razón | 3 |
 
 ---
 
 ## 13. Matriz de consistencia
 
-| Pregunta / problema | Objetivo general | Objetivos específicos | Hipótesis | Variables, indicadores y metodología (población, muestra e instrumentos) |
+Fila general y una fila por objetivo específico; cada fila se lee horizontalmente.
+
+| Problema | Objetivo | Hipótesis | Variables | Metodología / Métrica |
 |---|---|---|---|---|
-| **General:** ¿De qué manera una arquitectura multi-tenant jerárquica y Row Level Security (RLS) sobre infraestructura serverless sostiene un aislamiento verificable e inmutable en la base de datos y mejora la gestión centralizada y la seguridad de los datos de operadores de varias organizaciones y talleres de servicio de mantenimiento mecánico en Bolivia?<br><br>**Específicas:**<br>1. ¿Qué estrategias documenta la literatura y qué carencias presenta la oferta boliviana?<br>2. ¿Qué modelo de datos y qué políticas sostienen un único límite de aislamiento?<br>3. ¿Cómo se comprueba que el aislamiento se cumple aun ante fallos de la capa de aplicación —su inmutabilidad— y que el cambio de contexto resulta usable? | Diseñar y validar una arquitectura multi-tenant jerárquica (organización → talleres) y Row Level Security (RLS) sobre infraestructura serverless, que sostenga un aislamiento verificable e inmutable en la base de datos, para permitir la gestión centralizada de varias organizaciones de servicio de mantenimiento mecánico. | 1. **Analizar** las estrategias de aislamiento multi-tenant de la literatura y las soluciones con presencia en Bolivia.<br><br>2. **Diseñar y especificar** el modelo de datos de la jerarquía organización → talleres y las políticas de seguridad a nivel de fila.<br><br>3. **Validar** el aislamiento con pruebas por interfaz de programación y por acceso directo a la base de datos, comprobando que **se sostiene aun con la capa de aplicación deshabilitada**, y **evaluar** la usabilidad del cambio de contexto con operadores del rubro. | Una arquitectura multi-tenant jerárquica, con políticas de seguridad a nivel de fila reforzadas por verificación de membresía en la capa de aplicación, elimina el acceso cruzado de datos entre organizaciones: reduce a cero (0) las filas ajenas devueltas y sostiene la separación aun con la verificación de la capa de aplicación deshabilitada — aislamiento **verificable e inmutable**. | **VARIABLES**<br>*Independiente:* arquitectura multi-tenant jerárquica con aislamiento en dos capas —seguridad a nivel de fila reforzada por verificación de membresía—.<br>*Dependientes:* separación verificable e inmutable de datos entre organizaciones · gestión centralizada · usabilidad del cambio de contexto.<br><br>**INDICADORES**<br>• Filas ajenas devueltas por acceso directo a la base de datos: **0**<br>• Tablas de negocio con políticas de seguridad a nivel de fila activas: **100 % (7 de 7)**<br>• Operaciones con respuesta de autorización correcta: **100 %**<br>• Casos en verde con la verificación de la capa de aplicación deshabilitada —**inmutabilidad**—: **100 %**<br>• Vías independientes de verificación: **2**<br>• Tasa de éxito por tarea: **≥ 80 %**<br>• Puntuación SUS: **≥ 68**<br><br>**POBLACIÓN**<br>**a) Documental** *(obj. 1)*: publicaciones revisadas por pares sobre aislamiento entre inquilinos en esquema compartido, 2021–2026.<br>**b) De mercado** *(obj. 1)*: plataformas de gestión de talleres con presencia, uso o comercialización en Bolivia.<br>**c) Técnica** *(obj. 2 y 3 — es donde se mide la variable dependiente)*: las **tablas de negocio** del esquema y las **operaciones** expuestas por la interfaz de programación del sistema a construir. **No son personas: son datos y operaciones.**<br>**d) De operadores** *(obj. 3 — usabilidad)*: operadores de organizaciones de servicio de motocicletas en Bolivia que administran más de una organización y/o más de un taller. Única población compuesta por personas.<br><br>**MUESTRA**<br>**a)** 5 fuentes — no probabilístico **por criterio**; suficiencia por saturación temática.<br>**b)** 10 plataformas — no probabilístico **intencional**, por accesibilidad de la información pública del producto.<br>**c) Censo: el 100 % de la población** — 7 tablas de negocio y la totalidad de las operaciones del contrato, ejercidas sobre un escenario de 3 cuentas sintéticas, 3 organizaciones y 3 talleres. Muestreo **no probabilístico intencional por caso crítico**: se ejerce el peor escenario de aislamiento —una cuenta sin membresía alguna y una cuenta de otra organización consultando datos ajenos, con y sin la capa de aplicación activa—, no el uso nominal. **No cabe muestreo probabilístico**: una sola tabla sin política activa constituye una fuga, y una muestra parcial podría declarar seguro un sistema que no lo es.<br>**d)** De 5 a 8 participantes — no probabilístico **intencional** por perfil; tamaño justificado por Nielsen y Landauer (1993).<br><br>**ENFOQUE Y TIPO**<br>Investigación **aplicada**, de enfoque **mixto**, alcance descriptivo → propositivo → explicativo, método **hipotético-deductivo** y diseño **experimental sobre caso único** (§14, §15).<br><br>**INSTRUMENTOS**<br>• **Suite automatizada de pruebas (Vitest)**, niveles N1 a N4, ejecutada sobre una base reconstruida desde las migraciones versionadas — recolecta los indicadores de aislamiento; el nivel N6 comprueba el mismo contrato desde el cliente.<br>• **Cliente PostgreSQL autenticado con la identidad de otra cuenta**: vía 2, consulta directa al motor sin pasar por la interfaz de programación.<br>• **Cliente HTTP de contrato** sobre la interfaz de programación: vía 1.<br>• **Banco de pruebas con la verificación de membresía sustituida** por versiones permisivas: condición C2, que aísla el aporte de la capa del motor.<br>• **Guion de tareas T1–T3** con observación estructurada, cronometraje y registro de incidencias.<br>• **Cuestionario System Usability Scale** (Brooke, 1996), interpretado con el baremo de Bangor et al. (2008).<br>• **Matriz de extracción bibliográfica** y **matriz comparativa de capacidades** del mercado. |
+| **General:** ¿De qué manera una arquitectura multi-tenant jerárquica con Row Level Security (RLS) sobre infraestructura serverless sostiene un aislamiento verificable e inmutable —cero filas ajenas devueltas aun cuando la capa de aplicación omite sus controles—, frente al aislamiento resuelto solo en la aplicación, en la gestión centralizada de varias organizaciones y talleres de servicio de mantenimiento mecánico en Bolivia? | Diseñar, desarrollar y validar una arquitectura multi-tenant jerárquica con Row Level Security (RLS) sobre infraestructura serverless que sostenga un aislamiento verificable e inmutable —cero filas ajenas devueltas aun cuando la capa de aplicación omita sus controles—, para que los operadores de varias organizaciones y talleres de servicio de mantenimiento mecánico gestionen su información de forma centralizada. | H1: la arquitectura propuesta reduce en un 100 % las filas ajenas devueltas —a cero en las siete tablas— frente al aislamiento solo en la aplicación | VI: arquitectura de aislamiento · VD: aislamiento entre organizaciones, gestión centralizada | Design Science Research, cuantitativo-aplicado, cuasiexperimental con línea base / filas ajenas devueltas (filas) |
+| **Esp. 1:** ¿Qué estrategias de aislamiento documenta la literatura y qué carencias presenta la oferta boliviana? | Diagnosticar las estrategias de aislamiento y la oferta boliviana, fijando la línea base | — | — | Revisión sistemática y análisis documental / fuentes con limitación consignada · capacidades ausentes en 10 plataformas |
+| **Esp. 2:** ¿Qué modelo, qué políticas y qué contrato sostienen un único límite de aislamiento? | Diseñar el modelo jerárquico, las políticas y el contrato | — | VI: arquitectura de aislamiento (especificada) | Modelado de datos y C4 / niveles modelados (2) · límites de aislamiento (1) · tablas con criterio único de política (7 de 7) |
+| **Esp. 3:** ¿Cómo se construye el corte vertical conservando el diseño y verificado en cada integración? | Desarrollar el corte vertical con integración continua | — | Interviniente: calidad del código | Desarrollo iterativo con integración continua / cobertura ≥ 80 % · 0 errores de tipos · 0 vulnerabilidades críticas · pipeline en verde |
+| **Esp. 4:** ¿En qué medida la arquitectura reduce las filas ajenas frente a la línea base, y se sostiene sin la verificación de membresía? | Validar el aislamiento frente a la línea base, con la verificación deshabilitada | H1 · criterio de decisión §10.3 | VI: C0 · C1 · C2 · C3 · VD: aislamiento, gestión centralizada | Cuasiexperimental, censo de 7 tablas y todas las operaciones, 3 corridas / filas ajenas (0) · autorización correcta (100 %) · casos en verde sin la aplicación (100 %) |
+| **Esp. 5** *(complementaria)*: ¿Es el cambio de contexto más eficiente y satisfactorio que el cambio de cuenta? | Evaluar la usabilidad del cambio de contexto frente al cambio de cuenta | Contraste §10.4 | VI: modelo de cambio de contexto · VD: usabilidad | Intrasujeto contrabalanceado, n = 30 / éxito ≥ 80 % · SUS ≥ 68 con α > 0,8 · t de Student pareada, p < 0,05 |
+| **Esp. 6** *(complementaria)*: ¿Cuál es el costo mensual por organización del despliegue serverless frente a un servidor dedicado? | Evaluar el costo operativo por organización | — | VI: modelo de despliegue · VD: costo operativo | Telemetría de consumo durante I8 / USD por organización al mes |
 
 ---
 
 ## 14. Enfoque y tipo de investigación
 
-Las categorías empleadas —tipo, enfoque, alcance y método— siguen la clasificación de Hernández-Sampieri y Mendoza (2018).
+Las categorías siguen la clasificación de Hernández-Sampieri y Mendoza (2018).
 
 | Dimensión | Definición adoptada | Fundamento |
 |---|---|---|
-| **Tipo de investigación** | **Aplicada** | No busca conocimiento general, sino resolver un problema concreto mediante un artefacto de software verificable |
-| **Enfoque** | **Mixto** | El componente cualitativo abarca la revisión de literatura, el relevamiento del mercado, el diseño arquitectónico y la observación de las sesiones con operadores; el cuantitativo, la medición objetiva del aislamiento (filas devueltas, porcentajes de cobertura y de casos en verde) y las métricas de usabilidad (tasa de éxito, tiempos y puntuación SUS) |
-| **Alcance** | **Descriptivo → propositivo → explicativo** | Descriptivo en la fase de análisis, propositivo en la de diseño y explicativo-experimental en la de validación, donde se establece la relación causa-efecto entre la arquitectura aplicada y la separación obtenida |
-| **Método** | **Hipotético-deductivo** | La hipótesis se formula antes de la validación y se somete a pruebas capaces de refutarla |
+| **Tipo de investigación** | **Aplicada / tecnológica** | Resuelve un problema concreto mediante un artefacto de software evaluado |
+| **Enfoque** | **Cuantitativo-aplicado**, conducido como **Design Science Research** (Hevner et al., 2004) | El resultado es un artefacto construido y evaluado con métricas objetivas: filas ajenas, porcentajes de casos, tiempos, puntuaciones y costo. La revisión de literatura y el análisis de mercado son insumo del diseño, no un enfoque paralelo |
+| **Alcance** | **Descriptivo → propositivo → explicativo** | Descriptivo en el diagnóstico, propositivo en el diseño y el desarrollo, y explicativo en la validación, donde se contrasta la arquitectura con la línea base |
+| **Método** | **Hipotético-deductivo** | La hipótesis se fija antes de la validación y se somete a pruebas capaces de refutarla |
 
 ---
 
@@ -368,31 +431,26 @@ Las categorías empleadas —tipo, enfoque, alcance y método— siguen la clasi
 
 ### 15.1 Tipo de diseño
 
-**Experimental sobre caso único**, con medición posterior a la intervención. El artefacto que se construya será la unidad de observación, y las pruebas **manipulan deliberadamente** la condición de aislamiento —incluida la desactivación de la capa de aplicación— para observar su efecto sobre la variable dependiente.
+**Cuasiexperimental con línea base, sobre caso único.** Se compara el **antes** —la línea base de aislamiento solo en la aplicación, C0— con el **después** —la arquitectura propuesta bajo tres condiciones, C1 a C3— sobre el mismo artefacto y el mismo escenario. Es cuasiexperimental porque no hay asignación aleatoria: las condiciones se manipulan deliberadamente, una a la vez.
 
 ### 15.2 Condiciones experimentales
 
 | Condición | Descripción | Qué se observa |
 |---|---|---|
-| **C1 · Arquitectura completa** | Ambas capas activas: políticas en el motor de base de datos y verificación de membresía en la aplicación | Comportamiento nominal del sistema |
-| **C2 · Sin capa de aplicación** | Se desactiva deliberadamente la verificación de membresía; solo actúan las políticas del motor | Si el aislamiento se sostiene por sí solo en la base de datos |
-| **C3 · Acceso directo al motor** | Se consulta la base de datos con la identidad de otra cuenta, sin pasar por la interfaz de programación | Si las políticas filtran las filas ajenas sin intervención de la aplicación |
+| **C0 · Línea base** | Políticas de seguridad a nivel de fila deshabilitadas y verificación de membresía de la aplicación omitida, **solo en el proyecto de validación desechable**. Reproduce el aislamiento resuelto solo en la aplicación cuando su control falla | Filas ajenas devueltas; se espera que haya |
+| **C1 · Arquitectura completa** | Ambas capas activas: políticas en el motor y verificación de membresía en la aplicación | Comportamiento nominal |
+| **C2 · Sin verificación de aplicación** | Verificación de membresía sustituida por una versión que concede sin comprobar; solo actúan las políticas del motor | Si el aislamiento se sostiene por sí solo en la base de datos: **inmutabilidad** |
+| **C3 · Acceso directo al motor** | Consulta con la identidad de otra cuenta, sin pasar por la interfaz de programación | Si las políticas filtran sin intervención de la aplicación |
 
-La comparación entre C1, C2 y C3 es lo que permite afirmar —o refutar— que las dos capas son **independientes**, y no que una encubre el fallo de la otra.
-
-### 15.3 Evaluación de usabilidad
-
-La validación del objetivo 3 incorpora un segundo componente, de naturaleza distinta: un **estudio observacional de tareas guiadas** con operadores del rubro, sobre la aplicación desplegada.
+### 15.3 Diseño de la evaluación de usabilidad *(objetivo 5)*
 
 | Elemento | Definición |
 |---|---|
-| **Diseño** | Observacional, de un solo grupo y una sola medición. No hay grupo de control: no se compara contra otra interfaz, sino contra umbrales establecidos en la literatura |
-| **Tareas** | T1 cambiar de organización y confirmar los datos mostrados · T2 seleccionar taller y registrar en él un repuesto · T3 localizar un cliente registrado en otro taller de la misma organización |
-| **Métricas** | Tasa de éxito por tarea (≥ 80 %), tiempo y errores por tarea (descriptivos), y puntuación SUS (≥ 68) |
-| **Por qué estas tres tareas** | Cada una ejercita una consecuencia distinta de la jerarquía: el nivel organización, el nivel taller y el beneficio de que el cliente pertenezca a la organización y no al local. No se evalúa la interfaz en general |
-
-El componente de usabilidad **no forma parte de la hipótesis**: la afirmación sujeta a refutación es la del aislamiento (§10). La usabilidad se reporta como evidencia complementaria del objetivo 3, con sus umbrales declarados de antemano, y un resultado por debajo de ellos constituye un hallazgo que se discute, no un fallo de la tesis.
-
+| **Diseño** | Intrasujeto: cada participante realiza las tareas en las dos condiciones, **contrabalanceadas** —la mitad empieza por el selector y la otra mitad por el cambio de cuenta— para neutralizar el aprendizaje |
+| **Condición de línea base** | **Cambio de cuenta**: cada local se opera con una cuenta propia, como en el software de un solo inquilino; cambiar de local exige cerrar sesión e iniciarla con la cuenta de ese local |
+| **Condición propuesta** | **Selector de contexto**: una sola cuenta con selectores de organización y taller activos |
+| **Tareas** | T1 cambiar de organización y confirmar los datos mostrados · T2 situarse en un taller y registrar un repuesto · T3 localizar un cliente registrado en otro taller de la misma organización |
+| **Métricas** | Éxito por tarea, tiempo, errores y puntuación SUS por condición |
 
 ### 15.4 Escenario de laboratorio
 
@@ -408,235 +466,533 @@ Cuenta B ──owner──> Organización 3 ──> Taller 3.1 · clientes propi
 Cuenta C  ── sin membresía en ninguna de las anteriores
 ```
 
-Un solo montaje cubre las tres preguntas del aislamiento: **entre cuentas** (A frente a B), **entre organizaciones de la misma cuenta** (Organización 1 frente a Organización 2) y **frente a quien no es miembro de ninguna** (Cuenta C).
+Un solo montaje cubre las tres preguntas del aislamiento: **entre cuentas** (A frente a B), **entre organizaciones de la misma cuenta** (1 frente a 2) y **frente a quien no es miembro de ninguna** (C).
 
 ### 15.5 Secuencia del experimento
 
-Lo que sigue es la **lógica** del experimento —qué se manipula y en qué orden—; el procedimiento operativo con que se recolecta cada dato está en §17.1, y no se repite aquí.
-
-1. Construcción del escenario base (§15.4) por la propia prueba, desde una base vacía reconstruida con las migraciones versionadas.
-2. Ejecución de los casos bajo la condición **C1** y registro de resultados.
-3. Repetición bajo **C2** y **C3**, manipulando **una sola condición por vez**, de modo que el efecto observado sea atribuible a la capa desactivada y no a otro factor.
-4. Repetición del ciclo completo **tres veces**, en momentos distintos y sobre entornos reconstruidos (*test–retest*): una sola ejecución no distingue entre «el aislamiento se sostiene» y «esta vez se sostuvo».
-5. Contraste de los resultados contra el criterio de decisión de la hipótesis (§10.3).
-6. Conservación de la evidencia: guion de construcción, salida de la ejecución e identificador de la migración aplicada.
+1. Reconstrucción del esquema desde las migraciones versionadas en el proyecto de validación desechable, y construcción del escenario por la propia prueba.
+2. Ejecución bajo **C0** y registro de las filas ajenas devueltas.
+3. Restauración de las políticas y ejecución bajo **C1**, **C2** y **C3**, una condición por vez.
+4. Repetición del ciclo completo **tres veces**, en momentos distintos y sobre entornos reconstruidos (*test–retest*).
+5. Contraste contra el criterio de decisión (§10.3) y conservación de la evidencia.
 
 ### 15.6 Validez y limitaciones del diseño
 
 | Aspecto | Tratamiento |
 |---|---|
-| **Validez interna** | El resultado de cada caso es binario y objetivo —pasa o no pasa—, sin interpretación del investigador. Las condiciones se manipulan una a la vez |
-| **Fiabilidad** | La suite es automatizada y reproducible desde una base vacía; una segunda persona puede repetirla y obtener el mismo resultado |
-| **Validez externa** | Limitada: los resultados se obtienen en un entorno de desarrollo, no productivo, y con un número reducido de inquilinos. No se generaliza el comportamiento bajo carga |
-| **Limitación declarada** | No se prueba la fuga por canal lateral temporal documentada por Dar et al. (2023): el aislamiento verificado es el de **contenido** —qué filas se devuelven—, no el de metadatos inferibles por tiempo de ejecución |
+| **Validez interna** | Entorno dedicado y reconstruido en cada ciclo; una sola condición manipulada por vez; resultado binario por caso, sin interpretación del investigador; contrabalanceo en el objetivo 5 |
+| **Validez externa** | Limitada: entorno gestionado de capa gratuita, no producción a escala; tres inquilinos; operadores del servicio de motocicletas en Bolivia |
+| **Limitación declarada** | No se prueba la fuga por canal lateral temporal (Dar et al., 2023): el aislamiento verificado es el de **contenido**, no el de metadatos inferibles por tiempo de ejecución |
 
 ---
 
 ## 16. Población y muestra
 
-El proyecto trabaja con **cuatro poblaciones diferenciadas**, porque combina revisión documental, relevamiento de mercado, validación técnica y evaluación con operadores. Cada una se declara con su muestra, su tipo de muestreo y la razón del tamaño elegido.
-
-La distinción que ordena el conjunto: la población sobre la que se mide la variable dependiente **no son personas, son datos y operaciones** (§16.3). Las personas intervienen en una sola de las cuatro, y solo para la evidencia complementaria de usabilidad (§16.4).
-
 ### 16.1 Población documental *(objetivo 1)*
 
 | Elemento | Definición |
 |---|---|
-| **Población** | Publicaciones revisadas por pares sobre aislamiento entre inquilinos en arquitecturas de esquema compartido, publicadas entre 2021 y 2026, indexadas en ACM Digital Library, IEEE Xplore, Scopus, BASE, OATD y Google Scholar |
+| **Población** | Publicaciones revisadas por pares sobre aislamiento entre inquilinos en esquemas compartidos, 2021–2026, indexadas en las bases de §6.1 |
 | **Muestra** | **5 fuentes** seleccionadas |
-| **Tipo de muestreo** | No probabilístico, **por criterio**: se aplican los criterios de inclusión y exclusión declarados (ventana 2021–2026; revisión por pares o tesis de posgrado en ciencias de la computación; problema arquitectónico comparable aunque el rubro difiera). Se excluyen soluciones sobre tecnologías legadas y artículos de opinión sin validación métrica |
-| **Criterio de suficiencia** | Saturación temática: las fuentes adicionales relevadas repetían las limitaciones ya consignadas sin aportar un vacío nuevo |
+| **Muestreo** | No probabilístico **por criterio**, con los criterios de inclusión y exclusión de §6.1 |
 
 ### 16.2 Población de soluciones del mercado *(objetivo 1)*
 
 | Elemento | Definición |
 |---|---|
-| **Población** | Plataformas de software para la gestión de talleres de servicio vehicular con presencia, uso o comercialización en Bolivia |
-| **Muestra** | **10 plataformas** relevadas: 4 con presencia o uso directo en Bolivia, 2 regionales de uso extendido en el país y 4 referentes internacionales tomados como estándar de funcionalidades |
-| **Tipo de muestreo** | No probabilístico **intencional**, por accesibilidad de la información pública del producto |
-| **Criterio de inclusión** | Solo plataformas del **mismo objetivo** —gestión de la operación de talleres—; se excluye el software administrativo o contable de propósito general. Los comparadores y directorios de mercado se emplean como **fuente de relevamiento** y no se cuentan como plataformas ([Análisis del mercado](../ingenieria/09-analisis-mercado.md)) |
+| **Población** | Plataformas de gestión de talleres de servicio vehicular con presencia, uso o comercialización en Bolivia |
+| **Muestra** | **10 plataformas**: 4 con presencia en Bolivia, 2 regionales de uso extendido y 4 referentes internacionales |
+| **Muestreo** | No probabilístico **intencional**, por accesibilidad de la información pública del producto ([Análisis del mercado](../ingenieria/09-analisis-mercado.md)) |
 
-### 16.3 Población técnica: unidades de análisis *(objetivos 2 y 3)*
-
-Es la población sobre la que se mide la variable dependiente.
+### 16.3 Población técnica *(objetivos 2 y 4)*
 
 | Elemento | Definición |
 |---|---|
-| **Población** | Las **tablas de negocio** del esquema de datos y las **operaciones** expuestas por la interfaz de programación del sistema a construir |
-| **Muestra** | **Censo — el 100 % de la población.** Se evalúan las 7 tablas de negocio (clientes, talleres, membresías, asignaciones, repuestos, movimientos de existencias y registro de auditoría) y la totalidad de las operaciones del contrato |
-| **Tipo de muestreo** | No probabilístico **intencional por caso crítico**. El censo fija *qué* se evalúa; el caso crítico, *bajo qué condición*: se ejerce el **peor escenario de aislamiento** —una cuenta sin membresía alguna y una cuenta de otra organización consultando datos ajenos, con la capa de aplicación activa y desactivada—, no el uso nominal. Probar que el sistema aísla cuando nadie lo ataca no demuestra nada |
-| **Justificación de no muestrear** | En validación de aislamiento **no cabe el muestreo probabilístico**: una sola tabla sin política activa constituye una fuga, y una muestra parcial podría declarar seguro un sistema que no lo es. La cobertura total es condición del objetivo 3, no una decisión de conveniencia |
-| **Sujetos de prueba** | **3 cuentas sintéticas**, 3 organizaciones y 3 talleres, generadas por la propia prueba con identificadores irrepetibles. En esta población **no intervienen personas**: los datos son generados, no reales |
+| **Población** | Las **tablas de negocio** del esquema y las **operaciones** expuestas por la interfaz de programación del sistema a construir |
+| **Muestra** | **Censo — el 100 %**: 7 tablas de negocio (talleres, membresías, asignaciones, clientes, repuestos, movimientos de existencias y registro de auditoría) y la totalidad de las operaciones del contrato, bajo 4 condiciones y en 3 corridas |
+| **Muestreo** | No probabilístico **intencional por caso crítico**: se ejerce el peor escenario de aislamiento. **No cabe muestreo probabilístico**: una sola tabla sin política activa es una fuga |
+| **Sujetos de prueba** | 3 cuentas sintéticas, 3 organizaciones y 3 talleres generados por la propia prueba. **No intervienen personas** |
 
-### 16.4 Población de operadores *(objetivo 3 — evaluación de usabilidad)*
-
-Es la única población compuesta por **personas**. No es, sin embargo, la única que impone compromisos éticos: el §18 declara cinco, y solo uno de ellos trata de participantes humanos.
+### 16.4 Población de operadores *(objetivo 5)*
 
 | Elemento | Definición |
 |---|---|
-| **Población** | Operadores de organizaciones de servicio de motocicletas en Bolivia que administran —o planean administrar— más de una organización y/o más de un taller: exactamente el perfil que padece el problema descrito en §2 |
-| **Muestra** | **De 5 a 8 participantes** |
-| **Tipo de muestreo** | No probabilístico **intencional**, por criterio de perfil |
-| **Justificación del tamaño** | Nielsen y Landauer (1993) modelan matemáticamente el hallazgo de problemas de usabilidad y muestran que la curva de detección se satura pronto: cinco participantes descubren la mayoría de los problemas de una interfaz, y cada participante adicional aporta cada vez menos. El objetivo es **detectar problemas de uso**, no estimar un parámetro poblacional; por eso ampliar la muestra no mejoraría la conclusión en proporción al esfuerzo |
+| **Población** | Operadores de organizaciones de servicio de motocicletas en Bolivia que administran —o planean administrar— más de una organización y/o más de un taller |
+| **Muestra** | **30 participantes**, con sobre-reclutamiento de 36 para compensar abandonos |
+| **Muestreo** | No probabilístico **intencional**, por perfil |
+| **Justificación del tamaño** | Treinta participantes permiten aplicar el contraste de tiempos entre condiciones con la aproximación normal de la media de las diferencias; los primeros cinco bastan además para detectar la mayoría de los problemas de uso (Nielsen & Landauer, 1993) |
 | **Criterio de exclusión** | Haber participado en el desarrollo o conocer la aplicación antes de la sesión |
-| **Consideraciones éticas** | Consentimiento informado previo, anonimización con participantes identificados como P1…P8 y confidencialidad de sus organizaciones. Los cuatro compromisos, con su alcance exacto, están en **§18.3** |
 
-### 16.5 Sobre el alcance de esta muestra
+### 16.5 Consumo de infraestructura *(objetivo 6)*
 
-Conviene declarar qué **no** permite concluir. La muestra de operadores está dimensionada para detectar problemas de uso, no para sostener inferencia estadística: no se afirma representatividad del sector boliviano ni significancia sobre tiempos o puntuaciones. La caracterización del sector sigue apoyándose en fuentes estadísticas oficiales del INE (§5), no en esta muestra.
+| Elemento | Definición |
+|---|---|
+| **Población** | El consumo de los entornos de *staging* y producción y del proyecto de validación durante la iteración I8 |
+| **Muestra** | **Censo de los 14 días** de I8, con una lectura diaria de invocaciones, transferencia de datos y tamaño de base |
+| **Muestreo** | No aplica: se mide la totalidad del período |
 
-Tampoco se evalúa la interfaz completa: la evaluación se acota al **cambio de contexto entre organizaciones y talleres**, por ser la manifestación visible del aporte de la tesis. Las demás pantallas no se someten a prueba con usuarios.
+### 16.6 Sobre el alcance de las muestras
+
+La muestra de operadores no representa al sector boliviano: permite el contraste intrasujeto entre condiciones, no la generalización. La caracterización del sector se apoya en las fuentes oficiales del INE (§5.1). La evaluación se acota al **cambio de contexto**; las demás pantallas no se someten a prueba con usuarios.
 
 ---
 
-## 17. Procedimientos de recolección y análisis de datos
+## 17. Técnicas e instrumentos
 
-Los indicadores declarados en §12 no se recogen preguntando a nadie: se obtienen **ejecutando el instrumento sobre el artefacto** y exportando su salida a un formato auditable. El procedimiento se declara aquí de forma exacta porque un resultado cuyo modo de obtención no consta no es verificable por un tercero, y la reproducibilidad es condición del objetivo 3.
+### 17.1 Matriz de instrumentos
 
-**Los instrumentos y su configuración.** Un instrumento no queda declarado por su nombre sino por **cómo se ejecuta**: qué indicador recoge, con qué parámetros y cómo se procesa su salida. Decir «se usará Vitest» no permite a un tercero repetir nada.
+| Fase | Técnica | Herramienta | Dato extraído | Frecuencia |
+|---|---|---|---|---|
+| **Aislamiento — vía base de datos** | Experimentación controlada | Vitest con cliente PostgreSQL autenticado con identidad ajena | Filas ajenas por tabla | 7 tablas × 4 condiciones × 3 corridas |
+| **Aislamiento — vía interfaz** | Pruebas de contrato | Vitest con cliente HTTP | Estado y código `modulo.razon` por operación | Totalidad de las operaciones × C0, C1 y C2 × 3 corridas |
+| **Independencia de capas** | Sustitución de la verificación de membresía | Vitest en el banco de pruebas | Casos en verde | C2 × 3 corridas |
+| **Calidad del código** | Pruebas automatizadas y análisis estático | Vitest con cobertura · verificador de tipos · auditoría de dependencias | Cobertura %, errores de tipos, vulnerabilidades | En cada integración al ramal principal |
+| **Interfaz** | Flujos extremo a extremo y auditoría de instalabilidad | Playwright | Éxito de T1–T3 · manifiesto y *service worker* válidos · ausencia de desbordamiento a 360 px y 1280 px | En cada integración, sin interfaz gráfica |
+| **Usabilidad** *(obj. 5)* | Observación estructurada y encuesta estandarizada | Guion T1–T3 · cronómetro · planilla de incidencias · cuestionario SUS | Éxito, segundos, errores, puntuación SUS | 30 participantes × 3 tareas × 2 condiciones; SUS una vez por condición |
+| **Costo** *(obj. 6)* | Telemetría del proveedor | Paneles de consumo de Supabase y Vercel · tarifas publicadas | Invocaciones, transferencia, tamaño de base → USD | Una lectura diaria durante los 14 días de I8 |
 
-| Instrumento | Qué indicador recoge | Configuración con la que se ejecuta |
-|---|---|---|
-| **Suite automatizada (Vitest)**, niveles N1 a N4 | Casos en verde, filas ajenas devueltas, códigos de respuesta | Base reconstruida desde las migraciones versionadas; escenario de 3 cuentas, 3 organizaciones y 3 talleres creado por la propia prueba; una condición experimental por ejecución; salida conservada por caso |
-| **Cliente PostgreSQL con la identidad de otra cuenta** | Filas ajenas devueltas por consulta directa | Conexión autenticada como la cuenta B, **sin pasar por la interfaz de programación**; una consulta por cada una de las 7 tablas de negocio; se registra el recuento, no solo el éxito |
-| **Cliente HTTP de contrato** | Operaciones con respuesta de autorización correcta | Recorrido de la totalidad de las operaciones del contrato con contexto ajeno declarado y sin declarar; se contrasta estado y código `modulo.razon` contra el esperado |
-| **Banco de pruebas con la verificación de membresía sustituida** | Casos en verde bajo la condición C2 | Las funciones de verificación se reemplazan por versiones que conceden sin comprobar, **solo en el banco de pruebas**; el resto del sistema queda intacto |
-| **Suite de contrato desde el cliente (Vitest, nivel N6)** | Cumplimiento del contrato en el lado del cliente: cabeceras de contexto, regla de rutas y código de negocio del error | Ejecución sobre un DOM simulado, sin entorno externo; corre en cada integración junto a N1 y N2 ([Plan de pruebas](../ingenieria/11-plan-pruebas.md) §1.3) |
-| **Guion de tareas T1–T3** | Éxito, tiempo y errores por tarea | Sesión individual sobre la aplicación desplegada, datos precargados, sin asistencia; la intervención del observador se anota como fallo |
-| **Cuestionario SUS** (Brooke, 1996) | Puntuación de satisfacción | Diez ítems al terminar la sesión; puntuación calculada por participante y media del grupo, contra el baremo de Bangor et al. (2008) |
-
-### 17.1 Recolección de los datos de aislamiento *(objetivos 2 y 3)*
+### 17.2 Recolección de los datos de aislamiento
 
 | Fase | Qué se hace | Qué produce |
 |---|---|---|
-| **1 · Preparar el entorno** | Se creará, para la validación, un proyecto de base de datos **dedicado y desechable**, reconstruido desde cero aplicando en orden las migraciones versionadas y sin datos preexistentes de ninguna clase | Esquema en estado conocido e identificador de la última migración aplicada |
-| **2 · Construir el escenario** | La propia prueba crea las tres cuentas, las tres organizaciones y los tres talleres de §15.4, con correos irrepetibles por ejecución sobre un dominio reservado de pruebas | Escenario base reproducible, independiente del orden de los casos |
-| **3 · Ejecutar** | Se corre la suite completa bajo las condiciones C1, C2 y C3 (§15.2), **una condición por vez** | Resultado binario por caso, con su código de respuesta y el recuento de filas devueltas |
-| **4 · Extraer la evidencia** | Se conservan la salida del ejecutor de pruebas, el guion de construcción del escenario y la versión del esquema contra la que se ejecutó | Registro auditable de la ejecución |
-| **5 · Repetir** | Tres ejecuciones independientes del ciclo completo, en momentos distintos y sobre entornos reconstruidos (*test–retest*) | Confirmación de que el resultado no depende de una ejecución particular |
+| **1 · Preparar el entorno** | Se crea un proyecto de base de datos **dedicado y desechable**, reconstruido desde cero con las migraciones versionadas y sin datos preexistentes | Esquema en estado conocido e identificador de la última migración |
+| **2 · Construir el escenario** | La propia prueba crea las cuentas, organizaciones y talleres de §15.4, con correos irrepetibles sobre un dominio reservado | Escenario reproducible |
+| **3 · Ejecutar** | Se corre la suite bajo C0, C1, C2 y C3, una condición por vez | Resultado binario por caso, código de respuesta y recuento de filas |
+| **4 · Extraer la evidencia** | Se conservan la salida del ejecutor, el guion del escenario y la versión del esquema | Registro auditable |
+| **5 · Repetir** | Tres ciclos completos en momentos distintos, sobre entornos reconstruidos | Confirmación de que el resultado no depende de una ejecución |
 
-**Condiciones que hacen limpia la recolección.** La recolección no se hará sobre el equipo de desarrollo con procesos de fondo compitiendo por recursos, sino sobre un entorno gestionado que se dedicará exclusivamente a la prueba; los datos son generados por la propia prueba y **nunca provienen de una instalación productiva**; y un caso omitido por falta de credenciales del entorno se reporta como **omitido**, no como pasado ([Plan de pruebas](../ingenieria/11-plan-pruebas.md) §6.2).
+Un caso omitido por falta de credenciales del entorno se reporta como **omitido**, no como pasado.
 
-### 17.2 Recolección de los datos de usabilidad *(objetivo 3)*
+### 17.3 Recolección de los datos de usabilidad y de costo
 
-Sesión individual sobre la aplicación desplegada, con el escenario de datos ya cargado —el participante no lo construye—. El orden es fijo: explicación del propósito y firma del consentimiento informado, ejecución de T1, T2 y T3 sin asistencia, cuestionario SUS y comentario abierto sobre qué resultó confuso. Se registra, por participante: éxito o fallo de cada tarea, tiempo, incidencias y las diez respuestas del cuestionario. Una intervención del observador se anota como **fallo** de la tarea, no como éxito asistido.
+**Usabilidad.** Sesión individual —presencial o remota— sobre el entorno de producción con el escenario ya cargado. Orden fijo: consentimiento informado; tareas T1–T3 en la primera condición asignada; SUS de esa condición; tareas en la segunda condición; SUS de la segunda; comentario abierto. Se registra por participante y condición: éxito o fallo por tarea, segundos, incidencias y las diez respuestas del cuestionario. Una intervención del observador se anota como **fallo**.
 
-### 17.3 Análisis de los datos
-
-El proyecto analiza **dos clases de datos de naturaleza distinta**, y las trata con procedimientos distintos.
-
-| Indicador | Dato crudo recolectado | Tratamiento | Resultado que se reporta |
-|---|---|---|---|
-| Filas ajenas devueltas | Recuento de filas por consulta, tabla por tabla | Verificación de igualdad a cero en el censo de 7 tablas | Cero filas ajenas en las 7 tablas, o la tabla exacta donde se produjo la fuga |
-| Tablas con políticas activas | Estado de la seguridad a nivel de fila por tabla | Porcentaje sobre el censo de 7 | Cobertura alcanzada, con el detalle de la tabla que faltara |
-| Operaciones con autorización correcta | Código de estado y código de negocio de cada respuesta | Contraste uno a uno contra el contrato esperado | Porcentaje de coincidencia y lista de discrepancias |
-| Casos en verde sin la capa de aplicación | Resultado por caso bajo C2 | Comparación C1 · C2 · C3 | Si el aislamiento se sostiene por sí solo en el motor |
-| Tasa de éxito por tarea | Éxito o fallo por participante y tarea | Porcentaje por tarea sobre el total de participantes | Porcentaje por tarea, contra el umbral del 80 % |
-| Tiempo y errores por tarea | Segundos y recuento por participante | Media, mediana y rango | **Descriptivo, sin umbral** y sin afirmación de significancia |
-| Puntuación SUS | Diez respuestas por participante | Cálculo de la puntuación estándar por participante y media del grupo | Media contra el umbral de 68 (Bangor et al., 2008) |
-
-**Por qué no se aplica estadística inferencial al aislamiento.** No hay muestra ni azar que controlar: se evalúa el **100 % de la población** y el resultado de cada caso es determinista. Aplicar una prueba de significancia a un censo de resultados binarios sería un error de método, no un refuerzo. La decisión sobre la hipótesis nula se toma con el criterio de conjunción de §10.3 —todas las condiciones se cumplen, o H0 se sostiene—, nunca con un valor *p*.
-
-**Representación de los resultados.** Tabla de cobertura de políticas por tabla de negocio; gráfico comparativo de las condiciones C1, C2 y C3 que muestre si el aislamiento se sostiene en las tres; gráfico de barras de la tasa de éxito por tarea con la línea del umbral trazada; y distribución de las puntuaciones SUS individuales frente al baremo de referencia.
-
-**Herramientas de procesamiento.** El volumen es reducido —decenas de casos y a lo sumo ocho participantes, no millones de registros—, de modo que el procesamiento se realiza con **hoja de cálculo** sobre la salida exportada de la suite y sobre la planilla de las sesiones. No se emplean herramientas de datos masivos porque el problema no lo es; declararlas sería sobredimensionar el método.
+**Costo.** Cada día de I8 se registran, por entorno, las invocaciones de funciones, la transferencia de datos y el tamaño de la base, y se imputan a las organizaciones del escenario. El costo del servidor dedicado de referencia se toma de la tarifa publicada vigente en la fecha de medición.
 
 ### 17.4 Validez y confiabilidad de los instrumentos
 
-La validez del diseño experimental y sus limitaciones están en §15.6; lo que se declara aquí es la de los **instrumentos**.
-
 | Principio | Cómo lo satisface este proyecto |
 |---|---|
-| **Validez** | El aislamiento se mide con el propio motor de base de datos, contando las filas que una identidad ajena obtiene, y con los códigos de respuesta del contrato. **No se pregunta a ningún usuario si percibe que sus datos están aislados**: la percepción no es instrumento válido para medir aislamiento. La única variable medida con instrumento de percepción es la usabilidad, donde la percepción **es** el objeto de medida y se emplea una escala validada (Brooke, 1996) |
-| **Validez de contenido** | La medición cubre el censo completo —las 7 tablas de negocio y la totalidad de las operaciones del contrato—, no una selección |
-| **Validez de criterio** | Las dos vías, interfaz de programación y acceso directo al motor, se contrastan entre sí; una discrepancia entre ellas es en sí misma un hallazgo |
-| **Validez de constructo** | Las condiciones C1, C2 y C3 manipulan **una sola** condición por vez, de modo que el efecto observado sea atribuible a la capa desactivada y no a otro factor |
-| **Confiabilidad** | La recolección está **automatizada de extremo a extremo**: la construye y la ejecuta un guion, no una secuencia de acciones manuales. El entorno se reconstruye desde las migraciones y el ciclo se repite tres veces en momentos distintos (*test–retest*). El factor humano queda fuera de la recolección del dato cuantitativo |
+| **Validez** | El aislamiento se mide con el propio motor —contando filas— y con los códigos del contrato; **no se pregunta a nadie si percibe aislamiento**. La única variable medida con percepción es la usabilidad, con una escala validada (Brooke, 1996) |
+| **Validez de contenido** | Censo completo: 7 tablas y todas las operaciones |
+| **Validez de criterio** | Las dos vías se contrastan entre sí; una discrepancia es un hallazgo |
+| **Validez de constructo** | Una sola condición manipulada por vez |
+| **Confiabilidad** | Recolección automatizada de extremo a extremo, entorno reconstruido y tres corridas (*test–retest*). En el cuestionario SUS, consistencia interna con **α de Cronbach > 0,8** (Cronbach, 1951) |
 
-**Sobre los identificadores del escenario.** La práctica habitual para hacer repetible una prueba es fijar una **semilla constante**, de modo que los datos generados sean idénticos en cada ejecución. Aquí se hace lo contrario —cada ejecución crea cuentas y organizaciones con identificadores **irrepetibles**— y conviene justificarlo, porque parece contradecir la confiabilidad.
-
-La razón es que lo que debe repetirse no son los datos, sino el **resultado**. Una semilla constante sobre un entorno persistente haría que la segunda ejecución encontrase las filas de la primera, y entonces la prueba ya no partiría de una base vacía: el aislamiento se estaría comprobando sobre un escenario contaminado por la corrida anterior. La repetibilidad se obtiene aquí por otra vía —reconstruir el esquema desde las migraciones y que la propia prueba construya su escenario—, que es más fuerte: el resultado no depende ni de los datos previos ni de los identificadores concretos. Que el aislamiento se sostenga con identificadores distintos en cada corrida es, de hecho, evidencia adicional de que no depende de un caso particular.
+**Identificadores irrepetibles.** Cada ejecución crea cuentas y organizaciones con identificadores nuevos en lugar de fijar una semilla constante. Lo que debe repetirse es el **resultado**, no los datos: una semilla constante sobre un entorno persistente haría que la segunda corrida encontrase las filas de la primera. Que el aislamiento se sostenga con identificadores distintos en cada corrida es evidencia adicional de que no depende de un caso particular.
 
 ---
 
-## 18. Consideraciones éticas
+## 18. Estrategia de análisis
 
-La investigación se ejecuta sobre un artefacto de software, no sobre pacientes ni sobre expedientes de personas; eso **no** la exime de compromisos éticos, porque su objeto es precisamente el manejo de datos ajenos. Se declaran cinco.
+### 18.1 Aislamiento *(objetivo 4)*
 
-### 18.1 Manejo de datos y privacidad
+**Descriptivo y por criterio.** Recuento de filas ajenas por tabla y condición; porcentaje de tablas con políticas activas; porcentaje de operaciones con respuesta correcta; comparación C0 frente a C1–C3. La decisión se toma con el criterio de conjunción de §10.3.
 
-**No se emplea ningún dato productivo, real o personal en la validación técnica.** La totalidad del escenario de prueba es **sintética y generada por la propia prueba** en tiempo de ejecución: cuentas, organizaciones, talleres, clientes y repuestos se crean con identificadores irrepetibles sobre un dominio de correo reservado para pruebas, y se descartan junto con el entorno. En ningún momento se descarga, copia ni consulta la base de datos de una organización real, ni se aplica enmascaramiento de datos productivos —porque no hay datos productivos que enmascarar—. La ausencia de información personal identificable es una **propiedad del diseño del experimento**, no una medida correctiva aplicada después.
+**Por qué no se aplica estadística inferencial aquí.** Se evalúa el **100 % de la población** y cada caso es determinista: una prueba de significancia sobre un censo de resultados binarios sería un error de método. La estadística inferencial se aplica donde hay variabilidad muestral: la usabilidad.
 
-Si en trabajo posterior el sistema operase con datos reales, el propio objeto de esta tesis —el aislamiento aplicado en el motor de base de datos— sería la garantía técnica que los protegería: la privacidad desde el diseño no es aquí un añadido al método, sino la hipótesis sometida a prueba.
+### 18.2 Usabilidad *(objetivo 5)*
 
-### 18.2 Protección de los entornos productivos
+| Análisis | Indicador | Procedimiento |
+|---|---|---|
+| **Descriptivo** | Éxito, tiempo, errores, SUS | Porcentaje de éxito por tarea y condición; media, desviación estándar, mediana y percentil 90 de los tiempos; media de SUS por condición |
+| **Consistencia interna** | Ítems del SUS | α de Cronbach por condición, con umbral > 0,8 |
+| **Inferencial — tiempos** | Diferencia de tiempos entre condiciones | *t* de Student pareada, α = 0,05. Si la prueba de Shapiro-Wilk rechaza la normalidad de las diferencias, prueba de rangos con signo de Wilcoxon |
+| **Inferencial — satisfacción** | SUS de la condición propuesta | *t* de Student de una muestra contra el umbral de 68, α = 0,05 |
 
-Las pruebas **no se ejecutarán contra ningún entorno productivo ni contra infraestructura de terceros**. Se ejecutarán sobre un proyecto de base de datos **dedicado y desechable, creado para tal fin**, reconstruido desde las migraciones en cada ciclo y cuya destrucción no afecta a nadie. El proyecto **excluye explícitamente** las pruebas de carga, de rendimiento a escala productiva y de penetración (§19.3), de modo que el procedimiento carece por construcción de la capacidad de degradar el servicio de una organización real o de provocar una denegación de servicio accidental.
+### 18.3 Costo y calidad *(objetivos 6 y 3)*
 
-La credencial privilegiada del sistema se lee **únicamente del entorno**, nunca del repositorio, y su ausencia en el código versionado se verifica por inspección (RNF-103). Ninguna clave, correo o identificador real se incorpora al material de la tesis.
+Costo mensual estimado por organización en *staging* y producción, frente al costo fijo del servidor dedicado de referencia, con estadística descriptiva. Cobertura, errores de tipos y vulnerabilidades se comparan contra sus umbrales en cada integración.
 
-### 18.3 Participación de personas
+### 18.4 Representación y herramientas
 
-La evaluación de usabilidad es el único componente en el que participan personas, y se rige por cuatro compromisos: **consentimiento informado** firmado antes de la sesión, con explicación del propósito, del uso de los datos y del derecho a retirarse en cualquier momento y sin dar motivo; **anonimización**, con resultados reportados de forma agregada y participantes identificados como P1…P8; **confidencialidad de sus organizaciones**, que no se nombran ni se describen de modo que permita reconocerlas; y la declaración explícita, al inicio de cada sesión, de que **se evalúa el sistema y no a la persona**, porque condiciona su disposición a intentar sin temor a equivocarse. Ninguna sesión se graba en vídeo ni se registra dato alguno que permita identificar al participante.
-
-### 18.4 Propiedad intelectual y licencias
-
-El sistema se construye sobre componentes de terceros de código abierto —entre otros Node.js, TypeScript, React, Hono, Zod, Vitest y PostgreSQL—, cuyos avisos de licencia se conservan íntegros y cuya autoría **no se atribuye el investigador**; el trabajo propio se publica bajo licencia MIT. Toda fuente bibliográfica se cita en estilo APA (7.ª edición) con su identificador permanente verificado (§20).
-
-Sobre el uso de asistentes de inteligencia artificial se declara el límite adoptado: pueden emplearse para código repetitivo y tareas mecánicas de redacción, pero **el planteamiento del problema, el diseño arquitectónico, las decisiones registradas y la interpretación de los resultados son de autoría intelectual del investigador**. No se reutiliza ningún algoritmo propietario de terceros.
-
-### 18.5 Integridad de los resultados
-
-El fraude característico de una tesis de ingeniería no es el plagio de texto, sino el **maquillaje de la evidencia**: depurar de la salida los casos que fallaron para que la gráfica salga en verde. Se declara por anticipado lo contrario.
-
-- Un caso **omitido** por falta de entorno se reporta como omitido y **no cubre su requisito** ([Plan de pruebas](../ingenieria/11-plan-pruebas.md) §6.2). Un informe con casos omitidos en los niveles de integración y aislamiento no constituye evidencia de cumplimiento.
-- Si **una sola** tabla devolviera filas ajenas, se reporta la fuga con su tabla y su caso, y la hipótesis nula se sostiene (§10.3). El resultado negativo se publica; no se reformula la hipótesis para acomodarlo.
-- Si la usabilidad quedara por debajo de sus umbrales, se reporta y se discute como hallazgo. La hipótesis de la tesis es sobre el aislamiento, y un resultado adverso en usabilidad no se oculta para preservar la apariencia del conjunto.
-- La evidencia conservada (§15.5 y §17.1) permite que un tercero repita la ejecución y contraste los números frente a los declarados. Esa posibilidad de refutación es lo que da valor a la afirmación.
+Tabla de filas ajenas por tabla y condición; gráfico C0 frente a C1–C3; barras de éxito por tarea y condición con la línea del umbral; diagrama de caja de tiempos por condición; distribución de SUS frente al baremo. El procesamiento se realiza con **hoja de cálculo** sobre la salida exportada de la suite y la planilla de sesiones, y los contrastes con **R** (funciones base `t.test`, `shapiro.test` y `wilcox.test`).
 
 ---
 
-## 19. Alcance y exclusiones
+## 19. Consideraciones éticas
 
-### 19.1 Alcance funcional
+### 19.1 Privacidad por diseño
 
-- Registro que crea una cuenta, su primera organización y su primer taller, con el usuario como propietario.
-- Creación de organizaciones adicionales bajo la misma cuenta y de talleres dentro de cada organización.
-- Listado de organizaciones según membresía, cambio de organización activa y selección de taller activo.
-- Gestión de miembros por organización —invitar, cambiar rol, remover—, reservada al propietario, y asignación operativa de miembros a talleres.
-- **Corte vertical de demostración**: Clientes (entidad de nivel organización, visible desde cualquier taller) e Inventario de repuestos (entidad de nivel taller, acotada a su local).
-- Verificación de aislamiento por dos vías independientes.
-- **Evaluación de usabilidad del cambio de contexto** con operadores del rubro, mediante tareas guiadas.
+**No se emplea ningún dato productivo, real o personal en la validación técnica.** El escenario es **sintético y generado por la propia prueba**, con identificadores irrepetibles sobre un dominio de correo reservado, y se descarta con el entorno. La ausencia de información personal identificable es una **propiedad del diseño del experimento**, no una corrección posterior. El proyecto se conduce en coherencia con el derecho a la privacidad e intimidad que reconoce la Constitución Política del Estado (Estado Plurinacional de Bolivia, 2009, art. 21, num. 2).
 
-### 19.2 Alcance técnico
+### 19.2 Protección de los entornos
 
-| Componente | Tecnología |
+Las pruebas **no se ejecutan contra ningún entorno productivo ni contra infraestructura de terceros**. La condición C0 —políticas deshabilitadas— se aplica **únicamente** en el proyecto de validación dedicado y desechable, con datos sintéticos, y nunca en *staging* ni en producción. Las pruebas de carga, estrés y penetración están excluidas (§2.2), de modo que el procedimiento no puede degradar el servicio de nadie. La credencial privilegiada se lee **únicamente del entorno**, nunca del repositorio (RNF-103).
+
+### 19.3 Participación de personas
+
+La evaluación de usabilidad es el único componente con participantes humanos y se rige por cuatro compromisos: **consentimiento informado** firmado antes de la sesión, con derecho a retirarse sin dar motivo; **anonimización**, con resultados agregados y participantes identificados como P01…P30; **confidencialidad de sus organizaciones**; y la declaración explícita de que **se evalúa el sistema y no a la persona**. Ninguna sesión se graba en vídeo ni se registra dato alguno que permita identificar al participante.
+
+### 19.4 Propiedad intelectual, licencias y dependencias
+
+El sistema se construye sobre componentes de código abierto —Node.js, TypeScript, React, Hono, Zod, Vitest, Playwright y PostgreSQL, entre otros—, cuyos avisos de licencia se conservan íntegros; el trabajo propio se publica bajo licencia MIT. Las dependencias se auditan en cada integración y no se admiten vulnerabilidades críticas ni altas (RNF-208). La especificación atiende los riesgos del OWASP Top 10 aplicables a una interfaz multiorganización: control de acceso roto, inyección y fallos de identificación y autenticación. Los asistentes de inteligencia artificial pueden emplearse para código repetitivo y tareas mecánicas de redacción, pero **el planteamiento, el diseño arquitectónico y la interpretación de los resultados son de autoría del investigador**.
+
+### 19.5 Integridad de los resultados
+
+- Un caso **omitido** se reporta como omitido y **no cubre su requisito**.
+- Si **una sola** tabla devolviera filas ajenas bajo C1, C2 o C3, se reporta la fuga con su tabla y su caso, y la H0 se sostiene.
+- Si la línea base no fugara, el resultado se declara no concluyente en lugar de confirmatorio.
+- Si un objetivo complementario se descarta, se declara con su criterio y su fecha; lo recolectado no se presenta como evidencia inferencial.
+- La evidencia conservada permite que un tercero repita la ejecución y contraste los números.
+
+---
+
+# Parte II — Propuesta técnica
+
+## 20. Antecedentes tecnológicos relevantes
+
+La propuesta integra cuatro tecnologías consolidadas, cuya evolución se resume en §5.2:
+
+| Tecnología | Por qué es relevante para la propuesta |
 |---|---|
-| Servidor | Node.js · TypeScript · Hono · Zod |
-| Datos e identidad | PostgreSQL con seguridad a nivel de fila, sobre proveedor gestionado |
-| Despliegue | Funciones serverless |
-| Interfaz de usuario | React con TypeScript, responsiva e instalable |
-| Pruebas | Vitest — unitarias, de contrato, de integración y de aislamiento |
-| Integración continua | Pipeline automatizado con verificación de tipos y suite de pruebas |
+| **Seguridad a nivel de fila en PostgreSQL** | Traslada la condición de inquilino al motor y la evalúa en toda consulta, con independencia de la aplicación que la origine (PostgreSQL Global Development Group, s. f.-b) |
+| **Proveedor de datos con identidad integrada** | Expone el identificador del usuario autenticado dentro del motor, condición para que las políticas puedan evaluarlo ([ADR-004](../ingenieria/07-decisiones-diseno.md)) |
+| **Funciones serverless** | Eliminan el costo fijo por instalación y escalan a cero (Jonas et al., 2019) |
+| **TypeScript de extremo a extremo** | Un solo sistema de tipos entre cliente y servidor, que comparte las formas de datos del contrato (Microsoft, s. f.) |
 
-### 19.3 Exclusiones
-
-El objeto de estudio es la **arquitectura**, no la suite funcional completa. No forman parte de este proyecto:
-
-- Los módulos operativos fuera del corte vertical: motocicletas, órdenes de trabajo, historial de mantenimiento y panel de métricas.
-- La auditoría extendida a la totalidad de las entidades de negocio; sí se audita el conjunto acotado de acciones críticas.
-- La integración con mensajería por WhatsApp.
-- La emisión de factura electrónica del Servicio de Impuestos Nacionales.
-- Aplicaciones móviles o de escritorio nativas: solo web responsiva e instalable.
-- Migración de datos productivos desde sistemas anteriores.
-- Pruebas de carga o rendimiento a escala productiva.
-- La evaluación de usabilidad de la **totalidad** de la interfaz: se evalúa el cambio de contexto entre organizaciones y talleres, no las demás pantallas.
+La oferta comercial que hoy atiende al sector —y su limitación de un solo inquilino— está relevada en el [Análisis del mercado](../ingenieria/09-analisis-mercado.md).
 
 ---
 
-## 20. Referencias
+## 21. Propuesta de solución tecnológica
 
-Estilo **APA (7.ª edición)**. Cada identificador permanente —DOI e ISBN— se contrasta contra el registro del editor; el estado entrada por entrada, incluidas las comprobaciones que quedan por cerrar antes de la entrega final, consta en el [Anexo de verificación de referencias](anexo-referencias.md). La documentación técnica sin autor humano se cita con **autor corporativo** y, al carecer de fecha de publicación fija, con fecha de recuperación; se emplea únicamente como sustento del marco conceptual (§7.1), nunca como sustento teórico.
+### 21.1 Problema e impacto
+
+Se atiende el problema central de §2.1: la ausencia de un sistema que centralice varias organizaciones y talleres sin exponer sus datos. Su relevancia la sostienen el crecimiento del parque de motocicletas (§5.1), la ausencia de gestión multiorganización en las 10 plataformas relevadas y la evidencia de fallos del aislamiento en producción (§6.4).
+
+### 21.2 Solución e innovación
+
+Se propone un sistema web multiorganización cuyo aislamiento se aplica **dos veces y de forma independiente**: políticas de seguridad a nivel de fila en el motor y verificación de membresía en la aplicación, con el contexto activo —organización y taller— declarado en cada petición. **La innovación está en la integración, no en inventar un mecanismo**: una jerarquía de dos niveles con un único límite de aislamiento, un criterio de alcance explícito por entidad y un procedimiento que demuestra, frente a una línea base, que la separación no puede desactivarse desde la aplicación.
+
+### 21.3 Pertinencia
+
+La tecnología seleccionada es oportuna porque sus componentes están maduros y disponibles en capa gratuita (§28.3), y factible porque la desarrolla un solo desarrollador en un ecosistema único —TypeScript— sobre servicios gestionados que no exigen operación de servidores.
+
+### 21.4 Análisis comparativo
+
+| Criterio | SaaS de gestión de talleres relevados | ERP de código abierto de propósito general | **Propuesta** |
+|---|---|---|---|
+| **Estructura multiorganización** | Un taller por cuenta | Multiempresa genérica, sin alcance por nivel para el taller | Varias organizaciones por cuenta y varios talleres por organización, con alcance explícito por entidad |
+| **Aislamiento entre organizaciones** | En el código, no documentado | Configurable en la aplicación | En el motor **y** en la aplicación, verificado frente a una línea base |
+| **Costo de despliegue** | Suscripción por cuenta o local | Servidor y mantenimiento propios | Serverless con escalado a cero |
+| **Especialización en el rubro** | Alta | Baja: requiere adaptación | Alta en el corte vertical |
+
+### 21.5 Alcance funcional y técnico
+
+**Alcance funcional (qué hace).** Registro con creación de la primera organización y taller; organizaciones y talleres adicionales; cambio de organización y selección de taller activos; gestión de miembros con roles y asignación a talleres; clientes (nivel organización) e inventario de repuestos con movimientos (nivel taller); registro de acciones críticas consultable por el propietario.
+
+**Matriz de alcance técnico (cómo se construye).**
+
+| Capa | Tecnologías | Entregable clave |
+|---|---|---|
+| **Frontend** | React · TypeScript · manifiesto de aplicación web | Interfaz responsiva e instalable, con selectores de contexto |
+| **Backend y lógica** | Node.js · Hono · Zod · verificación de credenciales del proveedor | Interfaz REST conforme al contrato, con descripción OpenAPI |
+| **Persistencia e identidad** | PostgreSQL con seguridad a nivel de fila · Supabase Auth · migraciones versionadas | Modelo entidad-relación con políticas activas en las 7 tablas de negocio |
+| **DevOps y nube** | GitHub Actions · Vercel · Supabase (*staging*, producción y validación) | Pipeline con verificación de tipos, pruebas, cobertura y auditoría de dependencias; publicación automática tras aprobarlo |
+| **Verificación** | Vitest · Playwright | Suite multinivel y evidencia de aislamiento reproducible |
+
+### 21.6 Exclusiones
+
+Los módulos operativos fuera del corte vertical (motocicletas, órdenes de trabajo, historial de mantenimiento y panel de métricas); la auditoría extendida a todas las entidades; WhatsApp Business API; la factura electrónica del SIN; aplicaciones nativas; migración de datos productivos; pruebas de carga, estrés o rendimiento a escala productiva —el dominio no las justifica—; contenedores e infraestructura como código; pruebas de penetración y mitigación del canal lateral temporal; y la evaluación de usabilidad de la interfaz completa.
+
+### 21.7 Matriz investigación–solución
+
+| Objetivo | Módulo de software que lo materializa |
+|---|---|
+| 1 · Diagnosticar | — (insumo de diseño: fija la línea base que reproduce la condición C0) |
+| 2 · Diseñar | Esquema y políticas del motor · contrato de la interfaz · especificación de requerimientos |
+| 3 · Desarrollar | Módulos de identidad, contexto activo, organizaciones, talleres, miembros, clientes, inventario y auditoría · cliente web · pipeline |
+| 4 · Validar | Suite de aislamiento por las dos vías y banco de pruebas de las condiciones C0 a C3 |
+| 5 · Evaluar usabilidad | Selectores de contexto del cliente web · escenario de línea base con una cuenta por local |
+| 6 · Evaluar costo | Entornos de *staging* y producción desplegados · lectura de consumo |
+
+---
+
+## 22. Arquitectura preliminar del sistema
+
+### 22.1 Estilo arquitectónico
+
+| Criterio | Monolito modular | Microservicios | Serverless por función |
+|---|---|---|---|
+| **Complejidad operativa** | Baja | Alta | Media |
+| **Escalabilidad** | Vertical o réplicas completas | Horizontal por servicio | Automática por demanda |
+| **Costo inicial** | Bajo | Alto | Bajo, pago por uso |
+| **Adecuado para** | MVP y alcance medio | Dominios amplios con varios equipos | Eventos e integración de APIs |
+
+**Selección: monolito modular desplegado como funciones serverless.** Una sola aplicación organizada en módulos de dominio y en capas —controlador, servicio y repositorio—, desplegada como funciones con escalado a cero. Conserva la baja complejidad del monolito, recomendable para un desarrollador individual, y obtiene el costo por uso del modelo serverless ([ADR-009](../ingenieria/07-decisiones-diseno.md)).
+
+### 22.2 Diagrama de contenedores (C4, nivel 2)
+
+```mermaid
+flowchart LR
+    op(["Operador<br/>Owner · Recepcionista · Mecánico"])
+    subgraph sistema["Sistema de gestión multiorganización"]
+        spa["Aplicación web<br/><i>React + TypeScript</i><br/>SPA instalable"]
+        api["Interfaz de programación<br/><i>Node.js + Hono</i><br/>funciones serverless en Vercel"]
+        db[("Base de datos<br/><i>PostgreSQL con RLS</i><br/>Supabase")]
+    end
+    auth["Proveedor de identidad<br/><i>Supabase Auth</i>"]
+    ci["Integración y despliegue continuos<br/><i>GitHub Actions + Vercel</i>"]
+    op -->|HTTPS| spa
+    spa -->|Inicio de sesión| auth
+    spa -->|"REST/JSON · Bearer · X-Org-Id · X-Workshop-Id"| api
+    api -->|Verifica la credencial| auth
+    api -->|"SQL con la credencial de la petición"| db
+    api -.->|"Excepciones privilegiadas enumeradas"| db
+    ci -->|Publica tras el pipeline| api
+    ci -->|Publica tras el pipeline| spa
+```
+
+El diagrama de componentes (nivel 3) de la interfaz de programación está en [Arquitectura](../ingenieria/04-arquitectura.md).
+
+### 22.3 Aislamiento en dos capas
+
+1. **Motor de base de datos**: las políticas exigen membresía activa en la organización propietaria de la fila. Actúan aunque la aplicación falle u omita un filtro.
+2. **Capa de aplicación**: cada operación verifica membresía y rol antes de actuar y responde con un error de negocio específico.
+
+Los datos de negocio se consultan con la credencial de quien llama, para que la primera capa intervenga también en el camino de la interfaz; la verificación de la segunda capa consulta con privilegio, para no depender de la primera ([ADR-008](../ingenieria/07-decisiones-diseno.md)).
+
+---
+
+## 23. Tecnologías y herramientas
+
+**Matriz de selección tecnológica.** Criterios: naturaleza de la carga y escalabilidad, costo total de propiedad, curva de aprendizaje y disponibilidad de talento, y seguridad y madurez del ecosistema.
+
+| Necesidad técnica | Alternativas | Seleccionada | Justificación |
+|---|---|---|---|
+| Lenguaje y entorno del servidor | Python (FastAPI) · Java (Spring Boot) · Node.js | **Node.js con TypeScript** | La carga es de entrada/salida —peticiones que esperan red y base de datos—; tipado compartido con el cliente; soporte nativo en la plataforma serverless (ADR-001) |
+| Marco de la interfaz | Express · NestJS · rutas de API de Next.js · Hono | **Hono** | Diseñado para TypeScript y funciones efímeras; desacopla la interfaz del cliente web (ADR-003) |
+| Validación de entrada | Joi · Yup · Zod | **Zod** | Deriva el tipo estático del esquema, sin dos definiciones paralelas |
+| Base de datos relacional | MySQL · SQL Server · PostgreSQL | **PostgreSQL** | Seguridad a nivel de fila nativa y de código abierto; MySQL no la ofrece y SQL Server añade costo de licencia (ADR-002) |
+| Datos e identidad gestionados | Firebase · PostgreSQL autogestionado con identidad propia · Supabase | **Supabase** | Identidad integrada y evaluable en las políticas; Firebase es documental y no ofrece seguridad a nivel de fila (ADR-004) |
+| Despliegue | Servidor dedicado · AWS Lambda · Vercel | **Vercel** | Plataforma gestionada con escalado a cero y publicación desde el repositorio; Lambda exige configurar pasarela y permisos |
+| Cliente web | Angular · Vue.js · Next.js · React | **React (SPA)** | La aplicación es interna y autenticada: el renderizado en servidor no aporta; ecosistema amplio y TypeScript compartido |
+| Pruebas unitarias y de integración | Jest · Mocha · Vitest | **Vitest** | Mismo ecosistema TypeScript y ESM, sin transpilación adicional |
+| Pruebas extremo a extremo | Cypress · Selenium · Playwright | **Playwright** | Varios motores de navegador y anchos de pantalla en un solo ejecutor, sin interfaz gráfica en CI |
+| Calidad de código | TSLint (obsoleto) · Biome · ESLint con Prettier | **ESLint + Prettier en *pre-commit*** | Estándar del ecosistema TypeScript; la calidad se automatiza antes de integrar |
+| Integración y despliegue continuos | GitLab CI · Jenkins · GitHub Actions | **GitHub Actions** | Integrado con el repositorio, sin servidor propio que operar |
+
+---
+
+## 24. Diseño técnico preliminar
+
+La especificación completa está en [Requisitos](../ingenieria/02-requisitos.md), [Modelo de datos](../ingenieria/05-modelo-datos.md), [Seguridad](../ingenieria/06-seguridad.md) y [Contrato de la interfaz](../ingenieria/10-contrato-api.md). Aquí se resume.
+
+### 24.1 Actores
+
+| Actor | Tipo | Objetivo en el sistema | Nivel de acceso |
+|---|---|---|---|
+| Propietario (`Owner`) | Humano | Administrar organizaciones, talleres, miembros y auditoría | Autenticado; privilegiado dentro de su organización |
+| Recepcionista (`Receptionist`) | Humano | Registrar clientes y el catálogo de repuestos | Autenticado; permisos por rol |
+| Mecánico (`Mechanic`) | Humano | Consultar clientes e inventario y registrar movimientos | Autenticado; permisos por rol |
+| Cuenta sin membresía | Humano | — (actor del escenario de aislamiento) | Autenticado; sin acceso a la organización |
+| Visitante | Humano | Registrarse | Sin credencial; solo el registro |
+| Proveedor de identidad | Máquina | Emitir y renovar credenciales | Externo |
+| Servidor con credencial privilegiada | Proceso interno | Ejecutar las excepciones enumeradas de ADR-008 | Interno, sin exposición pública |
+
+### 24.2 Requerimientos, reglas y seguridad
+
+| Bloque | Contenido |
+|---|---|
+| **Requerimientos funcionales** | 38 dentro del alcance —identidad, organizaciones, talleres, miembros, clientes, inventario, aislamiento y auditoría—, cada uno con actor, criterio de aceptación *Dado–Cuando–Entonces* y prioridad MoSCoW |
+| **Reglas de negocio** | Un solo propietario activo por organización; correo de cliente único por organización; número de parte único por taller; existencias nunca negativas; movimientos inmutables; transferencia solo dentro de la organización y atómica; la asignación a talleres no altera permisos |
+| **No funcionales** | Filas ajenas = 0 en las 7 tablas (RNF-101) · aislamiento sostenido sin la verificación de aplicación (RNF-102) · 0 errores de tipos (RNF-201) · cobertura ≥ 80 % (RNF-207) · 0 vulnerabilidades críticas o altas (RNF-208) · éxito ≥ 80 % y SUS ≥ 68 (RNF-404) |
+| **Seguridad** | Credencial de sesión del proveedor verificada en cada petición; rol por organización; TLS en tránsito y cifrado en reposo del proveedor; registro de acciones críticas conservado mientras exista la organización; solo el registro y la comprobación de disponibilidad son públicos |
+
+---
+
+## 25. Estrategia de implementación
+
+### 25.1 Metodología e iteraciones
+
+Desarrollo iterativo con **iteraciones de dos semanas** que entregan **incrementos verticales** —de la interfaz a la base de datos—, con trazabilidad de cada historia a su requisito y objetivo. El orden busca descubrir los riesgos técnicos desde las primeras iteraciones: el esquema, las políticas y la autenticación van primero.
+
+### 25.2 Priorización y MVP
+
+**MoSCoW**: el MVP lo componen los requisitos funcionales `Must` más los no funcionales que bloquean la salida a producción —seguridad (RNF-101 a RNF-106 y RNF-208) y calidad (RNF-201 a RNF-203)—. **Corte vertical**: el módulo de clientes (nivel organización) se completa de punta a punta antes de expandir al inventario (nivel taller).
+
+### 25.3 Estrategia multinivel de pruebas
+
+| Nivel | Alcance y herramientas |
+|---|---|
+| **Unitarias** | Reglas de negocio puras: esquemas de validación, cálculo de existencias, resolución de permisos (Vitest) |
+| **Contrato** | La interfaz antes de tocar la base: credencial, contexto obligatorio, forma del error (Vitest) |
+| **Integración** | Flujos contra base de datos y proveedor de identidad reales (Vitest) |
+| **Aislamiento** | Las dos vías y las condiciones C0 a C3 (Vitest) |
+| **Componente del cliente** | Contrato desde el cliente: cabeceras de contexto y códigos de error (Vitest sobre DOM simulado) |
+| **Extremo a extremo** | Flujos T1–T3 del cambio de contexto (Playwright) |
+| **Auditorías** | Instalabilidad y diseño responsivo (Playwright) · dependencias (auditoría de npm) |
+
+### 25.4 Criterios de aceptación
+
+Cada historia de usuario y cada requisito funcional llevan criterios en formato **Dado–Cuando–Entonces**, que fijan su definición de terminado.
+
+> *Dado* un recurso de otra organización, *cuando* una cuenta autenticada en la propia lo solicita por identificador, *entonces* recibe la misma respuesta que para un recurso inexistente.
+
+### 25.5 KPIs de calidad
+
+| KPI | Umbral |
+|---|---|
+| Cobertura de pruebas en servicios de dominio | ≥ 80 % |
+| Requisitos `Must` con caso en verde | 100 % |
+| Errores de verificación de tipos | 0 |
+| Vulnerabilidades críticas o altas en dependencias | 0 |
+| Integraciones al ramal principal con pipeline en verde | 100 % |
+| Filas ajenas devueltas bajo C1, C2 y C3 | 0 |
+
+### 25.6 Matriz preliminar de validación
+
+| Módulo | Criterio de aceptación | Estrategia de prueba | Métrica / KPI | Estado |
+|---|---|---|---|---|
+| Identidad y registro | Dado un correo nuevo, cuando se registra, entonces existen cuenta, organización, taller y membresía `owner`, o ninguno | Integración | Atomicidad en el 100 % de los fallos simulados | Pendiente |
+| Contexto activo | Dada una petición sin `X-Org-Id`, cuando exige contexto, entonces responde `400` | Contrato | 100 % de las rutas con contexto obligatorio | Pendiente |
+| Organizaciones y miembros | Dado un `Mechanic`, cuando invita, entonces recibe `403` | Integración | 100 % de las reglas de rol | Pendiente |
+| Clientes | Dado un cliente creado con el taller A activo, cuando se opera con el taller B, entonces se lista | Integración | 100 % de entidades de organización visibles entre talleres | Pendiente |
+| Inventario | Dado un movimiento que dejaría existencia negativa, cuando se registra, entonces se rechaza sin alterar el stock | Unitaria e integración | Cobertura ≥ 80 % del servicio de inventario | Pendiente |
+| Aislamiento | Dada la identidad de otra cuenta, cuando consulta directamente las 7 tablas bajo C1–C3, entonces obtiene cero filas ajenas | Aislamiento | 0 filas ajenas en 3 corridas | Pendiente |
+| Cambio de contexto | Dado un operador con dos organizaciones, cuando cambia de organización, entonces el taller activo se limpia y los datos corresponden a la nueva | Extremo a extremo | T1–T3 en verde en cada integración | Pendiente |
+| Pipeline | Dada una integración al ramal principal, cuando falla una prueba, entonces no se publica | CI | 100 % de integraciones verificadas | Pendiente |
+
+---
+
+## 26. Cronograma de trabajo
+
+### 26.1 Descomposición del trabajo (EDT)
+
+| Paquete | Entregables |
+|---|---|
+| **1 · Investigación y documentación** | Revisión sistemática · análisis del mercado · especificación · documento final |
+| **2 · Persistencia** | Esquema de identidad y jerarquía · políticas y funciones de verificación · esquema de negocio · auditoría y permisos |
+| **3 · Interfaz de programación** | Autenticación y contexto activo · organizaciones, talleres y miembros · clientes · inventario · auditoría · descripción OpenAPI |
+| **4 · Cliente web** | Autenticación · selectores de contexto · módulos de clientes e inventario · instalabilidad y diseño responsivo |
+| **5 · DevOps** | Pipeline de integración continua · entornos de *staging* y producción · proyecto de validación desechable |
+| **6 · Validación** | Suite de aislamiento C0–C3 · pruebas extremo a extremo y auditorías · evaluación de usabilidad · medición de costo |
+
+**Ruta crítica**: especificación y contrato → esquema y políticas → autenticación y contexto activo → organizaciones, talleres y miembros → clientes e inventario → cliente web → validación. El contrato de la interfaz se cierra **antes** de construir el cliente web. La estimación se hace en puntos de historia.
+
+### 26.2 Fases e iteraciones
+
+| Fase | Iteración | Fechas | Contenido |
+|---|---|---|---|
+| **F1 · Diagnóstico** *(obj. 1)* | I1 | 1–14 sep | Revisión sistemática, relevamiento del mercado, vacío y línea base |
+| **F2 · Diseño** *(obj. 2)* | I2 | 15–28 sep | Requerimientos, modelo de datos, políticas, contrato, C4 y plan de pruebas |
+| **F3 · Desarrollo** *(obj. 3)* | I3 | 29 sep – 12 oct | Esquema, políticas, **autenticación** y contexto activo |
+| | I4 | 13–26 oct | Organizaciones, talleres y miembros con control de acceso por rol |
+| | I5 | 27 oct – 9 nov | Clientes — nivel organización |
+| | I6 | 10–23 nov | Inventario — nivel taller · reclutamiento de operadores |
+| | I7 | 24 nov – 7 dic | Cliente web, pruebas extremo a extremo y publicación en *staging* y producción |
+| **F4 · Validación y cierre** *(obj. 4, 5 y 6)* | I8 | 8–21 dic | Condiciones C0–C3 en tres corridas · sesiones con operadores · medición de costo · documento final |
+
+*Reserva: del 22 al 31 de diciembre, para correcciones posteriores a la revisión del tutor.*
+
+### 26.3 Hitos y puntos de decisión
+
+| Hito | Fecha | Criterio de cumplimiento |
+|---|---|---|
+| **H1 · Diagnóstico y diseño aprobados** | 28 de septiembre | Perfil y anteproyecto revisados por el tutor; especificación cerrada |
+| **H2 · Arquitectura base** | 12 de octubre | Esquema, políticas, autenticación y contexto activo operativos; primer caso de aislamiento en verde |
+| **H3 · Corte vertical completo** | 23 de noviembre | Clientes e inventario funcionando y probados · **decisión sobre el objetivo 5** |
+| **H4 · Sistema integrado** | 7 de diciembre | Cliente web en *staging* con T1–T3 en verde · **decisión sobre el objetivo 6** |
+| **H5 · Validación concluida** | 21 de diciembre | C0–C3 en tres corridas con evidencia conservada; objetivos 5 y 6 ejecutados o descartados con su criterio; documento final entregado |
+
+### 26.4 Diagrama de Gantt
+
+| Actividad | S1 | S2 | O1 | O2 | N1 | N2 | D1 | D2 |
+|---|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+| Diagnóstico | ██ | | | | | | | |
+| Diseño y especificación | | ██ | | | | | | |
+| Esquema, políticas, autenticación y contexto | | | ██ | | | | | |
+| Organizaciones, talleres y miembros | | | | ██ | | | | |
+| Clientes | | | | | ██ | | | |
+| Inventario · reclutamiento de operadores | | | | | | ██ | | |
+| Cliente web y publicación | | | | | | | ██ | |
+| Validación, evaluaciones y cierre | | | | | | | | ██ |
+
+---
+
+## 27. Resultados esperados
+
+### 27.1 Resultados técnicos
+
+| Resultado | Métrica asociada |
+|---|---|
+| Matriz del estado del arte y vacío formulado | Fuentes con limitación consignada |
+| Especificación de requerimientos, modelo de datos, políticas, C4 y contrato | 7 de 7 tablas de negocio con criterio único de política |
+| Sistema con el corte vertical desplegado en *staging* y producción | 100 % de requisitos `Must` con caso en verde · cobertura ≥ 80 % |
+| Pipeline de integración y despliegue continuos | 100 % de integraciones verificadas · 0 vulnerabilidades críticas o altas |
+| Evidencia reproducible de aislamiento | 0 filas ajenas bajo C1–C3 en 3 corridas |
+| Informe de usabilidad *(si continúa el objetivo 5)* | Éxito por tarea · SUS con α de Cronbach · contraste de tiempos |
+| Estimación de costo *(si continúa el objetivo 6)* | USD por organización al mes |
+
+### 27.2 Impacto frente a la línea base
+
+| Impacto | Línea base | Resultado esperado |
+|---|---|---|
+| Fuga ante la omisión del control de aplicación | Filas ajenas devueltas en las 7 tablas | Cero filas ajenas |
+| Operación de varios locales | Una cuenta por local, con cierre e inicio de sesión | Una cuenta con cambio de contexto sin reautenticación |
+| Costo de infraestructura | Costo fijo mensual de un servidor dedicado | Costo proporcional al uso, con escalado a cero |
+
+---
+
+## 28. Viabilidad técnica
+
+### 28.1 Restricciones y supuestos
+
+| Criterio | Restricción | Supuesto | Impacto |
+|---|---|---|---|
+| **Presupuesto** | Capa gratuita de Supabase y Vercel | El corte vertical cabe en 500 MB de base de datos y 1 millón de invocaciones mensuales | Determina que no haya gasto mensual |
+| **Proyectos de base de datos** | El plan gratuito admite 2 proyectos activos y los pausa tras 1 semana de inactividad | *Staging* puede pausarse durante I8 para liberar el proyecto de validación | Si falla, se requiere el plan Pro |
+| **Uso de la plataforma de despliegue** | El plan gratuito de Vercel es para uso personal no comercial | El proyecto académico y la evaluación con operadores no constituyen uso comercial | Si falla, se requiere el plan Pro |
+| **Seguridad** | Credencial privilegiada solo en el servidor; TLS en tránsito | El proveedor cifra los datos en reposo, según su declaración de seguridad | Condición para exponer producción a operadores |
+| **Tiempo** | 16 semanas y un solo desarrollador | Dedicación sostenida por iteración | Reserva de 10 días |
+| **Competencias** | Ecosistema TypeScript | La curva de aprendizaje de Hono y Supabase es acotada | Ritmo de desarrollo |
+| **Participantes** | 30 operadores del perfil | Se confirman durante I6 | Continuidad del objetivo 5 |
+
+### 28.2 Riesgos y mitigación
+
+| ID | Riesgo | Impacto | Prob. | Mitigación |
+|---|---|---|---|---|
+| **R1** | Las políticas de aislamiento resultan incorrectas o incompletas | Alto | Media | Pruebas de aislamiento escritas **antes** que la funcionalidad y ejecutadas tras cada cambio de esquema |
+| **R2** | El alcance crece más allá de lo planificado | Medio | Alta | Exclusiones cerradas; alcance congelado en H3 |
+| **R8** | No se consiguen 30 operadores o se retiran | Medio | Alta | Reclutar 36 durante I6; sesiones remotas; criterio de continuidad del objetivo 5 |
+| **R3** | Cambios o límites de los proveedores externos | Medio | Media | Acceso al proveedor tras una capa propia; aislamiento en el motor, no en el proveedor |
+| **R9** | Se exceden los límites de la capa gratuita | Medio | Media | Pausar *staging* en I8; contingencia de plan Pro |
+| **R4** | Las políticas se complican con el segundo nivel | Medio | Media | Un solo criterio de aislamiento en todas las tablas |
+| **R5** | Tiempo insuficiente | Medio | Media | Reserva de 10 días; objetivos complementarios descartables |
+| **R7** | Pérdida de trabajo por fallo de equipo | Alto | Baja | Repositorio remoto e integración frecuente |
+| **R6** | Fuentes académicas insuficientes | Bajo | Media | Ampliar a arquitecturas comparables; admitir tesis de posgrado |
+| **R10** | Métricas de consumo insuficientes para imputar costo | Bajo | Media | Criterio de continuidad del objetivo 6 |
+
+### 28.3 Recursos y presupuesto
+
+Tarifas y límites consultados el **14 de septiembre de 2026** en las páginas de precios de Supabase, Vercel y GitHub; los valores de esta sección corresponden a esa fecha.
+
+| Categoría | Recurso | Especificación | Propósito | Costo mensual |
+|---|---|---|---|---|
+| Base de datos e identidad | Supabase, plan gratuito — 2 proyectos (*staging* y producción) | 500 MB de base de datos, CPU compartida con 500 MB de RAM, 5 GB de transferencia, 50 000 usuarios activos mensuales, pausa tras 1 semana sin actividad | Pruebas integradas y evaluación con operadores | USD 0 |
+| Proyecto de validación | Supabase, proyecto desechable | Mismas especificaciones; ocupa el lugar de *staging* durante I8 | Condiciones C0–C3 | USD 0 |
+| Cómputo serverless | Vercel, plan gratuito | 1 millón de invocaciones y 100 GB de transferencia al mes; uso personal no comercial | *Staging* y producción | USD 0 |
+| Integración continua | GitHub Actions, plan gratuito | Ejecutores estándar: sin costo en repositorio público; 2000 minutos al mes en repositorio privado | Pipeline en cada integración | USD 0 |
+| Desarrollo | Equipo personal y herramientas de código abierto | — | Construcción | USD 0 |
+| Fuentes académicas | Google Scholar, IEEE Xplore, ACM, Scopus, BASE, OATD | Acceso institucional | Revisión sistemática | USD 0 |
+
+**Presupuesto mensual de *staging* y producción: USD 0** en capa gratuita. **Contingencia**: si se exceden los límites o se requieren tres proyectos simultáneos, Supabase Pro (desde USD 25 al mes) y, si la restricción de uso lo exigiera, Vercel Pro (USD 20 al mes): **USD 45 al mes** como techo previsto.
+
+### 28.4 Análisis de viabilidad
+
+| Dimensión | Evaluación |
+|---|---|
+| **Técnica** | Componentes maduros y compatibles: seguridad a nivel de fila nativa en PostgreSQL, identidad del proveedor evaluable en las políticas, adaptador de Hono para Vercel y TypeScript de extremo a extremo |
+| **Operativa** | Servicios gestionados sin servidores que operar; publicación automática tras el pipeline; paneles de consumo del proveedor como observabilidad |
+| **Temporal** | Ocho iteraciones con incremento verificable, 10 días de reserva y dos objetivos complementarios descartables que liberan I8 si falta tiempo |
+| **Económica** | USD 0 al mes en capa gratuita, con techo de contingencia de USD 45 al mes; sin licencias |
+
+---
+
+## 29. Referencias
+
+Estilo **APA (7.ª edición)**. El estado de verificación entrada por entrada consta en el [Anexo de verificación de referencias](anexo-referencias.md). La documentación técnica sin autor humano se cita con autor corporativo y fecha de recuperación, y se emplea únicamente como sustento del marco conceptual.
 
 Alobaywi, B., Almutairi, M. G., & Sheldon, F. T. (2026). Performance trade-offs in multi-tenant IoT–cloud security: A systematic review of emerging technologies. *IoT, 7*(1), 21. https://doi.org/10.3390/iot7010021
 
@@ -652,9 +1008,15 @@ Bezemer, C.-P., & Zaidman, A. (2010). Multi-tenant SaaS applications: Maintenanc
 
 Brooke, J. (1996). SUS: A quick and dirty usability scale. En P. W. Jordan, B. Thomas, B. A. Weerdmeester, & I. L. McClelland (Eds.), *Usability evaluation in industry* (pp. 189–194). Taylor & Francis.
 
+Brown, S. (s. f.). *The C4 model*. Recuperado el 14 de septiembre de 2026, de https://c4model.com/
+
 Codd, E. F. (1970). A relational model of data for large shared data banks. *Communications of the ACM, 13*(6), 377–387. https://doi.org/10.1145/362384.362685
 
+Cronbach, L. J. (1951). Coefficient alpha and the internal structure of tests. *Psychometrika, 16*(3), 297–334. https://doi.org/10.1007/BF02310555
+
 Dar, C., Hershcovitch, M., & Morrison, A. (2023). RLS side channels: Investigating leakage of row-level security protected data through query execution time. *Proceedings of the ACM on Management of Data, 1*(1), Artículo 89, 1–25. https://doi.org/10.1145/3588943
+
+Estado Plurinacional de Bolivia. (2009). *Constitución Política del Estado* (promulgada el 7 de febrero de 2009). Recuperado el 14 de septiembre de 2026, de https://www.lexivox.org/norms/BO-CPE-20090207.html
 
 Fielding, R. T. (2000). *Architectural styles and the design of network-based software architectures* [Tesis doctoral, University of California, Irvine].
 
@@ -667,6 +1029,8 @@ Gilbert, S., & Lynch, N. (2002). Brewer's conjecture and the feasibility of cons
 Haerder, T., & Reuter, A. (1983). Principles of transaction-oriented database recovery. *ACM Computing Surveys, 15*(4), 287–317. https://doi.org/10.1145/289.291
 
 Hernández-Sampieri, R., & Mendoza Torres, C. P. (2018). *Metodología de la investigación: Las rutas cuantitativa, cualitativa y mixta*. McGraw-Hill Education.
+
+Hevner, A. R., March, S. T., Park, J., & Ram, S. (2004). Design science in information systems research. *MIS Quarterly, 28*(1), 75–106. https://doi.org/10.2307/25148625
 
 Humble, J., & Farley, D. (2010). *Continuous delivery: Reliable software releases through build, test, and deployment automation*. Addison-Wesley Professional.
 
@@ -721,3 +1085,30 @@ Simić, M., Dedeić, J., Stojkov, M., & Prokić, I. (2024). A hierarchical names
 World Wide Web Consortium. (2026). *Web application manifest* (W3C Working Draft del 13 de agosto de 2026). https://www.w3.org/TR/appmanifest/
 
 Zod. (s. f.). *Zod documentation*. Recuperado el 14 de agosto de 2026, de https://zod.dev/
+
+---
+
+## Anexo A · Revisión de consistencia
+
+Auditoría de coherencia del documento: cada eslabón debe justificarse por el anterior.
+
+| # | Elemento | Debe responder a | Dónde se responde |
+|---|---|---|---|
+| 1 | Problema | La evidencia empírica | §2.1 ← §5.1, §6.4 y el relevamiento de §16.2 |
+| 2 | Objetivos | El problema | §8–§9 ← problema central y causas raíz de §2.1 |
+| 3 | Solución propuesta | Los objetivos | §21 · matriz investigación–solución §21.7 |
+| 4 | Requerimientos | La solución y su alcance | §24 ← §21.5 |
+| 5 | Arquitectura | Los requerimientos, sobre todo los no funcionales | §22 ← RNF-101, RNF-102, RNF-301 y RNF-302 |
+| 6 | Tecnologías | La arquitectura elegida | §23 ← estilo de §22.1 |
+| 7 | Metodología de desarrollo | El alcance y el tiempo | §25.1–§25.2 ← §21.5 y §26 |
+| 8 | Validación | Las hipótesis y los criterios de aceptación | §15, §18 y §25.6 ← §10 |
+| 9 | Planificación | Todo lo anterior | §26 y §28 ← EDT de §26.1 |
+
+| Qué se sustenta | Con qué se sustenta |
+|---|---|
+| El alcance | Límites y exclusiones (§2.2, §21.6) y viabilidad (§28.4) |
+| La arquitectura | Requerimientos no funcionales y criterios del estilo (§22.1) |
+| El stack tecnológico | Matriz de selección con alternativas descartadas (§23) |
+| La estrategia de desarrollo | Priorización del MVP y tiempo disponible (§25.2, §26) |
+| La estrategia de validación | Indicadores, umbrales y criterios de aceptación (§12, §25.5, §25.6) |
+| El cronograma y la viabilidad | EDT, ruta crítica y matriz de riesgos (§26.1, §28.2) |

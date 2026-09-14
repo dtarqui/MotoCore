@@ -280,3 +280,11 @@ La elección entre `403` y `404` no es estilística: comunica —o no— la exis
 - **Lo prohibido sin decisión registrada**: cambiar el significado de un código existente, mover el contexto activo de la cabecera a la ruta, o exponer desde el cliente una operación reservada al servidor. Los tres contradicen decisiones vigentes (ADR-005, RNF-103, RNF-106) y exigirían un ADR nuevo, no un ajuste de este documento.
 
 Las entidades de los módulos fuera del alcance (RF-800) se incorporarán siguiendo estas mismas reglas: nivel organización o nivel taller según el criterio del [Glosario](01-glosario.md), contexto por cabecera y códigos `modulo.razon`. El contrato está diseñado para admitirlas sin modificar lo ya especificado.
+
+---
+
+## 7. Descripción OpenAPI
+
+El contrato se publica además como **descripción OpenAPI 3.1**, entregable del objetivo específico 3: rutas, métodos, cabeceras de contexto, esquemas de petición y respuesta, y el catálogo de códigos de §4. Su función es que un consumidor pueda descubrir la interfaz sin leer este documento y que la documentación no se desincronice de la interfaz construida.
+
+La descripción **deriva** de este contrato y no lo sustituye: ante cualquier discrepancia entre ambos, manda este documento, y la descripción se corrige.

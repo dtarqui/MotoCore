@@ -1,10 +1,10 @@
 # Plan de pruebas y validación
 
-Estrategia de verificación del sistema y matriz de trazabilidad **requisito → caso de prueba → evidencia**. Materializa RNF-202 —toda regla de aislamiento y de negocio tiene prueba automatizada— y sostiene el objetivo específico 3: validar el aislamiento con evidencia reproducible ([anteproyecto/01](../anteproyecto/01-definicion-y-alcance.md) §1.7).
+Estrategia de verificación del sistema y matriz de trazabilidad **requisito → caso de prueba → evidencia**. Materializa RNF-202 —toda regla de aislamiento y de negocio tiene prueba automatizada—, sostiene el objetivo específico 4 —validar el aislamiento frente a la línea base— y especifica cómo se ejecutan los objetivos complementarios 5 y 6 ([anteproyecto/01](../anteproyecto/01-definicion-y-alcance.md) §1.7).
 
-> Requisitos: [02-requisitos.md](02-requisitos.md) · Contrato verificado: [10-contrato-api.md](10-contrato-api.md) · Políticas: [05-modelo-datos.md](05-modelo-datos.md) · Cronograma: [08-plan-trabajo.md](08-plan-trabajo.md)
+> Requisitos: [02-requisitos.md](02-requisitos.md) · Contrato verificado: [10-contrato-api.md](10-contrato-api.md) · Políticas: [05-modelo-datos.md](05-modelo-datos.md) · Cronograma: [08-plan-trabajo.md](08-plan-trabajo.md) · Diseño de la investigación: [anteproyecto](../anteproyecto/04-anteproyecto-integrado.md) §15–§18
 >
-> **Este documento especifica la verificación, no reporta resultados.** Define qué debe probarse y con qué criterio se da por probado. La ejecución y sus resultados son evidencia de la fase de validación (F3).
+> **Este documento especifica la verificación, no reporta resultados.** Define qué debe probarse y con qué criterio se da por probado. La ejecución y sus resultados son evidencia de la fase de validación (F4).
 
 ---
 
@@ -12,60 +12,80 @@ Estrategia de verificación del sistema y matriz de trazabilidad **requisito →
 
 ### 1.1 Qué gobierna la selección de pruebas
 
-El sistema no se prueba de manera uniforme: se concentra el esfuerzo donde un fallo es **irreversible o silencioso**. Una regla de aislamiento que falla no produce un error visible —produce una fuga que nadie observa—, y por eso el aislamiento recibe un nivel de prueba propio, con dos vías independientes.
-
-De ahí tres reglas de selección:
+El sistema no se prueba de manera uniforme: se concentra el esfuerzo donde un fallo es **irreversible o silencioso**. Una regla de aislamiento que falla no produce un error visible —produce una fuga que nadie observa—, y por eso el aislamiento recibe un nivel propio, con dos vías independientes y una línea base contra la que se contrasta.
 
 1. **Todo requisito `Must` con alcance `Sí` tiene al menos un caso ejecutable** (RNF-202). Lo que no se puede ejecutar no se declara cumplido.
-2. **El aislamiento se prueba por duplicado**, una vez por cada capa de defensa (ADR-002). Probarlo solo por la interfaz verificaría la capa de aplicación, no la del motor.
-3. **Lo no ejecutable se declara como tal.** Los requisitos que se comprueban por inspección se marcan explícitamente en la matriz, en lugar de disfrazarse de prueba.
+2. **El aislamiento se prueba por duplicado**, una vez por cada capa de defensa (ADR-002), y **frente a la línea base** (condición C0).
+3. **Lo no ejecutable se declara como tal.** Los requisitos que se comprueban por inspección se marcan explícitamente.
 
-### 1.2 Niveles
+### 1.2 Estrategia multinivel
 
-| Nivel | Qué verifica | Qué necesita | Coste de ejecución |
-|---|---|---|---|
-| **N0 · Inspección** | Propiedades no ejecutables: ausencia de secretos, existencia de decisiones registradas, configuración por entorno | Revisión del repositorio y de la configuración | Manual, por hito |
-| **N1 · Unitaria** | Reglas puras: esquemas de validación, cálculo de existencias, resolución de permisos por rol | Nada externo | Milisegundos |
-| **N2 · Contrato HTTP** | La interfaz **antes** de tocar la base: credencial ausente o inválida, contexto activo obligatorio, forma del error, validación de entrada | La aplicación en memoria | Segundos |
-| **N3 · Integración** | Flujo completo contra base de datos y proveedor de identidad reales: creación, unicidad por nivel, transiciones de estado, auditoría | Entorno con credenciales y migraciones aplicadas | Decenas de segundos |
-| **N4 · Aislamiento** | Que una organización no accede a datos de otra, por interfaz **y** por acceso directo al motor | Igual que N3, más una identidad adicional | Decenas de segundos |
-| **N5 · Usabilidad** | Que el cambio de contexto entre organizaciones y talleres resulta operable por un usuario del rubro (RNF-401, RNF-404) | Aplicación desplegada y operadores participantes | Sesión presencial o remota, por participante |
-| **N6 · Contrato desde el cliente** | Que el contexto que el operador elige sea el que viaja en las cabeceras, y que el cliente respete la regla de rutas y el método de las bajas lógicas | Nada externo: DOM simulado | Segundos |
+| Nivel | Nivel equivalente de la guía | Qué verifica | Herramienta | Qué necesita | Cuándo corre |
+|---|---|---|---|---|---|
+| **N0 · Inspección** | Auditorías | Ausencia de secretos, decisiones registradas, configuración por entorno | Revisión y búsqueda de secretos | Repositorio y configuración | Por hito |
+| **N1 · Unitaria** | Unitarias | Reglas puras: esquemas de validación, cálculo de existencias, resolución de permisos por rol | Vitest | Nada externo | En cada integración |
+| **N2 · Contrato HTTP** | Integración con base simulada | La interfaz **antes** de tocar la base: credencial, contexto obligatorio, forma del error, validación de entrada | Vitest | La aplicación en memoria | En cada integración |
+| **N3 · Integración** | Integración | Flujo completo contra base de datos y proveedor de identidad reales | Vitest | Entorno de *staging* con migraciones aplicadas | En cada integración con credenciales; siempre antes de cada hito |
+| **N4 · Aislamiento** | — *(específico del proyecto)* | Condiciones C0 a C3 por las dos vías | Vitest con cliente HTTP y cliente PostgreSQL con identidad ajena | Proyecto de validación desechable | Antes de cada hito; tres corridas en I8 |
+| **N5 · Usabilidad** | — *(objetivo complementario 5)* | Cambio de contexto frente al cambio de cuenta | Guion de tareas, cronómetro y cuestionario SUS | Entorno de producción y operadores | Una vez, en I8 |
+| **N6 · Componente del cliente** | Componente UI | El contrato desde el cliente: cabeceras de contexto, regla de rutas y códigos de error | Vitest sobre DOM simulado | Nada externo | En cada integración |
+| **N7 · Extremo a extremo** | E2E y auditorías | Flujos T1–T3, instalabilidad y diseño responsivo | Playwright | Cliente web e interfaz publicados en *staging* | Tras cada publicación en *staging*; un fallo bloquea la promoción a producción |
 
-Además de estos siete niveles, la matriz de §4.7 emplea la marca **CI** para las propiedades que no verifica un caso de prueba sino el propio pipeline de integración continua (verificación de tipos, ejecución de la suite y bloqueo ante fallo).
-
-N1, N2 y N6 corren siempre, en cada integración al ramal principal. N3 y N4 exigen credenciales; su tratamiento cuando faltan está en §6.2. N5 es **manual y no repetible en cada integración**: se ejecuta una vez, sobre la aplicación terminada, y su diseño está en §7.
+Además de estos niveles, la marca **CI** identifica las propiedades que verifica el propio pipeline: tipos, cobertura, auditoría de dependencias y bloqueo ante fallo.
 
 ### 1.3 Qué cubre N6, y qué deliberadamente no
 
-N6 no evalúa la interfaz: evalúa el **cumplimiento del contrato desde el lado del cliente**, que es lo que la evaluación con operadores no puede observar. Un participante puede completar las tres tareas con éxito mientras el cliente envía una cabecera equivocada, y a la inversa.
+N6 evalúa el **cumplimiento del contrato desde el lado del cliente**, que la evaluación con operadores no puede observar: un participante puede completar las tareas mientras el cliente envía una cabecera equivocada.
 
 | Cubre | No cubre |
 |---|---|
 | Que cambiar de organización limpie el taller activo | Si la pantalla resulta comprensible — eso es N5 |
-| Que `X-Org-Id` viaje siempre y `X-Workshop-Id` solo en endpoints de nivel taller | Diseño responsivo (RNF-402) e instalabilidad (RNF-403), que son N0 |
-| Que el código de negocio del error sobreviva al cliente | Recorridos completos de usuario extremo a extremo |
-| Regresión de la regla de rutas y del método de las bajas lógicas ([contrato](10-contrato-api.md) §2.3 y §2.6) | Rendimiento y accesibilidad |
+| Que `X-Org-Id` viaje siempre y `X-Workshop-Id` solo en endpoints de nivel taller | Diseño responsivo e instalabilidad — eso es N7 |
+| Que el código de negocio del error sobreviva al cliente | Recorridos completos de usuario — eso es N7 |
+| Regresión de la regla de rutas y del método de las bajas lógicas ([contrato](10-contrato-api.md) §2.3 y §2.6) | Rendimiento |
 
-**N6 no sustituye a N5 ni relaja sus umbrales.** RNF-401 y RNF-404 siguen verificándose con operadores reales.
+### 1.4 Qué cubre N7
 
-### 1.4 Qué queda deliberadamente fuera
+N7 automatiza lo que se puede observar sin una persona: que los flujos T1–T3 **funcionan** de extremo a extremo, que la aplicación es instalable y que no desborda en anchos de escritorio y móvil. **No sustituye a N5**: que un flujo funcione no dice si un operador lo comprende.
+
+### 1.5 Qué queda deliberadamente fuera
 
 | Fuera del plan | Motivo |
 |---|---|
-| Pruebas de carga y de rendimiento | Excluidas del alcance ([definición y alcance](../anteproyecto/01-definicion-y-alcance.md) §1.8.3); RNF-501 es criterio cualitativo, no objetivo medido |
-| Pruebas automatizadas de **toda** la interfaz de usuario | El objeto de validación es la arquitectura de aislamiento, que reside en el servidor y en la base de datos. RNF-402 y RNF-403 se verifican por inspección (N0), y RNF-401 y RNF-404 con operadores reales (N5, §7). Lo que sí se automatiza es el subconjunto del nivel N6 (§1.3): el contrato visto desde el cliente |
-| Evaluación de usabilidad de la interfaz completa | La evaluación se acota al **cambio de contexto** entre organizaciones y talleres, por ser la manifestación visible del aporte de la tesis. Las demás pantallas no se someten a prueba con usuarios |
-| Pruebas de penetración | El alcance cubre el aislamiento entre inquilinos, no una evaluación de seguridad ofensiva del despliegue |
-| Mitigación del canal lateral temporal de RLS | Amenaza reconocida y documentada (§3.3 del marco teórico); su mitigación excede el objeto del proyecto |
+| Pruebas de carga, estrés y rendimiento | El dominio no las justifica ([definición y alcance](../anteproyecto/01-definicion-y-alcance.md) §1.8.3); RNF-501 queda como criterio cualitativo |
+| Pruebas de penetración | El alcance cubre el aislamiento entre inquilinos, no una evaluación ofensiva del despliegue |
+| Mitigación del canal lateral temporal de la seguridad a nivel de fila | Amenaza documentada (marco teórico §3.3); su mitigación excede el objeto del proyecto |
+| Evaluación de usabilidad de la interfaz completa | La evaluación se acota al cambio de contexto |
 
 ---
 
-## 2. Entorno y datos de prueba
+## 2. KPIs de calidad
 
-### 2.1 Escenario base
+| KPI | Umbral | Requisito | Caso | Nivel |
+|---|---|---|---|---|
+| Cobertura de líneas de los servicios de dominio del servidor | **≥ 80 %** | RNF-207 | CP-N207 | CI |
+| Requisitos `Must` de alcance `Sí` con caso en verde | **100 %** | RNF-202 | CP-N202 | CI |
+| Errores de verificación de tipos | **0** | RNF-201 | CP-N201 | CI |
+| Vulnerabilidades críticas o altas en dependencias | **0** | RNF-208 | CP-N208 | CI |
+| Integraciones al ramal principal con pipeline en verde | **100 %** | RNF-203 | CP-N203 | CI |
+| Filas ajenas devueltas bajo C1, C2 y C3 | **0** | RNF-101, RNF-102 | CP-N101, CP-N102 | N4 |
 
-Todas las pruebas de N3 y N4 parten del mismo escenario, construido por el propio caso —nunca de datos preexistentes, para que la ejecución sea reproducible desde una base vacía:
+---
+
+## 3. Entorno y datos de prueba
+
+### 3.1 Entornos
+
+| Entorno | Niveles | Datos | Restricción |
+|---|---|---|---|
+| **Local y pipeline** | N1, N2, N6 | Ninguno persistente | — |
+| **Staging** | N3, N7 | Generados por las pruebas | Nunca se deshabilitan políticas |
+| **Proyecto de validación desechable** | N4 | Escenario sintético, reconstruido en cada ciclo | **Único entorno donde existe la condición C0** |
+| **Producción** | N5 | Escenario sintético precargado para las sesiones | Sin datos reales de ninguna organización |
+
+### 3.2 Escenario base
+
+Todas las pruebas de N3 y N4 parten del mismo escenario, construido por el propio caso —nunca de datos preexistentes—:
 
 ```
 Cuenta A ──owner──> Organización 1 ──> Taller 1.1
@@ -82,36 +102,36 @@ Cuenta B ──owner──> Organización 3 ──> Taller 3.1
 Cuenta C  ── sin membresía en ninguna de las anteriores
 ```
 
-Con este escenario, un solo montaje cubre las tres preguntas del aislamiento: **entre cuentas** (A frente a B), **entre organizaciones de la misma cuenta** (Organización 1 frente a Organización 2) y **frente a quien no es miembro de ninguna** (Cuenta C).
+Un solo montaje cubre las tres preguntas del aislamiento: **entre cuentas** (A frente a B), **entre organizaciones de la misma cuenta** (1 frente a 2) y **frente a quien no es miembro de ninguna** (C).
 
-### 2.2 Aislamiento entre ejecuciones
+### 3.3 Escenario de línea base para la usabilidad
+
+Para la condición de **cambio de cuenta** del objetivo 5, cada local del escenario se opera con una **cuenta propia**, dueña de una organización con un único taller: es la situación del software de un solo inquilino, reproducida con el mismo sistema (alternativa 1 de ADR-006).
+
+### 3.4 Independencia entre ejecuciones
 
 - Cada ejecución crea sus cuentas con correos irrepetibles; ninguna prueba depende del orden ni del rastro de otra.
 - Ningún caso modifica datos que otro caso vaya a leer.
-- La base de pruebas se reconstruye desde las migraciones versionadas (RNF-304), de modo que el esquema probado sea exactamente el especificado.
+- La base de pruebas se reconstruye desde las migraciones versionadas (RNF-304).
 
 ---
 
-## 3. Orden de escritura
+## 4. Orden de escritura
 
-**Las pruebas de aislamiento se escriben antes que la funcionalidad que protegen.** No es una preferencia metodológica: es la mitigación del riesgo R1 del [plan de trabajo](08-plan-trabajo.md), y se apoya en el uso de la prueba como especificación ejecutable (Beck, 2002; marco teórico §3.2.5).
-
-En la práctica, cada módulo de negocio se construye en este orden:
+**Las pruebas de aislamiento se escriben antes que la funcionalidad que protegen.** Es la mitigación del riesgo R1 del [plan de trabajo](08-plan-trabajo.md) y se apoya en el uso de la prueba como especificación ejecutable (Beck, 2002; marco teórico §3.2.5).
 
 1. Se escribe el caso de aislamiento del módulo: una cuenta ajena **no** ve estos datos. Falla, porque el módulo no existe.
 2. Se escriben los casos de contrato: sin credencial, sin contexto activo, con entrada inválida.
-3. Se implementa el módulo hasta que los tres pasan.
-4. Se añaden los casos funcionales del requisito.
-
-El paso 1 antes del 3 es lo que impide que el aislamiento se agregue "después", que es exactamente el modo en que se olvida.
+3. Se construye el módulo hasta que los tres pasan.
+4. Se añaden los casos funcionales del requisito, con sus criterios *Dado–Cuando–Entonces*.
 
 ---
 
-## 4. Matriz de trazabilidad
+## 5. Matriz de trazabilidad
 
-Identificación de casos: **CP-nnn**, donde `nnn` es el número del requisito que verifican. Los sufijos `.1`, `.2` distinguen los casos de un mismo requisito.
+Identificación de casos: **CP-nnn**, donde `nnn` es el número del requisito que verifican; los sufijos `.1`, `.2` distinguen casos de un mismo requisito. Los casos de línea base se identifican como **CP-LB**, y los del costo, como **CP-O6**.
 
-### 4.1 Identidad y cuentas
+### 5.1 Identidad y cuentas
 
 | Req. | Caso | Nivel | Criterio ejecutable |
 |---|---|---|---|
@@ -124,7 +144,7 @@ Identificación de casos: **CP-nnn**, donde `nnn` es el número del requisito qu
 | RF-103 | CP-103.2 | N2 | Credencial inválida: `401 auth.invalid_token` |
 | RF-104 | CP-104 | N3 | Devuelve perfil y organizaciones con membresía **activa**, cada una con su rol |
 
-### 4.2 Organizaciones y talleres
+### 5.2 Organizaciones y talleres
 
 | Req. | Caso | Nivel | Criterio ejecutable |
 |---|---|---|---|
@@ -135,7 +155,7 @@ Identificación de casos: **CP-nnn**, donde `nnn` es el número del requisito qu
 | RF-204 | CP-204 | N3 | El `Owner` edita; un no-`Owner` recibe `403` |
 | RF-301 | CP-301.1 | N3 | El taller creado aparece en el listado de la organización |
 | RF-301 | CP-301.2 | N3 | Un no-`Owner` que intenta crear recibe `403` |
-| RF-301 | CP-301.3 | N3 | La edición de los datos del taller se refleja en su ficha; un no-`Owner` que intenta editar recibe `403` |
+| RF-301 | CP-301.3 | N3 | La edición del taller se refleja en su ficha; un no-`Owner` que intenta editar recibe `403` |
 | RF-302 | CP-302 | N3 | El listado devuelve **solo** talleres de la organización activa |
 | RF-303 | CP-303.1 | N2 | Operación de nivel taller sin `X-Workshop-Id`: `400 workshop.missing_active_workshop` |
 | RF-303 | CP-303.2 | N3 | Taller de otra organización en la cabecera: `404 workshop.not_found` |
@@ -143,7 +163,7 @@ Identificación de casos: **CP-nnn**, donde `nnn` es el número del requisito qu
 | RF-304 | CP-304.2 | N3 | La asignación **no** altera lo que el miembro puede ver (ADR-006) |
 | RF-305 | CP-305 | N3 | El taller desactivado deja de listarse como activo; sus datos siguen consultables |
 
-### 4.3 Miembros y control de acceso
+### 5.3 Miembros y control de acceso
 
 | Req. | Caso | Nivel | Criterio ejecutable |
 |---|---|---|---|
@@ -151,14 +171,14 @@ Identificación de casos: **CP-nnn**, donde `nnn` es el número del requisito qu
 | RF-401 | CP-401.2 | N3 | Correo sin cuenta: `404 member.not_found` |
 | RF-401 | CP-401.3 | N3 | Reincorporar a alguien removido **reactiva** su membresía, no la duplica |
 | RF-402 | CP-402.1 | N2 | Invitar con rol `owner`: rechazo por validación |
-| RF-402 | CP-402.2 | **N4 · vía base de datos** | Una inserción directa de una segunda membresía activa con rol `owner` en la misma organización es rechazada por el motor, sin intervención de la aplicación |
+| RF-402 | CP-402.2 | **N4 · vía base de datos** | Una inserción directa de una segunda membresía activa con rol `owner` en la misma organización es rechazada por el motor |
 | RF-403 | CP-403 | N3 | El cambio se refleja en el listado y surte efecto inmediato |
 | RF-404 | CP-404 | N3 | El removido pierde el acceso de inmediato |
-| RF-405 | CP-405 | N3 | Cambiar el rol del propietario o removerlo: error de negocio específico |
+| RF-405 | CP-405 | N3 | Cambiar el rol del propietario o removerlo: `403 member.owner_protected` |
 | RF-406 | CP-406 | N3 | Un `Mechanic` que intenta invitar: `403` |
 | RF-407 | CP-407 | N3 | Cualquier miembro consulta el listado, con rol y estado |
 
-### 4.4 Clientes — nivel organización
+### 5.4 Clientes — nivel organización
 
 | Req. | Caso | Nivel | Criterio ejecutable |
 |---|---|---|---|
@@ -170,7 +190,7 @@ Identificación de casos: **CP-nnn**, donde `nnn` es el número del requisito qu
 | RF-504 | CP-504.2 | N3 | La búsqueda por nombre o correo opera dentro de la organización activa |
 | RF-505 | CP-505 | N3 | Un `Mechanic` que intenta crear: `403`; consultar sí puede |
 
-### 4.5 Inventario — nivel taller
+### 5.5 Inventario — nivel taller
 
 | Req. | Caso | Nivel | Criterio ejecutable |
 |---|---|---|---|
@@ -189,200 +209,277 @@ Identificación de casos: **CP-nnn**, donde `nnn` es el número del requisito qu
 | RF-608 | CP-608.3 | N3 | Destino fuera de la organización: `403 inventory.cross_organization_transfer` |
 | RF-609 | CP-609 | N3 | Un `Mechanic` que intenta crear o editar un repuesto: `403 inventory.insufficient_permissions`; consultar y registrar movimientos sí puede. Un `Receptionist` que intenta transferir: `403` |
 
-### 4.6 Aislamiento y auditoría
+### 5.6 Aislamiento y auditoría
 
 | Req. | Caso | Nivel | Criterio ejecutable |
 |---|---|---|---|
-| RF-701 | CP-701 | **N4 · vía interfaz** | Una cuenta sin membresía no obtiene dato alguno en ninguna operación — lectura y escritura —, respondiendo según §5 del [contrato](10-contrato-api.md): `403` con contexto ajeno declarado, `404` con recurso ajeno desde contexto propio |
-| RF-702 | CP-702 | **N4 · vía base de datos** | Consultas ejecutadas con la identidad de otra cuenta, sin pasar por la interfaz, no devuelven filas ajenas |
-| RF-703 | CP-703.1–.6 | N3 | Un caso por cada acción crítica: invitación, cambio de rol, remoción, modificación de los datos de la organización, desactivación de taller y baja de cliente |
+| RF-701 | CP-701 | **N4 · vía interfaz** | Bajo C1, una cuenta sin membresía no obtiene dato alguno en ninguna operación —lectura y escritura—, respondiendo según §5 del [contrato](10-contrato-api.md) |
+| RF-702 | CP-702 | **N4 · vía base de datos** | Bajo C3, consultas con la identidad de otra cuenta no devuelven filas ajenas |
+| RF-703 | CP-703.1–.6 | N3 | Un caso por cada acción crítica: invitación, cambio de rol, remoción, modificación de la organización, desactivación de taller y baja de cliente |
 | RF-703 | CP-703.7 | N3 | El registro persiste tras eliminar la entidad o la cuenta referenciada |
 | RF-704 | CP-704.1 | N3 | `Mechanic` o `Receptionist` que consulta la auditoría: `403` |
-| RF-704 | CP-704.2 | **N4 · vía base de datos** | La restricción se sostiene también por acceso directo: un miembro no propietario no lee el registro |
+| RF-704 | CP-704.2 | **N4 · vía base de datos** | Un miembro no propietario no lee el registro por acceso directo |
 
-### 4.7 Requisitos no funcionales
+### 5.7 Línea base
+
+Casos que **deben mostrar la fuga**: si no la muestran, la línea base no discrimina y el resultado de la hipótesis se declara no concluyente ([anteproyecto](../anteproyecto/04-anteproyecto-integrado.md) §10.3).
+
+| Caso | Nivel | Condición | Criterio ejecutable |
+|---|---|---|---|
+| CP-LB1 | **N4 · vía base de datos** | C0 | Con las políticas deshabilitadas, la consulta con identidad ajena devuelve filas ajenas en **cada una** de las 7 tablas de negocio; se registra el recuento por tabla |
+| CP-LB2 | **N4 · vía interfaz** | C0 | Con políticas deshabilitadas y verificación de membresía omitida, las operaciones de lectura sobre datos ajenos devuelven datos de la organización ajena; se registra el recuento por operación |
+
+### 5.8 Requisitos no funcionales
 
 | Req. | Caso | Nivel | Criterio |
 |---|---|---|---|
-| RNF-101 | CP-N101 | N4 · BD | Las siete tablas de negocio censadas en el [modelo de datos](05-modelo-datos.md) tienen políticas activas; la consulta directa con otra identidad no devuelve filas ajenas en ninguna |
-| RNF-102 | CP-N102 | N4 | Con la verificación de la capa de aplicación deshabilitada, el acceso cruzado **sigue** sin producirse (§5.3) |
-| RNF-103 | CP-N103 | N0 | Búsqueda de credenciales en el repositorio sin resultados; la clave privilegiada solo se lee del entorno |
-| RNF-104 | CP-N104 | N0 | Ninguna ruta de código recibe ni persiste contraseñas: la gestión está delegada (ADR-004) |
+| RNF-101 | CP-N101 | N4 · BD | Las 7 tablas de negocio tienen políticas activas; la consulta directa con otra identidad no devuelve filas ajenas en ninguna |
+| RNF-102 | CP-N102 | N4 | Bajo C2, el acceso cruzado **sigue** sin producirse (§6.4) |
+| RNF-103 | CP-N103 | N0 | Búsqueda de secretos sin resultados; la clave privilegiada solo se lee del entorno |
+| RNF-104 | CP-N104 | N0 | Ninguna ruta de código recibe ni persiste contraseñas (ADR-004) |
 | RNF-105 | CP-N105 | N3 | Para un mismo identificador, la respuesta de un recurso ajeno y la de uno inexistente son idénticas en estado, código y cuerpo |
 | RNF-106 | CP-N106 | N0 | La búsqueda de cuentas por correo no es invocable desde el cliente |
 | RNF-201 | CP-N201 | CI | La verificación de tipos finaliza sin errores |
-| RNF-202 | CP-N202 | CI | Todo `Must` de alcance `Sí` figura en esta matriz con al menos un caso ejecutable, y la suite pasa |
-| RNF-203 | CP-N203 | CI | El pipeline corre en cada integración; un fallo bloquea la incorporación |
+| RNF-202 | CP-N202 | CI | Todo `Must` de alcance `Sí` figura en esta matriz con al menos un caso, y la suite pasa |
+| RNF-203 | CP-N203 | CI | El pipeline corre en cada integración y un fallo bloquea la publicación |
 | RNF-204 | CP-N204 | N2 | Toda respuesta de error sigue Problem Details con código `modulo.razon` |
 | RNF-205 | CP-N205 | N2 | Cuerpo inválido: `400` con detalle por campo y **sin efectos secundarios** |
 | RNF-206 | CP-N206 | N0 | Cada decisión estructural tiene su ADR con alternativas y consecuencias |
+| RNF-207 | CP-N207 | CI | Cobertura de líneas de los servicios de dominio ≥ 80 % |
+| RNF-208 | CP-N208 | CI | Auditoría de dependencias sin vulnerabilidades críticas ni altas |
 | RNF-301 | CP-N301 | N0 | El despliegue se completa sin infraestructura propia que aprovisionar |
-| RNF-302 | CP-N302 | N0 | El modelo de despliegue escala a cero sin tráfico |
-| RNF-303 | CP-N303 | N0 | Cambiar de entorno solo requiere variables distintas, sin tocar código |
-| RNF-304 | CP-N304 | N0 | La base se reconstruye desde cero aplicando las migraciones en orden. Es **operativo, no automatizable en esta suite**: exige un proyecto Supabase desechable. Se ejecuta antes de cada hito y su evidencia es el identificador de la última migración aplicada (§5.5) |
-| RNF-401 | CP-N401 | N0 · N5 | El cambio de organización y de taller ocurre sin cerrar sesión y los datos mostrados corresponden al nuevo contexto |
-| RNF-401 | CP-N401.1 | **N6** | Cambiar de organización limpia el taller activo: no se arrastra un local de la organización anterior |
-| ADR-005 | CP-N005 | **N6** | El cliente adjunta `X-Org-Id` siempre y `X-Workshop-Id` solo en endpoints de nivel taller; sin contexto elegido no inventa ninguno |
+| RNF-302 | CP-N302 | N0 | Costo fijo por organización de USD 0 en capa gratuita; escalado a cero sin tráfico |
+| RNF-303 | CP-N303 | N0 | Pasar de *staging* a producción solo requiere variables distintas |
+| RNF-304 | CP-N304 | N0 | La base se reconstruye desde cero aplicando las migraciones en orden. Operativo: exige un proyecto desechable y se ejecuta antes de cada hito; su evidencia es el identificador de la última migración aplicada |
+| RNF-305 | CP-N305 | N0 | `main` publica en *staging* y `release` en producción, ambas solo con pipeline aprobado |
+| RNF-401 | CP-N401 | **N7** | Flujo T1: cambiar de organización sin cerrar sesión y ver los datos del nuevo contexto |
+| RNF-401 | CP-N401.1 | **N6** | Cambiar de organización limpia el taller activo |
+| ADR-005 | CP-N005 | **N6** | El cliente adjunta `X-Org-Id` siempre y `X-Workshop-Id` solo en endpoints de nivel taller |
 | Contrato §2.3 | CP-N023 | **N6** | Ninguna llamada del cliente anida el identificador de organización en la ruta |
 | Contrato §2.6 | CP-N026 | **N6** | Las bajas lógicas se invocan con `POST /…/deactivate`; la revocación de un vínculo, con `DELETE` |
-| RNF-204 | CP-N204.1 | **N6** | El código de negocio del error sobrevive al cliente y llega como `ApiError.code` |
-| RNF-402 | CP-N402 | N0 | Interfaz utilizable en anchos de escritorio y móvil |
-| RNF-403 | CP-N403 | N0 | El manifiesto permite instalar la aplicación desde el navegador |
-| RNF-404 | CP-N404.1 | **N5** | Tasa de éxito por tarea ≥ 80 % en las tres tareas de cambio de contexto (§7.2) |
-| RNF-404 | CP-N404.2 | **N5** | Puntuación SUS media ≥ 68 (Bangor et al., 2008) |
+| RNF-204 | CP-N204.1 | **N6** | El código de negocio del error sobrevive al cliente |
+| RNF-402 | CP-N402 | **N7** | Sin desbordamiento horizontal a 360 px y 1280 px en las pantallas del corte vertical |
+| RNF-403 | CP-N403 | **N7** | Manifiesto con nombre, iconos de 192 y 512 px, `start_url` y `display: standalone`; *service worker* registrado |
+| RNF-404 | CP-N404.1 | **N5** | Tasa de éxito ≥ 80 % por tarea con el selector de contexto (§8.4) |
+| RNF-404 | CP-N404.2 | **N5** | Puntuación SUS media ≥ 68 con el selector, contrastada con *t* de una muestra |
+| RNF-404 | CP-N404.3 | **N5** | α de Cronbach > 0,8 en los ítems del SUS |
 
 RNF-501 no aparece: está fuera de alcance como objetivo medible.
 
 ---
 
-## 5. Verificación del aislamiento (objetivo específico 3)
+## 6. Verificación del aislamiento (objetivo específico 4)
 
 Es el entregable central del proyecto. Se detalla aparte porque su diseño —no su cantidad— es lo que sostiene la tesis.
 
-### 5.1 Vía 1 — a través de la interfaz de programación
+### 6.1 Condiciones experimentales
 
-Verifica la **capa de aplicación**. Con las credenciales de la Cuenta C (sin membresía) y de la Cuenta B (miembro de otra organización), se intenta cada operación del contrato sobre datos de la Organización 1:
+| Condición | Políticas del motor | Verificación de membresía | Vía | Resultado esperado |
+|---|---|---|---|---|
+| **C0 · Línea base** | Deshabilitadas | Omitida | Interfaz y base de datos | Filas ajenas devueltas (CP-LB1, CP-LB2) |
+| **C1 · Arquitectura completa** | Activas | Activa | Interfaz | 0 datos ajenos; `403`/`404` según el contrato (CP-701) |
+| **C2 · Sin verificación de aplicación** | Activas | Sustituida por una versión que concede | Interfaz | 0 filas ajenas (CP-N102) |
+| **C3 · Acceso directo al motor** | Activas | No interviene | Base de datos | 0 filas ajenas (CP-702, CP-N101, CP-704.2) |
 
-- Lectura de clientes, de repuestos, de movimientos, de miembros, de talleres y de auditoría.
-- Escritura: crear, modificar y dar de baja en cada uno de esos recursos.
-- Con contexto declarado (`X-Org-Id` de la Organización 1) y sin él.
+**Cómo se establece C0.** Solo en el proyecto de validación desechable: se deshabilita la seguridad a nivel de fila en las 7 tablas de negocio y se sustituye la verificación de membresía, reproduciendo un sistema cuyo único control es el filtro de la aplicación **cuando ese filtro falla**. Tras C0 se reconstruye el esquema desde las migraciones antes de ejecutar C1, C2 y C3. C0 **nunca** se aplica en *staging* ni en producción.
 
-**Criterio**: ninguna operación devuelve datos de la Organización 1, y todas responden según §5 del [contrato](10-contrato-api.md) —`403` cuando se declara un contexto ajeno, `404` cuando se referencia un recurso ajeno desde un contexto propio.
+### 6.2 Vía 1 — a través de la interfaz de programación
 
-### 5.2 Vía 2 — por acceso directo a la base de datos
+Con las credenciales de la Cuenta C (sin membresía) y de la Cuenta B (miembro de otra organización), se intenta cada operación del contrato sobre datos de la Organización 1: lectura y escritura de clientes, repuestos, movimientos, miembros, talleres y auditoría, con contexto declarado (`X-Org-Id` de la Organización 1) y sin él.
 
-Verifica la **capa del motor**, y es la que demuestra la premisa del proyecto. Se establece una conexión con la identidad de la Cuenta B **sin pasar por la interfaz de programación**, y se consultan directamente las tablas de negocio de la Organización 1.
+**Criterio bajo C1**: ninguna operación devuelve datos de la Organización 1, y todas responden según §5 del [contrato](10-contrato-api.md) —`403` con contexto ajeno declarado, `404` con recurso ajeno desde contexto propio—.
 
-**Criterio**: las consultas se ejecutan sin error y devuelven **cero filas** de la organización ajena. Que no fallen es parte del resultado: RLS no rechaza la consulta, la filtra — y esa es exactamente la propiedad que se busca demostrar.
+### 6.3 Vía 2 — por acceso directo a la base de datos
 
-Debe cubrir **todas** las tablas de negocio: `mt_clients`, `mt_parts`, `mt_part_movements`, `mt_workshops`, `mt_memberships`, `mt_workshop_assignments` y `mt_audit_log`. Una tabla sin política activa es una fuga, y solo esta vía la detecta: por la interfaz quedaría oculta tras la verificación de la aplicación.
+Se establece una conexión con la identidad de la Cuenta B **sin pasar por la interfaz de programación**, y se consultan directamente las tablas de negocio de la Organización 1: `mt_clients`, `mt_parts`, `mt_part_movements`, `mt_workshops`, `mt_memberships`, `mt_workshop_assignments` y `mt_audit_log`.
 
-### 5.3 La prueba que justifica la redundancia — y que sostiene la inmutabilidad
+**Criterio bajo C3**: las consultas se ejecutan sin error y devuelven **cero filas** de la organización ajena. Que no fallen es parte del resultado: la política no rechaza la consulta, la filtra. Una tabla sin política activa es una fuga, y solo esta vía la detecta.
 
-RNF-102 exige demostrar que las dos capas son **independientes**, no que ambas existen. Se verifica omitiendo deliberadamente la verificación de membresía de la capa de aplicación y comprobando que el acceso cruzado sigue sin producirse.
+### 6.4 La prueba que sostiene la inmutabilidad — C2
 
-**Cómo se deshabilita.** No existe —ni debe existir— un interruptor en el código de producción que apague la comprobación: sería una vía de escalada esperando a que alguien la active por error. La capa se anula **en el banco de pruebas**, sustituyendo las funciones de verificación por versiones que conceden acceso sin comprobar nada; el resto del sistema queda intacto. La petición atraviesa entonces la capa de aplicación como si el solicitante fuera miembro, llega a la consulta, y no devuelve nada: el cliente de datos está atado a **su** credencial y las políticas se evalúan sobre su identidad real.
+RNF-102 exige demostrar que las dos capas son **independientes**, no que ambas existen. No existe —ni debe existir— un interruptor en el código de producción que apague la verificación: la capa se anula **en el banco de pruebas**, sustituyendo las funciones de verificación por versiones que conceden sin comprobar. La petición atraviesa entonces la aplicación como si el solicitante fuera miembro, llega a la consulta y no devuelve nada, porque el cliente de datos está atado a su credencial y las políticas se evalúan sobre su identidad real.
 
-Sin este caso, la defensa en profundidad de ADR-002 sería una afirmación de diseño; con él, es un hecho verificado — y es exactamente lo que el título llama **aislamiento inmutable**: una separación que la capa de aplicación no puede apagar ni degradar. Es el argumento que responde directamente a la evidencia de Dar et al. (2023) y a la serie de CVE citada en el estado del arte.
+Sin este caso, la defensa en profundidad de ADR-002 sería una afirmación de diseño; con él, y con la línea base que muestra qué ocurre sin las políticas, es un hecho verificado.
 
-### 5.4 Repetición: el resultado no puede depender de una ejecución
+### 6.5 Repetición
 
-Una sola ejecución en verde no distingue entre «el aislamiento se sostiene» y «esta vez se sostuvo». La confiabilidad del procedimiento se asegura repitiendo **el ciclo completo tres veces**, en momentos distintos y sobre entornos reconstruidos desde las migraciones (*test–retest*).
+El **ciclo completo C0 → C1 → C2 → C3** se repite **tres veces**, en momentos distintos y sobre entornos reconstruidos desde las migraciones (*test–retest*).
 
 | Condición | Por qué |
 |---|---|
-| **Tres ejecuciones independientes** | Un fallo intermitente —una condición de carrera en la creación del escenario, una política que dependa del orden— se manifiesta al repetir, no a la primera |
-| **Momentos distintos** | Ejecutarlas seguidas comparte el estado del entorno; separarlas es lo que hace independiente la repetición |
-| **Entorno reconstruido en cada ciclo** | Si el escenario se acumulara entre ejecuciones, la segunda no probaría lo mismo que la primera |
-| **Entorno dedicado** | No se recolecta sobre el equipo de desarrollo con procesos de fondo compitiendo por recursos, sino sobre un proyecto de base de datos dedicado y desechable |
+| **Tres ejecuciones independientes** | Un fallo intermitente se manifiesta al repetir, no a la primera |
+| **Momentos distintos** | Ejecutarlas seguidas comparte el estado del entorno |
+| **Entorno reconstruido en cada ciclo** | Si el escenario se acumulara, la segunda corrida no probaría lo mismo que la primera |
+| **Entorno dedicado** | Un proyecto de base de datos dedicado y desechable, no el equipo de desarrollo |
 
-El resultado que se reporta es el de las **tres** ejecuciones, no el de la mejor. Una discrepancia entre ellas es en sí misma un hallazgo y se declara como tal.
+Se reporta el resultado de las **tres** ejecuciones, no el de la mejor.
 
-### 5.5 Evidencia a conservar
+### 6.6 Evidencia a conservar
 
-Para que la validación sea reproducible por un tercero (objetivo 3), se conserva: el guion de construcción del escenario base, la salida de la ejecución de los casos CP-701, CP-702, CP-704.2, CP-N101 y CP-N102, y la versión del esquema —identificador de la última migración aplicada— contra la que se ejecutaron.
+Por ciclo: el guion de construcción del escenario, la salida de los casos CP-LB1, CP-LB2, CP-701, CP-702, CP-704.2, CP-N101 y CP-N102, y el identificador de la última migración aplicada.
 
-Esa evidencia la producen tres archivos de prueba, uno por vía de verificación: el de **integración** (CP-701 y el resto del flujo por la interfaz de programación), el de **acceso directo al motor** (CP-702, CP-N101 y CP-704.2) y el de **independencia de capas** (CP-N102). Separarlos no es organizativo: cada uno exige un montaje distinto —cliente HTTP, cliente PostgreSQL con identidad ajena y banco de pruebas con la verificación de membresía sustituida— y mezclarlos impediría ejecutar una sola condición experimental por vez (§15.2 del [anteproyecto](../anteproyecto/04-anteproyecto-integrado.md)).
+La evidencia la producen **cuatro archivos de prueba**, uno por montaje: **integración** (C1, cliente HTTP), **acceso directo al motor** (C3 y la vía base de datos de C0, cliente PostgreSQL con identidad ajena), **independencia de capas** (C2, verificación sustituida) y **línea base por la interfaz** (C0, políticas deshabilitadas y verificación sustituida). Separarlos permite ejecutar una sola condición por vez.
 
 ---
 
-## 6. Criterios de salida
+## 7. Criterios de salida
 
-### 6.1 Definición de terminado de una iteración
+### 7.1 Definición de terminado de una iteración
 
-Una iteración no se cierra mientras no se cumplan las cuatro condiciones ([08-plan-trabajo.md](08-plan-trabajo.md) §1):
+Una iteración no se cierra mientras no se cumplan las seis condiciones ([08-plan-trabajo.md](08-plan-trabajo.md) §1):
 
 1. Verificación de tipos sin errores.
 2. Todos los casos de esta matriz correspondientes a los requisitos de la iteración, en verde.
-3. Cada requisito abordado, trazado a su caso en §4.
-4. Documentación actualizada — incluida esta matriz, si la iteración incorporó requisitos.
+3. Cobertura de los servicios de dominio ≥ 80 %.
+4. Auditoría de dependencias sin vulnerabilidades críticas ni altas.
+5. Cada requisito abordado, trazado a su caso en §5 y con sus criterios *Dado–Cuando–Entonces* cumplidos.
+6. Documentación actualizada — incluida esta matriz, si la iteración incorporó requisitos.
 
-### 6.2 Cuando el entorno no está disponible
+### 7.2 Cuando el entorno no está disponible
 
-Los casos de N3 y N4 exigen credenciales de un entorno real. Cuando faltan, esos casos se **omiten**, no se dan por pasados.
+Los casos de N3 y N4 exigen credenciales de un entorno real. Cuando faltan, esos casos se **omiten**, no se dan por pasados. **Un caso omitido no cubre su requisito**, y un informe con casos omitidos en N3 o N4 **no** constituye evidencia de cumplimiento. Por eso la validación del objetivo 4 se ejecuta contra un entorno real antes de cada hito, no solo en el pipeline.
 
-La consecuencia debe declararse sin atenuantes: **un caso omitido no cubre su requisito**. Es la misma limitación que ADR-007 asume para las reglas alojadas en funciones del motor —no pueden verificarse sin un motor real—, y por eso la validación del objetivo 3 se ejecuta contra un entorno real antes de cada hito, no solo en la integración continua.
+### 7.3 Cierre del proyecto
 
-Un informe de ejecución que muestre casos omitidos en N3 o N4 **no** constituye evidencia de cumplimiento.
-
-### 6.3 Cierre del proyecto
-
-El criterio de cierre del proyecto (§6 del plan de trabajo) exige, sobre las pruebas: que todo requisito `Must` de alcance `Sí` tenga su caso en verde; que la suite de aislamiento —§5, ejecutada contra un entorno real— sea reproducible desde una base vacía con el guion conservado; y que la evaluación de usabilidad (§7) se haya ejecutado con al menos cinco participantes, con su informe de resultados y la lista de problemas detectados.
-
-La usabilidad se reporta **aunque no alcance sus umbrales**. Un resultado por debajo de 80 % de éxito o de 68 puntos SUS no invalida la tesis —cuya hipótesis es sobre el aislamiento, no sobre la interfaz—, pero constituye un hallazgo que debe declararse y discutirse, no ocultarse.
+El criterio de cierre ([plan de trabajo](08-plan-trabajo.md) §9) exige, sobre las pruebas: que todo requisito `Must` de alcance `Sí` tenga su caso en verde; que el ciclo C0–C3 de §6 se haya ejecutado tres veces contra el proyecto de validación con su evidencia conservada; y que los objetivos complementarios 5 y 6 se hayan **ejecutado o descartado** según su criterio de continuidad (§8.1, §9.1).
 
 ---
 
-## 7. Evaluación de usabilidad del cambio de contexto (objetivo específico 3)
+## 8. Evaluación de usabilidad del cambio de contexto (objetivo complementario 5)
 
-Complementa la verificación del aislamiento. Responde a una pregunta que las pruebas automatizadas no pueden responder: si el modelo jerárquico que la tesis propone resulta **comprensible para quien debe operarlo**. Una arquitectura correcta que el operador no sabe manejar no resuelve el problema planteado.
+Responde a lo que las pruebas automatizadas no pueden responder: si el modelo jerárquico resulta **operable para quien debe usarlo**, comparado con el cambio de cuenta que impone el software de un solo inquilino.
 
-### 7.1 Participantes
+### 8.1 Criterio de continuidad
+
+| Condición | Fecha | Si se cumple | Si no se cumple |
+|---|---|---|---|
+| Al menos **30 operadores** confirmados para las sesiones de I8 | 23 de noviembre de 2026 (H3) | Se ejecuta la evaluación completa, con contraste inferencial | El objetivo se **descarta**; si se realizan sesiones con los confirmados, se reportan como hallazgo exploratorio, con estadística descriptiva y sin inferencia |
+
+### 8.2 Participantes
 
 | Elemento | Definición |
 |---|---|
 | **Población** | Operadores de organizaciones de servicio de motocicletas en Bolivia que administran —o planean administrar— más de una organización y/o más de un taller |
-| **Muestra** | **De 5 a 8 participantes** |
-| **Tipo de muestreo** | No probabilístico **intencional**, por criterio: se busca el perfil que padece el problema, no una muestra representativa del sector |
-| **Justificación del tamaño** | Nielsen y Landauer (1993) modelan matemáticamente el hallazgo de problemas de usabilidad y muestran que la curva de detección se satura pronto: cinco participantes descubren la mayoría de los problemas de una interfaz, y cada participante adicional aporta cada vez menos. El objetivo es **detectar problemas**, no estimar un parámetro poblacional, de modo que aumentar la muestra no mejoraría la conclusión en proporción al esfuerzo |
-| **Criterio de exclusión** | Haber participado en el desarrollo o haber visto la aplicación antes de la sesión |
+| **Muestra** | **30 participantes**; se reclutan **36** para compensar abandonos |
+| **Muestreo** | No probabilístico **intencional**, por perfil |
+| **Justificación del tamaño** | Permite el contraste intrasujeto de tiempos entre condiciones con la aproximación normal de la media de las diferencias; los primeros cinco participantes bastan además para detectar la mayoría de los problemas de uso (Nielsen & Landauer, 1993) |
+| **Criterio de exclusión** | Haber participado en el desarrollo o conocer la aplicación antes de la sesión |
 
-### 7.2 Tareas
+### 8.3 Diseño y tareas
 
-Las tres tareas se eligen porque cada una ejercita una consecuencia distinta de la jerarquía de dos niveles. No se evalúa la interfaz en general.
+**Intrasujeto y contrabalanceado**: cada participante realiza las tres tareas en las dos condiciones; la mitad empieza por el selector y la otra mitad por el cambio de cuenta.
+
+| Condición | Descripción |
+|---|---|
+| **Selector de contexto** *(propuesta)* | Una sola cuenta con selectores de organización y taller activos |
+| **Cambio de cuenta** *(línea base)* | Una cuenta por local (§3.3); cambiar de local exige cerrar sesión e iniciarla con la cuenta de ese local |
 
 | # | Tarea | Qué pone a prueba |
 |---|---|---|
-| **T1** | Cambiar a otra organización y confirmar que los datos mostrados son los de esa organización | Que el usuario distinga el nivel **organización** y perciba el cambio de contexto (RNF-401) |
-| **T2** | Seleccionar un taller y registrar en él un repuesto | Que distinga el nivel **taller** y comprenda que el inventario es local |
-| **T3** | Localizar un cliente registrado en **otro** taller de la misma organización | Que perciba el beneficio central del modelo: el cliente pertenece a la organización, no al local (RF-502) |
+| **T1** | Cambiar a otra organización y confirmar que los datos mostrados son los de esa organización | El nivel **organización** y la percepción del cambio de contexto (RNF-401) |
+| **T2** | Situarse en un taller y registrar en él un repuesto | El nivel **taller** y que el inventario es local |
+| **T3** | Localizar un cliente registrado en **otro** taller de la misma organización | El beneficio central: el cliente pertenece a la organización, no al local (RF-502) |
 
-### 7.3 Instrumentos y métricas
+### 8.4 Instrumentos y métricas
 
 | Instrumento | Métrica | Unidad | Umbral |
 |---|---|---|---|
-| Observación de tarea guiada | Tasa de éxito por tarea | Porcentaje | **≥ 80 %** |
-| Cronometraje de la sesión | Tiempo por tarea | Segundos | Sin umbral: se reporta para comparar entre tareas |
-| Registro de incidencias | Errores por tarea | Cantidad | Sin umbral: alimenta la lista de problemas detectados |
-| Cuestionario SUS (Brooke, 1996) | Puntuación de satisfacción | 0 a 100 | **≥ 68**, promedio de la industria según el baremo de Bangor et al. (2008) |
+| Observación de tarea guiada | Tasa de éxito por tarea y condición | Porcentaje | **≥ 80 %** con el selector |
+| Cronometraje | Tiempo por tarea y condición | Segundos | Contraste entre condiciones (§8.7) |
+| Registro de incidencias | Errores por tarea y condición | Cantidad | Alimenta la lista de problemas |
+| Cuestionario SUS (Brooke, 1996) | Puntuación por condición | 0 a 100 | **≥ 68** con el selector, según el baremo de Bangor et al. (2008) |
+| Ítems del SUS | Consistencia interna | α de Cronbach | **> 0,8** |
 
-El tiempo y los errores **no llevan umbral a propósito**: con una muestra de cinco a ocho participantes no procede afirmar significancia estadística sobre ellos. Se reportan como evidencia descriptiva y como insumo de la lista de problemas.
+### 8.5 Consideraciones éticas
 
-### 7.4 Procedimiento
-
-1. Explicación del propósito y firma del **consentimiento informado**.
-2. Sesión individual sobre la aplicación desplegada, con datos de prueba ya cargados —el participante no crea el escenario.
-3. Ejecución de T1, T2 y T3 sin asistencia; se interviene solo si el participante se detiene por completo, y esa intervención se registra como fallo de la tarea.
-4. Cuestionario SUS al terminar.
-5. Comentario abierto sobre qué resultó confuso.
-
-### 7.5 Consideraciones éticas
-
-A diferencia del resto de la validación, aquí **sí participan personas**, lo que impone cuatro compromisos —los que declara el §18.3 del [anteproyecto](../anteproyecto/04-anteproyecto-integrado.md), que es su fuente—:
+Aquí **sí participan personas**, lo que impone los cuatro compromisos que declara el [anteproyecto](../anteproyecto/04-anteproyecto-integrado.md) §19.3, que es su fuente:
 
 - **Consentimiento informado** firmado antes de la sesión, con explicación del propósito, del uso de los datos y del derecho a retirarse en cualquier momento sin dar motivo.
-- **Anonimización**: los resultados se reportan de forma agregada y los participantes se identifican como P1…P8.
+- **Anonimización**: resultados agregados y participantes identificados como P01…P30.
 - **Confidencialidad de sus organizaciones**, que no se nombran ni se describen de modo que permita reconocerlas.
-- **Se evalúa el sistema, no a la persona.** Se declara explícitamente al participante al inicio de la sesión, porque condiciona su disposición a intentar sin miedo a equivocarse.
+- **Se evalúa el sistema, no a la persona**, declarado al inicio de la sesión.
 
 Ninguna sesión se graba en vídeo ni se registra dato alguno que permita identificar al participante.
 
-### 7.6 Evidencia a conservar
+### 8.6 Procedimiento
 
-Guion de tareas, formularios de consentimiento firmados, planilla de resultados por participante (éxito, tiempo, errores), respuestas SUS individuales con su puntuación calculada, y la lista de problemas detectados ordenada por frecuencia.
+1. Explicación del propósito y firma del consentimiento informado.
+2. Sesión individual —presencial o remota— sobre el entorno de producción con el escenario precargado.
+3. T1, T2 y T3 en la primera condición asignada, sin asistencia; una intervención del observador se registra como **fallo** de la tarea.
+4. Cuestionario SUS de esa condición.
+5. T1, T2 y T3 en la segunda condición y su cuestionario SUS.
+6. Comentario abierto sobre qué resultó confuso.
+
+### 8.7 Análisis
+
+| Análisis | Procedimiento |
+|---|---|
+| **Descriptivo** | Porcentaje de éxito por tarea y condición; media, desviación estándar, mediana y percentil 90 de los tiempos; media de SUS por condición |
+| **Consistencia interna** | α de Cronbach de los diez ítems del SUS, por condición |
+| **Contraste de tiempos** | *t* de Student pareada entre condiciones, α = 0,05; si la prueba de Shapiro-Wilk rechaza la normalidad de las diferencias, prueba de rangos con signo de Wilcoxon |
+| **Contraste de satisfacción** | *t* de Student de una muestra de la puntuación SUS con el selector contra 68, α = 0,05 |
+| **Herramientas** | Hoja de cálculo para la planilla; R con las funciones base `t.test`, `shapiro.test` y `wilcox.test` |
+
+Un resultado por debajo de los umbrales **no invalida la tesis** —cuya hipótesis es sobre el aislamiento—, pero es un hallazgo que se declara y se discute.
+
+### 8.8 Evidencia a conservar
+
+Guion de tareas con el orden de condiciones asignado a cada participante, formularios de consentimiento, planilla por participante y condición (éxito, tiempo, errores), respuestas SUS individuales con su puntuación, salida de los contrastes en R y lista de problemas detectados ordenada por frecuencia.
 
 ---
 
-## 8. Limitaciones declaradas
+## 9. Medición del costo operativo (objetivo complementario 6)
 
-Se consignan para que el alcance de la evidencia no se sobreentienda mayor de lo que es:
+### 9.1 Criterio de continuidad
+
+| Condición | Fecha | Si no se cumple |
+|---|---|---|
+| Los paneles de Supabase y Vercel exponen invocaciones, transferencia de datos y tamaño de base con granularidad diaria | 7 de diciembre de 2026 (H4) | El objetivo se descarta y el costo queda tratado solo en el análisis de viabilidad económica del [plan de trabajo](08-plan-trabajo.md) §8 |
+
+### 9.2 Procedimiento
+
+1. Cada día de I8 se registran, por entorno —*staging*, producción y validación—, las invocaciones de funciones, la transferencia de datos y el tamaño de la base.
+2. Las peticiones a la interfaz se registran con el identificador de la organización activa, sin datos personales, y el consumo de cada día se **prorratea entre organizaciones** según su número de peticiones.
+3. El consumo se valoriza con las tarifas publicadas de cada proveedor vigentes en la fecha de medición; dentro de la capa gratuita, el costo marginal es cero y se reporta además el **porcentaje del límite gratuito** consumido.
+4. La **línea base** es la tarifa mensual publicada de un servidor dedicado de referencia capaz de ejecutar la interfaz y la base de datos, tomada en la misma fecha.
+
+### 9.3 Casos y evidencia
+
+| Caso | Criterio |
+|---|---|
+| CP-O6.1 | 14 de 14 lecturas diarias registradas, por entorno |
+| CP-O6.2 | Costo mensual estimado por organización calculado para *staging* y producción, junto al porcentaje del límite gratuito consumido |
+| CP-O6.3 | Costo mensual del servidor dedicado de referencia registrado con su fuente y fecha |
+
+Evidencia: planilla de lecturas diarias, capturas de los paneles de consumo con su fecha y la tabla de tarifas usada.
+
+---
+
+## 10. Matriz preliminar de validación
+
+El criterio se escribe como comportamiento observable; la métrica lleva siempre umbral numérico. El estado se actualiza al ejecutar.
+
+| Módulo | Criterio de aceptación | Estrategia de prueba | Métrica / KPI | Estado |
+|---|---|---|---|---|
+| Identidad y registro | Dado un correo nuevo, cuando se registra, entonces existen cuenta, organización, taller y membresía `owner`, o ninguno | Integración (N3) | Atomicidad en el 100 % de los fallos simulados | Pendiente |
+| Contexto activo | Dada una petición sin `X-Org-Id`, cuando exige contexto, entonces responde `400` | Contrato (N2) | 100 % de las rutas con contexto obligatorio | Pendiente |
+| Organizaciones y miembros | Dado un `Mechanic`, cuando invita, entonces recibe `403` | Integración (N3) | 100 % de las reglas de rol | Pendiente |
+| Clientes | Dado un cliente creado con el taller A activo, cuando se opera con el taller B, entonces se lista | Integración (N3) | 100 % de entidades de nivel organización visibles entre talleres | Pendiente |
+| Inventario | Dado un movimiento que dejaría existencia negativa, cuando se registra, entonces se rechaza sin alterar el stock | Unitaria e integración (N1, N3) | Cobertura ≥ 80 % del servicio de inventario | Pendiente |
+| Aislamiento | Dada la identidad de otra cuenta, cuando consulta las 7 tablas bajo C1–C3, entonces obtiene cero filas ajenas, frente a filas ajenas bajo C0 | Aislamiento (N4) | 0 filas ajenas en 3 corridas | Pendiente |
+| Cambio de contexto | Dado un operador con dos organizaciones, cuando cambia de organización, entonces el taller activo se limpia y los datos corresponden a la nueva | Componente y extremo a extremo (N6, N7) | T1–T3 en verde tras cada publicación | Pendiente |
+| Pipeline | Dada una integración al ramal principal, cuando falla una prueba, entonces no se publica | CI | 100 % de integraciones verificadas | Pendiente |
+
+---
+
+## 11. Limitaciones declaradas
 
 | Limitación | Alcance real de la evidencia |
 |---|---|
-| Los casos N3 y N4 se ejecutan sobre un entorno de desarrollo, no productivo | Demuestran la corrección de las políticas y del contrato, no el comportamiento bajo carga ni ante fallos de infraestructura |
-| El canal lateral temporal de RLS no se prueba | El aislamiento verificado es el de **contenido** —qué filas se devuelven—, no el de metadatos inferibles por tiempo de ejecución (§3.3 del marco teórico) |
-| Las reglas alojadas en funciones del motor solo se prueban contra un motor real | Su cobertura depende del entorno; §6.2 fija cómo se reporta |
-| RNF-402 y RNF-403 se verifican por inspección | Tienen criterio observable, no automatizado |
-| La evaluación de usabilidad usa de 5 a 8 participantes | Dimensionada para **detectar problemas** (Nielsen y Landauer, 1993), no para estimar parámetros poblacionales: no procede afirmar significancia estadística sobre sus tiempos ni sobre la media SUS |
-| La usabilidad evaluada es la del **cambio de contexto** | No se concluye nada sobre la usabilidad de las demás pantallas, que no se sometieron a prueba con usuarios |
-| El escenario base usa tres cuentas y tres organizaciones | Suficiente para las tres preguntas del aislamiento (§2.1), pero no explora el comportamiento con un número elevado de inquilinos |
+| N4 se ejecuta sobre un proyecto de capa gratuita, no productivo | Demuestra la corrección de las políticas y del contrato, no el comportamiento bajo carga |
+| La línea base C0 se reproduce deshabilitando políticas en el propio sistema | Emula el aislamiento solo en la aplicación cuando su control falla; no mide un producto comercial concreto |
+| El canal lateral temporal no se prueba | El aislamiento verificado es el de **contenido**, no el de metadatos inferibles por tiempo de ejecución |
+| Las reglas alojadas en funciones del motor solo se prueban contra un motor real | Su cobertura depende del entorno; §7.2 fija cómo se reporta |
+| La evaluación de usabilidad usa 30 operadores del servicio de motocicletas en Bolivia | Sostiene el contraste entre condiciones, no la representatividad del sector |
+| La usabilidad evaluada es la del **cambio de contexto** | No se concluye nada sobre las demás pantallas |
+| El costo se estima con tres organizaciones sintéticas durante 14 días | Es un orden de magnitud por organización, no una proyección a escala |

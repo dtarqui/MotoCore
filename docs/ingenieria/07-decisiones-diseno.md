@@ -47,7 +47,7 @@ Registro de las decisiones estructurales del proyecto, con las alternativas eval
 
 Esta decisión establece **que** hay dos capas, no **cómo** participa la segunda en el camino de la interfaz: eso depende de la identidad con que el servidor consulta la base de datos, y se resuelve en ADR-008.
 
-**Relación con los objetivos.** La comparación fundamentada frente a las alternativas de base por inquilino y esquema por inquilino corresponde al objetivo específico 1, y se desarrolla en el estado del arte.
+**Relación con los objetivos.** La comparación fundamentada frente a las alternativas de base por inquilino y esquema por inquilino corresponde al objetivo específico 1, y se desarrolla en el estado del arte. La alternativa 1 —aislamiento únicamente en la capa de aplicación— es además la **línea base** contra la que el objetivo 4 contrasta esta decisión (condición C0 del [Plan de pruebas](11-plan-pruebas.md) §6).
 
 ---
 
@@ -60,9 +60,10 @@ Esta decisión establece **que** hay dos capas, no **cómo** participa la segund
 **Alternativas consideradas**
 1. **Next.js** (rutas de API): unifica interfaz de usuario y servidor en un solo proyecto, a costa de acoplar ambas capas a un mismo marco y su ciclo de versiones.
 2. **Express**: el más difundido del ecosistema, con abundante material de referencia, pero con soporte de tipos añadido a posteriori y menor afinidad con entornos serverless.
-3. **Hono**: diseñado desde su origen para TypeScript y para entornos serverless, con adaptadores oficiales para la plataforma de despliegue seleccionada.
+3. **NestJS**: arquitectura modular con inyección de dependencias y tipado estricto, a costa de un contenedor de dependencias que se inicializa en cada arranque en frío de una función efímera.
+4. **Hono**: diseñado desde su origen para TypeScript y para entornos serverless, con adaptadores oficiales para la plataforma de despliegue seleccionada.
 
-**Decisión**: opción 3.
+**Decisión**: opción 4.
 
 **Justificación.** Ofrece tipado de extremo a extremo sin capas de compatibilidad, y mantiene la interfaz de usuario desacoplada del marco del servidor, de modo que cada una puede evolucionar por separado.
 
@@ -190,6 +191,32 @@ El proveedor de datos ofrece dos credenciales. La **clave de servicio** salta la
 - Un rechazo de una política se manifiesta como error del motor, no como error de negocio. Como el control de la aplicación se evalúa **antes**, en operación normal es este el que responde con su código; que responda la política indica una discrepancia entre ambas capas, y por eso se propaga como fallo del servidor y no se traduce a un código de negocio.
 - El cliente del servidor puede reutilizarse entre peticiones; el de la petición, no — depende de la credencial de quien llama. Se construye **una sola vez por petición**, en el middleware de autenticación, y viaja en el contexto: crearlo por consulta multiplicaría ese costo en un entorno de funciones efímeras. El cliente no abre conexiones persistentes, de modo que la sobrecarga es la de instanciar un objeto, no la de un arranque de conexión.
 - La independencia de las dos capas pasa a ser **verificable**: el caso CP-N102 anula el control de la aplicación en el banco de pruebas y comprueba que las políticas siguen filtrando. Sin esta decisión, ese caso no podría existir.
+
+---
+
+## ADR-009 — Estilo arquitectónico: monolito modular desplegado como funciones serverless
+
+**Estado**: aceptada.
+
+**Contexto.** El sistema lo construye un solo desarrollador en dieciséis semanas, con una carga esperada propia de la gestión interna de talleres —muchas peticiones cortas que esperan red y base de datos, sin picos masivos— y con dos requisitos que condicionan el estilo: ausencia de servidores que operar (RNF-301) y costo proporcional al uso (RNF-302). Los criterios de elección son la carga estimada, la mantenibilidad y la facilidad de prueba, y el equilibrio entre tiempo de entrega y escalabilidad.
+
+**Alternativas consideradas**
+
+| Alternativa | Ventajas | Inconvenientes |
+|---|---|---|
+| **Monolito modular en servidor dedicado** | Un solo artefacto, baja complejidad operativa, fácil de probar | Costo fijo mensual y servidor que operar: incumple RNF-301 y RNF-302 |
+| **Microservicios** | Escalado y despliegue independientes por servicio | Orquestación, observabilidad distribuida y consistencia entre servicios que un desarrollador único no puede sostener (Newman, 2021, citado en el marco teórico §3.3) |
+| **Serverless con una función por endpoint** | Escalado automático y pago por uso | Fragmenta la lógica compartida —autenticación, contexto activo, verificación de membresía— en tantas unidades como rutas, y multiplica los arranques en frío |
+| **Monolito modular desplegado como funciones serverless** | Una sola aplicación con módulos por dominio y capas internas, publicada como funciones con escalado a cero | La aplicación completa se carga en cada arranque en frío |
+
+**Decisión**: la cuarta. Una aplicación Hono organizada en **módulos de dominio** —identidad, organizaciones, talleres, miembros, clientes, inventario y auditoría— y en **capas** —controlador, servicio y repositorio—, con los middlewares de autenticación y de contexto activo compartidos, desplegada como funciones en Vercel.
+
+**Justificación.** Conserva la baja complejidad operativa y la facilidad de prueba del monolito, recomendables para un proyecto individual de alcance medio, y obtiene del modelo serverless el costo por uso que exige el mercado objetivo. La separación en capas aísla las reglas de negocio del marco y del proveedor de datos, lo que mitiga además la dependencia del proveedor (riesgo R3).
+
+**Consecuencias**
+- La aplicación completa se carga en cada arranque en frío; se asume por tratarse de uso interno sin exigencia de latencia estricta (RNF-501 fuera de alcance).
+- Los límites entre módulos son de código, no de despliegue: una dependencia indebida entre módulos no la impide la infraestructura, sino la revisión y las pruebas.
+- Si en trabajo posterior un módulo exigiera escalado independiente, la separación por módulos permite extraerlo sin rehacer los demás; esa extracción sería un ADR nuevo.
 
 ---
 

@@ -58,6 +58,20 @@ Capacidades relevadas en las soluciones disponibles, y su relevancia para el mer
 
 **Lectura del relevamiento.** Las capacidades operativas básicas están cubiertas por la oferta existente; lo que no se encuentra resuelto es la **estructura organizativa** ni el aislamiento verificable entre organizaciones. La elaboración de esa carencia como vacío que justifica el proyecto corresponde al estado del arte ([§2.3](../anteproyecto/02-antecedentes-y-estado-del-arte.md)) y aquí no se repite.
 
+## Análisis comparativo
+
+La propuesta se compara con las dos alternativas reales a las que puede recurrir un operador: el software como servicio especializado que se relevó arriba, y un sistema de gestión empresarial de código abierto y propósito general. La segunda columna se caracteriza por **categoría**, no por un producto concreto: ninguno de esos sistemas entra en el recuento, porque no es una plataforma del mismo objetivo.
+
+| Criterio | SaaS de gestión de talleres relevados | Sistema de gestión empresarial de código abierto y propósito general | **Propuesta** |
+|---|---|---|---|
+| **Estructura multiorganización** | Un taller por cuenta | Multiempresa genérica, sin alcance por nivel para el taller | Varias organizaciones por cuenta y varios talleres por organización, con alcance explícito por entidad |
+| **Aislamiento entre organizaciones** | En el código de la aplicación, no documentado | Configurable en la aplicación | En el motor **y** en la aplicación, verificado frente a una línea base |
+| **Personalización al rubro** | Alta, en estructuras fijas | Baja: requiere adaptación y esfuerzo de configuración | Alta en el corte vertical |
+| **Costo de despliegue** | Suscripción recurrente por cuenta o local | Servidor y mantenimiento propios | Serverless con escalado a cero |
+| **Integración** | Cerrada o acotada | Modular y heterogénea | Interfaz REST con contrato publicado |
+
+**Innovar aquí significa integrar bien, no inventar desde cero**: el aporte se juzga por la calidad con que se integran el aislamiento en dos capas, la jerarquía de dos niveles y el despliegue sin costo fijo.
+
 ## Dos capacidades decisivas para Bolivia
 
 El relevamiento destaca dos capacidades determinantes en el mercado boliviano: el canal de comunicación (WhatsApp) y el cumplimiento fiscal (factura electrónica del SIN).

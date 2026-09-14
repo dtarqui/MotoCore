@@ -77,15 +77,27 @@ Los errores se devuelven en un formato uniforme y normalizado, con códigos esta
 
 ## Verificación del aislamiento
 
-El cumplimiento del aislamiento se comprueba mediante pruebas automatizadas que operan por dos vías independientes (objetivo específico 3):
+El cumplimiento del aislamiento se comprueba mediante pruebas automatizadas que operan por dos vías independientes y se contrastan con una línea base (objetivo específico 4):
 
 1. **A través de la interfaz de programación**: una cuenta sin membresía en una organización recibe error de autorización en cualquier operación sobre sus datos.
 2. **Mediante acceso directo a la base de datos**, prescindiendo de la capa de aplicación: las consultas ejecutadas con la identidad de otra cuenta no devuelven registros ajenos.
 
 La segunda vía es la que demuestra que el aislamiento se sostiene cuando se prescinde por completo de la interfaz — es decir, que es **inmutable**: ninguna decisión tomada en la capa de aplicación puede apagarlo. A ellas se suma una tercera comprobación, que es la que verifica la **independencia** de las dos capas: anular el control de membresía de la aplicación —en el banco de pruebas, nunca con un interruptor en producción— y comprobar que las políticas siguen filtrando (RNF-102, caso CP-N102).
 
-El diseño de las tres —escenario, tablas cubiertas y evidencia a conservar— está en el [Plan de pruebas](11-plan-pruebas.md) §5.
+Las tres se contrastan con la **línea base**: el mismo escenario con las políticas deshabilitadas y el control de aplicación omitido —solo en el proyecto de validación desechable—, que debe mostrar la fuga que las otras condiciones impiden.
+
+El diseño completo —condiciones C0 a C3, escenario, tablas cubiertas y evidencia a conservar— está en el [Plan de pruebas](11-plan-pruebas.md) §6.
+
+## Transporte y superficie de exposición
+
+- **Transporte**: todo el tráfico entre cliente web, interfaz de programación, proveedor de identidad y base de datos viaja sobre TLS. Los datos en reposo los cifra el proveedor de datos.
+- **Orígenes permitidos**: la interfaz solo acepta peticiones de navegador desde los orígenes del cliente web en *staging* y producción.
+- **Superficie pública**: el registro de cuenta y la comprobación de disponibilidad. Todo lo demás exige credencial.
+- **Superficie interna**: la búsqueda de cuentas por correo y las funciones atómicas del motor solo son invocables por el servidor.
+- **Retención**: el registro de auditoría se conserva mientras exista la organización.
+
+La especificación verificable de estos puntos está en [Requisitos](02-requisitos.md) §5.
 
 ## Fuera del alcance
 
-Se identifican como líneas de refuerzo posterior: autenticación de doble factor, políticas formales de rotación de credenciales y auditoría extendida a la totalidad de las entidades de negocio. Esta última exclusión es la misma que registra el alcance del proyecto ([anteproyecto/01-definicion-y-alcance.md](../anteproyecto/01-definicion-y-alcance.md) §1.8.3): se audita el conjunto acotado de seis acciones críticas que enumera RF-703, no toda operación del sistema.
+Se identifican como líneas de refuerzo posterior: autenticación de doble factor, políticas formales de rotación de credenciales, un **límite de tasa propio sobre el registro** —que en funciones efímeras exige un almacén de estado compartido que el proyecto no incorpora— y auditoría extendida a la totalidad de las entidades de negocio. Esta última exclusión es la misma que registra el alcance del proyecto ([anteproyecto/01-definicion-y-alcance.md](../anteproyecto/01-definicion-y-alcance.md) §1.8.3): se audita el conjunto acotado de seis acciones críticas que enumera RF-703, no toda operación del sistema.

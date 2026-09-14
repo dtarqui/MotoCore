@@ -143,7 +143,7 @@ El nivel de cada entidad determina el ámbito de sus claves únicas — es la co
 
 ## Políticas de aislamiento (RLS)
 
-**Censo de tablas de negocio.** Son **siete**, y todas activan Row Level Security: `mt_workshops`, `mt_memberships`, `mt_workshop_assignments`, `mt_clients`, `mt_parts`, `mt_part_movements` y `mt_audit_log`. Es el conjunto sobre el que se mide la cobertura de políticas (RNF-101) y el que recorre la verificación por acceso directo ([Plan de pruebas](11-plan-pruebas.md) §5.2).
+**Censo de tablas de negocio.** Son **siete**, y todas activan Row Level Security: `mt_workshops`, `mt_memberships`, `mt_workshop_assignments`, `mt_clients`, `mt_parts`, `mt_part_movements` y `mt_audit_log`. Es el conjunto sobre el que se mide la cobertura de políticas (RNF-101) y el que recorre la verificación por acceso directo ([Plan de pruebas](11-plan-pruebas.md) §6.3).
 
 Quedan **fuera del censo** las dos tablas que no son de negocio, cada una por un motivo distinto:
 
