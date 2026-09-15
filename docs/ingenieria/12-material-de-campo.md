@@ -18,7 +18,7 @@ Se prepara por escrito **antes** de I8 porque un instrumento improvisado en la s
 
 | Requisito | Detalle |
 |---|---|
-| **Escenario cargado** | Dos organizaciones con dos talleres cada una, clientes e inventario precargados ([Plan de pruebas](11-plan-pruebas.md) §3.2), y el escenario de línea base con una cuenta por local (§3.3) |
+| **Escenario cargado** | Dos organizaciones con dos talleres cada una, clientes e inventario precargados ([Plan de pruebas](11-plan-pruebas.md) §3.2), y el escenario de línea base con una cuenta por local (§3.3 del mismo documento) |
 | **Credenciales** | Preparadas y probadas para las dos condiciones, con la sesión cerrada al iniciar |
 | **Cronómetro** | Uno por tarea; se detiene al declarar el participante que terminó |
 | **Duración prevista** | 40 minutos por participante, incluidas las dos condiciones |

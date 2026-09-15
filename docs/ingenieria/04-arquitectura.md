@@ -79,7 +79,7 @@ flowchart TD
 
 | Capa | Contenido | Responsabilidad |
 |---|---|---|
-| **Presentación** (cliente web) | SPA en React con TypeScript; enrutamiento; proveedor del contexto activo como componente contenedor; cliente HTTP que adjunta las cabeceras de contexto; manifiesto y *service worker* | Presentación, autenticación contra el proveedor de identidad y conservación del contexto activo |
+| **Presentación** (cliente web) | SPA en React con TypeScript; enrutamiento; proveedor del contexto activo como componente contenedor; cliente HTTP que adjunta las cabeceras de contexto; sincronización y caché del estado de servidor con **TanStack Query**, con el contexto activo en la clave de consulta (ADR-010); manifiesto y *service worker* | Presentación, autenticación contra el proveedor de identidad, conservación del contexto activo y vigencia de los datos que muestra |
 | **Negocio** (interfaz de programación) | Middlewares de autenticación y de contexto; controladores, servicios y repositorios por módulo; esquemas Zod como DTO de entrada; manejador de errores | Validación de la entrada, verificación de membresía y rol, reglas de negocio y el conjunto acotado de operaciones privilegiadas (ADR-007, ADR-008) |
 | **Datos e infraestructura** | PostgreSQL con políticas de seguridad a nivel de fila; funciones de verificación de membresía; funciones atómicas; migraciones versionadas; Supabase Auth | Persistencia, integridad referencial, transacciones y aplicación de las políticas de aislamiento |
 
@@ -91,6 +91,7 @@ flowchart TD
 | **Repository y DTO** | Los repositorios abstraen el acceso a datos; los esquemas Zod son los DTO de entrada, y de ellos se derivan los tipos |
 | **Arquitectura limpia (transversal)** | Las reglas de dominio no dependen de Hono ni de Supabase; eso mitiga la dependencia del proveedor (riesgo R3) |
 | **Container / Presenter** | En el cliente, el contexto activo vive en un componente contenedor y las vistas lo reciben |
+| **Caché con clave de contexto** | El identificador de la organización activa —y el del taller, en datos de nivel taller— forma parte de la clave de consulta, de modo que un cambio de contexto no puede servirse desde la caché anterior (ADR-010) |
 | **CQRS** | **No se aplica**: el rendimiento no exige separar lectura y escritura (RNF-501 fuera de alcance) |
 
 ## 7. Integración mediante APIs
@@ -157,6 +158,7 @@ La columna de **alternativas** es obligatoria: sin ella no hay justificación, s
 | Datos e identidad gestionados | Firebase · PostgreSQL autogestionado con identidad propia · Supabase | **Supabase** | Identidad integrada y evaluable en las políticas; Firebase es documental y no ofrece seguridad a nivel de fila (ADR-004) |
 | Despliegue | Servidor dedicado · AWS Lambda · Vercel | **Vercel** | Plataforma gestionada con escalado a cero y publicación desde el repositorio; Lambda exige configurar pasarela y permisos |
 | Cliente web | Angular · Vue.js · Next.js · React | **React (SPA)** | La aplicación es interna y autenticada: el renderizado en servidor no aporta; ecosistema amplio y TypeScript compartido |
+| Estado de servidor en el cliente: sincronización y caché | Estado propio de React con recarga manual · Redux Toolkit Query · SWR · TanStack Query | **TanStack Query** | La clave de consulta incorpora la organización y el taller activos, de modo que ningún cambio de contexto puede servirse desde la caché anterior; no impone un contenedor de estado global (ADR-010) |
 | Pruebas unitarias y de integración | Jest · Mocha · Vitest | **Vitest** | Mismo ecosistema TypeScript y ESM, sin transpilación adicional |
 | Pruebas extremo a extremo | Cypress · Selenium · Playwright | **Playwright** | Varios motores de navegador y anchos de pantalla en un solo ejecutor, sin interfaz gráfica en el pipeline |
 | Calidad de código | TSLint (obsoleto) · Biome · ESLint con Prettier | **ESLint + Prettier en *pre-commit*** | Estándar del ecosistema TypeScript; la calidad se automatiza antes de integrar |

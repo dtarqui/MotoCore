@@ -218,6 +218,31 @@ El proveedor de datos ofrece dos credenciales. La **clave de servicio** salta la
 - Los límites entre módulos son de código, no de despliegue: una dependencia indebida entre módulos no la impide la infraestructura, sino la revisión y las pruebas.
 - Si en trabajo posterior un módulo exigiera escalado independiente, la separación por módulos permite extraerlo sin rehacer los demás; esa extracción sería un ADR nuevo.
 
+## ADR-010 — Sincronización y caché del estado de servidor en el cliente
+
+**Estado**: aceptada.
+
+**Contexto.** Las vistas del cliente web muestran datos que viven en el servidor —clientes, inventario, miembros, talleres—, y la validez de todos ellos depende del **contexto activo**: al cambiar de organización o de taller, lo que se obtuvo para el contexto anterior deja de ser válido por completo. Sin un mecanismo declarado, cada vista decide por su cuenta cuándo volver a pedir los datos, con dos consecuencias. La primera es de percepción, y es seria: una fila de otra organización mostrada desde una caché obsoleta **es indistinguible de una fuga de aislamiento** para quien la ve, aunque el motor nunca la haya devuelto. La segunda es de medición: la evaluación de usabilidad cronometra el cambio de contexto (RNF-401, objetivo complementario 5), de modo que obligar al operador a recargar a mano contaminaría el tiempo medido.
+
+**Alternativas consideradas**
+
+| Alternativa | Ventajas | Inconvenientes |
+|---|---|---|
+| **Estado propio de React con recarga manual** | Ninguna dependencia nueva | Cada vista reimplementa cuándo pedir, cuándo reintentar y cuándo descartar; la invalidación al cambiar de contexto queda a criterio de cada pantalla, que es justo donde no debe quedar |
+| **Redux Toolkit Query** | Caché y sincronización resueltas | Arrastra un contenedor de estado global que el sistema no necesita: el único estado verdaderamente compartido es el contexto activo, que ya vive en un componente contenedor |
+| **SWR** | Ligera, de API mínima | Menos control sobre la invalidación explícita por clave, que es precisamente la operación que exige el cambio de contexto |
+| **TanStack Query** | Caché por **clave de consulta**, invalidación explícita, reintento y estados de carga uniformes; tipada en TypeScript | Una dependencia más en el cliente |
+
+**Decisión**: la cuarta. **TanStack Query** para el estado de servidor, con una regla de diseño que la acompaña: **el identificador de la organización activa —y el del taller, en los datos de nivel taller— forma parte de la clave de consulta**, y el cambio de contexto invalida las consultas del contexto anterior.
+
+**Justificación.** Al incorporar el contexto a la clave, dos organizaciones producen claves distintas y **ninguna respuesta puede servirse desde la caché de otra organización**: el mecanismo que evita el error de percepción es estructural, no una comprobación que cada pantalla deba recordar. El contexto activo sigue viviendo en su componente contenedor (arquitectura §6), sin contenedor de estado global. No altera el servidor ni el contrato: la interfaz de programación sigue recibiendo `X-Org-Id` y `X-Workshop-Id` en cada petición (ADR-005).
+
+**Consecuencias**
+- La caché es **en memoria y no se persiste** en el dispositivo: cerrar la sesión o recargar la aplicación la vacía, y no queda información de una organización en el equipo del operador.
+- Ninguna consulta de datos de negocio puede escribirse sin el contexto en su clave; es una regla revisable en las pruebas de componente, no una convención tácita (CP-N401.2).
+- La caché **no forma parte del aislamiento** y no se le atribuye ningún mérito en él: vive en la capa de presentación, mientras la frontera sigue estando en el motor y en la verificación de membresía (ADR-002). Una caché mal invalidada produce un error visible, nunca una lectura de datos ajenos.
+- Añade una dependencia al cliente, sujeta a la auditoría de dependencias del pipeline (RNF-208).
+
 ---
 
 ## Cuestiones registradas sin ADR propio

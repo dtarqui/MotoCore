@@ -32,9 +32,9 @@ flowchart TD
 | Efecto observable | Evidencia empírica |
 |---|---|
 | El historial del cliente queda fragmentado entre talleres de una misma organización | Relevamiento de 10 plataformas: la gestión de varias organizaciones desde una cuenta está **ausente** en la oferta local ([Análisis del mercado](../ingenieria/09-analisis-mercado.md)) |
-| Un solo error de consulta expone datos de una organización a otra | Fallos recurrentes documentados en la aplicación de políticas de seguridad de fila y fuga de información por tiempo de ejecución de la consulta (§2.2) |
-| El operador que crece lleva cada local como una cuenta independiente o recurre a hojas de cálculo | Caracterización del sector (§2.1.1) |
-| El costo de entrada excluye a buena parte del sector | Empleo informal del 86,8 % de la población ocupada y presupuesto de tecnología reducido (§2.1.1) |
+| Un solo error de consulta expone datos de una organización a otra | Fallos recurrentes documentados en la aplicación de políticas de seguridad de fila y fuga de información por tiempo de ejecución de la consulta (capítulo 2 §2.2) |
+| El operador que crece lleva cada local como una cuenta independiente o recurre a hojas de cálculo | Caracterización del sector (capítulo 2 §2.1.1) |
+| El costo de entrada excluye a buena parte del sector | Empleo informal del 86,8 % de la población ocupada y presupuesto de tecnología reducido (capítulo 2 §2.1.1) |
 
 ### Problema central
 
@@ -51,7 +51,7 @@ Los operadores que gestionan **varias organizaciones y talleres de servicio de m
 
 ## 1.3 Delimitación del problema
 
-> **Por qué el título dice «mantenimiento mecánico» y la delimitación contextual dice «motocicletas».** El título declara el **dominio de aplicabilidad** de la arquitectura: nada de lo que se diseña es propio de la motocicleta, y el mismo modelo sirve a cualquier taller de servicio mecánico. La delimitación contextual fija **dónde se valida**: el servicio de motocicletas en Bolivia, que es el caso del que se dispone de datos oficiales (§2.1.1), de oferta relevable (§2.2) y de operadores a los que someter la evaluación de usabilidad (§16.4 del anteproyecto). Un título más estrecho prometería menos de lo que la arquitectura sostiene; una delimitación más ancha prometería una validación que no se hace.
+> **Por qué el título dice «mantenimiento mecánico» y la delimitación contextual dice «motocicletas».** El título declara el **dominio de aplicabilidad** de la arquitectura: nada de lo que se diseña es propio de la motocicleta, y el mismo modelo sirve a cualquier taller de servicio mecánico. La delimitación contextual fija **dónde se valida**: el servicio de motocicletas en Bolivia, que es el caso del que se dispone de datos oficiales (capítulo 2 §2.1.1), de oferta relevable (capítulo 2 §2.2) y de operadores a los que someter la evaluación de usabilidad (§16.4 del anteproyecto). Un título más estrecho prometería menos de lo que la arquitectura sostiene; una delimitación más ancha prometería una validación que no se hace.
 
 Las cuatro dimensiones son obligatorias:
 
@@ -114,7 +114,7 @@ Dos objetivos adicionales, **ya problematizados** en §1.2 —el cambio de cuent
 
 | # | Objetivo | Pregunta | Entregable verificable |
 |---|---|---|---|
-| 1 | Diagnosticar la literatura y la oferta boliviana | 1 | Matriz del estado del arte por autor, metodología, aporte y limitaciones (§2.2) · análisis del mercado · enunciado del vacío (§2.3) · definición operativa de la línea base |
+| 1 | Diagnosticar la literatura y la oferta boliviana | 1 | Matriz del estado del arte por autor, metodología, aporte y limitaciones (capítulo 2 §2.2) · análisis del mercado · enunciado del vacío (§2.3) · definición operativa de la línea base |
 | 2 | Diseñar el modelo, las políticas y el contrato | 2 | Especificación de requerimientos —actores, requisitos funcionales, reglas de negocio y no funcionales— · modelo entidad-relación con alcance por nivel · políticas de seguridad a nivel de fila y funciones de verificación especificadas · diagramas C4 de contenedores y componentes · contrato de la interfaz de programación |
 | 3 | Desarrollar el corte vertical | 3 | Sistema desplegado en *staging* con el corte vertical operativo · pipeline de integración continua en verde · cobertura de pruebas ≥ 80 % en los servicios de dominio del servidor |
 | 4 | Validar el aislamiento frente a la línea base | 4 | Suite de aislamiento con su matriz requisito → caso → evidencia · resultados de las condiciones C0 a C3 en tres corridas reproducibles desde una base vacía |
@@ -143,7 +143,7 @@ Los casos de uso, historias de usuario, reglas de negocio y criterios de aceptac
 
 | Capa | Tecnologías | Entregable verificable |
 |---|---|---|
-| **Frontend** | React con TypeScript, integración con el proveedor de identidad, selectores de organización y taller activos, manifiesto de aplicación instalable | Interfaz responsiva e instalable como PWA |
+| **Frontend** | React con TypeScript, integración con el proveedor de identidad, selectores de organización y taller activos, TanStack Query para la sincronización y caché del estado de servidor, manifiesto de aplicación instalable | Interfaz responsiva e instalable como PWA, sin datos del contexto anterior tras cambiar de organización |
 | **Backend** | Node.js, TypeScript, Hono (marco de la interfaz de programación) y Zod (validación) | Interfaz REST conforme al [contrato](../ingenieria/10-contrato-api.md), con su descripción OpenAPI |
 | **Persistencia e identidad** | Supabase: PostgreSQL con seguridad a nivel de fila, Supabase Auth y migraciones versionadas | Modelo entidad-relación con políticas activas en las siete tablas de negocio |
 | **Despliegue** | Vercel (funciones serverless) sobre dos entornos —*staging* y producción— y un proyecto de base de datos dedicado y desechable para la validación | Entornos desplegados y reconstruibles desde el repositorio |
@@ -175,7 +175,7 @@ El proyecto aporta una solución replicable a un problema conocido de la industr
 
 ### Económica / de negocio
 
-El despliegue serverless, con escalado a cero y sin costo fijo por organización, reduce el costo de infraestructura a lo que se consume, condición necesaria para ofrecer software especializado a un sector con alta informalidad y presupuesto de tecnología mínimo (§2.1.1). Administrar varias organizaciones y talleres desde una sola cuenta elimina, además, la duplicación de licencias y registros que hoy impone el software de un solo inquilino. El objetivo complementario 6 cuantifica ese costo por organización.
+El despliegue serverless, con escalado a cero y sin costo fijo por organización, reduce el costo de infraestructura a lo que se consume, condición necesaria para ofrecer software especializado a un sector con alta informalidad y presupuesto de tecnología mínimo (capítulo 2 §2.1.1). Administrar varias organizaciones y talleres desde una sola cuenta elimina, además, la duplicación de licencias y registros que hoy impone el software de un solo inquilino. El objetivo complementario 6 cuantifica ese costo por organización.
 
 ### De conocimiento
 

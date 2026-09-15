@@ -9,7 +9,7 @@ Especificación de requerimientos del proyecto: actores, requisitos funcionales,
 - **Formato del requisito funcional** — *El sistema debe [acción] [objeto] [condición o restricción]*, redactado como comportamiento observable, no como descripción de pantalla.
 - **Criterio de aceptación** — en formato **Dado–Cuando–Entonces**, de modo que el requisito nace con su prueba asociada.
 - **Prioridad (MoSCoW)** — `Must`: bloquea la salida a producción · `Should`: alto valor, no bloqueante · `Could`: deseable si hay margen.
-- **Alcance** — dentro (`Sí`) o fuera (`No`) del proyecto de grado (§1.8). Los requisitos fuera de alcance se documentan porque definen el producto completo.
+- **Alcance** — dentro (`Sí`) o fuera (`No`) del proyecto de grado (definición y alcance §1.8). Los requisitos fuera de alcance se documentan porque definen el producto completo.
 - **Nivel** — si el dato que gobierna el requisito es de **organización** o de **taller**. Se declara en los bloques del corte vertical (RF-300, RF-500, RF-600); los demás son de nivel organización.
 
 ---
@@ -191,7 +191,7 @@ Restricciones del dominio que condicionan los requisitos sin ser funcionalidades
 | RNF-401 | Usabilidad | El cambio de organización y de taller está disponible sin cerrar sesión. | **0** reautenticaciones al cambiar de contexto · flujo T1 en verde | Contrato desde el cliente y extremo a extremo (CP-N401) | Must | Sí |
 | RNF-402 | Compatibilidad | La interfaz es utilizable en navegador de escritorio y móvil. | **0** desbordamientos horizontales a **360 px** y **1280 px** en las pantallas del corte vertical, en los motores **Chromium** y **WebKit** | Auditoría con Playwright (CP-N402) | Must | Sí |
 | RNF-403 | Compatibilidad | La aplicación es instalable como PWA. | Manifiesto con nombre, iconos de **192 px** y **512 px**, `start_url` y `display: standalone` · *service worker* registrado | Auditoría con Playwright (CP-N403) | Should | Sí |
-| RNF-404 | Usabilidad | El cambio de contexto resulta operable por un usuario del rubro sin formación previa. | Tasa de éxito **≥ 80 %** por tarea · puntuación SUS **≥ 68** (Brooke, 1996, en la versión en español validada por Sevilla-González et al., 2020; baremo de Bangor et al., 2008) con **α > 0,8** | Evaluación con operadores, objetivo complementario 5 (CP-N404) | Should | Sí |
+| RNF-404 | Usabilidad | El cambio de contexto resulta operable por un usuario del rubro sin formación previa. | Tasa de éxito **≥ 80 %** por tarea · puntuación SUS **≥ 68** (Brooke, 1996, en la versión en español validada por Sevilla-González et al., 2020; baremo de Bangor et al., 2008) con **α > 0,8** | Evaluación con operadores, objetivo complementario 5 (CP-N404.1 a CP-N404.3) | Should | Sí |
 | RNF-405 | Compatibilidad | La interfaz cumple los criterios de accesibilidad aplicables a las pantallas del corte vertical. | **0** incumplimientos graves o críticos de **WCAG 2.1 nivel AA** en las pantallas del corte vertical | Auditoría automatizada en el ejecutor extremo a extremo (CP-N405) | Should | Sí |
 
 ### RNF-500 · Rendimiento *(fuera de alcance)*

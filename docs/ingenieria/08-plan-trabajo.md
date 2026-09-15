@@ -91,6 +91,8 @@ Cuatro fases, una por objetivo núcleo. Los objetivos complementarios se ejecuta
 | **H4 · Sistema integrado** | 7 de diciembre | Cliente web en *staging* con T1–T3 en verde · **decisión sobre el objetivo 6**: continúa si los proveedores exponen métricas de consumo diarias |
 | **H5 · Validación concluida** | 21 de diciembre | C0–C3 en tres corridas con evidencia conservada; objetivos 5 y 6 ejecutados o descartados con su criterio; documento final entregado |
 
+> **Presentación del perfil: 16 de noviembre de 2026.** Cae dentro de I6 (10–23 de noviembre) y no desplaza ningún hito: H1 recoge la **revisión del tutor** y el cierre de la especificación, no la presentación formal ante la Dirección de Postgrado.
+
 ## 5. Restricciones y supuestos
 
 Por cada criterio se distingue la **restricción** —lo que no se puede cambiar— del **supuesto** —lo que se asume sin poder garantizarlo—. Si un supuesto falla, la factibilidad cambia.
@@ -112,7 +114,7 @@ Impacto y probabilidad en escala baja / media / alta, ordenados por exposición.
 | ID | Riesgo | Prob. | Impacto | Mitigación | Plan de contingencia |
 |---|---|---|---|---|---|
 | **R1** | Las políticas de aislamiento resultan incorrectas o incompletas y permiten acceso cruzado | Media | **Alto** | Escribir las pruebas de aislamiento **antes** que la funcionalidad y ejecutarlas tras cada cambio de esquema o de política | Bloquear el avance hasta corregir; el aislamiento no admite deuda |
-| **R2** | El alcance crece más allá de lo planificado | **Alta** | Medio | Exclusiones cerradas en §1.8.3; corte vertical definido | Congelar el alcance en H3; lo demás pasa a trabajo futuro |
+| **R2** | El alcance crece más allá de lo planificado | **Alta** | Medio | Exclusiones cerradas en definición y alcance §1.8.3; corte vertical definido | Congelar el alcance en H3; lo demás pasa a trabajo futuro |
 | **R8** | No se consiguen 30 operadores o se retiran tras aceptar | **Alta** | Medio | Contactar a 36 durante I6; permitir sesiones remotas | Descartar el objetivo 5 en H3 según su criterio; reportar lo recolectado como hallazgo exploratorio |
 | **R3** | Cambios de interfaz, límites o indisponibilidad de Supabase o Vercel | Media | Medio | Acceso al proveedor tras la capa de repositorios (ADR-009); aislamiento en el motor, no en el proveedor | Ejecutar PostgreSQL local para desarrollo y pruebas |
 | **R9** | Se exceden los límites de la capa gratuita o se requieren tres proyectos simultáneos | Media | Medio | Pausar *staging* durante I8; vigilar el consumo en los paneles del proveedor | Contratar Supabase Pro durante I8 (§7) |
@@ -150,4 +152,4 @@ La especificación técnica es lo que hace costeable el presupuesto. **Tarifas y
 
 ## 9. Criterio de cierre
 
-El proyecto se considera concluido cuando los **cuatro objetivos núcleo** cuentan con su entregable verificable —según la tabla de trazabilidad de [anteproyecto/01-definicion-y-alcance.md](../anteproyecto/01-definicion-y-alcance.md) §1.7.3—, los **objetivos complementarios** se han ejecutado o descartado según su criterio de continuidad, y la suite de aislamiento se ha ejecutado en tres corridas reproducibles con las condiciones que fija [Plan de pruebas](11-plan-pruebas.md) §7.3. Las funcionalidades excluidas del alcance (§1.8.3) no condicionan ese cierre.
+El proyecto se considera concluido cuando los **cuatro objetivos núcleo** cuentan con su entregable verificable —según la tabla de trazabilidad de [anteproyecto/01-definicion-y-alcance.md](../anteproyecto/01-definicion-y-alcance.md) §1.7.3—, los **objetivos complementarios** se han ejecutado o descartado según su criterio de continuidad, y la suite de aislamiento se ha ejecutado en tres corridas reproducibles con las condiciones que fija [Plan de pruebas](11-plan-pruebas.md) §7.3. Las funcionalidades excluidas del alcance (definición y alcance §1.8.3) no condicionan ese cierre.

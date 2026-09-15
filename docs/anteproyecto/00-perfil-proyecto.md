@@ -162,7 +162,7 @@ Aporta una solución replicable a un problema conocido del software como servici
 
 ### 6.2 Económica / de negocio
 
-El despliegue serverless, con escalado a cero y sin costo fijo por organización, reduce el costo de infraestructura a lo que se consume y cabe en la capa gratuita de sus proveedores (§12), condición para ofrecer software especializado a un sector con 84,2 % de informalidad laboral. Administrar varias organizaciones desde una sola cuenta elimina, además, la duplicación de cuentas y registros por local.
+El despliegue serverless, con escalado a cero y sin costo fijo por organización, reduce el costo de infraestructura a lo que se consume y cabe en la capa gratuita de sus proveedores (§12), condición para ofrecer software especializado a un sector con **86,8 %** de empleo informal (§2). Administrar varias organizaciones desde una sola cuenta elimina, además, la duplicación de cuentas y registros por local.
 
 ### 6.3 De conocimiento
 
@@ -190,7 +190,7 @@ Un sistema web multiorganización cuyo aislamiento se aplica **dos veces y de fo
 
 | Capa | Tecnologías | Entregable |
 |---|---|---|
-| Frontend | React · TypeScript · manifiesto de aplicación web | Interfaz responsiva e instalable |
+| Frontend | React · TypeScript · TanStack Query · manifiesto de aplicación web | Interfaz responsiva e instalable, con el contexto activo en la clave de cada consulta |
 | Backend | Node.js · Hono · Zod | Interfaz REST conforme al contrato, con descripción OpenAPI |
 | Persistencia e identidad | PostgreSQL con seguridad a nivel de fila · Supabase Auth | Políticas activas en las 7 tablas de negocio |
 | DevOps y nube | GitHub Actions · Vercel · Supabase | Pipeline con tipos, pruebas, cobertura y auditoría de dependencias; publicación en *staging* y producción |
@@ -343,6 +343,8 @@ Cuatro fases —una por objetivo núcleo— y ocho iteraciones de dos semanas.
 | **H4 · Sistema integrado** | 7 de diciembre | Cliente web en *staging* · decisión sobre el objetivo 6 |
 | **H5 · Validación concluida** | 21 de diciembre | C0–C3 en tres corridas; objetivos complementarios ejecutados o descartados; documento final |
 
+> **Presentación del perfil: 16 de noviembre de 2026.** Cae dentro de I6 (10–23 de noviembre) y no desplaza ningún hito: H1 recoge la **revisión del tutor** y el cierre de la especificación, no la presentación formal ante la Dirección de Postgrado.
+
 ---
 
 ## 12. Recursos, presupuesto y viabilidad
@@ -493,7 +495,7 @@ Zhu, X., Shen, P., Dai, Y., Xu, L., & Hu, J. (2024). Privacy-preserving and trus
 
 <div align="center">
 
-La Paz, 15 de noviembre de 2026
+La Paz, 16 de noviembre de 2026
 
 <br><br>
 

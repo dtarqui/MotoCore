@@ -85,7 +85,7 @@ flowchart TD
     PC --> C4["Infraestructura con costo fijo<br/>por instalación"]
 ```
 
-**Efectos.** El historial del cliente queda fragmentado entre talleres de una misma organización —la gestión de varias organizaciones desde una cuenta está ausente en las 10 plataformas relevadas (§16.2)—; un solo error de consulta expone datos de una organización a otra, riesgo que la evidencia de fallos recurrentes en la aplicación de políticas de seguridad de fila vuelve concreto (§6.4); el operador que crece lleva cada local como una cuenta independiente o recurre a hojas de cálculo; y el costo de entrada excluye a buena parte de un sector con 84,2 % de informalidad laboral (§5.1).
+**Efectos.** El historial del cliente queda fragmentado entre talleres de una misma organización —la gestión de varias organizaciones desde una cuenta está ausente en las 10 plataformas relevadas (§16.2)—; un solo error de consulta expone datos de una organización a otra, riesgo que la evidencia de fallos recurrentes en la aplicación de políticas de seguridad de fila vuelve concreto (§6.4); el operador que crece lleva cada local como una cuenta independiente o recurre a hojas de cálculo; y el costo de entrada excluye a buena parte de un sector con 86,8 % de empleo informal (§5.1).
 
 **Problema central.** Los operadores que gestionan **varias organizaciones y talleres de servicio de mantenimiento mecánico** no disponen de un sistema que centralice su información sin exponerla a otras organizaciones: el software disponible es de un solo inquilino y, cuando separa datos entre clientes del sistema, lo hace **únicamente en el código de la aplicación**.
 
@@ -136,7 +136,7 @@ El proyecto aporta una solución replicable a un problema conocido del software 
 
 ### 4.2 Económica / de negocio
 
-El despliegue serverless, con escalado a cero y sin costo fijo por organización, reduce el costo de infraestructura a lo que se consume: la especificación del proyecto cabe en la capa gratuita de sus proveedores (§28.3), condición necesaria para ofrecer software especializado a un sector con 84,2 % de informalidad laboral. Administrar varias organizaciones y talleres desde una sola cuenta elimina, además, la duplicación de cuentas y registros que hoy impone el software de un solo inquilino. El objetivo complementario 6 cuantifica ese costo por organización.
+El despliegue serverless, con escalado a cero y sin costo fijo por organización, reduce el costo de infraestructura a lo que se consume: la especificación del proyecto cabe en la capa gratuita de sus proveedores (§28.3), condición necesaria para ofrecer software especializado a un sector con **86,8 %** de empleo informal (§5.1). Administrar varias organizaciones y talleres desde una sola cuenta elimina, además, la duplicación de cuentas y registros que hoy impone el software de un solo inquilino. El objetivo complementario 6 cuantifica ese costo por organización.
 
 ### 4.3 De conocimiento
 
@@ -693,7 +693,7 @@ La tecnología seleccionada es oportuna porque sus componentes están maduros y 
 
 | Criterio | SaaS de gestión de talleres relevados | ERP de código abierto de propósito general | **Propuesta** |
 |---|---|---|---|
-| **Estructura multiorganización** | Un taller por cuenta | Multiempresa genérica, sin alcance por nivel para el taller | Varias organizaciones por cuenta y varios talleres por organización, con alcance explícito por entidad |
+| **Estructura multiorganización** | Un taller por cuenta | Multiorganización genérica, sin alcance por nivel para el taller | Varias organizaciones por cuenta y varios talleres por organización, con alcance explícito por entidad |
 | **Aislamiento entre organizaciones** | En el código, no documentado | Configurable en la aplicación | En el motor **y** en la aplicación, verificado frente a una línea base |
 | **Costo de despliegue** | Suscripción por cuenta o local | Servidor y mantenimiento propios | Serverless con escalado a cero |
 | **Especialización en el rubro** | Alta | Baja: requiere adaptación | Alta en el corte vertical |
@@ -706,7 +706,7 @@ La tecnología seleccionada es oportuna porque sus componentes están maduros y 
 
 | Capa | Tecnologías | Entregable clave |
 |---|---|---|
-| **Frontend** | React · TypeScript · manifiesto de aplicación web | Interfaz responsiva e instalable, con selectores de contexto |
+| **Frontend** | React · TypeScript · TanStack Query · manifiesto de aplicación web | Interfaz responsiva e instalable, con selectores de contexto y sin datos cacheados del contexto anterior |
 | **Backend y lógica** | Node.js · Hono · Zod · verificación de credenciales del proveedor | Interfaz REST conforme al contrato, con descripción OpenAPI |
 | **Persistencia e identidad** | PostgreSQL con seguridad a nivel de fila · Supabase Auth · migraciones versionadas | Modelo entidad-relación con políticas activas en las 7 tablas de negocio |
 | **DevOps y nube** | GitHub Actions · Vercel · Supabase (*staging*, producción y validación) | Pipeline con verificación de tipos, pruebas, cobertura y auditoría de dependencias; publicación automática tras aprobarlo |
@@ -788,6 +788,7 @@ Los datos de negocio se consultan con la credencial de quien llama, para que la 
 | Datos e identidad gestionados | Firebase · PostgreSQL autogestionado con identidad propia · Supabase | **Supabase** | Identidad integrada y evaluable en las políticas; Firebase es documental y no ofrece seguridad a nivel de fila (ADR-004) |
 | Despliegue | Servidor dedicado · AWS Lambda · Vercel | **Vercel** | Plataforma gestionada con escalado a cero y publicación desde el repositorio; Lambda exige configurar pasarela y permisos |
 | Cliente web | Angular · Vue.js · Next.js · React | **React (SPA)** | La aplicación es interna y autenticada: el renderizado en servidor no aporta; ecosistema amplio y TypeScript compartido |
+| Estado de servidor en el cliente: sincronización y caché | Estado propio de React con recarga manual · Redux Toolkit Query · SWR · TanStack Query | **TanStack Query** | La clave de consulta incorpora la organización y el taller activos: ningún cambio de contexto puede servirse desde la caché anterior; no impone contenedor de estado global (ADR-010) |
 | Pruebas unitarias y de integración | Jest · Mocha · Vitest | **Vitest** | Mismo ecosistema TypeScript y ESM, sin transpilación adicional |
 | Pruebas extremo a extremo | Cypress · Selenium · Playwright | **Playwright** | Varios motores de navegador y anchos de pantalla en un solo ejecutor, sin interfaz gráfica en CI |
 | Calidad de código | TSLint (obsoleto) · Biome · ESLint con Prettier | **ESLint + Prettier en *pre-commit*** | Estándar del ecosistema TypeScript; la calidad se automatiza antes de integrar |
@@ -919,6 +920,8 @@ Cada historia de usuario y cada requisito funcional llevan criterios en formato 
 | **H3 · Corte vertical completo** | 23 de noviembre | Clientes e inventario funcionando y probados · **decisión sobre el objetivo 5** |
 | **H4 · Sistema integrado** | 7 de diciembre | Cliente web en *staging* con T1–T3 en verde · **decisión sobre el objetivo 6** |
 | **H5 · Validación concluida** | 21 de diciembre | C0–C3 en tres corridas con evidencia conservada; objetivos 5 y 6 ejecutados o descartados con su criterio; documento final entregado |
+
+> **Presentación del perfil: 16 de noviembre de 2026.** Cae dentro de I6 (10–23 de noviembre) y no desplaza ningún hito: H1 recoge la **revisión del tutor** y el cierre de la especificación, no la presentación formal ante la Dirección de Postgrado.
 
 ### 26.4 Diagrama de Gantt
 

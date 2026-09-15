@@ -64,7 +64,7 @@ La propuesta se compara con las dos alternativas reales a las que puede recurrir
 
 | Criterio | SaaS de gestión de talleres relevados | Sistema de gestión empresarial de código abierto y propósito general | **Propuesta** |
 |---|---|---|---|
-| **Estructura multiorganización** | Un taller por cuenta | Multiempresa genérica, sin alcance por nivel para el taller | Varias organizaciones por cuenta y varios talleres por organización, con alcance explícito por entidad |
+| **Estructura multiorganización** | Un taller por cuenta | Multiorganización genérica, sin alcance por nivel para el taller | Varias organizaciones por cuenta y varios talleres por organización, con alcance explícito por entidad |
 | **Aislamiento entre organizaciones** | En el código de la aplicación, no documentado | Configurable en la aplicación | En el motor **y** en la aplicación, verificado frente a una línea base |
 | **Personalización al rubro** | Alta, en estructuras fijas | Baja: requiere adaptación y esfuerzo de configuración | Alta en el corte vertical |
 | **Costo de despliegue** | Suscripción recurrente por cuenta o local | Servidor y mantenimiento propios | Serverless con escalado a cero |

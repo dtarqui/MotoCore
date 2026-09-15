@@ -40,6 +40,7 @@ N6 evalúa el **cumplimiento del contrato desde el lado del cliente**, que la ev
 | Cubre | No cubre |
 |---|---|
 | Que cambiar de organización limpie el taller activo | Si la pantalla resulta comprensible — eso es N5 |
+| Que ninguna vista sirva datos cacheados del contexto anterior (ADR-010) | Si el motor devolvió o no esas filas — eso es N4 |
 | Que `X-Org-Id` viaje siempre y `X-Workshop-Id` solo en endpoints de nivel taller | Diseño responsivo e instalabilidad — eso es N7 |
 | Que el código de negocio del error sobreviva al cliente | Recorridos completos de usuario — eso es N7 |
 | Regresión de la regla de rutas y del método de las bajas lógicas ([contrato](10-contrato-api.md) §2.3 y §2.6) | Rendimiento |
@@ -256,6 +257,7 @@ Casos que **deben mostrar la fuga**: si no la muestran, la línea base no discri
 | RNF-305 | CP-N305 | N0 | `main` publica en *staging* y `release` en producción, ambas solo con pipeline aprobado |
 | RNF-401 | CP-N401 | **N7** | Flujo T1: cambiar de organización sin cerrar sesión y ver los datos del nuevo contexto |
 | RNF-401 | CP-N401.1 | **N6** | Cambiar de organización limpia el taller activo |
+| ADR-010 | CP-N401.2 | **N6** | Al cambiar de organización se invalidan las consultas del contexto anterior: ninguna vista sirve datos cacheados de la organización previa, y toda consulta de negocio lleva el contexto en su clave |
 | ADR-005 | CP-N005 | **N6** | El cliente adjunta `X-Org-Id` siempre y `X-Workshop-Id` solo en endpoints de nivel taller |
 | Contrato §2.3 | CP-N023 | **N6** | Ninguna llamada del cliente anida el identificador de organización en la ruta |
 | Contrato §2.6 | CP-N026 | **N6** | Las bajas lógicas se invocan con `POST /…/deactivate`; la revocación de un vínculo, con `DELETE` |
@@ -484,7 +486,7 @@ El criterio se escribe como comportamiento observable; la métrica lleva siempre
 | Clientes | Dado un cliente creado con el taller A activo, cuando se opera con el taller B, entonces se lista | Integración (N3) | 100 % de entidades de nivel organización visibles entre talleres | Pendiente |
 | Inventario | Dado un movimiento que dejaría existencia negativa, cuando se registra, entonces se rechaza sin alterar el stock | Unitaria e integración (N1, N3) | Cobertura ≥ 80 % del servicio de inventario | Pendiente |
 | Aislamiento | Dada la identidad de otra cuenta, cuando consulta las 7 tablas bajo C1–C3, entonces obtiene cero filas ajenas, frente a filas ajenas bajo C0 | Aislamiento (N4) | 0 filas ajenas en 3 corridas | Pendiente |
-| Cambio de contexto | Dado un operador con dos organizaciones, cuando cambia de organización, entonces el taller activo se limpia y los datos corresponden a la nueva | Componente y extremo a extremo (N6, N7) | T1–T3 en verde tras cada publicación | Pendiente |
+| Cambio de contexto | Dado un operador con dos organizaciones, cuando cambia de organización, entonces el taller activo se limpia y los datos corresponden a la nueva, sin servir nada cacheado de la anterior | Componente y extremo a extremo (N6, N7) | T1–T3 en verde tras cada publicación | Pendiente |
 | Pipeline | Dada una integración al ramal principal, cuando falla una prueba, entonces no se publica | CI | 100 % de integraciones verificadas | Pendiente |
 
 ---
