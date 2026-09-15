@@ -2,7 +2,7 @@
 
 Estado de comprobación de cada fuente citada en el anteproyecto. Una referencia con datos incorrectos compromete la trazabilidad de la información tanto como una inventada, de modo que cada identificador se contrastó contra el registro del editor.
 
-**Última comprobación**: 14 de septiembre de 2026, para las cuatro fuentes incorporadas al ajustar la documentación a la guía metodológica —Cronbach (1951), Hevner et al. (2004), Brown (s. f.) y la Constitución Política del Estado—. La comprobación general anterior es del 18 de agosto de 2026: en esa fecha se verificaron contra el **texto completo del editor** las entradas antes marcadas `Parcial` por metadatos, y se añadió a cada fuente un **enlace de acceso** localizado en las bases consultadas: [Google Scholar](https://scholar.google.com/), [OATD](https://oatd.org/), [BASE](https://api.base-search.net/), Scopus / Web of Science, IEEE Xplore y ACM DL.
+**Última comprobación**: 14 de septiembre de 2026, para las nueve fuentes incorporadas al ajustar la documentación a la guía metodológica —Cronbach (1951), Hevner et al. (2004), Brown (s. f.), la Constitución Política del Estado y los cinco artículos de IEEE que completan la matriz del estado del arte: Zhang et al. (2021), Yassin et al. (2022), Zhu et al. (2024), Yin et al. (2025) y Leburu (2026)—. Los cinco se localizaron consultando Crossref por revista y editor, y se retuvieron tras leer su resumen. **Ese mismo día se comprobaron además**: el ISBN de Brooke (1996) contra el catálogo de OpenLibrary; la accesibilidad por HTTP de las nueve fuentes con autor corporativo; el texto de la Constitución en el PDF oficial del Ministerio de Planificación del Desarrollo; la declaración de cifrado en reposo del proveedor de datos; el Cuadro 7 de UDAPE, del que procede la cifra de empleo informal; y el texto completo de Olabanji et al. (2023) y de Bezemer y Zaidman (2010). La comprobación general anterior es del 18 de agosto de 2026: en esa fecha se verificaron contra el **texto completo del editor** las entradas antes marcadas `Parcial` por metadatos, y se añadió a cada fuente un **enlace de acceso** localizado en las bases consultadas: [Google Scholar](https://scholar.google.com/), [OATD](https://oatd.org/), [BASE](https://api.base-search.net/), Scopus / Web of Science, IEEE Xplore y ACM DL.
 
 ## Cómo se verificó cada tipo de fuente
 
@@ -26,13 +26,18 @@ Estado de comprobación de cada fuente citada en el anteproyecto. Una referencia
 
 | Cap. | Ref. | Autor y año | Metadatos del editor | Contenido | Acceso al texto |
 |---|---|---|---|---|---|
-| 2 | A1 | Dar, Hershcovitch & Morrison (2023) | OK — *Proc. ACM Manag. Data*, 1(1), art. 89, pp. 1–25 · ACM | OK — texto completo leído | [doi.org/10.1145/3588943](https://doi.org/10.1145/3588943) |
-| 2 | A2 | Alobaywi, Almutairi & Sheldon (2026) | OK — *IoT*, 7(1), 21 · MDPI · publicado 22-02-2026 | `Parcial` — solo resumen | **Acceso abierto**: [mdpi.com/2624-831X/7/1/21](https://www.mdpi.com/2624-831X/7/1/21) |
-| 2 | A3 | Andriianenko (2026) | OK — repositorio UTM accesible; ficha confirmada: Universidad Técnica de Moldavia, Facultad de Computadores, Informática y Microelectrónica; licencia CC BY-NC-ND 3.0 | `Parcial` — solo resumen | **PDF descargable (353 KB)**: [repository.utm.md/handle/5014/35481](https://repository.utm.md/handle/5014/35481) |
-| 2 | A4 | Simić, Dedeić, Stojkov & Prokić (2024) | OK — *IEEE Access*, 12, pp. 32597–32617 · cuatro autores confirmados por Crossref | `Parcial` — solo resumen | **Acceso abierto (CC BY 4.0)**: [ieeexplore.ieee.org/document/10443611](https://ieeexplore.ieee.org/document/10443611/) |
-| 2 | A5 | Olabanji, Fitch & Matthew (2023) | OK — *WSEAS Trans. on Computers*, 22, pp. 25–43 · tres autores confirmados por Crossref | `Parcial` — solo resumen | **PDF abierto del editor**: [wseas.com/journals/computers/2023/a105105-1421.pdf](https://wseas.com/journals/computers/2023/a105105-1421.pdf) |
+| 2 | A1 | Dar, Hershcovitch & Morrison (2023) | OK — *Proc. ACM Manag. Data*, 1(1), art. 89, pp. 1–25 · ACM · consultado el 18-08-2026 | OK — texto completo leído | [doi.org/10.1145/3588943](https://doi.org/10.1145/3588943) |
+| 2 | A2 | Alobaywi, Almutairi & Sheldon (2026) | OK — *IoT*, 7(1), 21 · MDPI · publicado 22-02-2026 · consultado el 18-08-2026 | `Parcial` — solo resumen; MDPI rechaza la descarga automatizada (HTTP 403 el 14-09-2026) | **Acceso abierto**: [mdpi.com/2624-831X/7/1/21](https://www.mdpi.com/2624-831X/7/1/21) |
+| 2 | A3 | Andriianenko (2026) | OK — repositorio UTM accesible; ficha confirmada: Universidad Técnica de Moldavia, Facultad de Computadores, Informática y Microelectrónica; licencia CC BY-NC-ND 3.0 · consultado el 18-08-2026 | `Parcial` — el repositorio publica **solo la anotación**, leída el 14-09-2026; el texto completo no es de acceso público | **PDF descargable (353 KB)**: [repository.utm.md/handle/5014/35481](https://repository.utm.md/handle/5014/35481) |
+| 2 | A4 | Simić, Dedeić, Stojkov & Prokić (2024) | OK — *IEEE Access*, 12, pp. 32597–32617 · cuatro autores confirmados por Crossref · consultado el 18-08-2026 | `Parcial` — solo resumen; IEEE Xplore exige verificación de navegador para la descarga | **Acceso abierto (CC BY 4.0)**: [ieeexplore.ieee.org/document/10443611](https://ieeexplore.ieee.org/document/10443611/) |
+| 2 | A5 | Olabanji, Fitch & Matthew (2023) | OK — *WSEAS Trans. on Computers*, 22, pp. 25–43 · tres autores confirmados por Crossref · consultado el 18-08-2026 | **OK — texto completo leído el 14-09-2026** | **PDF abierto del editor**: [wseas.com/journals/computers/2023/a105105-1421.pdf](https://wseas.com/journals/computers/2023/a105105-1421.pdf) |
+| 2 | A8 | Zhang, Yang, Du, Li, Chen & Sun (2021) | OK — *IEEE Access*, 9, pp. 15156–15169 · seis autores confirmados por Crossref · consultado el 14-09-2026 | `Parcial` — solo resumen; IEEE Xplore exige verificación de navegador para la descarga | **Acceso abierto**: [ieeexplore.ieee.org/document/9319865](https://ieeexplore.ieee.org/document/9319865/) |
+| 2 | A9 | Yassin, Ould-Slimane, Talhi & Boucheneb (2022) | OK — *IEEE Transactions on Services Computing*, 15(5), pp. 2925–2938 · cuatro autores confirmados por Crossref · consultado el 14-09-2026 | `Parcial` — solo resumen; IEEE Xplore exige verificación de navegador para la descarga | [ieeexplore.ieee.org/document/9424427](https://ieeexplore.ieee.org/document/9424427/) |
+| 2 | A10 | Zhu, Shen, Dai, Xu & Hu (2024) | OK — *IEEE Transactions on Information Forensics and Security*, 19, pp. 4316–4330 · cinco autores confirmados por Crossref · consultado el 14-09-2026 | `Parcial` — solo resumen; IEEE Xplore exige verificación de navegador para la descarga | [ieeexplore.ieee.org/document/10472543](https://ieeexplore.ieee.org/document/10472543/) |
+| 2 | A11 | Yin, Morvan, Martinez-Gil & Hameurlain (2025) | OK — *IEEE Transactions on Knowledge and Data Engineering*, 37(5), pp. 2743–2755 · cuatro autores confirmados por Crossref · consultado el 14-09-2026 | `Parcial` — solo resumen; IEEE Xplore exige verificación de navegador para la descarga | [ieeexplore.ieee.org/document/10897901](https://ieeexplore.ieee.org/document/10897901/) |
+| 2 | A12 | Leburu (2026) | OK — *IEEE Access*, 14, pp. 97094–97117 · autor único confirmado por Crossref · consultado el 14-09-2026 | `Parcial` — solo resumen; IEEE Xplore exige verificación de navegador para la descarga | **Acceso abierto**: [ieeexplore.ieee.org/document/11574655](https://ieeexplore.ieee.org/document/11574655/) |
 | 3 | A1 | **Bangor, Kortum & Miller (2008)** | OK — *Int. J. Human–Computer Interaction*, 24(6), pp. 574–594 · Taylor & Francis | `Parcial` — se toma de él el umbral SUS = 68 | [doi.org/10.1080/10447310802205776](https://doi.org/10.1080/10447310802205776) |
-| 3 | A2 | Bezemer & Zaidman (2010) | OK — IWPSE-EVOL '10, pp. 88–92 · ACM | `Parcial` — solo resumen | **PDF del propio autor**: [azaidman.github.io/publications/bezemerIWPSE2010.pdf](https://azaidman.github.io/publications/bezemerIWPSE2010.pdf) |
+| 3 | A2 | Bezemer & Zaidman (2010) | OK — IWPSE-EVOL '10, pp. 88–92 · ACM | **OK — texto completo leído el 14-09-2026** | **PDF del propio autor**: [azaidman.github.io/publications/bezemerIWPSE2010.pdf](https://azaidman.github.io/publications/bezemerIWPSE2010.pdf) |
 | 3 | A3 | Codd (1970) | OK — *CACM*, 13(6), pp. 377–387 | OK — obra canónica | [doi.org/10.1145/362384.362685](https://doi.org/10.1145/362384.362685) |
 | 3 | A4 | Dar, Hershcovitch & Morrison (2023) | Ver capítulo 2, ref. A1 | Ver capítulo 2, ref. A1 | Ver capítulo 2, ref. A1 |
 | 3 | A5 | Gao, Bird & Barr (2017) | OK — ICSE 2017, pp. 758–769 · IEEE/ACM | **OK — cifra del 15 % verificada en el texto completo** (ver §2) | **PDF abierto (Microsoft Research)**: [microsoft.com/…/gao2017javascript.pdf](https://www.microsoft.com/en-us/research/wp-content/uploads/2017/09/gao2017javascript.pdf) |
@@ -47,6 +52,7 @@ Estado de comprobación de cada fuente citada en el anteproyecto. Una referencia
 | 3 | A14 | Simić et al. (2024) | Ver capítulo 2, ref. A4 | Ver capítulo 2, ref. A4 | Ver capítulo 2, ref. A4 |
 | 3 | A15 | **Cronbach (1951)** | OK — *Psychometrika*, 16(3), pp. 297–334 · confirmado por Crossref el 14-09-2026 | `Parcial` — se toma de él el coeficiente α; texto no leído | [doi.org/10.1007/BF02310555](https://doi.org/10.1007/BF02310555) |
 | 3 | A16 | Hevner, March, Park & Ram (2004) | OK — *MIS Quarterly*, 28(1), pp. 75–106 · cuatro autores confirmados por Crossref el 14-09-2026 | `Parcial` — solo resumen | [doi.org/10.2307/25148625](https://doi.org/10.2307/25148625) |
+| 3 | A17 | **Sevilla-González et al. (2020)** | OK — *JMIR Human Factors*, 7(4), e21161 · siete autores confirmados por Crossref el 14-09-2026 | `Parcial` — se toma de ella la **versión en español validada** del SUS; los diez ítems deben transcribirse del material complementario ([PENDIENTES](../PENDIENTES.md) §5) | **Acceso abierto**: [doi.org/10.2196/21161](https://doi.org/10.2196/21161) |
 
 ### 1.2 Libros
 
@@ -57,13 +63,13 @@ Estado de comprobación de cada fuente citada en el anteproyecto. Una referencia
 | Cap. 3 L7 | Newman (2021), *Building microservices*, 2.ª ed. | El catálogo fechaba ese ISBN en 2020 | **Confirmado 2021** — O'Reilly Media, 2.ª ed., publicada el 5 de octubre de 2021, ISBN 978-1-4920-3402-5. [Ficha del editor](https://www.oreilly.com/library/view/building-microservices-2nd/9781492034018/) |
 | Cap. 3 L2 | Beck (2002), *Test-driven development: By example* | El catálogo devolvía una reimpresión de 2006 | **Confirmado 2002** — Addison-Wesley Professional, 1.ª ed., 8 de noviembre de 2002, ISBN 978-0-321-14653-3 |
 
-De los **once ISBN** que cita el anteproyecto —diez en la lista de libros del capítulo 3 y uno, Hernández-Sampieri y Mendoza (2018), en las listas del perfil y del anteproyecto integrado—, **diez resuelven correctamente contra el catálogo y uno queda por comprobar**. Sin discrepancias: Bass et al. (2021), Richards & Ford (2020), Kleppmann (2017), Humble & Farley (2010), Forsgren et al. (2018), Nielsen (1993), Pierce (2002) y Hernández-Sampieri & Mendoza (2018), además de los dos resueltos en la tabla anterior.
+De los **once ISBN** que cita el anteproyecto —diez en la lista de libros del capítulo 3 y uno, Hernández-Sampieri y Mendoza (2018), en las listas del perfil y del anteproyecto integrado—, **los once resuelven correctamente contra el catálogo**. Sin discrepancias: Bass et al. (2021), Richards & Ford (2020), Kleppmann (2017), Humble & Farley (2010), Forsgren et al. (2018), Nielsen (1993), Pierce (2002) y Hernández-Sampieri & Mendoza (2018), además de los dos resueltos en la tabla anterior.
 
-**La entrada que falta.** Se consigna aquí en lugar de darse por comprobada con el resto, porque la diferencia entre «verificado» y «declarado» es justamente lo que este anexo existe para registrar:
+**La entrada que faltaba, ya resuelta.** Se consigna aquí, y no junto al resto, porque la diferencia entre «verificado» y «declarado» es justamente lo que este anexo existe para registrar:
 
 | Ref. | Obra | Estado | Qué falta |
 |---|---|---|---|
-| Cap. 3 L3 | Brooke, J. (1996). SUS: A quick and dirty usability scale. En *Usability evaluation in industry* (pp. 189–194). Taylor & Francis | `Falta` — el ISBN **978-0-7484-0460-5** se declara a partir de la ficha de la obra y **no se ha contrastado contra el catálogo del editor**. Su **contenido** sí está verificado (§2): el capítulo es la fuente primaria de la escala SUS | Contrastar el ISBN contra el catálogo de Taylor & Francis antes de la entrega final ([PENDIENTES](../PENDIENTES.md) §2) |
+| Cap. 3 L3 | Brooke, J. (1996). SUS: A quick and dirty usability scale. En *Usability evaluation in industry* (pp. 189–194). Taylor & Francis | **OK — resuelto el 14-09-2026**: el ISBN **978-0-7484-0460-5** corresponde a *Usability evaluation in industry*, Taylor & Francis / CRC Press, 1996, editado por Patrick W. Jordan y otros; registro `OL587988M` de OpenLibrary, con ISBN-10 `0-7484-0460-0`, 252 pp. y número de control LC `96178477`. Su **contenido** ya estaba verificado (§2) | — |
 
 #### Obras evaluadas y no incorporadas
 
@@ -87,7 +93,8 @@ APA 7 no admite referencias sin cita. Estas cinco obras se evaluaron como biblio
 | N4 | Jonas et al. (2019) — Berkeley View on Serverless | OK — arXiv accesible | [arxiv.org/abs/1902.03383](https://arxiv.org/abs/1902.03383) |
 | N5 | Fielding (2000) — Tesis doctoral | OK — alojada en el sitio institucional de UC Irvine | [ics.uci.edu/~fielding/pubs/dissertation/top.htm](https://ics.uci.edu/~fielding/pubs/dissertation/top.htm) |
 | N6 | W3C — Web Application Manifest | OK — accesible. **Corrección aplicada**: es un *Working Draft* fechado el 13 de agosto de 2026, no de 2023 | [w3.org/TR/appmanifest/](https://www.w3.org/TR/appmanifest/) |
-| — | Estado Plurinacional de Bolivia (2009) — Constitución Política del Estado | OK — texto consultado el 14-09-2026; promulgación del 7 de febrero de 2009 confirmada. **Art. 21, num. 2 verificado literalmente**: «A la privacidad, intimidad, honra, honor, propia imagen y dignidad». Es el único artículo que cita el anteproyecto | [lexivox.org/norms/BO-CPE-20090207.html](https://www.lexivox.org/norms/BO-CPE-20090207.html) |
+| N7 | SIN — RND 102600000007, de 25 de marzo de 2026 (prórroga de la facturación en línea) | OK — PDF del emisor accesible el 14-09-2026; amplía el plazo al 30 de septiembre de 2026 para los grupos noveno a duodécimo | [RND 102600000007](https://www.impuestos.gob.bo/wp-content/uploads/2026/03/RND-102600000007.pdf) |
+| — | Estado Plurinacional de Bolivia (2009) — Constitución Política del Estado | OK — texto consultado el 14-09-2026; promulgación del 7 de febrero de 2009 confirmada. **Art. 21, num. 2 verificado literalmente**: «A la privacidad, intimidad, honra, honor, propia imagen y dignidad». Es el único artículo que cita el anteproyecto | [PDF oficial del Ministerio de Planificación del Desarrollo](https://www.planificacion.gob.bo/uploads/marco-legal/nueva_constitucion_politica_del_estado.pdf) · el enlace de LexiVox devolvió **HTTP 500** el 14-09-2026 |
 
 ### 1.4 Documentación técnica con autor corporativo
 
@@ -95,14 +102,14 @@ Incorporada al §7.1 del anteproyecto. Se emplea **solo como sustento del marco 
 
 | Fuente | Enlace | Estado |
 |---|---|---|
-| OpenJS Foundation — *Node.js documentation* | [nodejs.org/docs/latest/api/](https://nodejs.org/docs/latest/api/) | `Falta` — accesible el 14-08-2026; re-comprobar y fechar |
-| Microsoft — *TypeScript documentation* | [typescriptlang.org/docs/](https://www.typescriptlang.org/docs/) | `Falta` — ídem |
-| PostgreSQL Global Development Group — *PostgreSQL documentation* (s. f.-a) | [postgresql.org/docs/current/](https://www.postgresql.org/docs/current/) | `Falta` — ídem |
-| PostgreSQL Global Development Group — *Row security policies* (s. f.-b) | [postgresql.org/docs/current/ddl-rowsecurity.html](https://www.postgresql.org/docs/current/ddl-rowsecurity.html) | `Falta` — ídem |
-| Zod — *Zod documentation* | [zod.dev](https://zod.dev/) | `Falta` — ídem |
-| Meta Open Source — *React documentation* | [react.dev](https://react.dev/) | `Falta` — ídem |
-| Schwaber & Sutherland (2020) — *The Scrum Guide* | [scrumguides.org](https://scrumguides.org/) | `Falta` — ídem |
-| Brown (s. f.) — *The C4 model* | [c4model.com](https://c4model.com/) | `Falta` — accesible el 14-09-2026; autoría de Simon Brown y los cuatro niveles del modelo confirmados en la página; re-comprobar y fechar |
+| OpenJS Foundation — *Node.js documentation* | [nodejs.org/docs/latest/api/](https://nodejs.org/docs/latest/api/) | OK — accesible el 14-09-2026 (respuesta HTTP 200); la fecha definitiva se fija el día de la entrega |
+| Microsoft — *TypeScript documentation* | [typescriptlang.org/docs/](https://www.typescriptlang.org/docs/) | OK — ídem |
+| PostgreSQL Global Development Group — *PostgreSQL documentation* (s. f.-a) | [postgresql.org/docs/current/](https://www.postgresql.org/docs/current/) | OK — ídem |
+| PostgreSQL Global Development Group — *Row security policies* (s. f.-b) | [postgresql.org/docs/current/ddl-rowsecurity.html](https://www.postgresql.org/docs/current/ddl-rowsecurity.html) | OK — ídem |
+| Zod — *Zod documentation* | [zod.dev](https://zod.dev/) | OK — ídem |
+| Meta Open Source — *React documentation* | [react.dev](https://react.dev/) | OK — ídem |
+| Schwaber & Sutherland (2020) — *The Scrum Guide* | [scrumguides.org](https://scrumguides.org/) | OK — ídem |
+| Brown (s. f.) — *The C4 model* | [c4model.com](https://c4model.com/) | OK — accesible el 14-09-2026 (respuesta HTTP 200); autoría de Simon Brown y los cuatro niveles del modelo confirmados en la página |
 | Chong, Carraro & Wolter (2006) — *Multi-tenant data architecture* | [Copia archivada (Wayback, 30-05-2017)](https://web.archive.org/web/20170530080303/https://msdn.microsoft.com/en-us/library/aa479086.aspx) | **Sustituida** — la URL original de MSDN devuelve 404. La atribución teórica se trasladó a Krebs et al. (2012) |
 
 ---
@@ -116,6 +123,10 @@ Lo que se verificó **dentro del texto**, no solo en sus metadatos.
 | «Aproximadamente el **15 %** de los errores públicos de proyectos JavaScript habría sido detectado por un verificador de tipos estático como TypeScript» | Gao et al. (2017) | **Confirmada**. El resumen del artículo dice literalmente: *«our central finding is that both static type systems find an important percentage of public bugs: both Flow 0.30 and TypeScript 2.0 successfully detect 15%»*. La cifra mide el porcentaje de **errores públicos corregidos** que el verificador detecta, y aplica por igual a Flow y a TypeScript |
 | Autoría de Krebs et al. (2012), que Crossref no listaba | Krebs, Momm & Kounev (2012) | **Confirmada** en la portada del PDF del editor: «Krebs R., Momm C. and Kounev S.» |
 | Que Brooke (1996) es la fuente primaria de la escala SUS | Brooke (1996) | **Confirmada**. El documento original —John Brooke, Redhatch Consulting Ltd.— se abre con «*This chapter describes the System Usability Scale (SUS)*», lo que confirma que es el capítulo del libro y no una reimpresión posterior. Se cita en el cuerpo como origen del instrumento (marco teórico §3.2.3, anteproyecto §7.2.3 y perfil §8), manteniendo a Bangor et al. (2008) como fuente del baremo y del umbral de 68 puntos |
+
+| El proveedor de datos cifra los datos **en reposo con AES-256** y en tránsito con TLS | Supabase — página de seguridad | **Confirmada** el 14-09-2026. La página declara literalmente: *«All customer data is encrypted at rest with AES-256 and in transit via TLS»*, y añade que los secretos se cifran además en la capa de aplicación. Declara SOC 2 Tipo 2, ISO 27001 y HIPAA |
+| El **empleo informal** fue del **86,8 %** de la población ocupada en 2024 | UDAPE (2025), Cuadro 7 | **Confirmada** el 14-09-2026 en el PDF del organismo: 6,0 millones de 6,9 (86,8 %) a nivel nacional, 83,0 % urbano y 94,7 % rural. En esa serie el 84,2 % corresponde a **2017**, lo que descarta la atribución de esa cifra a 2024 que circula en prensa |
+| El **artículo 21, numeral 2** de la Constitución reconoce el derecho a la privacidad | CPE (2009), PDF oficial | **Confirmada** el 14-09-2026: *«A la privacidad, intimidad, honra, honor, propia imagen y dignidad»*. El enlace de LexiVox devolvió **HTTP 500** ese día, de modo que la referencia pasó al PDF del Ministerio de Planificación del Desarrollo |
 
 ---
 
@@ -153,6 +164,8 @@ Krebs, R., Momm, C., & Kounev, S. (2012). Architectural concerns in multi-tenant
 
 Larman, C., & Basili, V. R. (2003). Iterative and incremental developments: A brief history. *Computer, 36*(6), 47–56. https://doi.org/10.1109/MC.2003.1204375
 
+Leburu, N. (2026). Trust-aware orchestration architecture for LLM-assisted workflows in multi-tenant enterprise systems. *IEEE Access, 14*, 97094–97117. https://doi.org/10.1109/ACCESS.2026.3706063
+
 Nielsen, J., & Landauer, T. K. (1993). A mathematical model of the finding of usability problems. En *Proceedings of the INTERACT '93 and CHI '93 Conference on Human Factors in Computing Systems* (pp. 206–213). ACM. https://doi.org/10.1145/169059.169166
 
 Olabanji, D., Fitch, T., & Matthew, O. (2023). Multi-tenancy in cloud-native architecture: A systematic mapping study. *WSEAS Transactions on Computers, 22*, 25–43. https://doi.org/10.37394/23205.2023.22.4
@@ -161,7 +174,17 @@ Saltzer, J. H., & Schroeder, M. D. (1975). The protection of information in comp
 
 Sandhu, R. S., Coyne, E. J., Feinstein, H. L., & Youman, C. E. (1996). Role-based access control models. *Computer, 29*(2), 38–47. https://doi.org/10.1109/2.485845
 
+Sevilla-González, M. del R., Moreno Loaeza, L., Lazaro-Carrera, L. S., Bourguet Ramirez, B., Vázquez Rodríguez, A., Peralta-Pedrero, M. L., & Almeda-Valdes, P. (2020). Spanish version of the System Usability Scale for the assessment of electronic tools: Development and validation. *JMIR Human Factors, 7*(4), e21161. https://doi.org/10.2196/21161
+
 Simić, M., Dedeić, J., Stojkov, M., & Prokić, I. (2024). A hierarchical namespace approach for multi-tenancy in distributed clouds. *IEEE Access, 12*, 32597–32617. https://doi.org/10.1109/ACCESS.2024.3369031
+
+Yassin, M., Ould-Slimane, H., Talhi, C., & Boucheneb, H. (2022). Multi-tenant intrusion detection framework as a service for SaaS. *IEEE Transactions on Services Computing, 15*(5), 2925–2938. https://doi.org/10.1109/TSC.2021.3077852
+
+Yin, S., Morvan, F., Martinez-Gil, J., & Hameurlain, A. (2025). MTD-DS: An SLA-aware decision support benchmark for multi-tenant parallel DBMSs. *IEEE Transactions on Knowledge and Data Engineering, 37*(5), 2743–2755. https://doi.org/10.1109/TKDE.2025.3543727
+
+Zhang, Z., Yang, Z., Du, X., Li, W., Chen, X., & Sun, L. (2021). Tenant-led ciphertext information flow control for cloud virtual machines. *IEEE Access, 9*, 15156–15169. https://doi.org/10.1109/ACCESS.2021.3051061
+
+Zhu, X., Shen, P., Dai, Y., Xu, L., & Hu, J. (2024). Privacy-preserving and trusted keyword search for multi-tenancy cloud. *IEEE Transactions on Information Forensics and Security, 19*, 4316–4330. https://doi.org/10.1109/TIFS.2024.3377549
 
 ### Libros y capítulos
 
@@ -187,7 +210,7 @@ Richards, M., & Ford, N. (2020). *Fundamentals of software architecture: An engi
 
 ### Documentos normativos e informes
 
-Estado Plurinacional de Bolivia. (2009). *Constitución Política del Estado* (promulgada el 7 de febrero de 2009). Recuperado el 14 de septiembre de 2026, de https://www.lexivox.org/norms/BO-CPE-20090207.html
+Estado Plurinacional de Bolivia. (2009). *Constitución Política del Estado* (promulgada el 7 de febrero de 2009). Recuperado el 14 de septiembre de 2026, de https://www.planificacion.gob.bo/uploads/marco-legal/nueva_constitucion_politica_del_estado.pdf
 
 Fielding, R. T. (2000). *Architectural styles and the design of network-based software architectures* [Tesis doctoral, University of California, Irvine]. https://ics.uci.edu/~fielding/pubs/dissertation/top.htm
 
@@ -207,19 +230,19 @@ World Wide Web Consortium. (2026). *Web application manifest* (W3C Working Draft
 
 Brown, S. (s. f.). *The C4 model*. Recuperado el 14 de septiembre de 2026, de https://c4model.com/
 
-Meta Open Source. (s. f.). *React documentation*. Recuperado el 14 de agosto de 2026, de https://react.dev/
+Meta Open Source. (s. f.). *React documentation*. Recuperado el 14 de septiembre de 2026, de https://react.dev/
 
-Microsoft. (s. f.). *TypeScript documentation*. Recuperado el 14 de agosto de 2026, de https://www.typescriptlang.org/docs/
+Microsoft. (s. f.). *TypeScript documentation*. Recuperado el 14 de septiembre de 2026, de https://www.typescriptlang.org/docs/
 
-OpenJS Foundation. (s. f.). *Node.js documentation*. Recuperado el 14 de agosto de 2026, de https://nodejs.org/docs/latest/api/
+OpenJS Foundation. (s. f.). *Node.js documentation*. Recuperado el 14 de septiembre de 2026, de https://nodejs.org/docs/latest/api/
 
-PostgreSQL Global Development Group. (s. f.-a). *PostgreSQL documentation*. Recuperado el 14 de agosto de 2026, de https://www.postgresql.org/docs/current/
+PostgreSQL Global Development Group. (s. f.-a). *PostgreSQL documentation*. Recuperado el 14 de septiembre de 2026, de https://www.postgresql.org/docs/current/
 
-PostgreSQL Global Development Group. (s. f.-b). *Row security policies*. Recuperado el 14 de agosto de 2026, de https://www.postgresql.org/docs/current/ddl-rowsecurity.html
+PostgreSQL Global Development Group. (s. f.-b). *Row security policies*. Recuperado el 14 de septiembre de 2026, de https://www.postgresql.org/docs/current/ddl-rowsecurity.html
 
-Schwaber, K., & Sutherland, J. (2020). *The Scrum Guide: The definitive guide to Scrum*. Recuperado el 14 de agosto de 2026, de https://scrumguides.org/
+Schwaber, K., & Sutherland, J. (2020). *The Scrum Guide: The definitive guide to Scrum*. Recuperado el 14 de septiembre de 2026, de https://scrumguides.org/
 
-Zod. (s. f.). *Zod documentation*. Recuperado el 14 de agosto de 2026, de https://zod.dev/
+Zod. (s. f.). *Zod documentation*. Recuperado el 14 de septiembre de 2026, de https://zod.dev/
 
 ### Fuentes estadísticas oficiales
 
@@ -229,10 +252,12 @@ Instituto Nacional de Estadística de Bolivia. (2025). *Boletín estadístico pa
 
 Instituto Nacional de Estadística de Bolivia. (2026). *Estadísticas del parque automotor 2003–2025*. https://www.ine.gob.bo/index.php/estadisticas-del-parque-automotor-2003-2025/
 
+Unidad de Análisis de Políticas Sociales y Económicas. (2025). *Análisis de la población ocupada, desocupada e inactiva en Bolivia entre los años 2015 y 2024*. UDAPE. https://www.udape.gob.bo/wp-content/uploads/2026/03/Analisis-de-la-condicion-actividad-2025.pdf
+
 ---
 
 ## 4. Alcance de esta verificación
 
 Este anexo consigna el **estado por referencia**: qué se comprobó de cada fuente, con qué método y con qué resultado. Las entradas marcadas `Parcial` en la columna «Contenido» tienen sus datos bibliográficos confirmados contra el registro del editor y su afirmación tomada del resumen; las marcadas `OK` fueron contrastadas contra el texto completo. Esa distinción se declara aquí de forma explícita, en lugar de darse por supuesta.
 
-**Lo que queda abierto**, y que ningún otro documento debe dar por cerrado: las seis entradas citadas a partir de su resumen —cuatro del capítulo 2 y dos del capítulo 3, Bezemer y Zaidman (2010) y Hevner et al. (2004)—, cuya lectura completa corresponde antes de la entrega final; el ISBN de Brooke (1996); y las fechas de recuperación de la documentación técnica con autor corporativo y de las fuentes consultadas en línea, que se fijan el día de la entrega. El registro operativo de esas acciones está en [PENDIENTES](../PENDIENTES.md) §2; ni el perfil ni el anteproyecto afirman una verificación mayor que la que esta tabla sostiene.
+**Lo que queda abierto**, y que ningún otro documento debe dar por cerrado: las nueve entradas citadas a partir de su resumen —ocho del capítulo 2 y una del capítulo 3, Hevner et al. (2004)—, cuya lectura completa corresponde antes de la entrega final; y las fechas de recuperación de la documentación técnica con autor corporativo y de las fuentes consultadas en línea, que se fijan el día de la entrega. El registro operativo de esas acciones está en [PENDIENTES](../PENDIENTES.md) §2; ni el perfil ni el anteproyecto afirman una verificación mayor que la que esta tabla sostiene.

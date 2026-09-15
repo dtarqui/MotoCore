@@ -95,6 +95,7 @@ El diseño completo —condiciones C0 a C3, escenario, tablas cubiertas y eviden
 - **Superficie pública**: el registro de cuenta y la comprobación de disponibilidad. Todo lo demás exige credencial.
 - **Superficie interna**: la búsqueda de cuentas por correo y las funciones atómicas del motor solo son invocables por el servidor.
 - **Retención**: el registro de auditoría se conserva mientras exista la organización.
+- **Registros operativos**: los registros de ejecución, de base de datos y del pipeline **no contienen** contraseñas, cabeceras `Authorization`, credenciales del proveedor ni contenido de filas de negocio; su especificación está en [Arquitectura](04-arquitectura.md) §15.
 
 La especificación verificable de estos puntos está en [Requisitos](02-requisitos.md) §5.
 

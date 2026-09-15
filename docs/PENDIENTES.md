@@ -10,12 +10,12 @@ Cada entrada nace de una afirmación que los documentos dejan declarada como abi
 
 | § | Bloque | Entradas | Cuándo |
 |---|---|---|---|
-| [1](#1-formato) | Formato | 2 | Antes de presentar el perfil |
-| [2](#2-fuentes-y-referencias) | Fuentes y referencias | 4 | Antes de la entrega final |
-| [3](#3-datos-y-normativa) | Datos y normativa | 3 | Antes de la defensa |
+| [1](#1-formato) | Formato | 1 | Antes de presentar el perfil |
+| [2](#2-fuentes-y-referencias) | Fuentes y referencias | 3 | Antes de la entrega final |
+| [3](#3-datos-y-normativa) | Datos y normativa | 2 | Antes de la defensa |
 | [4](#4-condiciones-que-la-validación-debe-cumplir) | Condiciones que la validación debe cumplir | 3 | Antes de I8 |
-| [5](#5-trabajo-de-campo) | Trabajo de campo | 2 | Durante I6 |
-| [6](#6-decisiones-abiertas) | Decisiones abiertas | 6 | Según se indica |
+| [5](#5-trabajo-de-campo) | Trabajo de campo | 3 | Durante I6 |
+| [6](#6-decisiones-abiertas) | Decisiones abiertas | 7 | Según se indica |
 
 ---
 
@@ -23,8 +23,7 @@ Cada entrada nace de una afirmación que los documentos dejan declarada como abi
 
 | # | Pendiente | Dónde |
 |---|---|---|
-| **1.1** | **Contrastar la presentación con la guía de formato de la Dirección de Postgrado** —preliminares, márgenes y numeración—. La guía metodológica fija el contenido y los criterios, no el formato de presentación | Ambos documentos |
-| **1.2** | **Resumen y palabras clave.** El anteproyecto integrado ya lleva índice; faltan resumen y palabras clave en ambos documentos, y el índice del perfil. Decidir si la entrega los exige —depende de 1.1— y generarlos en ese caso | Ambos documentos |
+| **1.1** | **Contrastar la presentación con la guía de formato de la Dirección de Postgrado** —preliminares, márgenes, tipografía y numeración—. La guía metodológica fija el contenido y los criterios, no el formato de presentación. El **resumen, las palabras clave y el índice ya están redactados** en ambos documentos; lo que falta es ajustarlos a la plantilla institucional si esta impone otra estructura | Ambos documentos |
 
 ---
 
@@ -32,10 +31,9 @@ Cada entrada nace de una afirmación que los documentos dejan declarada como abi
 
 | # | Pendiente | Estado |
 |---|---|---|
-| **2.1** | **Ampliar la matriz del estado del arte a un mínimo de 10 artículos.** La guía lo exige (§3, «Matriz SOTA: mínimo 10 artículos»); hoy hay **5**. Cada fuente nueva debe entrar por el protocolo de revisión, con su DOI contrastado en el anexo. Al completarla cambian: capítulo 2 §2.2.2–§2.2.4 y §2.3; anteproyecto §6.2, §6.3, §6.5, §13 y §16.1; perfil §2, §9.2 y §10; y el anexo de referencias | **Requiere búsqueda** |
-| **2.2** | **Leer el texto completo de las seis fuentes citadas a partir de su resumen**: Alobaywi et al. (2026), Andriianenko (2026), Simić et al. (2024) y Olabanji et al. (2023) del capítulo 2, y Bezemer y Zaidman (2010) y Hevner et al. (2004) del capítulo 3. El anexo trae el enlace de acceso de cada una. Citar desde un resumen es admisible en un anteproyecto; en el documento final, no | Requiere lectura |
-| **2.3** | **Contrastar el ISBN de Brooke (1996)** —`978-0-7484-0460-5`— contra el catálogo de Taylor & Francis. Es la única entrada `Falta` de los once ISBN citados | Requiere comprobación |
-| **2.4** | **Fijar la fecha de recuperación definitiva** —el día de la entrega— de las fuentes sin fecha de publicación: documentación técnica (OpenJS, Microsoft, PostgreSQL ×2, Zod, Meta Open Source y el *Scrum Guide*, hoy con 14 de agosto de 2026), el modelo C4 y la Constitución Política del Estado (hoy con 14 de septiembre de 2026) y los cuadros del INE | El día de la entrega |
+| **2.1** | **Leer el texto completo de las nueve fuentes citadas a partir de su resumen**: Alobaywi et al. (2026), Andriianenko (2026), Simić et al. (2024), Zhang et al. (2021), Yassin et al. (2022), Zhu et al. (2024), Yin et al. (2025) y Leburu (2026) del capítulo 2, y Hevner et al. (2004) del capítulo 3. Olabanji et al. (2023) y Bezemer y Zaidman (2010) **ya se leyeron completos** el 14-09-2026. Tres obstáculos concretos: MDPI rechaza la descarga automatizada, IEEE Xplore exige verificación de navegador —incluidos los dos artículos de acceso abierto— y el repositorio de la UTM publica **solo la anotación** de la tesis de Andriianenko | Requiere lectura manual |
+| **2.2** | **Fijar la fecha de recuperación definitiva** —el día de la entrega— de las fuentes sin fecha de publicación: documentación técnica (OpenJS, Microsoft, PostgreSQL ×2, Zod, Meta Open Source y el *Scrum Guide*), el modelo C4 y los cuadros del INE. Todas se comprobaron accesibles el **14-09-2026** y llevan hoy esa fecha; solo resta re-comprobarlas y fecharlas el día de la entrega | El día de la entrega |
+| **2.3** | **Revisar dos fuentes frente al criterio de la guía** —estado del arte de los **últimos cinco años en IEEE, ACM y Scopus**—. **Olabanji et al. (2023)** se publicó en *WSEAS Transactions on Computers*, revista **discontinuada en Scopus desde 2014**; **Zhang et al. (2021)** se publicó en enero de 2021 y queda en el borde de la ventana de cinco años al llegar la defensa. Decidir entre sustituirlas por artículos de IEEE, ACM o Scopus dentro de la ventana, o justificar su permanencia en el protocolo (capítulo 2 §2.2.1) | Requiere decisión |
 
 ---
 
@@ -43,9 +41,8 @@ Cada entrada nace de una afirmación que los documentos dejan declarada como abi
 
 | # | Pendiente | Estado |
 |---|---|---|
-| **3.1** | **Localizar el cuadro oficial del 84,2 % de informalidad laboral.** El capítulo 2 declara que procede de difusión secundaria y queda «por remitir a su cuadro oficial» | Requiere comprobación, o citar un organismo estatal |
-| **3.2** | **El plazo del SIN vence dentro del período del proyecto.** El [Análisis del mercado](ingenieria/09-analisis-mercado.md) afirma que «el SIN extendió la adecuación hasta el **30 de septiembre de 2026**»; esa fecha cae antes de la defensa. Pasarla a pasado y citar la RND que formaliza la prórroga | Antes de la defensa |
-| **3.3** | **Confirmar la vigencia de la declaración de cifrado en reposo** del proveedor de datos (AES-256), que el documento trata como supuesto de seguridad | Antes de exponer producción a operadores |
+| **3.1** | **Confirmar que el plazo del SIN venció sin nueva prórroga.** El [Análisis del mercado](ingenieria/09-analisis-mercado.md) cita la **RND 102600000007, de 25 de marzo de 2026**, que amplió la adecuación hasta el **30 de septiembre de 2026**; esa fecha cae antes de la defensa. Comprobar que no se emitió otra resolución posterior y que el texto sigue siendo exacto | Antes de la defensa |
+| **3.2** | **Re-confirmar la declaración de cifrado en reposo** del proveedor de datos. Verificada el **14-09-2026** —*«All customer data is encrypted at rest with AES-256 and in transit via TLS»*, con SOC 2 Tipo 2, ISO 27001 y HIPAA—; el supuesto debe revalidarse inmediatamente antes de exponer producción a operadores reales | Antes de exponer producción a operadores |
 
 ---
 
@@ -63,12 +60,13 @@ El objetivo 4 no se cumple ejecutando la suite: se cumple ejecutándola **en las
 
 ## 5. Trabajo de campo
 
-Lo que exige el objetivo complementario 5 y no depende del código. Su contenido está en el [Plan de pruebas](ingenieria/11-plan-pruebas.md) §8.
+Lo que exige el objetivo complementario 5 y no depende del código. Su diseño está en el [Plan de pruebas](ingenieria/11-plan-pruebas.md) §8 y los instrumentos, ya redactados, en [Material de campo](ingenieria/12-material-de-campo.md).
 
 | # | Pendiente | Cuándo |
 |---|---|---|
 | **5.1** | **Contactar a 36 operadores y confirmar al menos 30 durante I6** (10–23 de noviembre). Es el criterio de continuidad del objetivo 5 y la mitigación del riesgo R8 | Durante I6 |
-| **5.2** | **Preparar el material de campo**: formulario de consentimiento informado, guion de tareas T1–T3 para las dos condiciones con la asignación contrabalanceada de cada participante, planilla de tiempos e incidencias, y el escenario de línea base con una cuenta por local ([Plan de pruebas](ingenieria/11-plan-pruebas.md) §3.3) | Antes de I8 |
+| **5.2** | **Transcribir los diez ítems del SUS en su versión validada en español** (Sevilla-González et al., 2020, material complementario) en [Material de campo](ingenieria/12-material-de-campo.md) §5, que hoy lleva una redacción provisional. Una traducción propia invalidaría la validación que justifica usarla | Antes del piloto |
+| **5.3** | **Ejecutar la sesión piloto** con uno o dos operadores ajenos a la muestra y aplicar sus correcciones al guion y a la planilla ([Plan de pruebas](ingenieria/11-plan-pruebas.md) §8.9) | Antes de I8, si el objetivo 5 continúa |
 
 ---
 
@@ -89,7 +87,7 @@ Las dos que [Decisiones de diseño](ingenieria/07-decisiones-diseno.md) consigna
 | # | Tema | Situación |
 |---|---|---|
 | **6.2.1** | Proveedor de mensajería por WhatsApp | Abierta — depende de funcionalidad fuera del alcance actual |
-| **6.2.2** | Integración con la facturación electrónica del SIN: proveedor autorizado frente a firma digital y generación de XML propias | Abierta — requiere validar la normativa vigente (ver 3.2) |
+| **6.2.2** | Integración con la facturación electrónica del SIN: proveedor autorizado frente a firma digital y generación de XML propias | Abierta — requiere validar la normativa vigente (ver 3.1) |
 
 ### 6.3 Ajustes que el esquema deberá recoger
 

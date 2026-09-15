@@ -100,7 +100,7 @@ Por cada criterio se distingue la **restricción** —lo que no se puede cambiar
 | **Presupuesto** | Capa gratuita de Supabase y Vercel, según las tarifas consultadas el 14 de septiembre de 2026 (§7) | El corte vertical cabe en 500 MB de base de datos y en 1 millón de invocaciones mensuales | Determina que no haya gasto mensual |
 | **Proyectos de base de datos** | El plan gratuito de Supabase admite 2 proyectos activos y los pausa tras 1 semana sin actividad | *Staging* puede pausarse durante I8 para liberar el proyecto de validación | Si falla, se requiere Supabase Pro |
 | **Uso de la plataforma de despliegue** | El plan gratuito de Vercel es para uso personal no comercial | El proyecto académico y la evaluación con operadores no constituyen uso comercial | Si falla, se requiere Vercel Pro |
-| **Seguridad** | Credencial privilegiada solo en el servidor; TLS en tránsito | El proveedor cifra los datos en reposo con AES-256, según su [declaración de seguridad](https://supabase.com/security) | Condición para exponer producción a operadores |
+| **Seguridad** | Credencial privilegiada solo en el servidor; TLS en tránsito | El proveedor cifra los datos en reposo con AES-256 —declaración verificada el 14 de septiembre de 2026—, según su [declaración de seguridad](https://supabase.com/security) | Condición para exponer producción a operadores |
 | **Tiempo** | 16 semanas; un solo desarrollador | Dedicación sostenida por iteración | Reserva de 10 días; objetivos complementarios descartables |
 | **Competencias** | Ecosistema TypeScript | La curva de aprendizaje de Hono y Supabase es acotada | Ritmo de desarrollo de I3 e I4 |
 | **Participantes** | 30 operadores del perfil | Se confirman durante I6 | Continuidad del objetivo 5 |

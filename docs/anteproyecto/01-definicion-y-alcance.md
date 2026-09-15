@@ -34,7 +34,7 @@ flowchart TD
 | El historial del cliente queda fragmentado entre talleres de una misma organización | Relevamiento de 10 plataformas: la gestión de varias organizaciones desde una cuenta está **ausente** en la oferta local ([Análisis del mercado](../ingenieria/09-analisis-mercado.md)) |
 | Un solo error de consulta expone datos de una organización a otra | Fallos recurrentes documentados en la aplicación de políticas de seguridad de fila y fuga de información por tiempo de ejecución de la consulta (§2.2) |
 | El operador que crece lleva cada local como una cuenta independiente o recurre a hojas de cálculo | Caracterización del sector (§2.1.1) |
-| El costo de entrada excluye a buena parte del sector | Informalidad laboral del 84,2 % y presupuesto de tecnología reducido (§2.1.1) |
+| El costo de entrada excluye a buena parte del sector | Empleo informal del 86,8 % de la población ocupada y presupuesto de tecnología reducido (§2.1.1) |
 
 ### Problema central
 

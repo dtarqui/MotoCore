@@ -88,7 +88,7 @@ Bolivia exige facturación electrónica/en línea gestionada por el **Servicio d
 - **Modalidades**: Electrónica en Línea, Computarizada en Línea y Portal Web en Línea (según el volumen del contribuyente).
 - **Códigos del SIN**: cada factura lleva un **CUF** (Código Único de Facturación); el sistema usa **CUIS** (inicio de sistema) y **CUFD** (código diario) emitidos por el SIN.
 - **Formato y firma**: XML normado (RND Nº 102100000011) y **firma digital** obligatoria en la modalidad Electrónica en Línea.
-- **Normativa/plazo**: serie **RND 1021** (p. ej. 1021-11, facturación en línea); el SIN extendió la adecuación hasta el **30 de septiembre de 2026**.
+- **Normativa/plazo**: serie **RND 1021** (p. ej. 1021-11, facturación en línea). Mediante la **[RND 102600000007](https://www.impuestos.gob.bo/wp-content/uploads/2026/03/RND-102600000007.pdf), de 25 de marzo de 2026**, el SIN amplió hasta el **30 de septiembre de 2026** el plazo de adecuación de los contribuyentes de los grupos noveno a duodécimo —alcanzados por las RND 102400000004, 102400000005, 102400000012 y 102400000025—; **desde el 1 de octubre de 2026** esos contribuyentes deben emitir sus documentos fiscales únicamente por la modalidad en línea que les corresponda.
 
 **Implicación para el sistema**: la factura de una orden de trabajo debería emitirse como factura en línea del SIN, generando el documento normado, firmándolo digitalmente y remitiéndolo según la modalidad que corresponda al contribuyente. Es una obligación normativa, no una funcionalidad opcional. Queda **fuera del alcance** del presente proyecto por su extensión, y se documenta como línea de continuación prioritaria.
 

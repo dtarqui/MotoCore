@@ -29,6 +29,20 @@ La Paz – Bolivia
 
 ---
 
+## Resumen
+
+El software de gestión de talleres disponible en Bolivia asume un taller por cuenta y resuelve la separación entre clientes en la capa de aplicación, de modo que un error de programación puede exponer los datos de una organización a otra. Este proyecto propone **diseñar, desarrollar y validar una arquitectura multi-tenant jerárquica** —una cuenta administra varias organizaciones y cada organización varios talleres— cuyo aislamiento se impone en el **motor de base de datos con Row Level Security (RLS)** y se refuerza con verificación de membresía en la capa de aplicación, sobre infraestructura serverless. La investigación es **aplicada**, de enfoque **cuantitativo** y diseño **cuasiexperimental**, y adopta *Design Science Research*: el artefacto se contrasta con una **línea base** en la que el aislamiento se resuelve solo en la aplicación. Se mide el número de **filas ajenas devueltas** en las siete tablas de negocio bajo cuatro condiciones experimentales, entre ellas la omisión deliberada de los controles de la aplicación. Dos objetivos complementarios, la usabilidad del cambio de contexto y el costo operativo por organización, se evalúan con un criterio de continuidad que permite descartarlos sin afectar la hipótesis central.
+
+**Palabras clave:** multi-tenancy jerárquica; Row Level Security; aislamiento de datos; software como servicio; PostgreSQL; arquitectura serverless.
+
+---
+
+## Índice
+
+1. Datos generales · 2. Antecedentes · 3. Planteamiento del problema · 4. Objetivos · 5. Hipótesis y variables · 6. Justificación · 7. Propuesta, alcance y exclusiones · 8. Marco teórico y conceptual · 9. Diseño metodológico · 10. Matriz de consistencia · 11. Cronograma · 12. Recursos, presupuesto y viabilidad · 13. Riesgos y mitigación · 14. Resultados esperados · 15. Bibliografía preliminar
+
+---
+
 ## 1. Datos generales
 
 | Campo | Detalle |
@@ -47,11 +61,11 @@ La Paz – Bolivia
 
 **El parque de motocicletas y la demanda de servicio.** La motocicleta es el vehículo más numeroso de Bolivia. Según el Instituto Nacional de Estadística (INE), a partir de los registros del Registro Único para la Administración Tributaria Municipal (RUAT), en **2025** se contabilizaron **931.205 motocicletas**, el **34,8 %** del parque automotor nacional. Su crecimiento supera al del parque en conjunto: de **657.718 unidades en 2021** pasó a **872.550 en 2024** y a **931.205 en 2025**, **+41,6 % en cuatro años**, frente al +20,0 % del parque automotor total. Cada unidad requiere mantenimiento periódico, lo que sostiene una red amplia de talleres de servicio.
 
-**Condiciones del sector.** Ese crecimiento ocurre en una economía marcadamente informal: el indicador de **informalidad laboral del 84,2 % en 2024**, procedente de la Encuesta Continua de Empleo del INE, se emplea como caracterización cualitativa y no interviene en ningún cálculo del documento (capítulo 2, §2.1.1). Para el rubro de talleres esto se traduce en unidades de negocio pequeñas, con presupuesto de tecnología muy limitado y gestión apoyada todavía en papel u hojas de cálculo.
+**Condiciones del sector.** Ese crecimiento ocurre en una economía marcadamente informal: el **empleo informal alcanzó el 86,8 % de la población ocupada en 2024** —6,0 de 6,9 millones de personas—, según el Cuadro 7 de UDAPE, elaborado con la Encuesta Continua de Empleo del INE. El indicador se emplea como caracterización cualitativa y no interviene en ningún cálculo del documento (capítulo 2, §2.1.1). Para el rubro de talleres esto se traduce en unidades de negocio pequeñas, con presupuesto de tecnología muy limitado y gestión apoyada todavía en papel u hojas de cálculo.
 
 **Antecedentes tecnológicos.** La gestión de talleres pasó del software de escritorio por local al software como servicio de un solo inquilino por cuenta, que traslada el sistema a la nube pero conserva el supuesto de un taller por cuenta. Las arquitecturas multi-tenant ofrecen tres estrategias —base por inquilino, esquema por inquilino y esquema compartido—, y la última, la única compatible con un costo proporcional al uso, dispersa la condición de inquilino por el código de la aplicación salvo que se traslade al motor mediante políticas de seguridad a nivel de fila.
 
-**Antecedentes científicos.** La literatura reciente sobre aislamiento entre inquilinos en esquemas compartidos —Dar, Hershcovitch y Morrison (2023), Alobaywi et al. (2026), Andriianenko (2026) y Olabanji et al. (2023)— aborda el problema en modelos de inquilino **plano y de un solo nivel**. Simić et al. (2024) sí modelan una jerarquía, pero su aislamiento opera sobre **recursos de infraestructura** y no sobre las filas de una base relacional compartida. A ello se suma la evidencia de que la aplicación de políticas de seguridad a nivel de fila ha fallado de forma recurrente en producción (CVE-2016-2193, CVE-2023-2455 y CVE-2024-10976).
+**Antecedentes científicos.** La literatura reciente sobre aislamiento entre inquilinos en esquemas compartidos —Dar, Hershcovitch y Morrison (2023), Alobaywi et al. (2026), Andriianenko (2026) y Olabanji et al. (2023)— aborda el problema en modelos de inquilino **plano y de un solo nivel**. Otros trabajos lo resuelven en capas distintas de las filas de una base compartida —la aplicación (Leburu, 2026), la criptografía (Zhu et al., 2024), la detección de intrusiones (Yassin et al., 2022) o la máquina virtual (Zhang et al., 2021)—, o evalúan bases de datos multi-inquilino sin medir el aislamiento (Yin et al., 2025). Simić et al. (2024) sí modelan una jerarquía, pero su aislamiento opera sobre **recursos de infraestructura** y no sobre las filas de una base relacional compartida. A ello se suma la evidencia de que la aplicación de políticas de seguridad a nivel de fila ha fallado de forma recurrente en producción (CVE-2016-2193, CVE-2023-2455 y CVE-2024-10976).
 
 ---
 
@@ -227,7 +241,7 @@ Las categorías siguen la clasificación de Hernández-Sampieri y Mendoza (2018)
 
 | # | Población | Muestra | Muestreo |
 |---|---|---|---|
-| **a** | Publicaciones revisadas por pares sobre aislamiento entre inquilinos, 2021–2026 *(obj. 1)* | **5 fuentes** | No probabilístico por criterio |
+| **a** | Publicaciones revisadas por pares sobre aislamiento entre inquilinos, 2021–2026 *(obj. 1)* | **10 fuentes** | No probabilístico por criterio |
 | **b** | Plataformas de gestión de talleres con presencia en Bolivia *(obj. 1)* | **10 plataformas** | No probabilístico intencional |
 | **c** | Tablas de negocio y operaciones de la interfaz del sistema a construir *(obj. 2 y 4)* | **Censo**: 7 tablas y todas las operaciones × 4 condiciones × 3 corridas, sobre 3 cuentas, 3 organizaciones y 3 talleres sintéticos | Intencional por caso crítico; no cabe muestreo probabilístico |
 | **d** | Operadores de organizaciones de servicio de motocicletas en Bolivia con más de una organización y/o taller *(obj. 5)* | **30 participantes**, con sobre-reclutamiento de 36 | No probabilístico intencional por perfil |
@@ -277,7 +291,7 @@ La configuración detallada de cada instrumento está en el [anteproyecto](04-an
 | Problema | Objetivo | Hipótesis | Variables | Metodología / Métrica |
 |---|---|---|---|---|
 | **General:** ¿De qué manera una arquitectura multi-tenant jerárquica con Row Level Security (RLS) sobre infraestructura serverless sostiene un aislamiento verificable e inmutable —cero filas ajenas devueltas aun cuando la capa de aplicación omite sus controles—, frente al aislamiento resuelto solo en la aplicación, en la gestión centralizada de varias organizaciones y talleres de servicio de mantenimiento mecánico en Bolivia? | Diseñar, desarrollar y validar una arquitectura multi-tenant jerárquica con Row Level Security (RLS) sobre infraestructura serverless que sostenga un aislamiento verificable e inmutable —cero filas ajenas devueltas aun cuando la capa de aplicación omita sus controles—, para que los operadores de varias organizaciones y talleres de servicio de mantenimiento mecánico gestionen su información de forma centralizada. | H1: reducción del 100 % de las filas ajenas frente a la línea base | VI: arquitectura de aislamiento · VD: aislamiento, gestión centralizada | Design Science Research, cuasiexperimental con línea base / filas ajenas devueltas |
-| **Esp. 1:** ¿Qué estrategias documenta la literatura y qué carencias presenta la oferta boliviana? | Diagnosticar y fijar la línea base | — | — | Revisión sistemática y análisis documental / fuentes con limitación · capacidades ausentes |
+| **Esp. 1:** ¿Qué estrategias documenta la literatura y qué carencias presenta la oferta boliviana? | Diagnosticar y fijar la línea base | — | — | Revisión sistemática y análisis documental / 10 fuentes con limitación · capacidades ausentes |
 | **Esp. 2:** ¿Qué modelo, políticas y contrato sostienen un único límite de aislamiento? | Diseñar el modelo, las políticas y el contrato | — | VI especificada | Modelado y C4 / 2 niveles · 1 límite · 7 de 7 tablas con criterio único |
 | **Esp. 3:** ¿Cómo se construye el corte vertical verificado en cada integración? | Desarrollar el corte vertical | — | Interviniente: calidad del código | Desarrollo iterativo / cobertura ≥ 80 % · 0 errores de tipos · 0 vulnerabilidades |
 | **Esp. 4:** ¿En qué medida se reducen las filas ajenas frente a la línea base, también sin la verificación de membresía? | Validar frente a la línea base | H1 · criterio §9.4 | VI: C0–C3 · VD: aislamiento | Cuasiexperimental, censo, 3 corridas / 0 filas ajenas · 100 % autorización correcta |
@@ -379,7 +393,7 @@ El registro completo, con plan de contingencia, está en el [Plan de trabajo](..
 
 | Resultado | Métrica |
 |---|---|
-| Estado del arte con matriz y vacío formulado | Fuentes con limitación consignada |
+| Estado del arte con matriz y vacío formulado | 10 fuentes con limitación consignada |
 | Especificación, modelo jerárquico, políticas, C4 y contrato | 7 de 7 tablas con criterio único de política |
 | Sistema con el corte vertical en *staging* y producción | 100 % de requisitos `Must` con caso en verde · cobertura ≥ 80 % |
 | Evidencia reproducible de aislamiento | 0 filas ajenas bajo C1–C3 en 3 corridas, frente a filas ajenas en C0 |
@@ -391,7 +405,7 @@ El registro completo, con plan de contingencia, está en el [Plan de trabajo](..
 
 ## 15. Bibliografía preliminar
 
-Estilo APA, 7.ª edición. El estado de verificación entrada por entrada consta en el [Anexo de verificación de referencias](anexo-referencias.md).
+Estilo APA, 7.ª edición. El estado de verificación entrada por entrada consta en el [Anexo de verificación de referencias](anexo-referencias.md). Las obras con DOI o identificador permanente no llevan fecha de recuperación en APA 7, de modo que su **fecha de consulta** se registra en el anexo: **14 de septiembre de 2026** para Zhang et al. (2021), Yassin et al. (2022), Zhu et al. (2024), Yin et al. (2025), Leburu (2026), Cronbach (1951) y Hevner et al. (2004); **18 de agosto de 2026** para las demás.
 
 Alobaywi, B., Almutairi, M. G., & Sheldon, F. T. (2026). Performance trade-offs in multi-tenant IoT–cloud security: A systematic review of emerging technologies. *IoT, 7*(1), 21. https://doi.org/10.3390/iot7010021
 
@@ -415,7 +429,7 @@ Cronbach, L. J. (1951). Coefficient alpha and the internal structure of tests. *
 
 Dar, C., Hershcovitch, M., & Morrison, A. (2023). RLS side channels: Investigating leakage of row-level security protected data through query execution time. *Proceedings of the ACM on Management of Data, 1*(1), Artículo 89, 1–25. https://doi.org/10.1145/3588943
 
-Estado Plurinacional de Bolivia. (2009). *Constitución Política del Estado* (promulgada el 7 de febrero de 2009). Recuperado el 14 de septiembre de 2026, de https://www.lexivox.org/norms/BO-CPE-20090207.html
+Estado Plurinacional de Bolivia. (2009). *Constitución Política del Estado* (promulgada el 7 de febrero de 2009). Recuperado el 14 de septiembre de 2026, de https://www.planificacion.gob.bo/uploads/marco-legal/nueva_constitucion_politica_del_estado.pdf
 
 Fielding, R. T. (2000). *Architectural styles and the design of network-based software architectures* [Tesis doctoral, University of California, Irvine].
 
@@ -443,6 +457,8 @@ Krebs, R., Momm, C., & Kounev, S. (2012). Architectural concerns in multi-tenant
 
 Larman, C., & Basili, V. R. (2003). Iterative and incremental developments: A brief history. *Computer, 36*(6), 47–56. https://doi.org/10.1109/MC.2003.1204375
 
+Leburu, N. (2026). Trust-aware orchestration architecture for LLM-assisted workflows in multi-tenant enterprise systems. *IEEE Access, 14*, 97094–97117. https://doi.org/10.1109/ACCESS.2026.3706063
+
 Nielsen, J. (1993). *Usability engineering*. Morgan Kaufmann.
 
 Nielsen, J., & Landauer, T. K. (1993). A mathematical model of the finding of usability problems. En *Proceedings of the INTERACT '93 and CHI '93 Conference on Human Factors in Computing Systems* (pp. 206–213). ACM. https://doi.org/10.1145/169059.169166
@@ -460,6 +476,18 @@ Sandhu, R. S., Coyne, E. J., Feinstein, H. L., & Youman, C. E. (1996). Role-base
 Simić, M., Dedeić, J., Stojkov, M., & Prokić, I. (2024). A hierarchical namespace approach for multi-tenancy in distributed clouds. *IEEE Access, 12*, 32597–32617. https://doi.org/10.1109/ACCESS.2024.3369031
 
 World Wide Web Consortium. (2026). *Web application manifest* (W3C Working Draft del 13 de agosto de 2026). https://www.w3.org/TR/appmanifest/
+
+Sevilla-González, M. del R., Moreno Loaeza, L., Lazaro-Carrera, L. S., Bourguet Ramirez, B., Vázquez Rodríguez, A., Peralta-Pedrero, M. L., & Almeda-Valdes, P. (2020). Spanish version of the System Usability Scale for the assessment of electronic tools: Development and validation. *JMIR Human Factors, 7*(4), e21161. https://doi.org/10.2196/21161
+
+Unidad de Análisis de Políticas Sociales y Económicas. (2025). *Análisis de la población ocupada, desocupada e inactiva en Bolivia entre los años 2015 y 2024*. UDAPE. https://www.udape.gob.bo/wp-content/uploads/2026/03/Analisis-de-la-condicion-actividad-2025.pdf
+
+Yassin, M., Ould-Slimane, H., Talhi, C., & Boucheneb, H. (2022). Multi-tenant intrusion detection framework as a service for SaaS. *IEEE Transactions on Services Computing, 15*(5), 2925–2938. https://doi.org/10.1109/TSC.2021.3077852
+
+Yin, S., Morvan, F., Martinez-Gil, J., & Hameurlain, A. (2025). MTD-DS: An SLA-aware decision support benchmark for multi-tenant parallel DBMSs. *IEEE Transactions on Knowledge and Data Engineering, 37*(5), 2743–2755. https://doi.org/10.1109/TKDE.2025.3543727
+
+Zhang, Z., Yang, Z., Du, X., Li, W., Chen, X., & Sun, L. (2021). Tenant-led ciphertext information flow control for cloud virtual machines. *IEEE Access, 9*, 15156–15169. https://doi.org/10.1109/ACCESS.2021.3051061
+
+Zhu, X., Shen, P., Dai, Y., Xu, L., & Hu, J. (2024). Privacy-preserving and trusted keyword search for multi-tenancy cloud. *IEEE Transactions on Information Forensics and Security, 19*, 4316–4330. https://doi.org/10.1109/TIFS.2024.3377549
 
 ---
 

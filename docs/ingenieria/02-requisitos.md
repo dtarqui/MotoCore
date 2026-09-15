@@ -189,9 +189,10 @@ Restricciones del dominio que condicionan los requisitos sin ser funcionalidades
 | ID | Categoría | Requisito | Métrica y umbral | Cómo se verifica | Prioridad | Alcance |
 |---|---|---|---|---|---|---|
 | RNF-401 | Usabilidad | El cambio de organización y de taller está disponible sin cerrar sesión. | **0** reautenticaciones al cambiar de contexto · flujo T1 en verde | Contrato desde el cliente y extremo a extremo (CP-N401) | Must | Sí |
-| RNF-402 | Compatibilidad | La interfaz es utilizable en navegador de escritorio y móvil. | **0** desbordamientos horizontales a **360 px** y **1280 px** en las pantallas del corte vertical | Auditoría con Playwright (CP-N402) | Must | Sí |
+| RNF-402 | Compatibilidad | La interfaz es utilizable en navegador de escritorio y móvil. | **0** desbordamientos horizontales a **360 px** y **1280 px** en las pantallas del corte vertical, en los motores **Chromium** y **WebKit** | Auditoría con Playwright (CP-N402) | Must | Sí |
 | RNF-403 | Compatibilidad | La aplicación es instalable como PWA. | Manifiesto con nombre, iconos de **192 px** y **512 px**, `start_url` y `display: standalone` · *service worker* registrado | Auditoría con Playwright (CP-N403) | Should | Sí |
-| RNF-404 | Usabilidad | El cambio de contexto resulta operable por un usuario del rubro sin formación previa. | Tasa de éxito **≥ 80 %** por tarea · puntuación SUS **≥ 68** (Brooke, 1996; Bangor et al., 2008) con **α > 0,8** | Evaluación con operadores, objetivo complementario 5 (CP-N404) | Should | Sí |
+| RNF-404 | Usabilidad | El cambio de contexto resulta operable por un usuario del rubro sin formación previa. | Tasa de éxito **≥ 80 %** por tarea · puntuación SUS **≥ 68** (Brooke, 1996, en la versión en español validada por Sevilla-González et al., 2020; baremo de Bangor et al., 2008) con **α > 0,8** | Evaluación con operadores, objetivo complementario 5 (CP-N404) | Should | Sí |
+| RNF-405 | Compatibilidad | La interfaz cumple los criterios de accesibilidad aplicables a las pantallas del corte vertical. | **0** incumplimientos graves o críticos de **WCAG 2.1 nivel AA** en las pantallas del corte vertical | Auditoría automatizada en el ejecutor extremo a extremo (CP-N405) | Should | Sí |
 
 ### RNF-500 · Rendimiento *(fuera de alcance)*
 
@@ -210,7 +211,7 @@ Atraviesan todas las capas y son bloqueantes para exponer el entorno de producci
 | **Autenticación** | Credencial de sesión emitida por el proveedor de identidad —JWT firmado (RFC 7519)— y verificada en cada petición; el servidor no emite credenciales propias | RF-102, RF-103, ADR-004 |
 | **Expiración de sesiones** | Credencial de acceso de corta duración, renovada automáticamente mediante una credencial de renovación rotativa gestionada por el proveedor; una credencial expirada responde `401 auth.invalid_token` | RF-102, RF-103 |
 | **Autorización** | Control de acceso basado en roles **por organización** —`Owner`, `Receptionist`, `Mechanic`— verificado en la aplicación, más políticas de seguridad a nivel de fila en el motor | RF-406, RF-505, RF-609, RNF-101, RNF-102 |
-| **Protección de datos** | TLS en tránsito; cifrado en reposo provisto por el proveedor de datos (AES-256, según su [declaración de seguridad](https://supabase.com/security)); datos personales mínimos —nombre, correo y teléfono de contacto—; credencial privilegiada solo en el servidor | RNF-103, RNF-104 |
+| **Protección de datos** | TLS en tránsito; cifrado en reposo provisto por el proveedor de datos (AES-256 —declaración verificada el 14 de septiembre de 2026—, según su [declaración de seguridad](https://supabase.com/security)); datos personales mínimos —nombre, correo y teléfono de contacto—; credencial privilegiada solo en el servidor | RNF-103, RNF-104 |
 | **Trazabilidad** | Registro de las seis acciones críticas con autor, acción y fecha; de solo inserción; **retención mientras exista la organización** | RF-703, RF-704, RN-15 |
 | **Superficie de exposición** | **Públicos**: registro de cuenta y comprobación de disponibilidad. **Autenticados**: todo lo demás. **Internos**: búsqueda de cuentas por correo y funciones atómicas, invocables solo por el servidor. **Orígenes permitidos**: solo los del cliente web en *staging* y producción. Un límite de tasa propio sobre el registro exige estado compartido entre funciones efímeras y queda fuera del alcance ([Seguridad](06-seguridad.md), «Fuera del alcance») | RNF-106, ADR-007, ADR-008 |
 
@@ -226,7 +227,7 @@ El **MVP** lo componen los requisitos funcionales `Must` **más** los no funcion
 |---|---|
 | **MVP — funcionales `Must`** | RF-101 a RF-104, RF-201 a RF-203, RF-301 a RF-303, RF-401 a RF-406, RF-501 a RF-504, RF-601 a RF-606, RF-701, RF-702 |
 | **MVP — no funcionales bloqueantes** | RNF-101 a RNF-106 (seguridad), RNF-201 a RNF-205 y RNF-207 (calidad), RNF-208 (dependencias), RNF-301 a RNF-304 (operación), RNF-401 y RNF-402 (usabilidad y compatibilidad) |
-| **`Should`** | RF-204, RF-304, RF-305, RF-407, RF-505, RF-607, RF-609, RF-703, RF-704, RNF-305, RNF-403, RNF-404 |
+| **`Should`** | RF-204, RF-304, RF-305, RF-407, RF-505, RF-607, RF-609, RF-703, RF-704, RNF-305, RNF-403, RNF-404, RNF-405 |
 | **`Could`** | RF-608 |
 | **`Won't` (este período)** | RF-801 a RF-808, RNF-501 |
 
@@ -251,7 +252,7 @@ Cada requisito se rastrea **hacia atrás** hasta el objetivo específico que lo 
 | RNF-101 a RNF-106 | O2 · O3 · **O4** | Políticas del motor · middlewares · reparto de clientes de datos (ADR-008) |
 | RNF-201 a RNF-208 | O3 | Pipeline de integración continua |
 | RNF-301 a RNF-305 | O3 · O6 evalúa RNF-302 | Despliegue en Vercel y Supabase |
-| RNF-401 a RNF-403 | O3 · O5 evalúa RNF-401 | Cliente web: selectores de contexto y manifiesto |
+| RNF-401 a RNF-403 y RNF-405 | O3 · O5 evalúa RNF-401 | Cliente web: selectores de contexto, manifiesto y accesibilidad |
 | RNF-404 | **O5** | Evaluación con operadores |
 
 El objetivo 1 no genera requisitos propios: **fundamenta** RNF-101, RNF-102, la línea base de la validación y el alcance funcional.

@@ -189,7 +189,24 @@ Qué se ejecuta en cada nivel está en el [Plan de pruebas](11-plan-pruebas.md) 
 
 La plataforma soportada es **web**, responsiva para escritorio y móvil (RNF-402) e instalable como aplicación web progresiva (RNF-403). Las aplicaciones nativas están **fuera del alcance** ([anteproyecto/01-definicion-y-alcance.md](../anteproyecto/01-definicion-y-alcance.md) §1.8.3).
 
-## 15. Salidas de esta etapa
+## 15. Registros y observabilidad
+
+Qué queda registrado cuando algo falla, dónde vive ese registro y qué no debe entrar en él.
+
+**No confundir con el registro de auditoría** (§8): aquel es un **dato de negocio** —seis acciones críticas, de solo inserción, consultable por el `Owner` y conservado mientras exista la organización (RF-703, RF-704)—. Los registros de esta sección son **operativos**: sirven para diagnosticar fallos, no se exponen en la interfaz y su retención es la que ofrezca el plan del proveedor.
+
+| Registro | Qué contiene | Dónde vive | Para qué se usa |
+|---|---|---|---|
+| **Errores del servidor** | Causa real del `server.error` con su traza, el código de negocio devuelto, la ruta y el identificador de la organización activa | Registros de ejecución de la plataforma serverless | Diagnosticar un `500`, cuyo detalle **nunca viaja al cliente** ([Contrato](10-contrato-api.md) §5) |
+| **Invocaciones** | Ruta, método, código de estado y duración | Registros de ejecución de la plataforma serverless | Localizar fallos repetidos y confirmar que una publicación quedó operativa |
+| **Base de datos** | Errores del motor, incluidas las denegaciones por política | Registros del proveedor de datos | Distinguir un fallo de aplicación de una denegación de aislamiento |
+| **Pipeline** | Salida de tipos, pruebas, cobertura y auditoría de dependencias | Historial de ejecuciones de GitHub Actions | Evidencia de los KPI de calidad ([Plan de pruebas](11-plan-pruebas.md) §2) |
+
+**Qué no se registra nunca**: contraseñas, cabeceras `Authorization`, credenciales del proveedor ni el contenido de filas de negocio. De la organización y del taller se registra su **identificador**, no su nombre; de la cuenta, su identificador, no su correo.
+
+**Trazabilidad de un fallo.** El cliente recibe `server.error` sin detalle; la causa se localiza en los registros de ejecución por ruta y momento. Como en capa gratuita la retención la fija el proveedor y no es configurable, **toda salida que deba sostener un resultado de la validación se exporta y se conserva** con la evidencia ([Plan de pruebas](11-plan-pruebas.md) §6.6), en lugar de confiarse al registro del proveedor.
+
+## 16. Salidas de esta etapa
 
 | Salida | Dónde |
 |---|---|
@@ -197,3 +214,4 @@ La plataforma soportada es **web**, responsiva para escritorio y móvil (RNF-402
 | Matriz de componentes | §5 |
 | Relaciones: protocolos, contratos y flujos de datos | §7 · [Contrato](10-contrato-api.md) |
 | Justificación técnica | §1, §12 y [Decisiones de diseño](07-decisiones-diseno.md) |
+| Registros y observabilidad | §15 |

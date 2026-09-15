@@ -40,6 +40,7 @@ La documentación se divide en dos: el **anteproyecto** es el documento académi
 | 9 | [Análisis del mercado](ingenieria/09-analisis-mercado.md) | Soluciones existentes en Bolivia, comparativo y funcionalidades desatendidas |
 | 10 | [Contrato de la interfaz de programación](ingenieria/10-contrato-api.md) | Rutas, contexto activo, códigos de error y reglas de no divulgación |
 | 11 | [Plan de pruebas y validación](ingenieria/11-plan-pruebas.md) | Estrategia multinivel, KPIs, condiciones C0–C3, matriz requisito → caso → evidencia y evaluaciones complementarias |
+| 12 | [Material de campo](ingenieria/12-material-de-campo.md) | Consentimiento informado, guion de tareas T1–T3, planilla de registro y cuestionario SUS en español para la evaluación con operadores |
 
 ---
 
@@ -81,6 +82,7 @@ Antes de escribir sobre un tema, verificar quién es su responsable. Si ya lo ti
 | Contexto de mercado y análisis comparativo | [ingenieria/09-analisis-mercado.md](ingenieria/09-analisis-mercado.md) |
 | Rutas, cabeceras y códigos de error de la API | [ingenieria/10-contrato-api.md](ingenieria/10-contrato-api.md) |
 | Estrategia de pruebas, KPIs, matriz de validación y evidencia | [ingenieria/11-plan-pruebas.md](ingenieria/11-plan-pruebas.md) |
+| Instrumentos de la evaluación con operadores | [ingenieria/12-material-de-campo.md](ingenieria/12-material-de-campo.md) |
 
 ## Pendientes
 

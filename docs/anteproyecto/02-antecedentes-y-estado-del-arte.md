@@ -8,7 +8,7 @@ Son dos secciones distintas. Los **antecedentes** responden *¿qué se ha usado 
 
 **El parque de motocicletas de Bolivia y su demanda de servicio.** La motocicleta es el vehículo más numeroso del país: según el Cuadro N.º 1.2 del Instituto Nacional de Estadística (INE), elaborado con registros del Registro Único para la Administración Tributaria Municipal (RUAT), en **2025** se contabilizaron **931.205 motocicletas** —el **34,8 %** de todo el parque automotor nacional—, cifra que lo encabeza por delante de vagonetas, automóviles y camionetas. Su crecimiento no solo es sostenido, sino **más del doble de rápido** que el del parque en conjunto: entre 2021 y 2025 las motocicletas pasaron de **657.718** a **931.205 unidades** (**+41,6 %**), mientras que el parque automotor total creció un **+20,0 %** en el mismo período. La progresión es continua —657.718 en 2021, 872.550 en 2024 y 931.205 en 2025—, y por eso su participación no deja de subir: del **29,5 % en 2021** al **34,8 % en 2025**. Cada una de esas unidades requiere mantenimiento periódico y reparaciones, lo que sostiene una red amplia de talleres de servicio distribuida por todo el territorio — una base de negocio que crece año a año y que, al hacerlo, empuja a los operadores más exitosos a abrir locales adicionales.
 
-**Condiciones del sector que explican el problema.** Ese crecimiento ocurre, sin embargo, en una economía marcadamente informal: el INE reporta una **informalidad laboral del 84,2 % en 2024**, una tendencia que se ha agravado de forma sostenida durante las últimas dos décadas. Para el rubro de talleres esto se traduce en unidades de negocio pequeñas, con presupuesto de tecnología muy limitado y baja adopción de software especializado, donde la gestión se apoya todavía en registros en papel u hojas de cálculo. En ese contexto, el operador que crece —el que abre un segundo o tercer taller, o constituye más de una organización— se encuentra sin herramientas que le permitan administrarlas de forma centralizada: debe optar entre llevar cada local como una instalación independiente, perdiendo la visión unificada del cliente y su historial, o renunciar a la especialización y volver a soluciones genéricas.
+**Condiciones del sector que explican el problema.** Ese crecimiento ocurre, sin embargo, en una economía marcadamente informal: el **empleo informal alcanzó el 86,8 % de la población ocupada en 2024** —6,0 de 6,9 millones de personas—, según el Cuadro 7 de UDAPE, elaborado con la Encuesta Continua de Empleo del INE; en el área rural llega al **94,7 %**, y la serie se agrava de forma sostenida desde 2015. Para el rubro de talleres esto se traduce en unidades de negocio pequeñas, con presupuesto de tecnología muy limitado y baja adopción de software especializado, donde la gestión se apoya todavía en registros en papel u hojas de cálculo. En ese contexto, el operador que crece —el que abre un segundo o tercer taller, o constituye más de una organización— se encuentra sin herramientas que le permitan administrarlas de forma centralizada: debe optar entre llevar cada local como una instalación independiente, perdiendo la visión unificada del cliente y su historial, o renunciar a la especialización y volver a soluciones genéricas.
 
 #### Fuentes consultadas para el contexto del sector
 
@@ -20,9 +20,10 @@ Se cita el **cuadro estadístico oficial**, no su difusión periodística. El IN
 | INE — *Boletín estadístico parque automotor 2024* (publicado el 28 de mayo de 2025) | **Primaria** (oficial) | https://www.ine.gob.bo/index.php/boletin-estadistico-parque-automotor-2024/ |
 | INE — *Estadísticas del parque automotor 2003–2025* (publicado el 1 de julio de 2026) | **Primaria** (oficial) | https://www.ine.gob.bo/index.php/estadisticas-del-parque-automotor-2003-2025/ |
 | INE / ANDA — Ficha del producto estadístico *Estadísticas del parque automotor*, identificador `BOL-INE-EPARQAUTO` | **Primaria** (metadatos oficiales) | https://anda.ine.gob.bo/index.php/catalog/205 |
-| INE — *Encuesta Continua de Empleo* (fuente del indicador de informalidad laboral del 84,2 %) | Secundaria — dato por remitir a su cuadro oficial | https://www.ine.gob.bo/index.php/desocupacion/ |
+| UDAPE — *Análisis de la población ocupada, desocupada e inactiva en Bolivia entre los años 2015 y 2024*, **Cuadro 7** (serie de empleo informal 2015–2024). **Cuadro del que procede la cifra de informalidad** | **Primaria** (oficial, descargable) | https://www.udape.gob.bo/wp-content/uploads/2026/03/Analisis-de-la-condicion-actividad-2025.pdf |
+| INE — *Encuesta Continua de Empleo*, encuesta de origen de esa serie | **Primaria** (oficial) | https://www.ine.gob.bo/index.php/desocupacion/ |
 
-> **Salvedad sobre el indicador de informalidad.** A diferencia de las cifras del parque automotor, el 84,2 % de informalidad laboral procede de la Encuesta Continua de Empleo del INE por vía de difusión secundaria, y no del cuadro estadístico original. Se emplea, por tanto, únicamente como **caracterización cualitativa** del sector y no interviene en ningún cálculo del documento.
+> **Sobre el indicador de informalidad.** La cifra procede del **Cuadro 7** de UDAPE —organismo estatal—, que construye la serie de empleo informal 2015–2024 sobre la Encuesta Continua de Empleo del INE. En esa serie, el **84,2 %** que suele citarse en prensa corresponde a **2017**, no a 2024. El indicador se emplea únicamente como **caracterización cualitativa** del sector y no interviene en ningún cálculo del documento.
 
 > **Nota de método.** Las cifras de motocicletas del Cuadro N.º 1.2 se presentan desagregadas por tipo de servicio; el total anual empleado aquí es la suma de las tres categorías (particular, público y oficial). Para 2024, por ejemplo: 855.268 + 2.278 + 15.004 = **872.550**; el total de 2025 se obtiene de la misma forma.
 
@@ -64,6 +65,11 @@ Esta evolución deja dos límites abiertos que el estado del arte debe examinar:
 | **Andriianenko (2026)** · Tesis de maestría, Universitatea Tehnică a Moldovei | Diseño, implementación y **evaluación comparativa** de dos arquitecturas sobre un mismo SaaS de gestión de proyectos basado en microservicios | El **esquema compartido** reduce el consumo de recursos pero incrementa la complejidad y el riesgo de aislamiento; la **base de datos por inquilino** separa mejor a costa de mayor sobrecarga operativa | Evalúa ambos modelos como **alternativas planas y excluyentes**, sin considerar la seguridad a nivel de fila como refuerzo dentro del esquema compartido, ni una jerarquía de dos niveles con reglas de alcance distintas por entidad |
 | **Simić, Dedeić, Stojkov & Prokić (2024)** · *IEEE Access*, 12, pp. 32597–32617 · DOI 10.1109/ACCESS.2024.3369031 | Diseño e implementación de un modelo de nubes virtuales mediante una jerarquía de espacios de nombres sobre infraestructura distribuida en el borde, con evaluación del aislamiento y de la redistribución de recursos | La jerarquía de espacios de nombres sostiene el **aislamiento lógico entre inquilinos de distinto nivel**, permitiendo que un nivel superior reorganice CPU, memoria y almacenamiento de los inferiores | Su aislamiento opera sobre **recursos de infraestructura**, no sobre filas de una base relacional compartida: no hay políticas a nivel de fila ni reparto de entidades de negocio según su nivel |
 | **Olabanji, Fitch & Matthew (2023)** · *WSEAS Transactions on Computers*, 22, pp. 25–43 · DOI 10.37394/23205.2023.22.4 | Mapeo sistemático: de 921 publicaciones relevadas seleccionan y clasifican 64 revisadas por pares (2015–2022) | Documentan los retos y tendencias de la multi-tenancy en contenedores y orquestación, y confirman que el aislamiento entre inquilinos **sigue siendo un problema abierto** | Cataloga el conocimiento **sin proponer ni validar arquitectura propia**; su dominio es *cloud-native*, no la jerarquía organizacional de dos niveles |
+| **Zhang, Yang, Du, Li, Chen & Sun (2021)** · *IEEE Access*, 9, pp. 15156–15169 · DOI 10.1109/ACCESS.2021.3051061 | Diseño de un control de flujo de información cifrado dirigido por el inquilino para máquinas virtuales en la nube —política descentralizada, gestión de claves por dominio secreto y cifrado umbral basado en múltiples identidades—, validado con prueba de seguridad y experimento | Impide que usuarios maliciosos internos y externos lean ilegalmente los datos privados del inquilino, allí donde el control de acceso y el cifrado convencionales no controlan su propagación | Opera sobre **máquinas virtuales**, en la capa de infraestructura: no sobre filas de una base relacional compartida ni con inquilinos jerárquicos |
+| **Yassin, Ould-Slimane, Talhi & Boucheneb (2022)** · *IEEE Transactions on Services Computing*, 15(5), pp. 2925–2938 · DOI 10.1109/TSC.2021.3077852 | Diseño e integración de un marco de detección de intrusiones como servicio para SaaS multi-inquilino (MTIDaaS), probado en una nube pública real | En un SaaS de instancia compartida, donde el inquilino no controla el código ni la base de datos, el proveedor ofrece detección de intrusiones por inquilino con poca sobrecarga e impacto insignificante en el tiempo de respuesta | Control **detectivo**, no preventivo: identifica ataques pero no impide el acceso cruzado a los datos; no propone aislamiento en la capa de datos |
+| **Zhu, Shen, Dai, Xu & Hu (2024)** · *IEEE Transactions on Information Forensics and Security*, 19, pp. 4316–4330 · DOI 10.1109/TIFS.2024.3377549 | Diseño de un esquema de cifrado con búsqueda por palabra clave verificable y auditable (VAKSE) y de su versión paralela, con análisis formal de seguridad y experimentos de eficiencia | Habilita búsquedas entre inquilinos independientes preservando la privacidad, con verificabilidad y trazabilidad del usuario | **Da por supuesto el límite de aislamiento** que el proveedor impone a cada inquilino: protege contenido cifrado, pero no aborda cómo se impone ese límite en una base relacional compartida |
+| **Yin, Morvan, Martinez-Gil & Hameurlain (2025)** · *IEEE Transactions on Knowledge and Data Engineering*, 37(5), pp. 2743–2755 · DOI 10.1109/TKDE.2025.3543727 | Diseño de un banco de pruebas (MTD-DS) que extiende TPC-DS con cargas multi-inquilino, objetivos de nivel de servicio, modelos de precios y métricas nuevas, con experimentos de ejemplo | Permite evaluar sistemas de gestión de bases de datos paralelos multi-inquilino por el equilibrio entre el beneficio del proveedor y la satisfacción de los inquilinos | Mide rendimiento, nivel de servicio y precio, pero **no el aislamiento de datos** entre inquilinos |
+| **Leburu (2026)** · *IEEE Access*, 14, pp. 97094–97117 · DOI 10.1109/ACCESS.2026.3706063 | Diseño de un plano de control determinista para sistemas empresariales multi-inquilino con modelos de lenguaje —compuertas de resolución del inquilino, autorización por rol y validación de esquema, más auditoría de solo inserción—, evaluado sobre 14 885 casos con cinco modelos | Las garantías estructurales, entre ellas el **aislamiento de inquilino**, se sostienen en las 14 885 evaluaciones como predicados deterministas | El aislamiento se impone y se verifica **en la capa de aplicación**, sin un control por debajo en el motor de datos; no defiende contra la manipulación de intención dentro del alcance autorizado; inquilinos planos |
 
 ### 2.2.3 Fichas analíticas de las fuentes primarias
 
@@ -135,18 +141,88 @@ Desarrollo de cada entrada de la matriz, con el detalle que la tabla no permite 
 | **Vacío frente a este proyecto** | Su dominio son contenedores y orquestación, no la jerarquía organizacional de dos niveles en el motor de base de datos. |
 | **Aporte a este proyecto** | Respaldo cuantitativo a la vigencia del problema. |
 
+#### Ficha 6 — Zhang, Yang, Du, Li, Chen & Sun (2021)
+
+| Campo | Contenido |
+|---|---|
+| **Referencia** | Zhang, Z., Yang, Z., Du, X., Li, W., Chen, X., & Sun, L. (2021). Tenant-led ciphertext information flow control for cloud virtual machines. *IEEE Access, 9*, 15156–15169. |
+| **Venue** | *IEEE Access* — revista de acceso abierto revisada por pares, indexada en Scopus y en IEEE Xplore. |
+| **Problema abordado** | Al subir sus datos a la nube, el inquilino pierde el control sobre ellos, y ni el control de acceso ni el cifrado convencionales impiden su propagación dentro del sistema. |
+| **Metodología** | Diseño de un control de flujo de información en forma cifrada dirigido por el inquilino: política descentralizada, gestión de claves por dominio secreto y cifrado umbral basado en múltiples identidades; validación mediante prueba de seguridad y experimento. |
+| **Resultados clave** | Impide que usuarios maliciosos internos y externos lean ilegalmente los datos privados del inquilino. |
+| **Limitaciones** | El control opera sobre **máquinas virtuales**, en la capa de infraestructura. |
+| **Vacío frente a este proyecto** | No aborda filas de una base relacional compartida por una aplicación ni inquilinos con subdivisiones internas. |
+| **Aporte a este proyecto** | Confirma que el control de acceso convencional no basta para impedir la propagación de datos entre inquilinos, y sitúa otra propuesta de aislamiento **fuera** de la capa de datos. |
+
+#### Ficha 7 — Yassin, Ould-Slimane, Talhi & Boucheneb (2022)
+
+| Campo | Contenido |
+|---|---|
+| **Referencia** | Yassin, M., Ould-Slimane, H., Talhi, C., & Boucheneb, H. (2022). Multi-tenant intrusion detection framework as a service for SaaS. *IEEE Transactions on Services Computing, 15*(5), 2925–2938. |
+| **Venue** | *IEEE Transactions on Services Computing* — revista de IEEE revisada por pares, indexada en Scopus. |
+| **Problema abordado** | En un SaaS donde una sola instancia sirve a varios inquilinos, estos pierden el control del código, las bases de datos y la infraestructura, y no pueden desplegar su propia detección de intrusiones. |
+| **Metodología** | Diseño de un marco de detección de intrusiones como servicio (MTIDaaS), integrado y probado en una nube pública real. |
+| **Resultados clave** | Detección de intrusiones por inquilino con poca sobrecarga de virtualización e impacto insignificante en el tiempo de respuesta HTTP. |
+| **Limitaciones** | Es un control **detectivo**: identifica ataques, no impide el acceso cruzado a los datos. |
+| **Vacío frente a este proyecto** | No propone un mecanismo de aislamiento de datos entre inquilinos en la base compartida. |
+| **Aporte a este proyecto** | Documenta el punto de partida del problema: en el SaaS multi-inquilino el inquilino **no controla la base de datos** y depende del aislamiento que imponga el proveedor. |
+
+#### Ficha 8 — Zhu, Shen, Dai, Xu & Hu (2024)
+
+| Campo | Contenido |
+|---|---|
+| **Referencia** | Zhu, X., Shen, P., Dai, Y., Xu, L., & Hu, J. (2024). Privacy-preserving and trusted keyword search for multi-tenancy cloud. *IEEE Transactions on Information Forensics and Security, 19*, 4316–4330. |
+| **Venue** | *IEEE Transactions on Information Forensics and Security* — revista de IEEE revisada por pares, indexada en Scopus. |
+| **Problema abordado** | Permitir búsquedas entre inquilinos en una nube multi-inquilino sin comprometer la privacidad, cuando los esquemas existentes se centran en un solo inquilino. |
+| **Metodología** | Diseño de un esquema de cifrado con búsqueda por palabra clave verificable y auditable (VAKSE) y de su versión paralela, con análisis formal de seguridad y experimentos. |
+| **Resultados clave** | Búsqueda entre varios propietarios de datos independientes con preservación de privacidad, verificabilidad y trazabilidad del usuario. |
+| **Limitaciones** | Protege el contenido con criptografía y parte de que el proveedor ya aísla los datos dentro del límite de cada inquilino. |
+| **Vacío frente a este proyecto** | **Da por supuesto el límite de aislamiento**: no aborda cómo se impone en una base relacional compartida. |
+| **Aporte a este proyecto** | Confirma que el aislamiento dentro del límite del inquilino es el modelo vigente en la nube multi-inquilino, y que ese límite es un supuesto que otras capas deben sostener. |
+
+#### Ficha 9 — Yin, Morvan, Martinez-Gil & Hameurlain (2025)
+
+| Campo | Contenido |
+|---|---|
+| **Referencia** | Yin, S., Morvan, F., Martinez-Gil, J., & Hameurlain, A. (2025). MTD-DS: An SLA-aware decision support benchmark for multi-tenant parallel DBMSs. *IEEE Transactions on Knowledge and Data Engineering, 37*(5), 2743–2755. |
+| **Venue** | *IEEE Transactions on Knowledge and Data Engineering* — revista de IEEE revisada por pares, indexada en Scopus. |
+| **Problema abordado** | Medir la capacidad de los sistemas de gestión de bases de datos multi-inquilino de equilibrar el beneficio del proveedor y la satisfacción de los inquilinos. |
+| **Metodología** | Diseño de un banco de pruebas que extiende TPC-DS con un generador de cargas multi-inquilino, objetivos de nivel de servicio, modelos de precios y métricas nuevas, con resultados experimentales de ejemplo. |
+| **Resultados clave** | Demuestra la pertinencia y la factibilidad de evaluar bases de datos paralelas multi-inquilino por rendimiento y costo. |
+| **Limitaciones** | Sus métricas son de rendimiento, nivel de servicio y precio. |
+| **Vacío frente a este proyecto** | **No mide el aislamiento de datos entre inquilinos**. |
+| **Aporte a este proyecto** | Confirma, desde un banco de pruebas específico para bases multi-inquilino, la carencia que señalan Dar et al. (2023): los instrumentos de evaluación establecidos no miden el aislamiento, y el proyecto debe construir el suyo. |
+
+#### Ficha 10 — Leburu (2026)
+
+| Campo | Contenido |
+|---|---|
+| **Referencia** | Leburu, N. (2026). Trust-aware orchestration architecture for LLM-assisted workflows in multi-tenant enterprise systems. *IEEE Access, 14*, 97094–97117. |
+| **Venue** | *IEEE Access* — revista de acceso abierto revisada por pares, indexada en Scopus y en IEEE Xplore. |
+| **Problema abordado** | Los modelos de lenguaje que invocan herramientas en sistemas empresariales introducen riesgos concretos, entre ellos la fuga de datos entre inquilinos. |
+| **Metodología** | Diseño de una arquitectura en la que un plano de control determinista valida y ejecuta las acciones propuestas por el modelo mediante tres compuertas obligatorias —autenticación y resolución del inquilino, autorización de herramientas por rol y validación de esquema— y un registro de auditoría de solo inserción; evaluación sobre 14 885 casos con cinco modelos. |
+| **Resultados clave** | Las garantías estructurales —aislamiento de inquilino, lista de herramientas permitidas y conformidad de esquema— se sostienen de forma uniforme en las 14 885 evaluaciones. |
+| **Limitaciones** | El autor declara que las compuertas no defienden contra la manipulación de intención dentro del alcance autorizado, y que las garantías se verifican a nivel lógico del plano de control. |
+| **Vacío frente a este proyecto** | El aislamiento vive **en la capa de aplicación**, sin un control por debajo en el motor de datos, y los inquilinos son planos. |
+| **Aporte a este proyecto** | Es el trabajo más reciente que **verifica empíricamente el aislamiento de inquilino** con predicados deterministas, y coincide con el proyecto en dos decisiones —la resolución explícita del inquilino y la auditoría de solo inserción—; su limitación es exactamente la que la defensa en profundidad del proyecto viene a cubrir. |
+
 ### 2.2.4 Síntesis comparativa
 
-| Criterio | Dar et al. (2023) | Alobaywi et al. (2026) | Andriianenko (2026) | Simić et al. (2024) | Olabanji et al. (2023) | **Este proyecto** |
-|---|---|---|---|---|---|---|
-| Tipo de trabajo | Investigación experimental | Revisión sistemática | Tesis con implementación | Investigación experimental | Revisión de mapeo | **Design Science Research con validación cuasiexperimental** |
-| Niveles de inquilino | Uno (plano) | Uno (plano) | Uno (plano) | Jerárquico (infraestructura) | Uno (plano) | **Dos (jerárquico, en los datos)** |
-| Mecanismo de aislamiento estudiado | RLS | Varios marcos | Esquema compartido / base por inquilino | Espacios de nombres | Varios | **RLS + verificación en aplicación** |
-| Capa donde se aplica el aislamiento | Consulta | Varias | Base de datos | **Infraestructura** | Varias | **Motor de base de datos + aplicación** |
-| ¿Propone arquitectura? | No (ataque y defensa) | No | Sí | Sí | No | Sí |
-| ¿Valida frente a una línea base? | Sí | No | Sí | Sí | No | Sí |
-| Dominio de aplicación | Genérico | IoT–nube | SaaS de gestión de proyectos | Nube distribuida en el borde | *Cloud-native* | **SaaS de gestión de talleres (Bolivia)** |
-| Despliegue | Instancias gestionadas | No aplica | Microservicios | Micro-nubes en el borde | Contenedores | **Serverless** |
+| Trabajo | Tipo de trabajo | Niveles de inquilino | Mecanismo de aislamiento | Capa donde se aplica | ¿Propone arquitectura? | ¿Valida empíricamente? | Dominio |
+|---|---|---|---|---|---|---|---|
+| Zhang et al. (2021) | Diseño con prueba de seguridad | Uno (plano) | Control de flujo de información cifrado | Máquina virtual | Sí | Sí | Nube (máquinas virtuales) |
+| Yassin et al. (2022) | Diseño e integración | Uno (plano) | Detección de intrusiones por inquilino | Aplicación SaaS | Sí | Sí | SaaS |
+| Dar et al. (2023) | Investigación experimental | Uno (plano) | RLS | Consulta | No (ataque y defensa) | Sí | Genérico |
+| Olabanji et al. (2023) | Revisión de mapeo | Uno (plano) | Varios | Varias | No | No | *Cloud-native* |
+| Simić et al. (2024) | Investigación experimental | Jerárquico (infraestructura) | Espacios de nombres | **Infraestructura** | Sí | Sí | Nube distribuida en el borde |
+| Zhu et al. (2024) | Diseño criptográfico con análisis formal | Uno (plano) | Cifrado con búsqueda por palabra clave | Datos cifrados | Sí | Sí | Nube multi-inquilino |
+| Yin et al. (2025) | Banco de pruebas | Uno (plano) | — *(no mide aislamiento)* | Motor de base de datos | No | Sí | Base de datos como servicio |
+| Alobaywi et al. (2026) | Revisión sistemática | Uno (plano) | Varios marcos | Varias | No | No | IoT–nube |
+| Andriianenko (2026) | Tesis con implementación | Uno (plano) | Esquema compartido / base por inquilino | Base de datos | Sí | Sí | SaaS de gestión de proyectos |
+| Leburu (2026) | Diseño con evaluación empírica | Uno (plano) | Compuertas deterministas del plano de control | Aplicación | Sí | Sí | Sistemas empresariales con modelos de lenguaje |
+| **Este proyecto** | **Design Science Research con validación cuasiexperimental** | **Dos (jerárquico, en los datos)** | **RLS + verificación en aplicación** | **Motor de base de datos + aplicación** | **Sí** | **Sí, frente a una línea base** | **SaaS de gestión de talleres (Bolivia)** |
+
+Ningún trabajo revisado combina las tres propiedades del proyecto: inquilinos jerárquicos, aislamiento impuesto en el motor de datos y verificación independiente de la capa de aplicación.
 
 ### 2.2.5 Evidencia técnica primaria complementaria
 
@@ -172,6 +248,8 @@ La solución propuesta por **Dar et al. (2023)** es rigurosa y demuestra empíri
 
 El antecedente que más se aproxima es **Simić et al. (2024)**, que sí modelan una **jerarquía** de inquilinos y demuestran que el aislamiento se sostiene entre sus niveles; **ahora bien**, esa jerarquía organiza **recursos de infraestructura** y no las filas de una base de datos relacional compartida, de modo que no responde cómo repartir las entidades de negocio entre los niveles ni cómo hacer cumplir esa separación en el motor. Por último, **Olabanji et al. (2023)**, sobre 921 publicaciones relevadas, confirman que el aislamiento entre inquilinos permanece como reto abierto, **aunque**, al ser una revisión de mapeo, catalogan el conocimiento sin proponer ni validar arquitectura alguna. A todo ello se suma que la serie de vulnerabilidades registradas en la aplicación de políticas RLS (CVE-2016-2193, CVE-2023-2455 y CVE-2024-10976) evidencia que confiar en una sola capa de aislamiento resulta insuficiente en la práctica.
 
+El resto de la revisión confirma el patrón desde otras capas. **Leburu (2026)** impone y verifica empíricamente el aislamiento de inquilino con compuertas deterministas, **pero** en el plano de control de la aplicación, que es justamente la capa que este proyecto no admite como única barrera. **Zhu et al. (2024)** habilitan búsquedas entre inquilinos preservando la privacidad, **aunque** dan por supuesto el límite de aislamiento que otras capas deben imponer. **Yassin et al. (2022)** protegen a los inquilinos de un SaaS compartido con detección de intrusiones, **no obstante** detectar un ataque no impide el acceso cruzado. **Zhang et al. (2021)** controlan la propagación de los datos privados del inquilino, **pero** en máquinas virtuales y no en filas de una base compartida. Y **Yin et al. (2025)**, al construir un banco de pruebas para bases de datos multi-inquilino, miden rendimiento y precio **sin incluir el aislamiento**, lo que confirma la ausencia de instrumentos de evaluación que ya advertían Dar et al. (2023).
+
 El presente proyecto aborda esta deficiencia mediante el **diseño, desarrollo y validación de una arquitectura multi-tenant jerárquica (organización → talleres)** que mantiene un **único límite de aislamiento verificable** a nivel de organización, tratando el taller como criterio de alcance operativo y no como segunda frontera de seguridad; refuerza la seguridad a nivel de fila con **verificación de membresía en la capa de aplicación** (defensa en profundidad), en respuesta directa al patrón de fallos evidenciado por los CVE; y **contrasta la separación obtenida con una línea base** de aislamiento solo en la aplicación, por dos vías independientes —la interfaz de programación y el acceso directo a la base de datos—, demostrando que el aislamiento se sostiene aun cuando la capa de aplicación omita sus controles.
 
 ---
@@ -182,17 +260,22 @@ Se separan en dos bloques según **cómo se verifica cada uno**: los artículos 
 
 ### A. Artículos y tesis con identificador permanente
 
-*Se verifican por DOI o por el identificador del repositorio institucional.*
+*Se verifican por DOI o por el identificador del repositorio institucional. APA 7 no incluye la fecha de consulta en la referencia de una obra con identificador permanente; por eso se registra en columna aparte.*
 
-| # | Referencia (APA 7) | Identificador |
-|---|---|---|
-| A1 | Dar, C., Hershcovitch, M., & Morrison, A. (2023). RLS side channels: Investigating leakage of row-level security protected data through query execution time. *Proceedings of the ACM on Management of Data, 1*(1), Artículo 89, 1–25. | https://doi.org/10.1145/3588943 |
-| A2 | Alobaywi, B., Almutairi, M. G., & Sheldon, F. T. (2026). Performance trade-offs in multi-tenant IoT–cloud security: A systematic review of emerging technologies. *IoT, 7*(1), 21. | https://doi.org/10.3390/iot7010021 |
-| A3 | Andriianenko, O. (2026). *Design and evaluation of multi-tenant architectures in microservice based project management systems* [Tesis de maestría, Universitatea Tehnică a Moldovei]. Repositorio institucional UTM. | https://repository.utm.md/handle/5014/35481 |
-| A4 | Simić, M., Dedeić, J., Stojkov, M., & Prokić, I. (2024). A hierarchical namespace approach for multi-tenancy in distributed clouds. *IEEE Access, 12*, 32597–32617. | https://doi.org/10.1109/ACCESS.2024.3369031 |
-| A5 | Olabanji, D., Fitch, T., & Matthew, O. (2023). Multi-tenancy in cloud-native architecture: A systematic mapping study. *WSEAS Transactions on Computers, 22*, 25–43. | https://doi.org/10.37394/23205.2023.22.4 |
-| A6 | Bezemer, C.-P., & Zaidman, A. (2010). Multi-tenant SaaS applications: Maintenance dream or nightmare? En *Proceedings of the Joint ERCIM Workshop on Software Evolution (EVOL) and International Workshop on Principles of Software Evolution (IWPSE)* (pp. 88–92). ACM. **(cap. 3)** | https://doi.org/10.1145/1862372.1862393 |
-| A7 | Krebs, R., Momm, C., & Kounev, S. (2012). Architectural concerns in multi-tenant SaaS applications. En *Proceedings of the 2nd International Conference on Cloud Computing and Services Science (CLOSER 2012)* (pp. 426–431). SciTePress. **(cap. 3)** | https://doi.org/10.5220/0003957604260431 |
+| # | Referencia (APA 7) | Identificador | Consultado |
+|---|---|---|---|
+| A1 | Dar, C., Hershcovitch, M., & Morrison, A. (2023). RLS side channels: Investigating leakage of row-level security protected data through query execution time. *Proceedings of the ACM on Management of Data, 1*(1), Artículo 89, 1–25. | https://doi.org/10.1145/3588943 | 18-08-2026 |
+| A2 | Alobaywi, B., Almutairi, M. G., & Sheldon, F. T. (2026). Performance trade-offs in multi-tenant IoT–cloud security: A systematic review of emerging technologies. *IoT, 7*(1), 21. | https://doi.org/10.3390/iot7010021 | 18-08-2026 |
+| A3 | Andriianenko, O. (2026). *Design and evaluation of multi-tenant architectures in microservice based project management systems* [Tesis de maestría, Universitatea Tehnică a Moldovei]. Repositorio institucional UTM. | https://repository.utm.md/handle/5014/35481 | 18-08-2026 |
+| A4 | Simić, M., Dedeić, J., Stojkov, M., & Prokić, I. (2024). A hierarchical namespace approach for multi-tenancy in distributed clouds. *IEEE Access, 12*, 32597–32617. | https://doi.org/10.1109/ACCESS.2024.3369031 | 18-08-2026 |
+| A5 | Olabanji, D., Fitch, T., & Matthew, O. (2023). Multi-tenancy in cloud-native architecture: A systematic mapping study. *WSEAS Transactions on Computers, 22*, 25–43. | https://doi.org/10.37394/23205.2023.22.4 | 18-08-2026 |
+| A6 | Bezemer, C.-P., & Zaidman, A. (2010). Multi-tenant SaaS applications: Maintenance dream or nightmare? En *Proceedings of the Joint ERCIM Workshop on Software Evolution (EVOL) and International Workshop on Principles of Software Evolution (IWPSE)* (pp. 88–92). ACM. **(cap. 3)** | https://doi.org/10.1145/1862372.1862393 | 18-08-2026 |
+| A7 | Krebs, R., Momm, C., & Kounev, S. (2012). Architectural concerns in multi-tenant SaaS applications. En *Proceedings of the 2nd International Conference on Cloud Computing and Services Science (CLOSER 2012)* (pp. 426–431). SciTePress. **(cap. 3)** | https://doi.org/10.5220/0003957604260431 | 18-08-2026 |
+| A8 | Zhang, Z., Yang, Z., Du, X., Li, W., Chen, X., & Sun, L. (2021). Tenant-led ciphertext information flow control for cloud virtual machines. *IEEE Access, 9*, 15156–15169. | https://doi.org/10.1109/ACCESS.2021.3051061 | 14-09-2026 |
+| A9 | Yassin, M., Ould-Slimane, H., Talhi, C., & Boucheneb, H. (2022). Multi-tenant intrusion detection framework as a service for SaaS. *IEEE Transactions on Services Computing, 15*(5), 2925–2938. | https://doi.org/10.1109/TSC.2021.3077852 | 14-09-2026 |
+| A10 | Zhu, X., Shen, P., Dai, Y., Xu, L., & Hu, J. (2024). Privacy-preserving and trusted keyword search for multi-tenancy cloud. *IEEE Transactions on Information Forensics and Security, 19*, 4316–4330. | https://doi.org/10.1109/TIFS.2024.3377549 | 14-09-2026 |
+| A11 | Yin, S., Morvan, F., Martinez-Gil, J., & Hameurlain, A. (2025). MTD-DS: An SLA-aware decision support benchmark for multi-tenant parallel DBMSs. *IEEE Transactions on Knowledge and Data Engineering, 37*(5), 2743–2755. | https://doi.org/10.1109/TKDE.2025.3543727 | 14-09-2026 |
+| A12 | Leburu, N. (2026). Trust-aware orchestration architecture for LLM-assisted workflows in multi-tenant enterprise systems. *IEEE Access, 14*, 97094–97117. | https://doi.org/10.1109/ACCESS.2026.3706063 | 14-09-2026 |
 
 > A6 y A7 sostienen los antecedentes tecnológicos (§2.1.2), no el estado del arte: son anteriores a la ventana 2021–2026 porque describen la evolución de las arquitecturas, que es lo que los antecedentes exigen.
 
@@ -206,6 +289,7 @@ Se separan en dos bloques según **cómo se verifica cada uno**: los artículos 
 | E2 | Instituto Nacional de Estadística de Bolivia. (2025). *Boletín estadístico parque automotor 2024*. | https://www.ine.gob.bo/index.php/boletin-estadistico-parque-automotor-2024/ |
 | E3 | Instituto Nacional de Estadística de Bolivia. (2026). *Estadísticas del parque automotor 2003–2025*. | https://www.ine.gob.bo/index.php/estadisticas-del-parque-automotor-2003-2025/ |
 | E4 | *CVE-2024-10976: PostgreSQL incomplete tracking of tables with row security*. (2024). Wiz Vulnerability Database. | https://www.wiz.io/vulnerability-database/cve/cve-2024-10976 |
-| E5 | PostgreSQL Global Development Group. (s. f.-b). *Row security policies*. Recuperado el 14 de agosto de 2026. **(cap. 3)** | https://www.postgresql.org/docs/current/ddl-rowsecurity.html |
+| E5 | PostgreSQL Global Development Group. (s. f.-b). *Row security policies*. Recuperado el 14 de septiembre de 2026. **(cap. 3)** | https://www.postgresql.org/docs/current/ddl-rowsecurity.html |
+| E6 | Unidad de Análisis de Políticas Sociales y Económicas. (2025). *Análisis de la población ocupada, desocupada e inactiva en Bolivia entre los años 2015 y 2024*. UDAPE. | https://www.udape.gob.bo/wp-content/uploads/2026/03/Analisis-de-la-condicion-actividad-2025.pdf |
 
 > **Formato**: todas las referencias siguen el estilo **APA (7.ª edición)**. Las obras que se emplean como sustento teórico se citan en el cuerpo del [capítulo 3](03-marco-teorico-y-conceptual.md), donde figuran además sus propias referencias. El estado de comprobación de cada identificador está en el [Anexo de referencias](anexo-referencias.md).

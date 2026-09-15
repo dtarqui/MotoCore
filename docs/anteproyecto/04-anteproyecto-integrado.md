@@ -29,6 +29,14 @@ La Paz – Bolivia
 
 ---
 
+## Resumen
+
+El software de gestión de talleres disponible en Bolivia asume un taller por cuenta y resuelve la separación entre clientes en la capa de aplicación, de modo que un error de programación puede exponer los datos de una organización a otra. Este anteproyecto propone **diseñar, desarrollar y validar una arquitectura multi-tenant jerárquica** —una cuenta administra varias organizaciones y cada organización varios talleres— cuyo aislamiento se impone en el **motor de base de datos con Row Level Security (RLS)** y se refuerza con verificación de membresía en la capa de aplicación, sobre infraestructura serverless. La investigación es **aplicada**, de enfoque **cuantitativo** y diseño **cuasiexperimental**, y adopta *Design Science Research*: el artefacto se contrasta con una **línea base** en la que el aislamiento se resuelve solo en la aplicación. La variable dependiente es el número de **filas ajenas devueltas** en las siete tablas de negocio, medido bajo cuatro condiciones experimentales —entre ellas la omisión deliberada de los controles de la aplicación—, y la hipótesis predice su reducción a cero. Dos objetivos complementarios, la usabilidad del cambio de contexto y el costo operativo por organización, se evalúan con un criterio de continuidad que permite descartarlos sin afectar la hipótesis central. La Parte I desarrolla la fundamentación de la investigación; la Parte II, la propuesta técnica.
+
+**Palabras clave:** multi-tenancy jerárquica; Row Level Security; aislamiento de datos; software como servicio; PostgreSQL; arquitectura serverless.
+
+---
+
 ## Índice
 
 **Parte I — Investigación**
@@ -142,14 +150,14 @@ El proyecto documenta un procedimiento reproducible para **verificar** el aislam
 
 **El parque de motocicletas y la demanda de servicio.** La motocicleta es el vehículo más numeroso de Bolivia. Según el Instituto Nacional de Estadística (INE), a partir de los registros del Registro Único para la Administración Tributaria Municipal (RUAT), en **2025** se contabilizaron **931.205 motocicletas**, el **34,8 %** del parque automotor nacional, encabezándolo por delante de vagonetas, automóviles y camionetas. Su crecimiento es sostenido y superior al del parque en conjunto: pasó de **657.718 unidades en 2021** a **872.550 en 2024** y a **931.205 en 2025**, un incremento del **41,6 % en cuatro años**, frente al +20,0 % del parque automotor total en el mismo período. Cada una de esas unidades requiere mantenimiento periódico y reparaciones, lo que sostiene una red amplia de talleres de servicio que crece año a año y empuja a los operadores más exitosos a abrir locales adicionales.
 
-**Condiciones del sector que explican el problema.** Ese crecimiento ocurre en una economía marcadamente informal: el indicador de **informalidad laboral del 84,2 % en 2024**, procedente de la Encuesta Continua de Empleo del INE, se emplea como caracterización cualitativa del sector y no interviene en ningún cálculo de este documento. Para el rubro de talleres esto se traduce en unidades de negocio pequeñas, con presupuesto de tecnología muy limitado y gestión apoyada todavía en registros en papel u hojas de cálculo.
+**Condiciones del sector que explican el problema.** Ese crecimiento ocurre en una economía marcadamente informal: el **empleo informal alcanzó el 86,8 % de la población ocupada en 2024** —6,0 de 6,9 millones de personas—, según el Cuadro 7 de UDAPE, elaborado con la Encuesta Continua de Empleo del INE. El indicador se emplea como caracterización cualitativa del sector y no interviene en ningún cálculo de este documento. Para el rubro de talleres esto se traduce en unidades de negocio pequeñas, con presupuesto de tecnología muy limitado y gestión apoyada todavía en registros en papel u hojas de cálculo.
 
 | Fuente | Tipo |
 |---|---|
 | INE — **Cuadro N.º 1.2**, *Bolivia: parque automotor por tipo de servicio y clase de vehículo, 2003–2025* (datos originados en el RUAT). Cuadro del que proceden todas las cifras | Primaria (oficial, descargable) |
 | INE — *Boletín estadístico parque automotor 2024* (28 de mayo de 2025) | Primaria (oficial) |
 | INE — *Estadísticas del parque automotor 2003–2025* (1 de julio de 2026) | Primaria (oficial) |
-| INE — *Encuesta Continua de Empleo* (indicador de informalidad laboral) | Secundaria — dato por remitir a su cuadro oficial |
+| UDAPE — *Análisis de la población ocupada, desocupada e inactiva en Bolivia entre los años 2015 y 2024*, Cuadro 7, sobre la Encuesta Continua de Empleo del INE | Primaria (oficial, descargable) |
 
 ### 5.2 Revisión crítica de soluciones previas y arquitecturas legadas
 
@@ -185,17 +193,27 @@ La revisión sigue las cuatro etapas de una revisión sistemática de literatura
 | **Andriianenko (2026)** · Tesis de maestría, Universitatea Tehnică a Moldovei | Diseño y evaluación comparativa de **esquema compartido** frente a **base por inquilino** sobre un SaaS de gestión de proyectos con microservicios | El esquema compartido reduce recursos pero incrementa complejidad y riesgo de aislamiento; la base por inquilino separa mejor con mayor sobrecarga operativa | Evalúa ambos modelos como **alternativas planas y excluyentes**, sin la seguridad a nivel de fila como refuerzo dentro del esquema compartido ni una jerarquía de dos niveles |
 | **Simić, Dedeić, Stojkov & Prokić (2024)** · *IEEE Access*, 12, pp. 32597–32617 · DOI 10.1109/ACCESS.2024.3369031 | Diseño e implementación de una jerarquía de espacios de nombres sobre nube distribuida en el borde, con evaluación del aislamiento y la redistribución de recursos | La jerarquía sostiene el aislamiento lógico entre inquilinos de distinto nivel | Su jerarquía organiza **recursos de infraestructura**, no filas de una base relacional compartida; no reparte entidades de negocio por nivel |
 | **Olabanji, Fitch & Matthew (2023)** · *WSEAS Transactions on Computers*, 22, pp. 25–43 · DOI 10.37394/23205.2023.22.4 | Mapeo sistemático: 64 estudios revisados por pares seleccionados de 921 relevados (2015–2022) | Confirma que el aislamiento entre inquilinos en entornos *cloud-native* sigue siendo un problema abierto | Cataloga el conocimiento **sin proponer ni validar arquitectura**; su dominio son contenedores y orquestación |
+| **Zhang, Yang, Du, Li, Chen & Sun (2021)** · *IEEE Access*, 9, pp. 15156–15169 · DOI 10.1109/ACCESS.2021.3051061 | Diseño de un control de flujo de información cifrado dirigido por el inquilino para máquinas virtuales, con prueba de seguridad y experimento | Impide la lectura ilegal de los datos privados del inquilino donde el control de acceso y el cifrado convencionales no controlan su propagación | Opera sobre **máquinas virtuales**, no sobre filas de una base relacional compartida |
+| **Yassin, Ould-Slimane, Talhi & Boucheneb (2022)** · *IEEE Transactions on Services Computing*, 15(5), pp. 2925–2938 · DOI 10.1109/TSC.2021.3077852 | Diseño e integración de detección de intrusiones como servicio para SaaS multi-inquilino, probada en una nube pública real | Detección por inquilino en un SaaS de instancia compartida, con poca sobrecarga | Control **detectivo**: no impide el acceso cruzado ni propone aislamiento en la capa de datos |
+| **Zhu, Shen, Dai, Xu & Hu (2024)** · *IEEE Transactions on Information Forensics and Security*, 19, pp. 4316–4330 · DOI 10.1109/TIFS.2024.3377549 | Diseño de un cifrado con búsqueda por palabra clave verificable y auditable, con análisis formal y experimentos | Búsqueda entre inquilinos que preserva la privacidad | **Da por supuesto el límite de aislamiento** de cada inquilino; no aborda cómo se impone en una base compartida |
+| **Yin, Morvan, Martinez-Gil & Hameurlain (2025)** · *IEEE Transactions on Knowledge and Data Engineering*, 37(5), pp. 2743–2755 · DOI 10.1109/TKDE.2025.3543727 | Diseño de un banco de pruebas para bases de datos paralelas multi-inquilino que extiende TPC-DS | Evalúa el equilibrio entre beneficio del proveedor y satisfacción del inquilino | Mide rendimiento y precio, **no el aislamiento** |
+| **Leburu (2026)** · *IEEE Access*, 14, pp. 97094–97117 · DOI 10.1109/ACCESS.2026.3706063 | Diseño de un plano de control determinista multi-inquilino para flujos con modelos de lenguaje, evaluado sobre 14 885 casos | El **aislamiento de inquilino** se sostiene en todas las evaluaciones como predicado determinista | Se impone y se verifica **en la capa de aplicación**, sin control en el motor de datos; inquilinos planos |
 
 ### 6.3 Síntesis comparativa
 
-| Criterio | Dar et al. (2023) | Alobaywi et al. (2026) | Andriianenko (2026) | Simić et al. (2024) | Olabanji et al. (2023) | **Este proyecto** |
+| Trabajo | Tipo de trabajo | Niveles de inquilino | Mecanismo de aislamiento | Capa donde se aplica | ¿Propone arquitectura? | ¿Valida empíricamente? |
 |---|---|---|---|---|---|---|
-| Tipo de trabajo | Experimental | Revisión sistemática | Tesis con implementación | Experimental | Revisión de mapeo | **Design Science Research con validación cuasiexperimental** |
-| Niveles de inquilino | Uno (plano) | Uno (plano) | Uno (plano) | Jerárquico (infraestructura) | Uno (plano) | **Dos (jerárquico, datos)** |
-| Mecanismo de aislamiento | RLS | Varios marcos | Esquema compartido / base por inquilino | Espacios de nombres | Varios | **RLS + verificación en aplicación** |
-| ¿Propone arquitectura? | No | No | Sí | Sí | No | Sí |
-| ¿Valida frente a una línea base? | Sí | No | Sí | Sí | No | Sí |
-| Dominio | Genérico | IoT–nube | SaaS gestión de proyectos | Nube distribuida | *Cloud-native* | **SaaS gestión de talleres (Bolivia)** |
+| Zhang et al. (2021) | Diseño con prueba de seguridad | Uno (plano) | Flujo de información cifrado | Máquina virtual | Sí | Sí |
+| Yassin et al. (2022) | Diseño e integración | Uno (plano) | Detección de intrusiones | Aplicación SaaS | Sí | Sí |
+| Dar et al. (2023) | Experimental | Uno (plano) | RLS | Consulta | No | Sí |
+| Olabanji et al. (2023) | Revisión de mapeo | Uno (plano) | Varios | Varias | No | No |
+| Simić et al. (2024) | Experimental | Jerárquico (infraestructura) | Espacios de nombres | Infraestructura | Sí | Sí |
+| Zhu et al. (2024) | Diseño criptográfico | Uno (plano) | Cifrado con búsqueda | Datos cifrados | Sí | Sí |
+| Yin et al. (2025) | Banco de pruebas | Uno (plano) | — *(no mide aislamiento)* | Motor de base de datos | No | Sí |
+| Alobaywi et al. (2026) | Revisión sistemática | Uno (plano) | Varios marcos | Varias | No | No |
+| Andriianenko (2026) | Tesis con implementación | Uno (plano) | Esquema compartido / base por inquilino | Base de datos | Sí | Sí |
+| Leburu (2026) | Diseño con evaluación empírica | Uno (plano) | Compuertas del plano de control | Aplicación | Sí | Sí |
+| **Este proyecto** | **Design Science Research con validación cuasiexperimental** | **Dos (jerárquico, datos)** | **RLS + verificación en aplicación** | **Motor + aplicación** | **Sí** | **Sí, frente a una línea base** |
 
 ### 6.4 Evidencia técnica complementaria
 
@@ -214,6 +232,8 @@ No constituye literatura académica —son registros oficiales de vulnerabilidad
 > **Seguridad a nivel de fila** en esquemas compartidos cuyos **inquilinos son jerárquicos y sus entidades tienen alcance distinto por nivel**: falta una arquitectura que sitúe el único límite de aislamiento y **lo valide empíricamente frente a una línea base, con independencia de la capa de aplicación**.
 
 **Dar et al. (2023)** demuestran que la seguridad a nivel de fila cumple su función como control de acceso; **sin embargo**, su análisis se limita a inquilinos planos y a la capa de consulta, sin abordar dónde ubicar el límite de aislamiento cuando el inquilino posee una subdivisión interna. **Alobaywi et al. (2026)** y **Olabanji et al. (2023)** sistematizan amenazas y tendencias, **pero** no proponen ni validan una arquitectura aplicable a un SaaS de gestión empresarial. **Andriianenko (2026)** compara esquema compartido frente a base por inquilino, **no obstante** los evalúa como alternativas planas y excluyentes. **Simić et al. (2024)** sí modelan una jerarquía, **aunque** su aislamiento opera sobre recursos de infraestructura y no sobre filas de una base relacional compartida. A ello se suma que la serie de CVE evidencia que confiar en una sola capa de aislamiento resulta insuficiente.
+
+El resto de la revisión confirma el patrón desde otras capas: **Leburu (2026)** verifica empíricamente el aislamiento de inquilino, **pero** en la capa de aplicación; **Zhu et al. (2024)** dan por supuesto el límite de aislamiento que otras capas deben imponer; **Yassin et al. (2022)** detectan intrusiones sin impedir el acceso cruzado; **Zhang et al. (2021)** controlan la propagación de datos en máquinas virtuales, no en filas de una base compartida; y **Yin et al. (2025)** evalúan bases de datos multi-inquilino sin medir el aislamiento.
 
 El presente proyecto aborda esta deficiencia mediante el **diseño, desarrollo y validación de una arquitectura multi-tenant jerárquica (organización → talleres)** que mantiene un **único límite de aislamiento verificable** a nivel de organización, tratando el taller como criterio de alcance operativo; refuerza la seguridad a nivel de fila con **verificación de membresía en la capa de aplicación**; y **contrasta la separación obtenida con una línea base** de aislamiento solo en la aplicación, por dos vías independientes.
 
@@ -405,7 +425,7 @@ Fila general y una fila por objetivo específico; cada fila se lee horizontalmen
 | Problema | Objetivo | Hipótesis | Variables | Metodología / Métrica |
 |---|---|---|---|---|
 | **General:** ¿De qué manera una arquitectura multi-tenant jerárquica con Row Level Security (RLS) sobre infraestructura serverless sostiene un aislamiento verificable e inmutable —cero filas ajenas devueltas aun cuando la capa de aplicación omite sus controles—, frente al aislamiento resuelto solo en la aplicación, en la gestión centralizada de varias organizaciones y talleres de servicio de mantenimiento mecánico en Bolivia? | Diseñar, desarrollar y validar una arquitectura multi-tenant jerárquica con Row Level Security (RLS) sobre infraestructura serverless que sostenga un aislamiento verificable e inmutable —cero filas ajenas devueltas aun cuando la capa de aplicación omita sus controles—, para que los operadores de varias organizaciones y talleres de servicio de mantenimiento mecánico gestionen su información de forma centralizada. | H1: la arquitectura propuesta reduce en un 100 % las filas ajenas devueltas —a cero en las siete tablas— frente al aislamiento solo en la aplicación | VI: arquitectura de aislamiento · VD: aislamiento entre organizaciones, gestión centralizada | Design Science Research, cuantitativo-aplicado, cuasiexperimental con línea base / filas ajenas devueltas (filas) |
-| **Esp. 1:** ¿Qué estrategias de aislamiento documenta la literatura y qué carencias presenta la oferta boliviana? | Diagnosticar las estrategias de aislamiento y la oferta boliviana, fijando la línea base | — | — | Revisión sistemática y análisis documental / fuentes con limitación consignada · capacidades ausentes en 10 plataformas |
+| **Esp. 1:** ¿Qué estrategias de aislamiento documenta la literatura y qué carencias presenta la oferta boliviana? | Diagnosticar las estrategias de aislamiento y la oferta boliviana, fijando la línea base | — | — | Revisión sistemática y análisis documental / 10 fuentes con limitación consignada · capacidades ausentes en 10 plataformas |
 | **Esp. 2:** ¿Qué modelo, qué políticas y qué contrato sostienen un único límite de aislamiento? | Diseñar el modelo jerárquico, las políticas y el contrato | — | VI: arquitectura de aislamiento (especificada) | Modelado de datos y C4 / niveles modelados (2) · límites de aislamiento (1) · tablas con criterio único de política (7 de 7) |
 | **Esp. 3:** ¿Cómo se construye el corte vertical conservando el diseño y verificado en cada integración? | Desarrollar el corte vertical con integración continua | — | Interviniente: calidad del código | Desarrollo iterativo con integración continua / cobertura ≥ 80 % · 0 errores de tipos · 0 vulnerabilidades críticas · pipeline en verde |
 | **Esp. 4:** ¿En qué medida la arquitectura reduce las filas ajenas frente a la línea base, y se sostiene sin la verificación de membresía? | Validar el aislamiento frente a la línea base, con la verificación deshabilitada | H1 · criterio de decisión §10.3 | VI: C0 · C1 · C2 · C3 · VD: aislamiento, gestión centralizada | Cuasiexperimental, censo de 7 tablas y todas las operaciones, 3 corridas / filas ajenas (0) · autorización correcta (100 %) · casos en verde sin la aplicación (100 %) |
@@ -493,7 +513,7 @@ Un solo montaje cubre las tres preguntas del aislamiento: **entre cuentas** (A f
 | Elemento | Definición |
 |---|---|
 | **Población** | Publicaciones revisadas por pares sobre aislamiento entre inquilinos en esquemas compartidos, 2021–2026, indexadas en las bases de §6.1 |
-| **Muestra** | **5 fuentes** seleccionadas |
+| **Muestra** | **10 fuentes** seleccionadas |
 | **Muestreo** | No probabilístico **por criterio**, con los criterios de inclusión y exclusión de §6.1 |
 
 ### 16.2 Población de soluciones del mercado *(objetivo 1)*
@@ -565,7 +585,7 @@ Un caso omitido por falta de credenciales del entorno se reporta como **omitido*
 
 ### 17.3 Recolección de los datos de usabilidad y de costo
 
-**Usabilidad.** Sesión individual —presencial o remota— sobre el entorno de producción con el escenario ya cargado. Orden fijo: consentimiento informado; tareas T1–T3 en la primera condición asignada; SUS de esa condición; tareas en la segunda condición; SUS de la segunda; comentario abierto. Se registra por participante y condición: éxito o fallo por tarea, segundos, incidencias y las diez respuestas del cuestionario. Una intervención del observador se anota como **fallo**.
+**Usabilidad.** Sesión individual —presencial o remota— sobre el entorno de producción con el escenario ya cargado. El cuestionario se aplica en la **versión en español validada** del SUS (Sevilla-González et al., 2020); el consentimiento, el guion de tareas, la planilla y el cuestionario están redactados en [Material de campo](../ingenieria/12-material-de-campo.md). Orden fijo: consentimiento informado; tareas T1–T3 en la primera condición asignada; SUS de esa condición; tareas en la segunda condición; SUS de la segunda; comentario abierto. Se registra por participante y condición: éxito o fallo por tarea, segundos, incidencias y las diez respuestas del cuestionario. Una intervención del observador se anota como **fallo**.
 
 **Costo.** Cada día de I8 se registran, por entorno, las invocaciones de funciones, la transferencia de datos y el tamaño de la base, y se imputan a las organizaciones del escenario. El costo del servidor dedicado de referencia se toma de la tarifa publicada vigente en la fecha de medición.
 
@@ -626,7 +646,7 @@ La evaluación de usabilidad es el único componente con participantes humanos y
 
 ### 19.4 Propiedad intelectual, licencias y dependencias
 
-El sistema se construye sobre componentes de código abierto —Node.js, TypeScript, React, Hono, Zod, Vitest, Playwright y PostgreSQL, entre otros—, cuyos avisos de licencia se conservan íntegros; el trabajo propio se publica bajo licencia MIT. Las dependencias se auditan en cada integración y no se admiten vulnerabilidades críticas ni altas (RNF-208). La especificación atiende los riesgos del OWASP Top 10 aplicables a una interfaz multiorganización: control de acceso roto, inyección y fallos de identificación y autenticación. Los asistentes de inteligencia artificial pueden emplearse para código repetitivo y tareas mecánicas de redacción, pero **el planteamiento, el diseño arquitectónico y la interpretación de los resultados son de autoría del investigador**.
+El sistema se construye sobre componentes de código abierto —Node.js, TypeScript, React, Hono, Zod, Vitest, Playwright y PostgreSQL, entre otros—, cuyos avisos de licencia se conservan íntegros; el trabajo propio se publica bajo licencia MIT. Los riesgos aplicables del **OWASP Top 10** se atienden con medidas declaradas y verificables: dos capas de aislamiento frente al *control de acceso roto*; consultas parametrizadas y validación de entrada con Zod frente a la *inyección*; identidad delegada, sin contraseñas propias almacenadas, frente a los *fallos de identificación y autenticación*; y auditoría de dependencias en cada integración frente a los *componentes vulnerables* (RNF-208). Las dependencias se auditan en cada integración y no se admiten vulnerabilidades críticas ni altas (RNF-208). La especificación atiende los riesgos del OWASP Top 10 aplicables a una interfaz multiorganización: control de acceso roto, inyección y fallos de identificación y autenticación. Los asistentes de inteligencia artificial pueden emplearse para código repetitivo y tareas mecánicas de redacción, pero **el planteamiento, el diseño arquitectónico y la interpretación de los resultados son de autoría del investigador**.
 
 ### 19.5 Integridad de los resultados
 
@@ -797,8 +817,9 @@ La especificación completa está en [Requisitos](../ingenieria/02-requisitos.md
 |---|---|
 | **Requerimientos funcionales** | 38 dentro del alcance —identidad, organizaciones, talleres, miembros, clientes, inventario, aislamiento y auditoría—, cada uno con actor, criterio de aceptación *Dado–Cuando–Entonces* y prioridad MoSCoW |
 | **Reglas de negocio** | Un solo propietario activo por organización; correo de cliente único por organización; número de parte único por taller; existencias nunca negativas; movimientos inmutables; transferencia solo dentro de la organización y atómica; la asignación a talleres no altera permisos |
-| **No funcionales** | Filas ajenas = 0 en las 7 tablas (RNF-101) · aislamiento sostenido sin la verificación de aplicación (RNF-102) · 0 errores de tipos (RNF-201) · cobertura ≥ 80 % (RNF-207) · 0 vulnerabilidades críticas o altas (RNF-208) · éxito ≥ 80 % y SUS ≥ 68 (RNF-404) |
-| **Seguridad** | Credencial de sesión del proveedor verificada en cada petición; rol por organización; TLS en tránsito y cifrado en reposo del proveedor; registro de acciones críticas conservado mientras exista la organización; solo el registro y la comprobación de disponibilidad son públicos |
+| **No funcionales** | Filas ajenas = 0 en las 7 tablas (RNF-101) · aislamiento sostenido sin la verificación de aplicación (RNF-102) · 0 errores de tipos (RNF-201) · cobertura ≥ 80 % (RNF-207) · 0 vulnerabilidades críticas o altas (RNF-208) · éxito ≥ 80 % y SUS ≥ 68 (RNF-404) · 0 incumplimientos graves de accesibilidad WCAG 2.1 AA (RNF-405) |
+| **Seguridad** | Credencial de sesión del proveedor verificada en cada petición; rol por organización; TLS en tránsito y cifrado en reposo del proveedor; registro de acciones críticas conservado mientras exista la organización; solo el registro y la comprobación de disponibilidad son públicos; riesgos aplicables del **OWASP Top 10** cubiertos y trazados a su medida ([Arquitectura](../ingenieria/04-arquitectura.md) §10) |
+| **Registros y observabilidad** | Registros operativos de la plataforma, de la base de datos y del pipeline, sin credenciales ni contenido de filas, separados del registro de auditoría de negocio ([Arquitectura](../ingenieria/04-arquitectura.md) §15) |
 
 ---
 
@@ -822,7 +843,7 @@ Desarrollo iterativo con **iteraciones de dos semanas** que entregan **increment
 | **Aislamiento** | Las dos vías y las condiciones C0 a C3 (Vitest) |
 | **Componente del cliente** | Contrato desde el cliente: cabeceras de contexto y códigos de error (Vitest sobre DOM simulado) |
 | **Extremo a extremo** | Flujos T1–T3 del cambio de contexto (Playwright) |
-| **Auditorías** | Instalabilidad y diseño responsivo (Playwright) · dependencias (auditoría de npm) |
+| **Auditorías** | Instalabilidad, diseño responsivo y **accesibilidad WCAG 2.1 AA** (Playwright) · dependencias (auditoría de npm) |
 
 ### 25.4 Criterios de aceptación
 
@@ -840,6 +861,9 @@ Cada historia de usuario y cada requisito funcional llevan criterios en formato 
 | Vulnerabilidades críticas o altas en dependencias | 0 |
 | Integraciones al ramal principal con pipeline en verde | 100 % |
 | Filas ajenas devueltas bajo C1, C2 y C3 | 0 |
+| Incumplimientos graves o críticos de accesibilidad (WCAG 2.1 AA) | 0 |
+
+> **Lo que estos KPI no miden.** No se miden deuda técnica ni duplicación de código: en un proyecto de un solo autor y cuatro meses, la calidad se gobierna con la cobertura, la verificación de tipos y la auditoría de dependencias, que bloquean la integración. Incorporar una plataforma de análisis estático añadiría una herramienta que ningún requisito exige ([Plan de pruebas](../ingenieria/11-plan-pruebas.md) §1.5).
 
 ### 25.6 Matriz preliminar de validación
 
@@ -917,7 +941,7 @@ Cada historia de usuario y cada requisito funcional llevan criterios en formato 
 
 | Resultado | Métrica asociada |
 |---|---|
-| Matriz del estado del arte y vacío formulado | Fuentes con limitación consignada |
+| Matriz del estado del arte y vacío formulado | 10 fuentes con limitación consignada |
 | Especificación de requerimientos, modelo de datos, políticas, C4 y contrato | 7 de 7 tablas de negocio con criterio único de política |
 | Sistema con el corte vertical desplegado en *staging* y producción | 100 % de requisitos `Must` con caso en verde · cobertura ≥ 80 % |
 | Pipeline de integración y despliegue continuos | 100 % de integraciones verificadas · 0 vulnerabilidades críticas o altas |
@@ -984,7 +1008,7 @@ Tarifas y límites consultados el **14 de septiembre de 2026** en las páginas d
 | Dimensión | Evaluación |
 |---|---|
 | **Técnica** | Componentes maduros y compatibles: seguridad a nivel de fila nativa en PostgreSQL, identidad del proveedor evaluable en las políticas, adaptador de Hono para Vercel y TypeScript de extremo a extremo |
-| **Operativa** | Servicios gestionados sin servidores que operar; publicación automática tras el pipeline; paneles de consumo del proveedor como observabilidad |
+| **Operativa** | Servicios gestionados sin servidores que operar; publicación automática tras el pipeline; registros de ejecución del proveedor y del motor de datos para el diagnóstico, y paneles de consumo para el costo ([Arquitectura](../ingenieria/04-arquitectura.md) §15) |
 | **Temporal** | Ocho iteraciones con incremento verificable, 10 días de reserva y dos objetivos complementarios descartables que liberan I8 si falta tiempo |
 | **Económica** | USD 0 al mes en capa gratuita, con techo de contingencia de USD 45 al mes; sin licencias |
 
@@ -992,7 +1016,7 @@ Tarifas y límites consultados el **14 de septiembre de 2026** en las páginas d
 
 ## 29. Referencias
 
-Estilo **APA (7.ª edición)**. El estado de verificación entrada por entrada consta en el [Anexo de verificación de referencias](anexo-referencias.md). La documentación técnica sin autor humano se cita con autor corporativo y fecha de recuperación, y se emplea únicamente como sustento del marco conceptual.
+Estilo **APA (7.ª edición)**. El estado de verificación entrada por entrada consta en el [Anexo de verificación de referencias](anexo-referencias.md). La documentación técnica sin autor humano se cita con autor corporativo y fecha de recuperación, y se emplea únicamente como sustento del marco conceptual. Las obras con DOI o identificador permanente no llevan fecha de recuperación en APA 7, de modo que su **fecha de consulta** se registra en el anexo: **14 de septiembre de 2026** para Zhang et al. (2021), Yassin et al. (2022), Zhu et al. (2024), Yin et al. (2025), Leburu (2026), Cronbach (1951) y Hevner et al. (2004); **18 de agosto de 2026** para las demás.
 
 Alobaywi, B., Almutairi, M. G., & Sheldon, F. T. (2026). Performance trade-offs in multi-tenant IoT–cloud security: A systematic review of emerging technologies. *IoT, 7*(1), 21. https://doi.org/10.3390/iot7010021
 
@@ -1016,7 +1040,7 @@ Cronbach, L. J. (1951). Coefficient alpha and the internal structure of tests. *
 
 Dar, C., Hershcovitch, M., & Morrison, A. (2023). RLS side channels: Investigating leakage of row-level security protected data through query execution time. *Proceedings of the ACM on Management of Data, 1*(1), Artículo 89, 1–25. https://doi.org/10.1145/3588943
 
-Estado Plurinacional de Bolivia. (2009). *Constitución Política del Estado* (promulgada el 7 de febrero de 2009). Recuperado el 14 de septiembre de 2026, de https://www.lexivox.org/norms/BO-CPE-20090207.html
+Estado Plurinacional de Bolivia. (2009). *Constitución Política del Estado* (promulgada el 7 de febrero de 2009). Recuperado el 14 de septiembre de 2026, de https://www.planificacion.gob.bo/uploads/marco-legal/nueva_constitucion_politica_del_estado.pdf
 
 Fielding, R. T. (2000). *Architectural styles and the design of network-based software architectures* [Tesis doctoral, University of California, Irvine].
 
@@ -1048,9 +1072,11 @@ Krebs, R., Momm, C., & Kounev, S. (2012). Architectural concerns in multi-tenant
 
 Larman, C., & Basili, V. R. (2003). Iterative and incremental developments: A brief history. *Computer, 36*(6), 47–56. https://doi.org/10.1109/MC.2003.1204375
 
-Meta Open Source. (s. f.). *React documentation*. Recuperado el 14 de agosto de 2026, de https://react.dev/
+Leburu, N. (2026). Trust-aware orchestration architecture for LLM-assisted workflows in multi-tenant enterprise systems. *IEEE Access, 14*, 97094–97117. https://doi.org/10.1109/ACCESS.2026.3706063
 
-Microsoft. (s. f.). *TypeScript documentation*. Recuperado el 14 de agosto de 2026, de https://www.typescriptlang.org/docs/
+Meta Open Source. (s. f.). *React documentation*. Recuperado el 14 de septiembre de 2026, de https://react.dev/
+
+Microsoft. (s. f.). *TypeScript documentation*. Recuperado el 14 de septiembre de 2026, de https://www.typescriptlang.org/docs/
 
 Newman, S. (2021). *Building microservices: Designing fine-grained systems* (2.ª ed.). O'Reilly Media.
 
@@ -1062,13 +1088,13 @@ Nottingham, M., Wilde, E., & Dalal, S. (2023). *Problem details for HTTP APIs* (
 
 Olabanji, D., Fitch, T., & Matthew, O. (2023). Multi-tenancy in cloud-native architecture: A systematic mapping study. *WSEAS Transactions on Computers, 22*, 25–43. https://doi.org/10.37394/23205.2023.22.4
 
-OpenJS Foundation. (s. f.). *Node.js documentation*. Recuperado el 14 de agosto de 2026, de https://nodejs.org/docs/latest/api/
+OpenJS Foundation. (s. f.). *Node.js documentation*. Recuperado el 14 de septiembre de 2026, de https://nodejs.org/docs/latest/api/
 
 Pierce, B. C. (2002). *Types and programming languages*. MIT Press.
 
-PostgreSQL Global Development Group. (s. f.-a). *PostgreSQL documentation*. Recuperado el 14 de agosto de 2026, de https://www.postgresql.org/docs/current/
+PostgreSQL Global Development Group. (s. f.-a). *PostgreSQL documentation*. Recuperado el 14 de septiembre de 2026, de https://www.postgresql.org/docs/current/
 
-PostgreSQL Global Development Group. (s. f.-b). *Row security policies*. Recuperado el 14 de agosto de 2026, de https://www.postgresql.org/docs/current/ddl-rowsecurity.html
+PostgreSQL Global Development Group. (s. f.-b). *Row security policies*. Recuperado el 14 de septiembre de 2026, de https://www.postgresql.org/docs/current/ddl-rowsecurity.html
 
 Richards, M., & Ford, N. (2020). *Fundamentals of software architecture: An engineering approach*. O'Reilly Media.
 
@@ -1078,13 +1104,25 @@ Saltzer, J. H., & Schroeder, M. D. (1975). The protection of information in comp
 
 Sandhu, R. S., Coyne, E. J., Feinstein, H. L., & Youman, C. E. (1996). Role-based access control models. *Computer, 29*(2), 38–47. https://doi.org/10.1109/2.485845
 
-Schwaber, K., & Sutherland, J. (2020). *The Scrum Guide: The definitive guide to Scrum*. Recuperado el 14 de agosto de 2026, de https://scrumguides.org/
+Sevilla-González, M. del R., Moreno Loaeza, L., Lazaro-Carrera, L. S., Bourguet Ramirez, B., Vázquez Rodríguez, A., Peralta-Pedrero, M. L., & Almeda-Valdes, P. (2020). Spanish version of the System Usability Scale for the assessment of electronic tools: Development and validation. *JMIR Human Factors, 7*(4), e21161. https://doi.org/10.2196/21161
+
+Schwaber, K., & Sutherland, J. (2020). *The Scrum Guide: The definitive guide to Scrum*. Recuperado el 14 de septiembre de 2026, de https://scrumguides.org/
 
 Simić, M., Dedeić, J., Stojkov, M., & Prokić, I. (2024). A hierarchical namespace approach for multi-tenancy in distributed clouds. *IEEE Access, 12*, 32597–32617. https://doi.org/10.1109/ACCESS.2024.3369031
 
+Unidad de Análisis de Políticas Sociales y Económicas. (2025). *Análisis de la población ocupada, desocupada e inactiva en Bolivia entre los años 2015 y 2024*. UDAPE. https://www.udape.gob.bo/wp-content/uploads/2026/03/Analisis-de-la-condicion-actividad-2025.pdf
+
 World Wide Web Consortium. (2026). *Web application manifest* (W3C Working Draft del 13 de agosto de 2026). https://www.w3.org/TR/appmanifest/
 
-Zod. (s. f.). *Zod documentation*. Recuperado el 14 de agosto de 2026, de https://zod.dev/
+Yassin, M., Ould-Slimane, H., Talhi, C., & Boucheneb, H. (2022). Multi-tenant intrusion detection framework as a service for SaaS. *IEEE Transactions on Services Computing, 15*(5), 2925–2938. https://doi.org/10.1109/TSC.2021.3077852
+
+Yin, S., Morvan, F., Martinez-Gil, J., & Hameurlain, A. (2025). MTD-DS: An SLA-aware decision support benchmark for multi-tenant parallel DBMSs. *IEEE Transactions on Knowledge and Data Engineering, 37*(5), 2743–2755. https://doi.org/10.1109/TKDE.2025.3543727
+
+Zhang, Z., Yang, Z., Du, X., Li, W., Chen, X., & Sun, L. (2021). Tenant-led ciphertext information flow control for cloud virtual machines. *IEEE Access, 9*, 15156–15169. https://doi.org/10.1109/ACCESS.2021.3051061
+
+Zhu, X., Shen, P., Dai, Y., Xu, L., & Hu, J. (2024). Privacy-preserving and trusted keyword search for multi-tenancy cloud. *IEEE Transactions on Information Forensics and Security, 19*, 4316–4330. https://doi.org/10.1109/TIFS.2024.3377549
+
+Zod. (s. f.). *Zod documentation*. Recuperado el 14 de septiembre de 2026, de https://zod.dev/
 
 ---
 

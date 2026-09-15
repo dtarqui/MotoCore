@@ -29,7 +29,7 @@ El sistema no se prueba de manera uniforme: se concentra el esfuerzo donde un fa
 | **N4 · Aislamiento** | — *(específico del proyecto)* | Condiciones C0 a C3 por las dos vías | Vitest con cliente HTTP y cliente PostgreSQL con identidad ajena | Proyecto de validación desechable | Antes de cada hito; tres corridas en I8 |
 | **N5 · Usabilidad** | — *(objetivo complementario 5)* | Cambio de contexto frente al cambio de cuenta | Guion de tareas, cronómetro y cuestionario SUS | Entorno de producción y operadores | Una vez, en I8 |
 | **N6 · Componente del cliente** | Componente UI | El contrato desde el cliente: cabeceras de contexto, regla de rutas y códigos de error | Vitest sobre DOM simulado | Nada externo | En cada integración |
-| **N7 · Extremo a extremo** | E2E y auditorías | Flujos T1–T3, instalabilidad y diseño responsivo | Playwright | Cliente web e interfaz publicados en *staging* | Tras cada publicación en *staging*; un fallo bloquea la promoción a producción |
+| **N7 · Extremo a extremo** | E2E y auditorías | Flujos T1–T3, instalabilidad, diseño responsivo y accesibilidad | Playwright | Cliente web e interfaz publicados en *staging* | Tras cada publicación en *staging*; un fallo bloquea la promoción a producción |
 
 Además de estos niveles, la marca **CI** identifica las propiedades que verifica el propio pipeline: tipos, cobertura, auditoría de dependencias y bloqueo ante fallo.
 
@@ -46,7 +46,7 @@ N6 evalúa el **cumplimiento del contrato desde el lado del cliente**, que la ev
 
 ### 1.4 Qué cubre N7
 
-N7 automatiza lo que se puede observar sin una persona: que los flujos T1–T3 **funcionan** de extremo a extremo, que la aplicación es instalable y que no desborda en anchos de escritorio y móvil. **No sustituye a N5**: que un flujo funcione no dice si un operador lo comprende.
+N7 automatiza lo que se puede observar sin una persona: que los flujos T1–T3 **funcionan** de extremo a extremo, que la aplicación es instalable, que no desborda en anchos de escritorio y móvil y que no incumple de forma grave los criterios de **WCAG 2.1 nivel AA** (RNF-405). **No sustituye a N5**: que un flujo funcione no dice si un operador lo comprende.
 
 ### 1.5 Qué queda deliberadamente fuera
 
@@ -56,6 +56,7 @@ N7 automatiza lo que se puede observar sin una persona: que los flujos T1–T3 *
 | Pruebas de penetración | El alcance cubre el aislamiento entre inquilinos, no una evaluación ofensiva del despliegue |
 | Mitigación del canal lateral temporal de la seguridad a nivel de fila | Amenaza documentada (marco teórico §3.3); su mitigación excede el objeto del proyecto |
 | Evaluación de usabilidad de la interfaz completa | La evaluación se acota al cambio de contexto |
+| Métricas de deuda técnica y duplicación de código | El proyecto es de un solo autor y cuatro meses; la calidad se gobierna con la cobertura ≥ 80 %, la verificación de tipos y la auditoría de dependencias, que **sí bloquean la integración**. Una plataforma de análisis estático añadiría herramienta sin requisito que la exija |
 
 ---
 
@@ -69,6 +70,7 @@ N7 automatiza lo que se puede observar sin una persona: que los flujos T1–T3 *
 | Vulnerabilidades críticas o altas en dependencias | **0** | RNF-208 | CP-N208 | CI |
 | Integraciones al ramal principal con pipeline en verde | **100 %** | RNF-203 | CP-N203 | CI |
 | Filas ajenas devueltas bajo C1, C2 y C3 | **0** | RNF-101, RNF-102 | CP-N101, CP-N102 | N4 |
+| Incumplimientos graves o críticos de accesibilidad (WCAG 2.1 AA) | **0** | RNF-405 | CP-N405 | N7 |
 
 ---
 
@@ -260,6 +262,7 @@ Casos que **deben mostrar la fuga**: si no la muestran, la línea base no discri
 | RNF-204 | CP-N204.1 | **N6** | El código de negocio del error sobrevive al cliente |
 | RNF-402 | CP-N402 | **N7** | Sin desbordamiento horizontal a 360 px y 1280 px en las pantallas del corte vertical |
 | RNF-403 | CP-N403 | **N7** | Manifiesto con nombre, iconos de 192 y 512 px, `start_url` y `display: standalone`; *service worker* registrado |
+| RNF-405 | CP-N405 | **N7** | Sin incumplimientos graves o críticos de WCAG 2.1 AA en las pantallas del corte vertical |
 | RNF-404 | CP-N404.1 | **N5** | Tasa de éxito ≥ 80 % por tarea con el selector de contexto (§8.4) |
 | RNF-404 | CP-N404.2 | **N5** | Puntuación SUS media ≥ 68 con el selector, contrastada con *t* de una muestra |
 | RNF-404 | CP-N404.3 | **N5** | α de Cronbach > 0,8 en los ítems del SUS |
@@ -364,6 +367,7 @@ Responde a lo que las pruebas automatizadas no pueden responder: si el modelo je
 | **Muestreo** | No probabilístico **intencional**, por perfil |
 | **Justificación del tamaño** | Permite el contraste intrasujeto de tiempos entre condiciones con la aproximación normal de la media de las diferencias; los primeros cinco participantes bastan además para detectar la mayoría de los problemas de uso (Nielsen & Landauer, 1993) |
 | **Criterio de exclusión** | Haber participado en el desarrollo o conocer la aplicación antes de la sesión |
+| **Material** | Consentimiento informado, guion T1–T3, planilla de registro y cuestionario SUS en español: [Material de campo](12-material-de-campo.md) |
 
 ### 8.3 Diseño y tareas
 
@@ -387,7 +391,7 @@ Responde a lo que las pruebas automatizadas no pueden responder: si el modelo je
 | Observación de tarea guiada | Tasa de éxito por tarea y condición | Porcentaje | **≥ 80 %** con el selector |
 | Cronometraje | Tiempo por tarea y condición | Segundos | Contraste entre condiciones (§8.7) |
 | Registro de incidencias | Errores por tarea y condición | Cantidad | Alimenta la lista de problemas |
-| Cuestionario SUS (Brooke, 1996) | Puntuación por condición | 0 a 100 | **≥ 68** con el selector, según el baremo de Bangor et al. (2008) |
+| Cuestionario SUS (Brooke, 1996), en la versión en español validada por Sevilla-González et al. (2020) | Puntuación por condición | 0 a 100 | **≥ 68** con el selector, según el baremo de Bangor et al. (2008) |
 | Ítems del SUS | Consistencia interna | α de Cronbach | **> 0,8** |
 
 ### 8.5 Consideraciones éticas
@@ -425,6 +429,19 @@ Un resultado por debajo de los umbrales **no invalida la tesis** —cuya hipóte
 ### 8.8 Evidencia a conservar
 
 Guion de tareas con el orden de condiciones asignado a cada participante, formularios de consentimiento, planilla por participante y condición (éxito, tiempo, errores), respuestas SUS individuales con su puntuación, salida de los contrastes en R y lista de problemas detectados ordenada por frecuencia.
+
+### 8.9 Prueba piloto
+
+El instrumento se prueba **antes** de aplicarlo: una sesión con **uno o dos operadores ajenos a la muestra**, con el procedimiento completo de §8.6, cuyo objetivo es detectar instrucciones ambiguas, tareas mal calibradas en tiempo y campos que la planilla no recoge.
+
+| Qué se revisa | Qué se ajusta si falla |
+|---|---|
+| Que cada tarea se entienda sin aclaración del observador | Redacción del guion ([Material de campo](12-material-de-campo.md) §3) |
+| Que la sesión completa quepa en el tiempo previsto | Número de tareas por condición o extensión del escenario |
+| Que la planilla recoja todo lo que se observa | Campos de la planilla (§4 del material) |
+| Que los diez ítems del SUS se comprendan en su versión en español | Se conserva la redacción validada y se aclara de viva voz, **sin modificar el ítem** |
+
+Los datos del piloto **no se incorporan** al análisis: sirven para corregir el instrumento. Si el piloto obliga a cambiar una tarea, las sesiones ya realizadas con la versión anterior se descartan.
 
 ---
 
