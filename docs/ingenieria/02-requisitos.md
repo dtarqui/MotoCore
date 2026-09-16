@@ -1,15 +1,15 @@
 # Requisitos
 
-Especificación de requerimientos del proyecto: actores, requisitos funcionales, reglas de negocio, requisitos no funcionales, requisitos de seguridad, priorización y trazabilidad. Es el eslabón entre el alcance ([anteproyecto/01-definicion-y-alcance.md](../anteproyecto/01-definicion-y-alcance.md) §1.8) y la arquitectura ([Arquitectura](04-arquitectura.md)): traduce el alcance en enunciados verificables **antes** de decidir cómo se construye.
+Especificación de requerimientos del proyecto: actores, requisitos funcionales, reglas de negocio, requisitos no funcionales, requisitos de seguridad, priorización y trazabilidad. Es el eslabón entre el alcance ([anteproyecto/01-definicion-y-alcance.md](../anteproyecto/01-definicion-y-alcance.md), sección 1.8) y la arquitectura ([Arquitectura](04-arquitectura.md)): traduce el alcance en enunciados verificables **antes** de decidir cómo se construye.
 
-> Terminología: [Glosario](01-glosario.md) · Historias de usuario: [Historias de usuario](03-historias-usuario.md) · Interfaz por la que se ejercen: [Contrato](10-contrato-api.md) · Casos de prueba, nivel y evidencia: [Plan de pruebas](11-plan-pruebas.md)
+> Terminología: [Glosario](01-glosario.md); Historias de usuario: [Historias de usuario](03-historias-usuario.md); Interfaz por la que se ejercen: [Contrato](10-contrato-api.md); Casos de prueba, nivel y evidencia: [Plan de pruebas](11-plan-pruebas.md)
 
 ## Convenciones
 
 - **Formato del requisito funcional** — *El sistema debe [acción] [objeto] [condición o restricción]*, redactado como comportamiento observable, no como descripción de pantalla.
 - **Criterio de aceptación** — en formato **Dado–Cuando–Entonces**, de modo que el requisito nace con su prueba asociada.
-- **Prioridad (MoSCoW)** — `Must`: bloquea la salida a producción · `Should`: alto valor, no bloqueante · `Could`: deseable si hay margen.
-- **Alcance** — dentro (`Sí`) o fuera (`No`) del proyecto de grado (definición y alcance §1.8). Los requisitos fuera de alcance se documentan porque definen el producto completo.
+- **Prioridad (MoSCoW)** — `Must`: bloquea la salida a producción; `Should`: alto valor, no bloqueante; `Could`: deseable si hay margen.
+- **Alcance** — dentro (`Sí`) o fuera (`No`) del proyecto de grado (definición y alcance, sección 1.8). Los requisitos fuera de alcance se documentan porque definen el producto completo.
 - **Nivel** — si el dato que gobierna el requisito es de **organización** o de **taller**. Se declara en los bloques del corte vertical (RF-300, RF-500, RF-600); los demás son de nivel organización.
 
 ---
@@ -31,7 +31,7 @@ Especificación de requerimientos del proyecto: actores, requisitos funcionales,
 
 ## 2. Requisitos funcionales
 
-### RF-100 · Identidad y cuentas
+### RF-100 — Identidad y cuentas
 
 | ID | Actor | Requisito | Criterio de aceptación | Prioridad | Alcance |
 |---|---|---|---|---|---|
@@ -40,7 +40,7 @@ Especificación de requerimientos del proyecto: actores, requisitos funcionales,
 | RF-103 | Cualquiera | El sistema debe verificar la credencial en cada petición y rechazar las que no la traigan válida. | **Dada** una petición sin credencial o con credencial inválida a un recurso protegido, **cuando** se recibe, **entonces** responde `401`. | Must | Sí |
 | RF-104 | Miembro | El sistema debe devolver el perfil de la cuenta autenticada con las organizaciones donde tiene membresía activa y su rol en cada una. | **Dada** una cuenta con dos membresías activas y una revocada, **cuando** consulta su perfil, **entonces** recibe solo las dos organizaciones activas, cada una con su rol. | Must | Sí |
 
-### RF-200 · Organizaciones
+### RF-200 — Organizaciones
 
 | ID | Actor | Requisito | Criterio de aceptación | Prioridad | Alcance |
 |---|---|---|---|---|---|
@@ -49,7 +49,7 @@ Especificación de requerimientos del proyecto: actores, requisitos funcionales,
 | RF-203 | Miembro | El sistema debe permitir seleccionar la organización activa y confirmar el rol del solicitante en ella. | **Dada** una organización con membresía activa, **cuando** el usuario la activa, **entonces** recibe la organización y su rol; **dada** una sin membresía, **entonces** recibe `403 organization.access_denied`. | Must | Sí |
 | RF-204 | Owner | El sistema debe permitir al `Owner` editar los datos de su organización. | **Dado** el `Owner`, **cuando** edita la organización, **entonces** el cambio se refleja; **dado** un miembro no `Owner`, **cuando** lo intenta, **entonces** recibe `403`. | Should | Sí |
 
-### RF-300 · Talleres
+### RF-300 — Talleres
 
 | ID | Actor | Requisito | Criterio de aceptación | Prioridad | Alcance | Nivel |
 |---|---|---|---|---|---|---|
@@ -59,7 +59,7 @@ Especificación de requerimientos del proyecto: actores, requisitos funcionales,
 | RF-304 | Owner | El sistema debe permitir asignar y retirar miembros de talleres sin alterar sus permisos. | **Dado** un miembro asignado a un taller, **cuando** consulta datos de la organización, **entonces** ve exactamente lo mismo que antes de la asignación. | Should | Sí | Organización |
 | RF-305 | Owner | El sistema debe permitir desactivar un taller conservando su historial. | **Dado** un taller desactivado, **cuando** se listan los talleres activos, **entonces** no aparece; **cuando** se consultan sus datos, **entonces** siguen disponibles. | Should | Sí | Organización |
 
-### RF-400 · Miembros y control de acceso
+### RF-400 — Miembros y control de acceso
 
 | ID | Actor | Requisito | Criterio de aceptación | Prioridad | Alcance |
 |---|---|---|---|---|---|
@@ -71,7 +71,7 @@ Especificación de requerimientos del proyecto: actores, requisitos funcionales,
 | RF-406 | Mechanic, Receptionist | El sistema debe reservar la gestión de miembros al `Owner`. | **Dado** un `Mechanic`, **cuando** intenta invitar, **entonces** recibe `403 member.insufficient_permissions`. | Must | Sí |
 | RF-407 | Miembro | El sistema debe listar los miembros de la organización activa con su rol y estado. | **Dado** cualquier miembro, **cuando** consulta el equipo, **entonces** recibe solo miembros de la organización activa, con rol y estado. | Should | Sí |
 
-### RF-500 · Clientes *(corte vertical — nivel organización)*
+### RF-500 — Clientes *(corte vertical — nivel organización)*
 
 | ID | Actor | Requisito | Criterio de aceptación | Prioridad | Alcance | Nivel |
 |---|---|---|---|---|---|---|
@@ -81,7 +81,7 @@ Especificación de requerimientos del proyecto: actores, requisitos funcionales,
 | RF-504 | Owner, Receptionist | El sistema debe permitir editar, buscar y dar de baja lógica a un cliente. | **Dado** un cliente dado de baja, **cuando** se listan los activos, **entonces** no aparece y su registro se conserva; **dada** una búsqueda por nombre o correo, **entonces** opera solo dentro de la organización activa. | Must | Sí | Organización |
 | RF-505 | Mechanic | El sistema debe limitar al `Mechanic` a consultar clientes. | **Dado** un `Mechanic`, **cuando** intenta crear un cliente, **entonces** recibe `403`; **cuando** consulta el listado, **entonces** lo obtiene. | Should | Sí | Organización |
 
-### RF-600 · Inventario *(corte vertical — nivel taller)*
+### RF-600 — Inventario *(corte vertical — nivel taller)*
 
 | ID | Actor | Requisito | Criterio de aceptación | Prioridad | Alcance | Nivel |
 |---|---|---|---|---|---|---|
@@ -95,16 +95,16 @@ Especificación de requerimientos del proyecto: actores, requisitos funcionales,
 | RF-608 | Owner | El sistema debe transferir existencias entre talleres de la misma organización. | **Dada** existencia suficiente en el origen, **cuando** se transfiere, **entonces** descuenta en origen y suma en destino en una sola transacción; **dado** un destino de otra organización, **entonces** responde `403 inventory.cross_organization_transfer`. | Could | Sí | Taller |
 | RF-609 | Owner, Receptionist, Mechanic | El sistema debe reservar el catálogo de repuestos a `Owner` y `Receptionist` y la transferencia al `Owner`, y permitir a cualquier miembro consultar el inventario y registrar movimientos. | **Dado** un `Mechanic`, **cuando** intenta crear o editar un repuesto, **entonces** recibe `403 inventory.insufficient_permissions`; **cuando** registra un movimiento, **entonces** se acepta. La cláusula de transferencia solo se ejerce si RF-608 se construye. | Should | Sí | Taller |
 
-### RF-700 · Aislamiento y auditoría
+### RF-700 — Aislamiento y auditoría
 
 | ID | Actor | Requisito | Criterio de aceptación | Prioridad | Alcance |
 |---|---|---|---|---|---|
-| RF-701 | Cuenta sin membresía | El sistema debe impedir que una cuenta sin membresía activa lea o escriba datos de la organización a través de la interfaz. | **Dada** una cuenta sin membresía, **cuando** declara el contexto ajeno, **entonces** recibe `403 organization.access_denied`; **cuando** referencia un recurso ajeno desde su propio contexto, **entonces** recibe el `404` del módulo ([Contrato](10-contrato-api.md) §5). | Must | Sí |
+| RF-701 | Cuenta sin membresía | El sistema debe impedir que una cuenta sin membresía activa lea o escriba datos de la organización a través de la interfaz. | **Dada** una cuenta sin membresía, **cuando** declara el contexto ajeno, **entonces** recibe `403 organization.access_denied`; **cuando** referencia un recurso ajeno desde su propio contexto, **entonces** recibe el `404` del módulo ([Contrato](10-contrato-api.md), sección 5). | Must | Sí |
 | RF-702 | Cuenta sin membresía | El sistema debe sostener el aislamiento también en el acceso directo a la base de datos. | **Dada** la identidad de otra cuenta, **cuando** consulta directamente las tablas de negocio, **entonces** obtiene cero filas ajenas. | Must | Sí |
 | RF-703 | Servidor con credencial privilegiada | El sistema debe registrar con autor, acción y fecha las seis acciones críticas: invitación de un miembro, cambio de rol, remoción de un miembro, modificación de la organización (RF-204), desactivación de un taller (RF-305) y baja lógica de un cliente (RF-504). | **Dada** cada una de las seis acciones, **cuando** se ejecuta, **entonces** queda registrada; **dada** la eliminación de la entidad o del usuario referenciado, **entonces** el registro persiste. | Should | Sí |
 | RF-704 | Owner | El sistema debe reservar la consulta del registro de auditoría al `Owner`, también por acceso directo. | **Dado** un `Mechanic` o `Receptionist`, **cuando** consulta la auditoría por la interfaz, **entonces** recibe `403`; **cuando** la consulta directamente en la base, **entonces** obtiene cero filas. | Should | Sí |
 
-### RF-800 · Fuera del alcance del proyecto de grado
+### RF-800 — Fuera del alcance del proyecto de grado
 
 Documentados para dar contexto al diseño; su construcción es trabajo posterior (ver [Análisis del mercado](09-analisis-mercado.md)).
 
@@ -150,51 +150,51 @@ Restricciones del dominio que condicionan los requisitos sin ser funcionalidades
 
 **Sin métrica y umbral no es un requisito, es un deseo.** Cada RNF declara su categoría, la métrica con su umbral y cómo se verifica.
 
-### RNF-100 · Seguridad
+### RNF-100 — Seguridad
 
 | ID | Categoría | Requisito | Métrica y umbral | Cómo se verifica | Prioridad | Alcance |
 |---|---|---|---|---|---|---|
-| RNF-101 | Seguridad | El aislamiento entre organizaciones se aplica en el motor de base de datos, no solo en la aplicación. | **7 de 7** tablas de negocio censadas en el [Modelo de datos](05-modelo-datos.md) con políticas activas · **0 filas ajenas** por consulta directa | Acceso directo con identidad ajena (CP-N101) | Must | Sí |
-| RNF-102 | Seguridad | El aislamiento es **inmutable**: se sostiene con la verificación de la capa de aplicación deshabilitada. | **100 %** de casos de aislamiento en verde bajo C2 · **0 filas ajenas** | Banco de pruebas con la verificación sustituida (CP-N102) | Must | Sí |
+| RNF-101 | Seguridad | El aislamiento entre organizaciones se aplica en el motor de base de datos, no solo en la aplicación. | **7 de 7** tablas de negocio censadas en el [Modelo de datos](05-modelo-datos.md) con políticas activas, **0 filas ajenas** por consulta directa | Acceso directo con identidad ajena (CP-N101) | Must | Sí |
+| RNF-102 | Seguridad | El aislamiento es **inmutable**: se sostiene con la verificación de la capa de aplicación deshabilitada. | **100 %** de casos de aislamiento en verde bajo C2, **0 filas ajenas** | Banco de pruebas con la verificación sustituida (CP-N102) | Must | Sí |
 | RNF-103 | Seguridad | Las credenciales privilegiadas no se exponen al cliente ni al repositorio. | **0** secretos en el repositorio y en el paquete del cliente | Búsqueda de secretos e inspección (CP-N103) | Must | Sí |
 | RNF-104 | Seguridad | El sistema nunca recibe ni persiste contraseñas en texto plano. | **0** rutas de código que reciban o persistan contraseñas | Inspección: gestión delegada, ADR-004 (CP-N104) | Must | Sí |
 | RNF-105 | Seguridad | Los errores no revelan la existencia de recursos de otras organizaciones. | **100 %** de respuestas idénticas en estado, código y cuerpo entre recurso ajeno e inexistente | Prueba de integración (CP-N105) | Must | Sí |
 | RNF-106 | Seguridad | La búsqueda de cuentas por correo no es explotable para enumeración. | **0** operaciones de búsqueda de cuentas invocables desde el cliente | Inspección (CP-N106) | Must | Sí |
 
-### RNF-200 · Mantenibilidad y calidad
+### RNF-200 — Mantenibilidad y calidad
 
 | ID | Categoría | Requisito | Métrica y umbral | Cómo se verifica | Prioridad | Alcance |
 |---|---|---|---|---|---|---|
 | RNF-201 | Mantenibilidad | El código está tipado estáticamente y sin errores de tipo. | **0** errores del verificador de tipos | Pipeline (CP-N201) | Must | Sí |
 | RNF-202 | Mantenibilidad | Toda regla de aislamiento y de negocio tiene prueba automatizada. | **100 %** de requisitos `Must` de alcance `Sí` con al menos un caso en verde | Pipeline y matriz del plan de pruebas (CP-N202) | Must | Sí |
-| RNF-203 | Mantenibilidad | Cada integración al ramal principal ejecuta el pipeline y un fallo la bloquea. | **100 %** de integraciones con pipeline ejecutado · **0** publicaciones sin pipeline aprobado | Configuración del pipeline (CP-N203) | Must | Sí |
+| RNF-203 | Mantenibilidad | Cada integración al ramal principal ejecuta el pipeline y un fallo la bloquea. | **100 %** de integraciones con pipeline ejecutado, **0** publicaciones sin pipeline aprobado | Configuración del pipeline (CP-N203) | Must | Sí |
 | RNF-204 | Mantenibilidad | Los errores se devuelven en formato uniforme y con códigos estables. | **100 %** de respuestas de error en Problem Details (RFC 9457) con un código del catálogo del contrato | Prueba de contrato (CP-N204) | Must | Sí |
 | RNF-205 | Mantenibilidad | La entrada de toda operación de escritura se valida antes de tocar la base de datos. | **100 %** de cuerpos inválidos responden `400` con detalle por campo y **sin efectos secundarios** | Prueba de contrato (CP-N205) | Must | Sí |
 | RNF-206 | Mantenibilidad | Las decisiones estructurales quedan registradas con alternativas y consecuencias. | **1** ADR por cada decisión estructural | Inspección (CP-N206) | Must | Sí |
 | RNF-207 | Mantenibilidad | Los servicios de dominio del servidor están cubiertos por pruebas. | Cobertura de líneas **≥ 80 %** | Informe de cobertura en el pipeline (CP-N207) | Must | Sí |
 | RNF-208 | Seguridad | Las dependencias no tienen vulnerabilidades conocidas graves. | **0** vulnerabilidades críticas o altas | Auditoría de dependencias en el pipeline (CP-N208) | Must | Sí |
 
-### RNF-300 · Despliegue, operación y costo
+### RNF-300 — Despliegue, operación y costo
 
 | ID | Categoría | Requisito | Métrica y umbral | Cómo se verifica | Prioridad | Alcance |
 |---|---|---|---|---|---|---|
 | RNF-301 | Operación | El backend se despliega sin administrar servidores. | **0** servidores que aprovisionar u operar | Inspección del despliegue (CP-N301) | Must | Sí |
-| RNF-302 | Costo | El costo de infraestructura es proporcional al uso, sin costo fijo por organización. | **USD 0** de costo fijo por organización en la capa gratuita · escalado a cero sin tráfico | Inspección (CP-N302) · objetivo complementario 6 | Must | Sí |
+| RNF-302 | Costo | El costo de infraestructura es proporcional al uso, sin costo fijo por organización. | **USD 0** de costo fijo por organización en la capa gratuita, escalado a cero sin tráfico | Inspección (CP-N302), objetivo complementario 6 | Must | Sí |
 | RNF-303 | Operación | La configuración por entorno se realiza sin modificar el código. | **0** cambios de código para pasar de *staging* a producción | Inspección (CP-N303) | Must | Sí |
 | RNF-304 | Operación | El esquema evoluciona mediante migraciones versionadas reproducibles. | Base reconstruida desde cero aplicando el **100 %** de las migraciones en orden | Reconstrucción antes de cada hito (CP-N304) | Must | Sí |
-| RNF-305 | Operación | La publicación en *staging* y producción es automática tras el pipeline. | Rama `main` → *staging* · rama `release` → producción · **0** publicaciones sin pipeline aprobado | Inspección de la configuración (CP-N305) | Should | Sí |
+| RNF-305 | Operación | La publicación en *staging* y producción es automática tras el pipeline. | Rama `main` hacia *staging*; rama `release` hacia producción, **0** publicaciones sin pipeline aprobado | Inspección de la configuración (CP-N305) | Should | Sí |
 
-### RNF-400 · Usabilidad y compatibilidad
+### RNF-400 — Usabilidad y compatibilidad
 
 | ID | Categoría | Requisito | Métrica y umbral | Cómo se verifica | Prioridad | Alcance |
 |---|---|---|---|---|---|---|
-| RNF-401 | Usabilidad | El cambio de organización y de taller está disponible sin cerrar sesión. | **0** reautenticaciones al cambiar de contexto · flujo T1 en verde | Contrato desde el cliente y extremo a extremo (CP-N401) | Must | Sí |
+| RNF-401 | Usabilidad | El cambio de organización y de taller está disponible sin cerrar sesión. | **0** reautenticaciones al cambiar de contexto, flujo T1 en verde | Contrato desde el cliente y extremo a extremo (CP-N401) | Must | Sí |
 | RNF-402 | Compatibilidad | La interfaz es utilizable en navegador de escritorio y móvil. | **0** desbordamientos horizontales a **360 px** y **1280 px** en las pantallas del corte vertical, en los motores **Chromium** y **WebKit** | Auditoría con Playwright (CP-N402) | Must | Sí |
-| RNF-403 | Compatibilidad | La aplicación es instalable como PWA. | Manifiesto con nombre, iconos de **192 px** y **512 px**, `start_url` y `display: standalone` · *service worker* registrado | Auditoría con Playwright (CP-N403) | Should | Sí |
-| RNF-404 | Usabilidad | El cambio de contexto resulta operable por un usuario del rubro sin formación previa. | Tasa de éxito **≥ 80 %** por tarea · puntuación SUS **≥ 68** (Brooke, 1996, en la versión en español validada por Sevilla-González et al., 2020; baremo de Bangor et al., 2008) con **α > 0,8** | Evaluación con operadores, objetivo complementario 5 (CP-N404.1 a CP-N404.3) | Should | Sí |
+| RNF-403 | Compatibilidad | La aplicación es instalable como PWA. | Manifiesto con nombre, iconos de **192 px** y **512 px**, `start_url` y `display: standalone`; *service worker* registrado | Auditoría con Playwright (CP-N403) | Should | Sí |
+| RNF-404 | Usabilidad | El cambio de contexto resulta operable por un usuario del rubro sin formación previa. | Tasa de éxito **≥ 80 %** por tarea; puntuación SUS **≥ 68** (Brooke, 1996, en la versión en español validada por Sevilla-González et al., 2020; baremo de Bangor et al., 2008) con **α > 0,8** | Evaluación con operadores, objetivo complementario 5 (CP-N404.1 a CP-N404.3) | Should | Sí |
 | RNF-405 | Compatibilidad | La interfaz cumple los criterios de accesibilidad aplicables a las pantallas del corte vertical. | **0** incumplimientos graves o críticos de **WCAG 2.1 nivel AA** en las pantallas del corte vertical | Auditoría automatizada en el ejecutor extremo a extremo (CP-N405) | Should | Sí |
 
-### RNF-500 · Rendimiento *(fuera de alcance)*
+### RNF-500 — Rendimiento *(fuera de alcance)*
 
 | ID | Categoría | Requisito | Nota | Alcance |
 |---|---|---|---|---|
@@ -231,28 +231,28 @@ El **MVP** lo componen los requisitos funcionales `Must` **más** los no funcion
 | **`Could`** | RF-608 |
 | **`Won't` (este período)** | RF-801 a RF-808, RNF-501 |
 
-RNF-206 es `Must` como práctica de documentación, pero no bloquea la salida a producción. RNF-404 es `Should` de forma deliberada: la hipótesis del proyecto es sobre el **aislamiento**, y la usabilidad se evalúa en un objetivo complementario descartable.
+RNF-206 es `Must` como práctica de documentación, pero no bloquea la salida a producción. RNF-404 es `Should` de forma deliberada: el objetivo central del proyecto es el **aislamiento**, y la usabilidad se evalúa en un objetivo complementario descartable.
 
 ---
 
-## 7. Trazabilidad requisito → objetivo → componente
+## 7. Trazabilidad de requisito a objetivo y componente
 
 Cada requisito se rastrea **hacia atrás** hasta el objetivo específico que lo especifica, construye o valida, y **hacia adelante** hasta el componente de arquitectura que lo materializa ([Arquitectura](04-arquitectura.md)). Un requisito sin objetivo es alcance no problematizado; un objetivo sin requisitos, un objetivo no materializado.
 
 | Requisitos | Objetivos | Componente de arquitectura |
 |---|---|---|
-| RF-101 a RF-104 | O2 especifica · O3 construye · O4 valida RF-103 | Módulo de identidad · middleware de autenticación · función atómica de registro |
-| RF-201 a RF-204 | O2 · O3 | Módulo de organizaciones · middleware de contexto activo |
-| RF-301 a RF-305 | O2 · O3 | Módulo de talleres · middleware de contexto activo |
-| RF-401 a RF-407 | O2 · O3 | Módulo de miembros · índice único parcial del propietario |
-| RF-501 a RF-505 | O2 · O3 · O4 valida RF-502 | Módulo de clientes |
-| RF-601 a RF-609 | O2 · O3 · O4 valida RF-602 | Módulo de inventario · funciones atómicas de movimiento y transferencia |
-| RF-701, RF-702 | O2 · O3 · **O4** | Políticas de seguridad a nivel de fila · funciones de verificación de membresía · verificación de membresía de la aplicación · cliente de datos de la petición |
-| RF-703, RF-704 | O2 · O3 · O4 valida RF-704 | Módulo de auditoría · política de lectura del propietario |
-| RNF-101 a RNF-106 | O2 · O3 · **O4** | Políticas del motor · middlewares · reparto de clientes de datos (ADR-008) |
+| RF-101 a RF-104 | O2 especifica, O3 construye, O4 valida RF-103 | Módulo de identidad, middleware de autenticación, función atómica de registro |
+| RF-201 a RF-204 | O2 y O3 | Módulo de organizaciones, middleware de contexto activo |
+| RF-301 a RF-305 | O2 y O3 | Módulo de talleres, middleware de contexto activo |
+| RF-401 a RF-407 | O2 y O3 | Módulo de miembros, índice único parcial del propietario |
+| RF-501 a RF-505 | O2 y O3; O4 valida RF-502 | Módulo de clientes |
+| RF-601 a RF-609 | O2 y O3; O4 valida RF-602 | Módulo de inventario, funciones atómicas de movimiento y transferencia |
+| RF-701, RF-702 | O2, O3 y **O4** | Políticas de seguridad a nivel de fila, funciones de verificación de membresía, verificación de membresía de la aplicación, cliente de datos de la petición |
+| RF-703, RF-704 | O2 y O3; O4 valida RF-704 | Módulo de auditoría, política de lectura del propietario |
+| RNF-101 a RNF-106 | O2, O3 y **O4** | Políticas del motor, middlewares, reparto de clientes de datos (ADR-008) |
 | RNF-201 a RNF-208 | O3 | Pipeline de integración continua |
-| RNF-301 a RNF-305 | O3 · O6 evalúa RNF-302 | Despliegue en Vercel y Supabase |
-| RNF-401 a RNF-403 y RNF-405 | O3 · O5 evalúa RNF-401 | Cliente web: selectores de contexto, manifiesto y accesibilidad |
+| RNF-301 a RNF-305 | O3; O6 evalúa RNF-302 | Despliegue en Vercel y Supabase |
+| RNF-401 a RNF-403 y RNF-405 | O3; O5 evalúa RNF-401 | Cliente web: selectores de contexto, manifiesto y accesibilidad |
 | RNF-404 | **O5** | Evaluación con operadores |
 
 El objetivo 1 no genera requisitos propios: **fundamenta** RNF-101, RNF-102, la línea base de la validación y el alcance funcional.

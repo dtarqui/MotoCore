@@ -2,13 +2,13 @@
 
 **Diseño y validación de una arquitectura multi-tenant jerárquica con RLS para aislamiento verificable e inmutable en mantenimiento mecánico.**
 
-Maestría en Full Stack Development · Universidad Católica Boliviana "San Pablo" · Septiembre – diciembre de 2026
+Maestría en Full Stack Development, Universidad Católica Boliviana "San Pablo", Septiembre – diciembre de 2026
 
 ---
 
 ## Base normativa
 
-Toda la documentación se ajusta **estrictamente** a la [Guía de Investigación Aplicada y Desarrollo Full Stack](<Guía de Investigación Aplicada y Desarrollo Full Stack.md>): fija el contenido mínimo del documento final (§15), los criterios de redacción de problema, objetivos, hipótesis y variables (§2–§6), el diseño metodológico (§7) y la propuesta técnica (§8–§13), y la revisión de consistencia con que se cierra (§14). Si un documento contradice la guía, se corrige el documento.
+Toda la documentación se ajusta **estrictamente** a la [Guía de Investigación Aplicada y Desarrollo Full Stack](<Guía de Investigación Aplicada y Desarrollo Full Stack.md>): fija el contenido mínimo del documento final (sección 15), los criterios de redacción de problema, objetivos, hipótesis y variables (secciones 2 a 6), el diseño metodológico (sección 7) y la propuesta técnica (secciones 8 a 13), y la revisión de consistencia con que se cierra (sección 14). Si un documento contradice la guía, se corrige el documento.
 
 ## Cómo está organizada
 
@@ -18,12 +18,12 @@ La documentación se divide en dos: el **anteproyecto** es el documento académi
 
 | # | Capítulo | Qué establece |
 |---|---|---|
-| — | [**Anteproyecto integrado**](anteproyecto/04-anteproyecto-integrado.md) | **El documento de entrega**: los 29 puntos de la guía en dos partes —Parte I · Investigación y Parte II · Propuesta técnica— y el anexo de revisión de consistencia |
+| — | [**Anteproyecto integrado**](anteproyecto/04-anteproyecto-integrado.md) | **El documento de entrega**: los 29 puntos de la guía en dos partes —Parte I; Investigación y Parte II; Propuesta técnica— y el anexo de revisión de consistencia |
 | — | [**Perfil de proyecto**](anteproyecto/00-perfil-proyecto.md) | El documento que se presenta para aprobación: condensa los capítulos en la estructura del perfil, con matriz de consistencia, cronograma, presupuesto y viabilidad |
 | 1 | [Definición y alcance](anteproyecto/01-definicion-y-alcance.md) | Tema, árbol de problemas, cuatro delimitaciones, preguntas, objetivos, alcance, exclusiones y justificación |
 | 2 | [Antecedentes y estado del arte](anteproyecto/02-antecedentes-y-estado-del-arte.md) | Contexto del sector, antecedentes tecnológicos, revisión sistemática y vacío de investigación |
 | 3 | [Marco teórico y conceptual](anteproyecto/03-marco-teorico-y-conceptual.md) | Glosario técnico operacional, teorías que justifican cada decisión, enfoque de investigación y revisión crítica |
-| — | [Anexo · Verificación de referencias](anteproyecto/anexo-referencias.md) | Estado de comprobación de cada fuente citada |
+| — | [Anexo, Verificación de referencias](anteproyecto/anexo-referencias.md) | Estado de comprobación de cada fuente citada |
 
 ### [ingenieria/](ingenieria/) — los artefactos que lo sustentan
 
@@ -39,22 +39,26 @@ La documentación se divide en dos: el **anteproyecto** es el documento académi
 | 8 | [Plan de trabajo](ingenieria/08-plan-trabajo.md) | Metodología, EDT, cronograma, hitos, riesgos, restricciones y supuestos, recursos, presupuesto y viabilidad |
 | 9 | [Análisis del mercado](ingenieria/09-analisis-mercado.md) | Soluciones existentes en Bolivia, comparativo y funcionalidades desatendidas |
 | 10 | [Contrato de la interfaz de programación](ingenieria/10-contrato-api.md) | Rutas, contexto activo, códigos de error y reglas de no divulgación |
-| 11 | [Plan de pruebas y validación](ingenieria/11-plan-pruebas.md) | Estrategia multinivel, KPIs, condiciones C0–C3, matriz requisito → caso → evidencia y evaluaciones complementarias |
+| 11 | [Plan de pruebas y validación](ingenieria/11-plan-pruebas.md) | Estrategia multinivel, KPIs, condiciones C0–C3, matriz de requisito, caso y evidencia y evaluaciones complementarias |
 | 12 | [Material de campo](ingenieria/12-material-de-campo.md) | Consentimiento informado, guion de tareas T1–T3, planilla de registro y cuestionario SUS en español para la evaluación con operadores |
 
 ---
 
 ## Cómo se relacionan
 
-La secuencia reproduce la cadena de coherencia de la guía (§14): cada eslabón se justifica por el anterior.
+La secuencia reproduce la cadena de coherencia de la guía (sección 14): cada eslabón se justifica por el anterior.
 
-```
-Problema ──> Objetivos ──> Solución propuesta ──> Requerimientos ──> Arquitectura
-(cap. 1–2)   (cap. 1)      (anteproyecto §21)     (Requisitos)       (Arquitectura · Modelo · Seguridad · ADR)
-                                                                           │
-Planificación <── Validación <── Metodología de desarrollo <── Tecnologías ─┘
-(Plan de trabajo)  (Plan de pruebas)  (Plan de trabajo)        (matriz de selección)
-```
+| # | Eslabón | Dónde se desarrolla |
+|---|---|---|
+| 1 | Problema | Capítulos 1 y 2 |
+| 2 | Objetivos | Capítulo 1 |
+| 3 | Solución propuesta | Anteproyecto integrado, sección 19 |
+| 4 | Requerimientos | Requisitos |
+| 5 | Arquitectura | Arquitectura, Modelo de datos, Seguridad y Decisiones de diseño |
+| 6 | Tecnologías | Matriz de selección tecnológica |
+| 7 | Metodología de desarrollo | Plan de trabajo |
+| 8 | Validación | Plan de pruebas |
+| 9 | Planificación | Plan de trabajo |
 
 ## Fuente de verdad por tema
 
@@ -67,11 +71,11 @@ Antes de escribir sobre un tema, verificar quién es su responsable. Si ya lo ti
 | Estructura exigida del documento y criterios metodológicos | [Guía de Investigación Aplicada y Desarrollo Full Stack](<Guía de Investigación Aplicada y Desarrollo Full Stack.md>) |
 | Terminología del dominio y alcance de cada dato por nivel | [ingenieria/01-glosario.md](ingenieria/01-glosario.md) |
 | Título, problema, delimitación, preguntas, objetivos, alcance, exclusiones y justificación | [anteproyecto/01-definicion-y-alcance.md](anteproyecto/01-definicion-y-alcance.md) |
-| Antecedentes, protocolo de revisión, estado del arte y vacío | [anteproyecto/02-antecedentes-y-estado-del-arte.md](anteproyecto/02-antecedentes-y-estado-del-arte.md) · [anexo-referencias.md](anteproyecto/anexo-referencias.md) |
+| Antecedentes, protocolo de revisión, estado del arte y vacío | [anteproyecto/02-antecedentes-y-estado-del-arte.md](anteproyecto/02-antecedentes-y-estado-del-arte.md), [anexo-referencias.md](anteproyecto/anexo-referencias.md) |
 | Definición formal de una tecnología y teoría que justifica una decisión | [anteproyecto/03-marco-teorico-y-conceptual.md](anteproyecto/03-marco-teorico-y-conceptual.md) |
-| Hipótesis, variables, operacionalización y matriz de consistencia | [anteproyecto/04-anteproyecto-integrado.md](anteproyecto/04-anteproyecto-integrado.md) §10–§13 |
-| Enfoque, diseño, población, muestra, técnicas, instrumentos y estrategia de análisis | [anteproyecto/04-anteproyecto-integrado.md](anteproyecto/04-anteproyecto-integrado.md) §14–§18 |
-| Consideraciones éticas | [anteproyecto/04-anteproyecto-integrado.md](anteproyecto/04-anteproyecto-integrado.md) §19 · [ingenieria/11-plan-pruebas.md](ingenieria/11-plan-pruebas.md) §8.5 para la sesión con operadores |
+| Variables, operacionalización y matriz de consistencia | [anteproyecto/04-anteproyecto-integrado.md](anteproyecto/04-anteproyecto-integrado.md), secciones 10 a 12 |
+| Enfoque, diseño, población, muestra, técnicas, instrumentos y estrategia de análisis | [anteproyecto/04-anteproyecto-integrado.md](anteproyecto/04-anteproyecto-integrado.md), secciones 13 a 16 |
+| Consideraciones éticas | [anteproyecto/04-anteproyecto-integrado.md](anteproyecto/04-anteproyecto-integrado.md), sección 17; [ingenieria/11-plan-pruebas.md](ingenieria/11-plan-pruebas.md), sección 8.5 para la sesión con operadores |
 | Actores, requisitos, reglas de negocio, requisitos de seguridad y MVP | [ingenieria/02-requisitos.md](ingenieria/02-requisitos.md) |
 | Cómo lo vive quien lo usa | [ingenieria/03-historias-usuario.md](ingenieria/03-historias-usuario.md) |
 | Estilo arquitectónico, C4 y matriz de selección tecnológica | [ingenieria/04-arquitectura.md](ingenieria/04-arquitectura.md) |

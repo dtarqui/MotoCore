@@ -47,7 +47,7 @@ Registro de las decisiones estructurales del proyecto, con las alternativas eval
 
 Esta decisión establece **que** hay dos capas, no **cómo** participa la segunda en el camino de la interfaz: eso depende de la identidad con que el servidor consulta la base de datos, y se resuelve en ADR-008.
 
-**Relación con los objetivos.** La comparación fundamentada frente a las alternativas de base por inquilino y esquema por inquilino corresponde al objetivo específico 1, y se desarrolla en el estado del arte. La alternativa 1 —aislamiento únicamente en la capa de aplicación— es además la **línea base** contra la que el objetivo 4 contrasta esta decisión (condición C0 del [Plan de pruebas](11-plan-pruebas.md) §6).
+**Relación con los objetivos.** La comparación fundamentada frente a las alternativas de base por inquilino y esquema por inquilino corresponde al objetivo específico 1, y se desarrolla en el estado del arte. La alternativa 1 —aislamiento únicamente en la capa de aplicación— es además la **línea base** contra la que el objetivo 4 contrasta esta decisión (condición C0 del [Plan de pruebas](11-plan-pruebas.md), sección 6).
 
 ---
 
@@ -104,7 +104,7 @@ Esta decisión establece **que** hay dos capas, no **cómo** participa la segund
 
 **Justificación.** Permite cambiar de contexto sin reemitir el token de sesión, mantiene estables las rutas de los recursos y concentra la validación en un único punto reutilizable por todos los módulos.
 
-**Consecuencias.** El cliente debe conservar y enviar el contexto activo en cada llamada de negocio. El servidor **nunca asume un contexto por defecto**: si la cabecera falta, la petición se rechaza de forma explícita (RF-303). La regla de rutas que se deriva de esta decisión —qué identificadores pueden aparecer en la ruta y cuáles viajan solo por cabecera— está fijada en el [Contrato de la interfaz de programación](10-contrato-api.md) §2.3.
+**Consecuencias.** El cliente debe conservar y enviar el contexto activo en cada llamada de negocio. El servidor **nunca asume un contexto por defecto**: si la cabecera falta, la petición se rechaza de forma explícita (RF-303). La regla de rutas que se deriva de esta decisión —qué identificadores pueden aparecer en la ruta y cuáles viajan solo por cabecera— está fijada en el [Contrato de la interfaz de programación](10-contrato-api.md), sección 2.3.
 
 ---
 
@@ -117,7 +117,7 @@ Esta decisión establece **que** hay dos capas, no **cómo** participa la segund
 **Alternativas consideradas**
 1. **Una organización equivale a un local.** Cada taller se registra como una organización independiente. Es la opción más simple, pero fragmenta clientes e historial entre locales de un mismo operador y obliga a cambiar de contexto para atender al mismo cliente — anula el beneficio de centralizar.
 2. **El taller como segunda unidad de aislamiento** (inquilino anidado): las políticas de seguridad filtrarían también por taller. Ofrece la separación más estricta, pero impide compartir clientes e historial entre locales de la misma organización y duplica la complejidad de las políticas, aumentando la probabilidad de error en su definición.
-3. **Jerarquía organización → talleres con el aislamiento situado únicamente en la organización.** El taller actúa como criterio de alcance operativo: determina *dónde* ocurre una operación, no *quién* puede verla.
+3. **Jerarquía de organizaciones y talleres con el aislamiento situado únicamente en la organización.** El taller actúa como criterio de alcance operativo: determina *dónde* ocurre una operación, no *quién* puede verla.
 
 **Decisión**: opción 3.
 
@@ -174,7 +174,7 @@ El proveedor de datos ofrece dos credenciales. La **clave de servicio** salta la
 
 | Alternativa | Ventajas | Inconvenientes |
 |---|---|---|
-| **Clave de servicio en todo el servidor** | Un solo cliente, sin casos especiales; ninguna consulta puede fallar por una política mal escrita | Las políticas no intervienen en el camino de la interfaz: el aislamiento pasa a depender **solo** del control de la aplicación. Incumple RNF-102 y deja sin sustento la segunda cláusula de la hipótesis |
+| **Clave de servicio en todo el servidor** | Un solo cliente, sin casos especiales; ninguna consulta puede fallar por una política mal escrita | Las políticas no intervienen en el camino de la interfaz: el aislamiento pasa a depender **solo** del control de la aplicación. Incumple RNF-102 y deja sin sustento la segunda cláusula del criterio de éxito |
 | **Credencial de la petición en todo el servidor** | Máxima coherencia: una sola regla, sin excepciones que recordar | Imposible: el registro ocurre antes de que exista sesión; la creación de una organización exige escribir una membresía que la política aún no permite —el solicitante todavía no es miembro—; y varias funciones están concedidas solo a la identidad del servidor (ADR-007, RNF-106) |
 | **Reparto: credencial de la petición para los datos de negocio, clave de servicio para un conjunto cerrado de excepciones** | Las políticas actúan en el camino de la interfaz; lo privilegiado queda acotado y enumerado | Introduce dos clientes y, con ellos, la posibilidad de equivocarse al añadir un endpoint. Exige que las excepciones estén documentadas una a una |
 
@@ -205,7 +205,7 @@ El proveedor de datos ofrece dos credenciales. La **clave de servicio** salta la
 | Alternativa | Ventajas | Inconvenientes |
 |---|---|---|
 | **Monolito modular en servidor dedicado** | Un solo artefacto, baja complejidad operativa, fácil de probar | Costo fijo mensual y servidor que operar: incumple RNF-301 y RNF-302 |
-| **Microservicios** | Escalado y despliegue independientes por servicio | Orquestación, observabilidad distribuida y consistencia entre servicios que un desarrollador único no puede sostener (Newman, 2021, citado en el marco teórico §3.3) |
+| **Microservicios** | Escalado y despliegue independientes por servicio | Orquestación, observabilidad distribuida y consistencia entre servicios que un desarrollador único no puede sostener (Newman, 2021, citado en el marco teórico, sección 3.3) |
 | **Serverless con una función por endpoint** | Escalado automático y pago por uso | Fragmenta la lógica compartida —autenticación, contexto activo, verificación de membresía— en tantas unidades como rutas, y multiplica los arranques en frío |
 | **Monolito modular desplegado como funciones serverless** | Una sola aplicación con módulos por dominio y capas internas, publicada como funciones con escalado a cero | La aplicación completa se carga en cada arranque en frío |
 
@@ -235,7 +235,7 @@ El proveedor de datos ofrece dos credenciales. La **clave de servicio** salta la
 
 **Decisión**: la cuarta. **TanStack Query** para el estado de servidor, con una regla de diseño que la acompaña: **el identificador de la organización activa —y el del taller, en los datos de nivel taller— forma parte de la clave de consulta**, y el cambio de contexto invalida las consultas del contexto anterior.
 
-**Justificación.** Al incorporar el contexto a la clave, dos organizaciones producen claves distintas y **ninguna respuesta puede servirse desde la caché de otra organización**: el mecanismo que evita el error de percepción es estructural, no una comprobación que cada pantalla deba recordar. El contexto activo sigue viviendo en su componente contenedor (arquitectura §6), sin contenedor de estado global. No altera el servidor ni el contrato: la interfaz de programación sigue recibiendo `X-Org-Id` y `X-Workshop-Id` en cada petición (ADR-005).
+**Justificación.** Al incorporar el contexto a la clave, dos organizaciones producen claves distintas y **ninguna respuesta puede servirse desde la caché de otra organización**: el mecanismo que evita el error de percepción es estructural, no una comprobación que cada pantalla deba recordar. El contexto activo sigue viviendo en su componente contenedor (arquitectura, sección 6), sin contenedor de estado global. No altera el servidor ni el contrato: la interfaz de programación sigue recibiendo `X-Org-Id` y `X-Workshop-Id` en cada petición (ADR-005).
 
 **Consecuencias**
 - La caché es **en memoria y no se persiste** en el dispositivo: cerrar la sesión o recargar la aplicación la vacía, y no queda información de una organización en el equipo del operador.

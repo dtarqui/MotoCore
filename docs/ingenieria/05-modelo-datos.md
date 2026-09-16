@@ -1,8 +1,8 @@
 # Modelo de datos
 
-Diseño de datos de la arquitectura multi-tenant jerárquica. Corresponde al objetivo específico **2**: diseñar el modelo jerárquico y especificar las políticas de aislamiento ([anteproyecto/01](../anteproyecto/01-definicion-y-alcance.md) §1.7).
+Diseño de datos de la arquitectura multi-tenant jerárquica. Corresponde al objetivo específico **2**: diseñar el modelo jerárquico y especificar las políticas de aislamiento ([anteproyecto/01](../anteproyecto/01-definicion-y-alcance.md), sección 1.7).
 
-> Terminología: [Glosario](01-glosario.md) · Decisión de fondo: [ADR-006](07-decisiones-diseno.md) · Aislamiento: [Seguridad](06-seguridad.md)
+> Terminología: [Glosario](01-glosario.md); Decisión de fondo: [ADR-006](07-decisiones-diseno.md); Aislamiento: [Seguridad](06-seguridad.md)
 
 ## Diagrama entidad-relación
 
@@ -102,16 +102,16 @@ erDiagram
 | Tabla | Descripción | Claves y restricciones |
 |---|---|---|
 | `auth.users` | Gestionada por el proveedor de identidad. Identidad global de la cuenta. | PK `id` |
-| `mt_profiles` | Datos de perfil, 1:1 con la cuenta. Se crea por disparador al registrarse. | PK `id` → `auth.users(id)` en cascada |
+| `mt_profiles` | Datos de perfil, 1:1 con la cuenta. Se crea por disparador al registrarse. | PK `id` referencia a `auth.users(id)` en cascada |
 
 ### Jerarquía organizacional
 
 | Tabla | Nivel | Claves y restricciones |
 |---|---|---|
-| `mt_organizations` | — (es el tenant) | PK `id`; `owner_id` → `auth.users(id)`; índice por `owner_id` |
-| `mt_workshops` | Organización | PK `id`; `organization_id` → `mt_organizations(id)` en cascada; único `(organization_id, name)`; índice por `organization_id` |
-| `mt_memberships` | Organización | PK `id`; **único `(organization_id, user_id)`**; **único parcial por `(organization_id)` donde `role = 'owner'` y la membresía está activa**; `role ∈ {owner, mechanic, receptionist}`; índice por `user_id` |
-| `mt_workshop_assignments` | Organización | PK `id`; `organization_id` → `mt_organizations(id)` en cascada; único `(membership_id, workshop_id)`; ambas FK en cascada; índice por `workshop_id` |
+| `mt_organizations` | — (es el tenant) | PK `id`; `owner_id` referencia a `auth.users(id)`; índice por `owner_id` |
+| `mt_workshops` | Organización | PK `id`; `organization_id` referencia a `mt_organizations(id)` en cascada; único `(organization_id, name)`; índice por `organization_id` |
+| `mt_memberships` | Organización | PK `id`; **único `(organization_id, user_id)`**; **único parcial por `(organization_id)` donde `role = 'owner'` y la membresía está activa**; `role` restringido a `owner`, `mechanic`, `receptionist`; índice por `user_id` |
+| `mt_workshop_assignments` | Organización | PK `id`; `organization_id` referencia a `mt_organizations(id)` en cascada; único `(membership_id, workshop_id)`; ambas FK en cascada; índice por `workshop_id` |
 
 ### Negocio — corte vertical
 
@@ -143,7 +143,7 @@ El nivel de cada entidad determina el ámbito de sus claves únicas — es la co
 
 ## Políticas de aislamiento (RLS)
 
-**Censo de tablas de negocio.** Son **siete**, y todas activan Row Level Security: `mt_workshops`, `mt_memberships`, `mt_workshop_assignments`, `mt_clients`, `mt_parts`, `mt_part_movements` y `mt_audit_log`. Es el conjunto sobre el que se mide la cobertura de políticas (RNF-101) y el que recorre la verificación por acceso directo ([Plan de pruebas](11-plan-pruebas.md) §6.3).
+**Censo de tablas de negocio.** Son **siete**, y todas activan Row Level Security: `mt_workshops`, `mt_memberships`, `mt_workshop_assignments`, `mt_clients`, `mt_parts`, `mt_part_movements` y `mt_audit_log`. Es el conjunto sobre el que se mide la cobertura de políticas (RNF-101) y el que recorre la verificación por acceso directo ([Plan de pruebas](11-plan-pruebas.md), sección 6.3).
 
 Quedan **fuera del censo** las dos tablas que no son de negocio, cada una por un motivo distinto:
 

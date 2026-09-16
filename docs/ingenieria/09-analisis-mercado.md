@@ -32,7 +32,7 @@ No compiten en Bolivia, pero marcan el estándar de features (inspección digita
 | Fuente | Qué es | Para qué se usó |
 |---|---|---|
 | [ComparaSoftware Bolivia](https://www.comparasoftware.com.bo/taller-mecanico) | Comparador y directorio de software del mercado boliviano | Identificar qué productos se ofrecen activamente en Bolivia y con qué posicionamiento |
-| [Oficina Integrada](https://www.oficinaintegrada.com.br) (Brasil) | Plataforma de gestión de talleres sin comercialización en Bolivia | Evidenciar que el envío de la orden de servicio por WhatsApp es estándar en la región (§A) |
+| [Oficina Integrada](https://www.oficinaintegrada.com.br) (Brasil) | Plataforma de gestión de talleres sin comercialización en Bolivia | Evidenciar que el envío de la orden de servicio por WhatsApp es estándar en la región (apartado A) |
 
 ## Cobertura de la oferta existente
 
@@ -56,7 +56,7 @@ Capacidades relevadas en las soluciones disponibles, y su relevancia para el mer
 | Reportes y analítica de operación | Parcial | Media |
 | Integración contable | Escasa | Baja |
 
-**Lectura del relevamiento.** Las capacidades operativas básicas están cubiertas por la oferta existente; lo que no se encuentra resuelto es la **estructura organizativa** ni el aislamiento verificable entre organizaciones. La elaboración de esa carencia como vacío que justifica el proyecto corresponde al estado del arte ([§2.3](../anteproyecto/02-antecedentes-y-estado-del-arte.md)) y aquí no se repite.
+**Lectura del relevamiento.** Las capacidades operativas básicas están cubiertas por la oferta existente; lo que no se encuentra resuelto es la **estructura organizativa** ni el aislamiento verificable entre organizaciones. La elaboración de esa carencia como vacío que justifica el proyecto corresponde al estado del arte ([Sección 2.3](../anteproyecto/02-antecedentes-y-estado-del-arte.md)) y aquí no se repite.
 
 ## Análisis comparativo
 
@@ -94,7 +94,7 @@ Bolivia exige facturación electrónica/en línea gestionada por el **Servicio d
 
 ## Funcionalidades identificadas y su tratamiento en el proyecto
 
-El relevamiento identifica un conjunto amplio de funcionalidades. El alcance del proyecto de grado ([anteproyecto/01-definicion-y-alcance.md](../anteproyecto/01-definicion-y-alcance.md) §1.8) se concentra en la estructura organizativa y el aislamiento de datos; el resto se documenta como continuación.
+El relevamiento identifica un conjunto amplio de funcionalidades. El alcance del proyecto de grado ([anteproyecto/01-definicion-y-alcance.md](../anteproyecto/01-definicion-y-alcance.md), sección 1.8) se concentra en la estructura organizativa y el aislamiento de datos; el resto se documenta como continuación.
 
 ### Dentro del alcance
 

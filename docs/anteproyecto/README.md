@@ -4,12 +4,12 @@ Documento académico del proyecto de grado. Su estructura y sus criterios metodo
 
 ## Documentos de entrega
 
-[**Anteproyecto integrado**](04-anteproyecto-integrado.md) — **el documento que se entrega**. Responde a los 29 puntos del contenido mínimo que fija la guía (§15), en dos partes encadenadas:
+[**Anteproyecto integrado**](04-anteproyecto-integrado.md) — **el documento que se entrega**. Responde al contenido mínimo que fija la guía (sección 15) —salvo la hipótesis, que este proyecto no formula—, en dos partes encadenadas:
 
-- **Parte I · Investigación** (puntos 1 a 19): título, planteamiento del problema con árbol y cuatro delimitaciones, preguntas, justificación en tres ejes, antecedentes, estado del arte, marco teórico y conceptual, objetivos, hipótesis, variables, operacionalización, matriz de consistencia, enfoque y tipo, diseño, población y muestra, técnicas e instrumentos, estrategia de análisis y consideraciones éticas.
-- **Parte II · Propuesta técnica** (puntos 20 a 29): antecedentes tecnológicos, propuesta de solución, arquitectura preliminar, tecnologías, diseño técnico, estrategia de implementación, cronograma, resultados esperados, viabilidad técnica y referencias.
+- **Parte I; Investigación** (puntos 1 a 17): título, planteamiento del problema con árbol y cuatro delimitaciones, preguntas, justificación en tres ejes, antecedentes, estado del arte, marco teórico y conceptual, objetivos, variables, operacionalización, matriz de consistencia, enfoque y tipo, diseño, población y muestra, técnicas e instrumentos, estrategia de análisis y consideraciones éticas.
+- **Parte II; Propuesta técnica** (puntos 18 a 27): antecedentes tecnológicos, propuesta de solución, arquitectura preliminar, tecnologías, diseño técnico, estrategia de implementación, cronograma, resultados esperados, viabilidad técnica y referencias.
 
-Cierra con el **Anexo A**, la revisión de consistencia que la guía exige antes de dar por cerrado el documento (§14).
+Cierra con el **Anexo A**, la revisión de consistencia que la guía exige antes de dar por cerrado el documento (sección 14).
 
 [**Perfil de proyecto**](00-perfil-proyecto.md) — el documento que se presenta para aprobación. Condensa los capítulos en la estructura del perfil de proyecto de grado. No sustituye a los capítulos: los resume, y cada afirmación se remite a ellos.
 

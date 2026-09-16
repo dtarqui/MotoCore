@@ -1,6 +1,6 @@
 # Seguridad y control de acceso
 
-> Terminología: [Glosario](01-glosario.md). Arquitectura general: [Arquitectura](04-arquitectura.md). Modelos de seguridad que fundamentan este enfoque —principios de Saltzer y Schroeder, control de acceso basado en roles, confianza cero y defensa en profundidad—: [Marco teórico](../anteproyecto/03-marco-teorico-y-conceptual.md) §3.2.4.
+> Terminología: [Glosario](01-glosario.md). Arquitectura general: [Arquitectura](04-arquitectura.md). Modelos de seguridad que fundamentan este enfoque —principios de Saltzer y Schroeder, control de acceso basado en roles, confianza cero y defensa en profundidad—: [Marco teórico](../anteproyecto/03-marco-teorico-y-conceptual.md), sección 3.2.4.
 >
 > Este documento describe **el enfoque de seguridad a alto nivel**. Deliberadamente no incluye umbrales exactos, tiempos de expiración ni detalles de configuración que faciliten un ataque: esos viven en la configuración del despliegue.
 
@@ -14,7 +14,7 @@
 
 ## Modelo de propiedad y aislamiento
 
-La jerarquía es **organización → talleres** ([Glosario](01-glosario.md)), pero el **límite de seguridad es uno solo: la organización**. De ahí se siguen las tres reglas que gobiernan el acceso:
+La jerarquía es **organización y talleres** ([Glosario](01-glosario.md)), pero el **límite de seguridad es uno solo: la organización**. De ahí se siguen las tres reglas que gobiernan el acceso:
 
 - El acceso a los datos de una organización lo otorga una **membresía activa**, que define además el **rol** de esa cuenta *en esa organización*. Sin membresía no hay acceso, y ningún dato de negocio se comparte entre organizaciones.
 - El **taller no restringe** quién puede ver un dato dentro de la organización; tampoco lo hace la asignación de un miembro a talleres, que es operativa. Modelarlo como segunda frontera de seguridad se evaluó y se descartó — ver [ADR-006](07-decisiones-diseno.md).
@@ -68,7 +68,7 @@ Delegar la identidad reduce la superficie de código sensible del sistema y perm
 
 ## Manejo de errores
 
-Los errores se devuelven en un formato uniforme y normalizado, con códigos estables. Los errores de autorización no revelan si el recurso existe cuando ello permitiría inferir datos de otra organización (RNF-105). La regla que decide entre denegar y declarar inexistente, con el catálogo completo de códigos, está en el [Contrato de la interfaz de programación](10-contrato-api.md): el catálogo en §4 y la regla de no divulgación en §5.
+Los errores se devuelven en un formato uniforme y normalizado, con códigos estables. Los errores de autorización no revelan si el recurso existe cuando ello permitiría inferir datos de otra organización (RNF-105). La regla que decide entre denegar y declarar inexistente, con el catálogo completo de códigos, está en el [Contrato de la interfaz de programación](10-contrato-api.md): el catálogo en la sección 4 y la regla de no divulgación en la sección 5.
 
 ## Protección de datos sensibles
 
@@ -86,7 +86,7 @@ La segunda vía es la que demuestra que el aislamiento se sostiene cuando se pre
 
 Las tres se contrastan con la **línea base**: el mismo escenario con las políticas deshabilitadas y el control de aplicación omitido —solo en el proyecto de validación desechable—, que debe mostrar la fuga que las otras condiciones impiden.
 
-El diseño completo —condiciones C0 a C3, escenario, tablas cubiertas y evidencia a conservar— está en el [Plan de pruebas](11-plan-pruebas.md) §6.
+El diseño completo —condiciones C0 a C3, escenario, tablas cubiertas y evidencia a conservar— está en el [Plan de pruebas](11-plan-pruebas.md), sección 6.
 
 ## Transporte y superficie de exposición
 
@@ -95,10 +95,10 @@ El diseño completo —condiciones C0 a C3, escenario, tablas cubiertas y eviden
 - **Superficie pública**: el registro de cuenta y la comprobación de disponibilidad. Todo lo demás exige credencial.
 - **Superficie interna**: la búsqueda de cuentas por correo y las funciones atómicas del motor solo son invocables por el servidor.
 - **Retención**: el registro de auditoría se conserva mientras exista la organización.
-- **Registros operativos**: los registros de ejecución, de base de datos y del pipeline **no contienen** contraseñas, cabeceras `Authorization`, credenciales del proveedor ni contenido de filas de negocio; su especificación está en [Arquitectura](04-arquitectura.md) §15.
+- **Registros operativos**: los registros de ejecución, de base de datos y del pipeline **no contienen** contraseñas, cabeceras `Authorization`, credenciales del proveedor ni contenido de filas de negocio; su especificación está en [Arquitectura](04-arquitectura.md), sección 15.
 
-La especificación verificable de estos puntos está en [Requisitos](02-requisitos.md) §5.
+La especificación verificable de estos puntos está en [Requisitos](02-requisitos.md), sección 5.
 
 ## Fuera del alcance
 
-Se identifican como líneas de refuerzo posterior: autenticación de doble factor, políticas formales de rotación de credenciales, un **límite de tasa propio sobre el registro** —que en funciones efímeras exige un almacén de estado compartido que el proyecto no incorpora— y auditoría extendida a la totalidad de las entidades de negocio. Esta última exclusión es la misma que registra el alcance del proyecto ([anteproyecto/01-definicion-y-alcance.md](../anteproyecto/01-definicion-y-alcance.md) §1.8.3): se audita el conjunto acotado de seis acciones críticas que enumera RF-703, no toda operación del sistema.
+Se identifican como líneas de refuerzo posterior: autenticación de doble factor, políticas formales de rotación de credenciales, un **límite de tasa propio sobre el registro** —que en funciones efímeras exige un almacén de estado compartido que el proyecto no incorpora— y auditoría extendida a la totalidad de las entidades de negocio. Esta última exclusión es la misma que registra el alcance del proyecto ([anteproyecto/01-definicion-y-alcance.md](../anteproyecto/01-definicion-y-alcance.md), sección 1.8.3): se audita el conjunto acotado de seis acciones críticas que enumera RF-703, no toda operación del sistema.

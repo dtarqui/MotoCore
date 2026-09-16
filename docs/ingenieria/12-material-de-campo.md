@@ -1,16 +1,16 @@
-# Material de campo · evaluación de usabilidad con operadores
+# Material de campo — evaluación de usabilidad con operadores
 
-Instrumentos que se aplican en las sesiones del **objetivo complementario 5**, cuyo diseño, umbrales y análisis define el [Plan de pruebas](11-plan-pruebas.md) §8. Este documento **no decide nada**: redacta lo que allí se especifica, en la forma en que llegará al participante.
+Instrumentos que se aplican en las sesiones del **objetivo complementario 5**, cuyo diseño, umbrales y análisis define el [Plan de pruebas](11-plan-pruebas.md), sección 8. Este documento **no decide nada**: redacta lo que allí se especifica, en la forma en que llegará al participante.
 
-Se prepara por escrito **antes** de I8 porque un instrumento improvisado en la sesión no es replicable, y porque la guía metodológica exige instrumentos probados y validados previamente. Su prueba piloto está en el [Plan de pruebas](11-plan-pruebas.md) §8.9.
+Se prepara por escrito **antes** de I8 porque un instrumento improvisado en la sesión no es replicable, y porque la guía metodológica exige instrumentos probados y validados previamente. Su prueba piloto está en el [Plan de pruebas](11-plan-pruebas.md), sección 8.9.
 
 | Pieza | Sección | Cuándo se usa |
 |---|---|---|
-| Consentimiento informado | [§2](#2-consentimiento-informado) | Antes de empezar, firmado |
-| Guion de tareas T1–T3 | [§3](#3-guion-de-tareas) | Durante la sesión, leído literalmente |
-| Planilla de registro | [§4](#4-planilla-de-registro) | Durante la sesión, la completa el observador |
-| Cuestionario SUS en español | [§5](#5-cuestionario-sus-en-español) | Al terminar cada condición |
-| Asignación contrabalanceada | [§6](#6-asignación-contrabalanceada) | Al reclutar, fija el orden de cada participante |
+| Consentimiento informado | [Sección 2](#2-consentimiento-informado) | Antes de empezar, firmado |
+| Guion de tareas T1–T3 | [Sección 3](#3-guion-de-tareas) | Durante la sesión, leído literalmente |
+| Planilla de registro | [Sección 4](#4-planilla-de-registro) | Durante la sesión, la completa el observador |
+| Cuestionario SUS en español | [Sección 5](#5-cuestionario-sus-en-español) | Al terminar cada condición |
+| Asignación contrabalanceada | [Sección 6](#6-asignación-contrabalanceada) | Al reclutar, fija el orden de cada participante |
 
 ---
 
@@ -18,7 +18,7 @@ Se prepara por escrito **antes** de I8 porque un instrumento improvisado en la s
 
 | Requisito | Detalle |
 |---|---|
-| **Escenario cargado** | Dos organizaciones con dos talleres cada una, clientes e inventario precargados ([Plan de pruebas](11-plan-pruebas.md) §3.2), y el escenario de línea base con una cuenta por local (§3.3 del mismo documento) |
+| **Escenario cargado** | Dos organizaciones con dos talleres cada una, clientes e inventario precargados ([Plan de pruebas](11-plan-pruebas.md), sección 3.2), y el escenario de línea base con una cuenta por local (sección 3.3 del mismo documento) |
 | **Credenciales** | Preparadas y probadas para las dos condiciones, con la sesión cerrada al iniciar |
 | **Cronómetro** | Uno por tarea; se detiene al declarar el participante que terminó |
 | **Duración prevista** | 40 minutos por participante, incluidas las dos condiciones |
@@ -44,7 +44,7 @@ Se prepara por escrito **antes** de I8 porque un instrumento improvisado en la s
 >
 > He leído lo anterior, he podido preguntar lo que necesitaba y acepto participar.
 >
-> Nombre: ____________________  ·  Firma: ____________________  ·  Fecha: ____________
+> Nombre: ____________________; Firma: ____________________; Fecha: ____________
 
 El formulario firmado se conserva **separado** de la planilla de datos, de modo que no exista forma de vincular un nombre con un resultado.
 
@@ -52,7 +52,7 @@ El formulario firmado se conserva **separado** de la planilla de datos, de modo 
 
 ## 3. Guion de tareas
 
-Se lee **literalmente**, en el mismo orden, a todos los participantes. El observador **no asiste** durante la tarea: si interviene, la tarea se registra como fallo ([Plan de pruebas](11-plan-pruebas.md) §8.6).
+Se lee **literalmente**, en el mismo orden, a todos los participantes. El observador **no asiste** durante la tarea: si interviene, la tarea se registra como fallo ([Plan de pruebas](11-plan-pruebas.md), sección 8.6).
 
 ### Presentación
 
@@ -72,8 +72,8 @@ Los tiempos previstos **no se comunican** al participante: orientan al observado
 
 | Condición | Qué se le entrega al participante |
 |---|---|
-| **A · Selector de contexto** *(propuesta)* | Una sola cuenta, ya iniciada, con los selectores de organización y taller activos |
-| **B · Cambio de cuenta** *(línea base)* | Las credenciales de las cuatro cuentas, una por local; para cambiar de local debe cerrar sesión e iniciarla con la cuenta correspondiente |
+| **A, Selector de contexto** *(propuesta)* | Una sola cuenta, ya iniciada, con los selectores de organización y taller activos |
+| **B, Cambio de cuenta** *(línea base)* | Las credenciales de las cuatro cuentas, una por local; para cambiar de local debe cerrar sesión e iniciarla con la cuenta correspondiente |
 
 Entre una condición y otra se dice: «Ahora repetirá las mismas tres tareas en otra versión del sistema.» No se anticipa cuál es la propuesta del proyecto, ni se menciona que una es la línea base.
 
@@ -92,14 +92,14 @@ Una planilla **por participante y condición**. Se completa durante la sesión, 
 | Campo | Valores |
 |---|---|
 | Participante | P01 … P30 |
-| Condición | A (selector) · B (cuenta por local) |
+| Condición | A (selector), B (cuenta por local) |
 | Orden | Primera o segunda condición de la sesión |
-| Fecha y modalidad | Fecha · presencial o remota |
-| T1 · resultado | Éxito · fallo · intervención del observador *(cuenta como fallo)* |
-| T1 · tiempo | Segundos |
-| T1 · incidencias | Descripción breve de cada dificultad observada |
-| T2 · resultado, tiempo, incidencias | Ídem |
-| T3 · resultado, tiempo, incidencias | Ídem |
+| Fecha y modalidad | Fecha, presencial o remota |
+| T1 — resultado | Éxito, fallo, intervención del observador *(cuenta como fallo)* |
+| T1 — tiempo | Segundos |
+| T1 — incidencias | Descripción breve de cada dificultad observada |
+| T2 — resultado, tiempo, incidencias | Ídem |
+| T3 — resultado, tiempo, incidencias | Ídem |
 | SUS | Las diez respuestas, de 1 a 5 |
 | Comentario abierto | Transcripción literal |
 
@@ -111,7 +111,7 @@ Una planilla **por participante y condición**. Se completa durante la sesión, 
 
 Se aplica **al terminar cada condición**, sobre esa condición y no sobre el sistema en general. Diez ítems, escala de 1 —*totalmente en desacuerdo*— a 5 —*totalmente de acuerdo*—.
 
-> **Versión que se aplica.** La escala original es de Brooke (1996); se aplica la **versión en español desarrollada y validada** por Sevilla-González et al. (2020), publicada en *JMIR Human Factors* con licencia abierta. Antes de imprimir el formulario, los diez ítems deben **transcribirse literalmente** del material complementario de ese artículo: una traducción propia invalidaría la validación que justifica su uso ([PENDIENTES](../PENDIENTES.md) §5).
+> **Versión que se aplica.** La escala original es de Brooke (1996); se aplica la **versión en español desarrollada y validada** por Sevilla-González et al. (2020), publicada en *JMIR Human Factors* con licencia abierta. Antes de imprimir el formulario, los diez ítems deben **transcribirse literalmente** del material complementario de ese artículo: una traducción propia invalidaría la validación que justifica su uso ([PENDIENTES](../PENDIENTES.md), sección 5).
 
 La redacción que sigue es **provisional**, para ensayar el formato en el piloto:
 
@@ -138,10 +138,10 @@ La mitad de los participantes empieza por la condición A y la otra mitad por la
 
 | Participante | Primera condición | Segunda condición |
 |---|---|---|
-| P01, P03, P05 … P29 *(impares)* | **A** · selector de contexto | **B** · cuenta por local |
-| P02, P04, P06 … P30 *(pares)* | **B** · cuenta por local | **A** · selector de contexto |
+| P01, P03, P05 … P29 *(impares)* | **A**, selector de contexto | **B**, cuenta por local |
+| P02, P04, P06 … P30 *(pares)* | **B**, cuenta por local | **A**, selector de contexto |
 
-Si un participante abandona, su reemplazo **hereda su orden**, de modo que el reparto se mantenga equilibrado. Con los 36 reclutados previstos ([Plan de pruebas](11-plan-pruebas.md) §8.2), los seis adicionales se asignan alternando.
+Si un participante abandona, su reemplazo **hereda su orden**, de modo que el reparto se mantenga equilibrado. Con los 36 reclutados previstos ([Plan de pruebas](11-plan-pruebas.md), sección 8.2), los seis adicionales se asignan alternando.
 
 ---
 
@@ -151,5 +151,5 @@ Si un participante abandona, su reemplazo **hereda su orden**, de modo que el re
 |---|---|
 | **Anonimizar** | La planilla se archiva con el código del participante; el consentimiento firmado, por separado |
 | **Digitalizar** | Las planillas se vuelcan a la hoja de cálculo el mismo día, para evitar reconstrucciones de memoria |
-| **Conservar** | Lo que enumera el [Plan de pruebas](11-plan-pruebas.md) §8.8 |
+| **Conservar** | Lo que enumera el [Plan de pruebas](11-plan-pruebas.md), sección 8.8 |
 | **Descartar** | Los datos de quien interrumpa la sesión, y los del piloto |

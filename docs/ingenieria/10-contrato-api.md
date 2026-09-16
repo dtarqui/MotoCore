@@ -2,7 +2,7 @@
 
 Especificación normativa de la interfaz que expone el sistema. Traduce los requisitos ([02-requisitos.md](02-requisitos.md)) y las decisiones ya tomadas —contexto por cabecera (ADR-005), identidad delegada (ADR-004), formato de error uniforme (RNF-204)— en un contrato verificable.
 
-> Terminología: [Glosario](01-glosario.md) · Estructura: [Arquitectura](04-arquitectura.md) · Entidades: [Modelo de datos](05-modelo-datos.md) · Autorización: [Seguridad](06-seguridad.md) · Casos de prueba: [Plan de pruebas](11-plan-pruebas.md)
+> Terminología: [Glosario](01-glosario.md); Estructura: [Arquitectura](04-arquitectura.md); Entidades: [Modelo de datos](05-modelo-datos.md); Autorización: [Seguridad](06-seguridad.md); Casos de prueba: [Plan de pruebas](11-plan-pruebas.md)
 >
 > **Este documento especifica, no describe.** Define la interfaz que el sistema debe ofrecer; no registra el estado de avance de su construcción. Cuando la implementación difiera de lo aquí fijado, es la implementación la que se corrige.
 
@@ -14,7 +14,7 @@ Cuatro principios, cada uno heredado de una decisión anterior. Ninguna regla de
 
 | Principio | Origen | Consecuencia en la interfaz |
 |---|---|---|
-| **Ausencia de estado** | Estilo REST (marco teórico §3.2.1) | Cada petición porta todo lo necesario para ser atendida. El servidor no conserva contexto entre llamadas, ni siquiera la organización sobre la que se opera. |
+| **Ausencia de estado** | Estilo REST (marco teórico, sección 3.2.1) | Cada petición porta todo lo necesario para ser atendida. El servidor no conserva contexto entre llamadas, ni siquiera la organización sobre la que se opera. |
 | **Contexto explícito** | ADR-005 | La organización y el taller activos viajan en cabeceras. El servidor **nunca** asume un valor por defecto. |
 | **Identidad verificada, no emitida** | ADR-004 | La interfaz no expone registro de sesión ni renovación de credenciales: solo **verifica** la credencial que recibe. |
 | **Error uniforme** | RNF-204 | Toda respuesta de error usa Problem Details con un código estable `modulo.razon`. |
@@ -92,7 +92,7 @@ Ningún listado devuelve registros fuera del contexto activo, con independencia 
 
 Las transiciones de estado no se modelan como edición de un campo: la baja lógica de un taller o de un cliente es una acción con consecuencias de auditoría (RF-703), y el contrato la distingue de un `PATCH` ordinario.
 
-**Excepción declarada: la revocación de un vínculo.** La remoción de un miembro y el retiro de una asignación a taller son también acciones auditadas y reversibles —reincorporar a alguien reactiva su membresía en lugar de duplicarla (§3.4)—, pero se exponen como `DELETE` y no como `POST /…/deactivate`. El motivo es que lo que se revoca no es el estado de un recurso propio, sino **la relación** entre una cuenta y una organización: `DELETE` sobre la membresía expresa esa semántica con exactitud, y la baja lógica es un detalle de cómo se conserva el historial, no lo que la operación significa. La regla general rige para las entidades; la excepción, para los vínculos.
+**Excepción declarada: la revocación de un vínculo.** La remoción de un miembro y el retiro de una asignación a taller son también acciones auditadas y reversibles —reincorporar a alguien reactiva su membresía en lugar de duplicarla (sección 3.4)—, pero se exponen como `DELETE` y no como `POST /…/deactivate`. El motivo es que lo que se revoca no es el estado de un recurso propio, sino **la relación** entre una cuenta y una organización: `DELETE` sobre la membresía expresa esa semántica con exactitud, y la baja lógica es un detalle de cómo se conserva el historial, no lo que la operación significa. La regla general rige para las entidades; la excepción, para los vínculos.
 
 | Estado | Significado en esta interfaz |
 |---|---|
@@ -101,7 +101,7 @@ Las transiciones de estado no se modelan como edición de un campo: la baja lóg
 | `403` | Credencial válida, pero sin membresía o sin rol suficiente |
 | `404` | El recurso no existe **o no pertenece al contexto activo** (RNF-105) |
 | `409` | La operación contradice una regla de negocio sobre el estado actual (duplicados, existencia insuficiente) |
-| `500` | La operación falló por causa del servidor y **no dejó nada aplicado** — el caso previsto es el registro atómico interrumpido (§4) |
+| `500` | La operación falló por causa del servidor y **no dejó nada aplicado** — el caso previsto es el registro atómico interrumpido (sección 4) |
 
 ### 2.7 Formato de error
 
@@ -134,7 +134,7 @@ El registro es atómico: si cualquiera de los cuatro pasos falla, no queda ningu
 | `PATCH` | `/api/organizations/{orgId}` | — | Owner | RF-204 | Modifica los datos de la organización. **Acción auditada** (RF-703) |
 | `POST` | `/api/organizations/{orgId}/switch` | — | Miembro | RF-203 | Confirma la organización como activa y devuelve el rol del solicitante en ella |
 
-`switch` no cambia estado en el servidor —no hay sesión que actualizar (§1)—: **valida** que la cuenta pueda operar sobre esa organización y devuelve el rol, para que el cliente guarde el contexto y lo envíe en las llamadas siguientes.
+`switch` no cambia estado en el servidor —no hay sesión que actualizar (sección 1)—: **valida** que la cuenta pueda operar sobre esa organización y devuelve el rol, para que el cliente guarde el contexto y lo envíe en las llamadas siguientes.
 
 ### 3.3 Talleres
 
@@ -285,6 +285,6 @@ Las entidades de los módulos fuera del alcance (RF-800) se incorporarán siguie
 
 ## 7. Descripción OpenAPI
 
-El contrato se publica además como **descripción OpenAPI 3.1**, entregable del objetivo específico 3: rutas, métodos, cabeceras de contexto, esquemas de petición y respuesta, y el catálogo de códigos de §4. Su función es que un consumidor pueda descubrir la interfaz sin leer este documento y que la documentación no se desincronice de la interfaz construida.
+El contrato se publica además como **descripción OpenAPI 3.1**, entregable del objetivo específico 3: rutas, métodos, cabeceras de contexto, esquemas de petición y respuesta, y el catálogo de códigos de la sección 4. Su función es que un consumidor pueda descubrir la interfaz sin leer este documento y que la documentación no se desincronice de la interfaz construida.
 
 La descripción **deriva** de este contrato y no lo sustituye: ante cualquier discrepancia entre ambos, manda este documento, y la descripción se corrige.

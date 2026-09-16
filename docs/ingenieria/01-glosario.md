@@ -2,7 +2,7 @@
 
 Terminología unificada del proyecto. **Fuente de verdad de los términos**: si otro documento usa una palabra distinta para lo mismo, se corrige ese documento, no este.
 
-> **Alcance de este documento**: fija el **lenguaje del dominio** y su uso interno. Las definiciones formales de las tecnologías, con su fuente académica o normativa citable, están en el [Marco conceptual](../anteproyecto/03-marco-teorico-y-conceptual.md) §3.1 — aquí no se duplican.
+> **Alcance de este documento**: fija el **lenguaje del dominio** y su uso interno. Las definiciones formales de las tecnologías, con su fuente académica o normativa citable, están en el [Marco conceptual](../anteproyecto/03-marco-teorico-y-conceptual.md), sección 3.1 — aquí no se duplican.
 
 ## Términos del modelo multiorganización
 
@@ -21,11 +21,11 @@ Terminología unificada del proyecto. **Fuente de verdad de los términos**: si 
 
 ## Jerarquía y alcance de los datos
 
-```
-Cuenta (auth.users)
-   └── membresía (rol) ──> Organización  ← unidad de aislamiento (tenant)
-                              └── Taller  ← subdivisión operativa (local físico)
-```
+| Nivel | Qué representa | Papel en el aislamiento |
+|---|---|---|
+| **Cuenta** (`auth.users`) | La identidad de una persona | Accede a una organización mediante una **membresía** con rol |
+| **Organización** | La unidad de negocio del operador | **Unidad de aislamiento** (tenant) |
+| **Taller** | El local físico de la organización | **Subdivisión operativa**, sin frontera de seguridad propia |
 
 **Regla**: el aislamiento se aplica **siempre** a nivel de organización. El taller determina *dónde* ocurre la operación, no *quién* puede verla.
 
@@ -59,13 +59,13 @@ El rol es **por organización**, no global: la misma cuenta puede ser Owner en u
 
 ## Términos de arquitectura
 
-Uso interno de cada término. La definición formal con su fuente citable está en el [Marco conceptual](../anteproyecto/03-marco-teorico-y-conceptual.md) §3.1.
+Uso interno de cada término. La definición formal con su fuente citable está en el [Marco conceptual](../anteproyecto/03-marco-teorico-y-conceptual.md), sección 3.1.
 
 | Término | Uso en este proyecto |
 |---|---|
 | **RLS** (Row Level Security) | Mecanismo de PostgreSQL que restringe, en el propio motor de base de datos, qué filas puede leer o escribir cada usuario. Es la capa de fondo del aislamiento entre organizaciones. El **título del proyecto**, la pregunta general y el objetivo general lo nombran en inglés; el resto de la prosa emplea **seguridad a nivel de fila**. |
 | **Serverless** | Modelo de despliegue donde el backend corre como funciones efímeras bajo demanda, sin servidor propio que administrar y sin costo fijo cuando no hay tráfico. |
-| **Defensa en profundidad** | Aquí: el aislamiento se aplica **dos veces** — políticas RLS en la base de datos *y* verificación de membresía en la API. Si una falla, la otra sostiene. Su fundamento está en §3.2.4 del marco teórico. |
+| **Defensa en profundidad** | Aquí: el aislamiento se aplica **dos veces** — políticas RLS en la base de datos *y* verificación de membresía en la API. Si una falla, la otra sostiene. Su fundamento está en la sección 3.2.4 del marco teórico. |
 | **Inmutabilidad del aislamiento** | Propiedad que **el título del proyecto nombra**: la separación entre organizaciones **no puede desactivarse desde la aplicación**. No existe interruptor, configuración ni ruta de código que la apague, porque reside en el motor de base de datos y se evalúa sobre la identidad de quien consulta. Es verificable: anulando la verificación de membresía de la capa de aplicación, las políticas siguen filtrando (RNF-102, caso CP-N102). **No confundir con el historial inmutable**, que es una propiedad de dos tablas y no del aislamiento. |
 | **Problem Details** | Formato estándar de respuesta de error (RFC 9457, que sustituye al RFC 7807) que usa la API. Los códigos siguen el patrón `modulo.razon` (ej. `organization.access_denied`). |
 | **Contexto activo** | El par organización activa + taller activo que acompaña a cada petición. El servidor no asume ninguno por defecto: si falta, rechaza la petición. |
@@ -74,13 +74,13 @@ Uso interno de cada término. La definición formal con su fuente citable está 
 
 | Término | Uso en este proyecto |
 |---|---|
-| **Línea base** | El aislamiento resuelto **solo en la capa de aplicación**, que es lo que hace hoy la oferta relevada. Se reproduce en la condición experimental C0 —políticas del motor deshabilitadas y control de aplicación omitido, solo en el proyecto de validación desechable— y es el término de comparación de la hipótesis. En la evaluación de usabilidad, la línea base es el **cambio de cuenta**: una cuenta por local |
-| **Condición experimental** | Configuración de capas bajo la que se ejecuta la suite de aislamiento: **C0** línea base · **C1** arquitectura completa · **C2** sin verificación de aplicación · **C3** acceso directo al motor ([anteproyecto](../anteproyecto/04-anteproyecto-integrado.md) §15.2) |
+| **Línea base** | El aislamiento resuelto **solo en la capa de aplicación**, que es lo que hace hoy la oferta relevada. Se reproduce en la condición experimental C0 —políticas del motor deshabilitadas y control de aplicación omitido, solo en el proyecto de validación desechable— y es el término de comparación del criterio de éxito. En la evaluación de usabilidad, la línea base es el **cambio de cuenta**: una cuenta por local |
+| **Condición experimental** | Configuración de capas bajo la que se ejecuta la suite de aislamiento: **C0** línea base; **C1** arquitectura completa; **C2** sin verificación de aplicación; **C3** acceso directo al motor ([Plan de pruebas](11-plan-pruebas.md), sección 6.1) |
 | **Objetivo núcleo** | Uno de los cuatro objetivos específicos que responden la pregunta general: diagnosticar, diseñar, desarrollar y validar. No puede descartarse |
 | **Objetivo complementario** | Objetivo específico que amplía la evidencia sin condicionar la tesis —usabilidad del cambio de contexto y costo operativo—, sujeto a un criterio de continuidad |
 | **Criterio de continuidad** | Condición verificable, con fecha fija, que decide si un objetivo complementario se mantiene o se descarta de forma explícita |
 | **Corte vertical** | Funcionalidad completada de punta a punta —cliente web, interfaz de programación y base de datos— antes de expandir el sistema: aquí, clientes (nivel organización) e inventario (nivel taller) |
-| **MVP** | Los requisitos funcionales `Must` más los no funcionales que bloquean la salida a producción ([Requisitos](02-requisitos.md) §6) |
+| **MVP** | Los requisitos funcionales `Must` más los no funcionales que bloquean la salida a producción ([Requisitos](02-requisitos.md), sección 6) |
 
 ## Términos del mercado boliviano
 
