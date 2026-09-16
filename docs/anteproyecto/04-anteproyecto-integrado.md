@@ -606,7 +606,7 @@ La evaluación de usabilidad es el único componente con participantes humanos y
 
 ### 17.4 Propiedad intelectual, licencias y dependencias
 
-El sistema se construye sobre componentes de código abierto —Node.js, TypeScript, React, Hono, Zod, Vitest, Playwright y PostgreSQL, entre otros—, cuyos avisos de licencia se conservan íntegros; el trabajo propio se publica bajo licencia MIT. Los riesgos aplicables del **OWASP Top 10** se atienden con medidas declaradas y verificables: dos capas de aislamiento frente al *control de acceso roto*; consultas parametrizadas y validación de entrada con Zod frente a la *inyección*; identidad delegada, sin contraseñas propias almacenadas, frente a los *fallos de identificación y autenticación*; y auditoría de dependencias en cada integración frente a los *componentes vulnerables* (RNF-208). Las dependencias se auditan en cada integración y no se admiten vulnerabilidades críticas ni altas (RNF-208). La especificación atiende los riesgos del OWASP Top 10 aplicables a una interfaz multiorganización: control de acceso roto, inyección y fallos de identificación y autenticación. Los asistentes de inteligencia artificial pueden emplearse para código repetitivo y tareas mecánicas de redacción, pero **el planteamiento, el diseño arquitectónico y la interpretación de los resultados son de autoría del investigador**.
+El sistema se construye sobre componentes de código abierto —Node.js, TypeScript, React, Hono, Zod, Vitest, Playwright, axe-core y PostgreSQL, entre otros—, cuyos avisos de licencia se conservan íntegros; el trabajo propio se publica bajo licencia MIT. Los riesgos aplicables del **OWASP Top 10** se atienden con medidas declaradas y verificables: dos capas de aislamiento frente al *control de acceso roto*; consultas parametrizadas y validación de entrada con Zod frente a la *inyección*; identidad delegada, sin contraseñas propias almacenadas, frente a los *fallos de identificación y autenticación*; y auditoría de dependencias en cada integración frente a los *componentes vulnerables* (RNF-208). Las dependencias se auditan en cada integración y no se admiten vulnerabilidades críticas ni altas (RNF-208). La especificación atiende los riesgos del OWASP Top 10 aplicables a una interfaz multiorganización: control de acceso roto, inyección y fallos de identificación y autenticación. Los asistentes de inteligencia artificial pueden emplearse para código repetitivo y tareas mecánicas de redacción, pero **el planteamiento, el diseño arquitectónico y la interpretación de los resultados son de autoría del investigador**.
 
 ### 17.5 Integridad de los resultados
 
@@ -670,7 +670,7 @@ La tecnología seleccionada es oportuna porque sus componentes están maduros y 
 | **Backend y lógica** | Node.js, Hono, Zod, verificación de credenciales del proveedor | Interfaz REST conforme al contrato, con descripción OpenAPI |
 | **Persistencia e identidad** | PostgreSQL con seguridad a nivel de fila, Supabase Auth, migraciones versionadas | Modelo entidad-relación con políticas activas en las 7 tablas de negocio |
 | **DevOps y nube** | GitHub Actions; Vercel; Supabase (*staging*, producción y validación) | Pipeline con verificación de tipos, pruebas, cobertura y auditoría de dependencias; publicación automática tras aprobarlo |
-| **Verificación** | Vitest, Playwright | Suite multinivel y evidencia de aislamiento reproducible |
+| **Verificación** | Vitest, Playwright, axe-core | Suite multinivel y evidencia de aislamiento reproducible |
 
 ### 19.6 Exclusiones
 
@@ -751,6 +751,7 @@ Los datos de negocio se consultan con la credencial de quien llama, para que la 
 | Estado de servidor en el cliente: sincronización y caché | Estado propio de React con recarga manual, Redux Toolkit Query, SWR, TanStack Query | **TanStack Query** | La clave de consulta incorpora la organización y el taller activos: ningún cambio de contexto puede servirse desde la caché anterior; no impone contenedor de estado global (ADR-010) |
 | Pruebas unitarias y de integración | Jest, Mocha, Vitest | **Vitest** | Mismo ecosistema TypeScript y ESM, sin transpilación adicional |
 | Pruebas extremo a extremo | Cypress, Selenium, Playwright | **Playwright** | Varios motores de navegador y anchos de pantalla en un solo ejecutor, sin interfaz gráfica en CI |
+| Auditoría de accesibilidad | Pa11y, auditoría de Lighthouse, revisión manual, axe-core | **axe-core**, integrado en Playwright | Evalúa los criterios de WCAG 2.1 A y AA dentro del mismo ejecutor extremo a extremo, sin servicio adicional, y clasifica cada incumplimiento por impacto, lo que permite aplicar tal cual el umbral de RNF-405: cero incumplimientos graves o críticos |
 | Calidad de código | TSLint (obsoleto), Biome, ESLint con Prettier | **ESLint + Prettier en *pre-commit*** | Estándar del ecosistema TypeScript; la calidad se automatiza antes de integrar |
 | Integración y despliegue continuos | GitLab CI, Jenkins, GitHub Actions | **GitHub Actions** | Integrado con el repositorio, sin servidor propio que operar |
 
@@ -804,7 +805,7 @@ Desarrollo iterativo con **iteraciones de dos semanas** que entregan **increment
 | **Aislamiento** | Las dos vías y todas las condiciones experimentales (Vitest) |
 | **Componente del cliente** | Contrato desde el cliente: cabeceras de contexto y códigos de error (Vitest sobre DOM simulado) |
 | **Extremo a extremo** | Flujos T1–T3 del cambio de contexto (Playwright) |
-| **Auditorías** | Instalabilidad, diseño responsivo y **accesibilidad WCAG 2.1 AA** (Playwright); dependencias (auditoría de npm) |
+| **Auditorías** | Instalabilidad, diseño responsivo y **accesibilidad WCAG 2.1 AA** (Playwright y axe-core); dependencias (auditoría de npm) |
 
 ### 23.4 Criterios de aceptación
 
@@ -1111,5 +1112,5 @@ Auditoría de coherencia del documento: cada eslabón debe justificarse por el a
 | La arquitectura | Requerimientos no funcionales y criterios del estilo (sección 20.1) |
 | El stack tecnológico | Matriz de selección con alternativas descartadas (sección 21) |
 | La estrategia de desarrollo | Priorización del MVP y tiempo disponible (secciones 23.2 y 24) |
-| La estrategia de validación | Indicadores, umbrales y criterios de aceptación (secciones 11 y 23.5, sección 23.6) |
+| La estrategia de validación | Indicadores, umbrales y criterios de aceptación (secciones 11, 23.5 y 23.6) |
 | El cronograma y la viabilidad | EDT, ruta crítica y matriz de riesgos (secciones 24.1 y 26.2) |

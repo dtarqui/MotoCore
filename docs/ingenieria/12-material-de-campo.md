@@ -111,22 +111,24 @@ Una planilla **por participante y condición**. Se completa durante la sesión, 
 
 Se aplica **al terminar cada condición**, sobre esa condición y no sobre el sistema en general. Diez ítems, escala de 1 —*totalmente en desacuerdo*— a 5 —*totalmente de acuerdo*—.
 
-> **Versión que se aplica.** La escala original es de Brooke (1996); se aplica la **versión en español desarrollada y validada** por Sevilla-González et al. (2020), publicada en *JMIR Human Factors* con licencia abierta. Antes de imprimir el formulario, los diez ítems deben **transcribirse literalmente** del material complementario de ese artículo: una traducción propia invalidaría la validación que justifica su uso ([PENDIENTES](../PENDIENTES.md), sección 5).
+> **Versión que se aplica.** La escala original es de Brooke (1996); se aplica la **versión en español desarrollada y validada** por Sevilla-González et al. (2020), transcrita literalmente de su material complementario (*Multimedia Appendix 2*, obtenido de Europe PMC, PMC7773510, el 16 de septiembre de 2026), publicado con licencia abierta. Los ítems se refieren a «la herramienta»: se conserva esa redacción, porque cambiarla alteraría la versión validada.
 
-La redacción que sigue es **provisional**, para ensayar el formato en el piloto:
+**Instrucción al participante**, que se lee o se imprime tal cual:
 
-| # | Ítem *(redacción provisional)* | Polaridad |
+> «Por favor seleccione de cada uno de los enunciados la opción que mejor describa su experiencia con la herramienta electrónica. Un puntaje de 1 significa que usted se encuentra totalmente en desacuerdo con el enunciado, mientras que un puntaje en 5 significa que está totalmente de acuerdo, un puntaje de 3 significaría que usted se encuentra neutral con el enunciado.»
+
+| # | Ítem | Polaridad |
 |---|---|---|
-| 1 | Creo que usaría este sistema con frecuencia | Positiva |
-| 2 | Encuentro este sistema innecesariamente complejo | Negativa |
-| 3 | Creo que el sistema es fácil de usar | Positiva |
-| 4 | Creo que necesitaría el apoyo de una persona con conocimientos técnicos para poder usar este sistema | Negativa |
-| 5 | Encuentro que las funciones del sistema están bien integradas | Positiva |
-| 6 | Creo que el sistema es demasiado inconsistente | Negativa |
-| 7 | Imagino que la mayoría de las personas aprendería a usar este sistema con rapidez | Positiva |
-| 8 | Encuentro el sistema muy incómodo de usar | Negativa |
-| 9 | Me siento seguro usando el sistema | Positiva |
-| 10 | Necesité aprender muchas cosas antes de poder manejarme con este sistema | Negativa |
+| 1 | Me gustaría usar esta herramienta frecuentemente. | Positiva |
+| 2 | Considero que esta herramienta es innecesariamente compleja | Negativa |
+| 3 | Considero que la herramienta es fácil de usar. | Positiva |
+| 4 | Considero necesario el apoyo de personal experto para poder utilizar esta herramienta | Negativa |
+| 5 | Considero que las funciones de la herramienta están bien integradas | Positiva |
+| 6 | Considero que la herramienta presenta muchas contradicciones | Negativa |
+| 7 | Imagino que la mayoría de las personas aprenderían a usar esta herramienta rápidamente | Positiva |
+| 8 | Considero que el uso de esta herramienta es tedioso | Negativa |
+| 9 | Me sentí muy confiado al usar la herramienta | Positiva |
+| 10 | Necesité saber bastantes cosas antes de poder empezar a usar esta herramienta | Negativa |
 
 **Cálculo de la puntuación.** A los ítems impares se les resta 1; a los pares se los resta de 5; se suman los diez valores resultantes y el total se multiplica por 2,5. El resultado va de 0 a 100 y **no es un porcentaje**. El umbral de aceptabilidad es **68** (Bangor et al., 2008), y la consistencia interna de los diez ítems se reporta con **α de Cronbach** (Cronbach, 1951), con umbral **> 0,8**.
 

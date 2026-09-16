@@ -186,7 +186,7 @@ Un sistema web multiorganización cuyo aislamiento se aplica **dos veces y de fo
 | Backend | Node.js, Hono, Zod | Interfaz REST conforme al contrato, con descripción OpenAPI |
 | Persistencia e identidad | PostgreSQL con seguridad a nivel de fila, Supabase Auth | Políticas activas en las 7 tablas de negocio |
 | DevOps y nube | GitHub Actions, Vercel, Supabase | Pipeline con tipos, pruebas, cobertura y auditoría de dependencias; publicación en *staging* y producción |
-| Verificación | Vitest, Playwright | Suite multinivel y evidencia de aislamiento reproducible |
+| Verificación | Vitest, Playwright, axe-core | Suite multinivel y evidencia de aislamiento reproducible |
 
 ### 7.4 Exclusiones
 
@@ -271,7 +271,7 @@ La configuración detallada de cada instrumento está en el [anteproyecto](04-an
 ### 9.6 Consideraciones éticas
 
 - **Privacidad por diseño.** Ningún dato productivo, real o personal en la validación técnica: el escenario es sintético y se descarta con el entorno, en coherencia con el derecho a la privacidad reconocido en la Constitución Política del Estado (Estado Plurinacional de Bolivia, 2009, art. 21, num. 2).
-- **Entornos.** Las pruebas no se ejecutan contra entornos productivos; la línea base, con políticas deshabilitadas, solo existe en el proyecto de validación desechable (sección 7.4).
+- **Entornos.** Las pruebas no se ejecutan contra entornos productivos; la línea base, con políticas deshabilitadas, solo existe en el proyecto de validación desechable (sección 12).
 - **Personas.** Consentimiento informado con derecho a retirarse, resultados anonimizados como P01…P30, confidencialidad de las organizaciones y declaración de que se evalúa el sistema, no a la persona.
 - **Licencias y dependencias.** Componentes de código abierto con sus avisos; trabajo propio bajo licencia MIT; 0 vulnerabilidades críticas o altas en dependencias; riesgos del OWASP Top 10 aplicables atendidos en la especificación.
 - **Integridad.** No se depuran casos fallidos de la evidencia; un objetivo complementario descartado se declara con su criterio y su fecha.

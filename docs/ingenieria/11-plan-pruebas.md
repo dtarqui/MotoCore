@@ -1,8 +1,8 @@
 # Plan de pruebas y validación
 
-Estrategia de verificación del sistema y matriz de trazabilidad **requisito, caso de prueba y evidencia**. Materializa RNF-202 —toda regla de aislamiento y de negocio tiene prueba automatizada—, sostiene el objetivo específico 4 —validar el aislamiento frente a la línea base— y especifica cómo se ejecutan los objetivos complementarios 5 y 6 ([anteproyecto/01](../anteproyecto/01-definicion-y-alcance.md), sección 1.7).
+Estrategia de verificación del sistema y matriz de trazabilidad **requisito, caso de prueba y evidencia**. Materializa RNF-202 —toda regla de aislamiento y de negocio tiene prueba automatizada—, sostiene el objetivo específico 4 —validar el aislamiento frente a la línea base— y especifica cómo se ejecutan los objetivos complementarios 5 y 6 ([Definición y alcance](../anteproyecto/01-definicion-y-alcance.md), sección 1.7).
 
-> Requisitos: [02-requisitos.md](02-requisitos.md); Contrato verificado: [10-contrato-api.md](10-contrato-api.md); Políticas: [05-modelo-datos.md](05-modelo-datos.md); Cronograma: [08-plan-trabajo.md](08-plan-trabajo.md); Diseño de la investigación: [anteproyecto](../anteproyecto/04-anteproyecto-integrado.md), secciones 13 a 16
+> Requisitos: [Requisitos](02-requisitos.md); Contrato verificado: [Contrato](10-contrato-api.md); Políticas: [Modelo de datos](05-modelo-datos.md); Cronograma: [Plan de trabajo](08-plan-trabajo.md); Diseño de la investigación: [anteproyecto](../anteproyecto/04-anteproyecto-integrado.md), secciones 13 a 16
 >
 > **Este documento especifica la verificación, no reporta resultados.** Define qué debe probarse y con qué criterio se da por probado. La ejecución y sus resultados son evidencia de la fase de validación (F4).
 
@@ -29,7 +29,7 @@ El sistema no se prueba de manera uniforme: se concentra el esfuerzo donde un fa
 | **N4 — Aislamiento** | — *(específico del proyecto)* | Condiciones C0 a C3 por las dos vías | Vitest con cliente HTTP y cliente PostgreSQL con identidad ajena | Proyecto de validación desechable | Antes de cada hito; tres corridas en I8 |
 | **N5 — Usabilidad** | — *(objetivo complementario 5)* | Cambio de contexto frente al cambio de cuenta | Guion de tareas, cronómetro y cuestionario SUS | Entorno de producción y operadores | Una vez, en I8 |
 | **N6 — Componente del cliente** | Componente UI | El contrato desde el cliente: cabeceras de contexto, regla de rutas y códigos de error | Vitest sobre DOM simulado | Nada externo | En cada integración |
-| **N7 — Extremo a extremo** | E2E y auditorías | Flujos T1–T3, instalabilidad, diseño responsivo y accesibilidad | Playwright | Cliente web e interfaz publicados en *staging* | Tras cada publicación en *staging*; un fallo bloquea la promoción a producción |
+| **N7 — Extremo a extremo** | E2E y auditorías | Flujos T1–T3, instalabilidad, diseño responsivo y accesibilidad | Playwright y axe-core | Cliente web e interfaz publicados en *staging* | Tras cada publicación en *staging*; un fallo bloquea la promoción a producción |
 
 Además de estos niveles, la marca **CI** identifica las propiedades que verifica el propio pipeline: tipos, cobertura, auditoría de dependencias y bloqueo ante fallo.
 
@@ -250,12 +250,12 @@ Casos que **deben mostrar la fuga**: si no la muestran, la línea base no discri
 | RNF-401 | CP-N401.1 | **N6** | Cambiar de organización limpia el taller activo |
 | ADR-010 | CP-N401.2 | **N6** | Al cambiar de organización se invalidan las consultas del contexto anterior: ninguna vista sirve datos cacheados de la organización previa, y toda consulta de negocio lleva el contexto en su clave |
 | ADR-005 | CP-N005 | **N6** | El cliente adjunta `X-Org-Id` siempre y `X-Workshop-Id` solo en endpoints de nivel taller |
-| Contrato sección 2.3 | CP-N023 | **N6** | Ninguna llamada del cliente anida el identificador de organización en la ruta |
-| Contrato sección 2.6 | CP-N026 | **N6** | Las bajas lógicas se invocan con `POST /…/deactivate`; la revocación de un vínculo, con `DELETE` |
+| Contrato, sección 2.3 | CP-N023 | **N6** | Ninguna llamada del cliente anida el identificador de organización en la ruta |
+| Contrato, sección 2.6 | CP-N026 | **N6** | Las bajas lógicas se invocan con `POST /…/deactivate`; la revocación de un vínculo, con `DELETE` |
 | RNF-204 | CP-N204.1 | **N6** | El código de negocio del error sobrevive al cliente |
 | RNF-402 | CP-N402 | **N7** | Sin desbordamiento horizontal a 360 px y 1280 px en las pantallas del corte vertical |
 | RNF-403 | CP-N403 | **N7** | Manifiesto con nombre, iconos de 192 y 512 px, `start_url` y `display: standalone`; *service worker* registrado |
-| RNF-405 | CP-N405 | **N7** | Sin incumplimientos graves o críticos de WCAG 2.1 AA en las pantallas del corte vertical |
+| RNF-405 | CP-N405 | **N7** | Sin incumplimientos de impacto grave o crítico según axe-core, contra los criterios de WCAG 2.1 AA, en las pantallas del corte vertical |
 | RNF-404 | CP-N404.1 | **N5** | Tasa de éxito ≥ 80 % por tarea con el selector de contexto (sección 8.4) |
 | RNF-404 | CP-N404.2 | **N5** | Puntuación SUS media ≥ 68 con el selector, contrastada con *t* de una muestra |
 | RNF-404 | CP-N404.3 | **N5** | α de Cronbach > 0,8 en los ítems del SUS |
@@ -308,6 +308,16 @@ El **ciclo completo C0, C1, C2 y C3** se repite **tres veces**, en momentos dist
 | **Entorno reconstruido en cada ciclo** | Si el escenario se acumulara, la segunda corrida no probaría lo mismo que la primera |
 | **Entorno dedicado** | Un proyecto de base de datos dedicado y desechable, no el equipo de desarrollo |
 
+**Calendario de las corridas**, dentro de I8 (8 al 21 de diciembre):
+
+| Corrida | Fecha | Preparación |
+|---|---|---|
+| 1 | 9 de diciembre | Proyecto de validación reconstruido desde las migraciones el mismo día |
+| 2 | 14 de diciembre | Reconstrucción completa; ningún dato de la corrida 1 |
+| 3 | 18 de diciembre | Reconstrucción completa; ningún dato de las corridas anteriores |
+
+Cada corrida ejecuta primero la línea base y después las otras tres condiciones, en la misma jornada. Los días 19 a 21 quedan para el análisis y la redacción, antes del hito H5.
+
 Se reporta el resultado de las **tres** ejecuciones, no el de la mejor.
 
 ### 6.6 Evidencia a conservar
@@ -316,13 +326,26 @@ Por ciclo: el guion de construcción del escenario, la salida de los casos CP-LB
 
 La evidencia la producen **cuatro archivos de prueba**, uno por montaje: **integración** (C1, cliente HTTP), **acceso directo al motor** (C3 y la vía base de datos de C0, cliente PostgreSQL con identidad ajena), **independencia de capas** (C2, verificación sustituida) y **línea base por la interfaz** (C0, políticas deshabilitadas y verificación sustituida). Separarlos permite ejecutar una sola condición por vez.
 
+**Cómo se conserva.** La evidencia se define antes de generarla, y la produce el propio script de ejecución, nunca una transcripción manual:
+
+| Elemento | Contenido | Formato |
+|---|---|---|
+| Ubicación | Carpeta `evidencia/` del repositorio, con una subcarpeta por corrida: `corrida-1`, `corrida-2` y `corrida-3` | Versionada junto al código ejecutado |
+| Escenario | Cuentas, organizaciones y talleres creados, con sus identificadores y la hora de creación | `escenario.json` |
+| Resultados | Salida del ejecutor de pruebas, un archivo por condición | `resultados-<condición>.json`, reportero JSON de Vitest |
+| Versión ejecutada | Identificador de la última migración aplicada y del *commit* ejecutado | `version.txt` |
+| Resumen | Filas ajenas por tabla y condición, fecha y hora de inicio y de fin | `resumen.md` |
+| Integridad | Suma SHA-256 de cada archivo de la corrida | `sha256.txt` |
+
+Una corrida se conserva completa **aunque falle**: descartarla sesgaría el resultado. Los archivos no se editan después de generados, y el escenario es sintético, de modo que la evidencia no contiene datos personales.
+
 ---
 
 ## 7. Criterios de salida
 
 ### 7.1 Definición de terminado de una iteración
 
-Una iteración no se cierra mientras no se cumplan las seis condiciones ([08-plan-trabajo.md](08-plan-trabajo.md), sección 1):
+Una iteración no se cierra mientras no se cumplan las seis condiciones ([Plan de trabajo](08-plan-trabajo.md), sección 1):
 
 1. Verificación de tipos sin errores.
 2. Todos los casos de esta matriz correspondientes a los requisitos de la iteración, en verde.
@@ -451,7 +474,7 @@ Los datos del piloto **no se incorporan** al análisis: sirven para corregir el 
 1. Cada día de I8 se registran, por entorno —*staging*, producción y validación—, las invocaciones de funciones, la transferencia de datos y el tamaño de la base.
 2. Las peticiones a la interfaz se registran con el identificador de la organización activa, sin datos personales, y el consumo de cada día se **prorratea entre organizaciones** según su número de peticiones.
 3. El consumo se valoriza con las tarifas publicadas de cada proveedor vigentes en la fecha de medición; dentro de la capa gratuita, el costo marginal es cero y se reporta además el **porcentaje del límite gratuito** consumido.
-4. La **línea base** es la tarifa mensual publicada de un servidor dedicado de referencia capaz de ejecutar la interfaz y la base de datos, tomada en la misma fecha.
+4. La **línea base** es la tarifa mensual publicada de un **servidor de referencia**: la instancia mínima capaz de ejecutar a la vez la interfaz de programación en Node.js y PostgreSQL, con **1 vCPU y 2 GB de memoria**. Se toma el Droplet básico de DigitalOcean de esas características, cuyo precio se publica en dólares como el de los demás proveedores; su tarifa se lee en la página oficial de precios en la misma fecha de la medición.
 
 ### 9.3 Casos y evidencia
 
@@ -489,7 +512,7 @@ El criterio se escribe como comportamiento observable; la métrica lleva siempre
 | N4 se ejecuta sobre un proyecto de capa gratuita, no productivo | Demuestra la corrección de las políticas y del contrato, no el comportamiento bajo carga |
 | La línea base C0 se reproduce deshabilitando políticas en el propio sistema | Emula el aislamiento solo en la aplicación cuando su control falla; no mide un producto comercial concreto |
 | El canal lateral temporal no se prueba | El aislamiento verificado es el de **contenido**, no el de metadatos inferibles por tiempo de ejecución |
-| Las reglas alojadas en funciones del motor solo se prueban contra un motor real | Su cobertura depende del entorno; sección 7.2 fija cómo se reporta |
+| Las reglas alojadas en funciones del motor solo se prueban contra un motor real | Su cobertura depende del entorno; la sección 7.2 fija cómo se reporta |
 | La evaluación de usabilidad usa 30 operadores del servicio de motocicletas en Bolivia | Sostiene el contraste entre condiciones, no la representatividad del sector |
 | La usabilidad evaluada es la del **cambio de contexto** | No se concluye nada sobre las demás pantallas |
 | El costo se estima con tres organizaciones sintéticas durante 14 días | Es un orden de magnitud por organización, no una proyección a escala |

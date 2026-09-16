@@ -1,6 +1,6 @@
 # Modelo de datos
 
-Diseño de datos de la arquitectura multi-tenant jerárquica. Corresponde al objetivo específico **2**: diseñar el modelo jerárquico y especificar las políticas de aislamiento ([anteproyecto/01](../anteproyecto/01-definicion-y-alcance.md), sección 1.7).
+Diseño de datos de la arquitectura multi-tenant jerárquica. Corresponde al objetivo específico **2**: diseñar el modelo jerárquico y especificar las políticas de aislamiento ([Definición y alcance](../anteproyecto/01-definicion-y-alcance.md), sección 1.7).
 
 > Terminología: [Glosario](01-glosario.md); Decisión de fondo: [ADR-006](07-decisiones-diseno.md); Aislamiento: [Seguridad](06-seguridad.md)
 
@@ -203,4 +203,4 @@ La regla que se sigue de aquí, y que rige al añadir cualquier tabla: **antes d
 
 El esquema se construye mediante **migraciones versionadas** (RNF-304): cada archivo es aplicable de forma reproducible, lo que permite reconstruir la base desde cero y mantener alineados los entornos.
 
-Son **cuatro**, agrupadas por tema y no por orden histórico —identidad y jerarquía, negocio, auditoría y permisos—, y su orden viene dado por las dependencias: el negocio y la auditoría necesitan las tablas y funciones de la primera, y los permisos se conceden sobre todo lo anterior. Agruparlas así, en lugar de acumular una migración por corrección, tiene una consecuencia que importa para la validación: **el archivo que define una tabla es también el que explica por qué está definida así**, sin que haya que reconstruir la intención leyendo un historial de enmiendas. El orden de construcción sigue la dependencia entre entidades —identidad y jerarquía primero, entidades de negocio después— y se detalla en el cronograma ([08-plan-trabajo.md](08-plan-trabajo.md)).
+Son **cuatro**, agrupadas por tema y no por orden histórico —identidad y jerarquía, negocio, auditoría y permisos—, y su orden viene dado por las dependencias: el negocio y la auditoría necesitan las tablas y funciones de la primera, y los permisos se conceden sobre todo lo anterior. Agruparlas así, en lugar de acumular una migración por corrección, tiene una consecuencia que importa para la validación: **el archivo que define una tabla es también el que explica por qué está definida así**, sin que haya que reconstruir la intención leyendo un historial de enmiendas. El orden de construcción sigue la dependencia entre entidades —identidad y jerarquía primero, entidades de negocio después— y se detalla en el cronograma ([Plan de trabajo](08-plan-trabajo.md)).

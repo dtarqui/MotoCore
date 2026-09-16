@@ -1,6 +1,6 @@
 # Contrato de la interfaz de programación
 
-Especificación normativa de la interfaz que expone el sistema. Traduce los requisitos ([02-requisitos.md](02-requisitos.md)) y las decisiones ya tomadas —contexto por cabecera (ADR-005), identidad delegada (ADR-004), formato de error uniforme (RNF-204)— en un contrato verificable.
+Especificación normativa de la interfaz que expone el sistema. Traduce los requisitos ([Requisitos](02-requisitos.md)) y las decisiones ya tomadas —contexto por cabecera (ADR-005), identidad delegada (ADR-004), formato de error uniforme (RNF-204)— en un contrato verificable.
 
 > Terminología: [Glosario](01-glosario.md); Estructura: [Arquitectura](04-arquitectura.md); Entidades: [Modelo de datos](05-modelo-datos.md); Autorización: [Seguridad](06-seguridad.md); Casos de prueba: [Plan de pruebas](11-plan-pruebas.md)
 >
@@ -149,7 +149,7 @@ El registro es atómico: si cualquiera de los cuatro pasos falla, no queda ningu
 | `POST` | `/api/workshops/{workshopId}/assignments` | Org | Owner | RF-304 | Asigna un miembro al taller |
 | `DELETE` | `/api/workshops/{workshopId}/assignments/{userId}` | Org | Owner | RF-304 | Retira la asignación, sin afectar la membresía |
 
-La asignación a talleres es **operativa**: no otorga ni restringe permisos, y no filtra lo que el miembro puede ver (ADR-006, decisión cerrada en [07-decisiones-diseno.md](07-decisiones-diseno.md)).
+La asignación a talleres es **operativa**: no otorga ni restringe permisos, y no filtra lo que el miembro puede ver (ADR-006, decisión cerrada en [Decisiones de diseño](07-decisiones-diseno.md)).
 
 ### 3.4 Miembros
 
@@ -208,7 +208,7 @@ Reglas que el contrato debe hacer cumplir:
 |---|---|---|---|---|---|
 | `GET` | `/api/audit` | Org | **Owner** | RF-703, RF-704 | Registro de acciones críticas de la organización activa, con autor, acción y fecha |
 
-Es la única lectura de la interfaz reservada a un rol. La restricción **no** se sostiene solo aquí: se aplica también en el motor de base de datos, de modo que el acceso directo tampoco la eluda (RF-704, [05-modelo-datos.md](05-modelo-datos.md)).
+Es la única lectura de la interfaz reservada a un rol. La restricción **no** se sostiene solo aquí: se aplica también en el motor de base de datos, de modo que el acceso directo tampoco la eluda (RF-704, [Modelo de datos](05-modelo-datos.md)).
 
 El registro es de **solo inserción**: el contrato no expone ninguna operación de modificación ni de borrado sobre él.
 
@@ -269,7 +269,7 @@ La elección entre `403` y `404` no es estilística: comunica —o no— la exis
 | Credenciales de inicio de sesión incorrectas | Error genérico, sin indicar el campo | No revela si el correo tiene cuenta (HU-02) |
 | Invitación a un correo sin cuenta | `404 member.not_found` | El sistema informa que no puede invitarlo, sin exponer la búsqueda de cuentas como operación (RNF-106) |
 
-**Prueba de la regla**: para un identificador cualquiera, la respuesta de un recurso ajeno y la de un recurso inexistente deben ser idénticas en estado, código y cuerpo. Su verificación está en [11-plan-pruebas.md](11-plan-pruebas.md).
+**Prueba de la regla**: para un identificador cualquiera, la respuesta de un recurso ajeno y la de un recurso inexistente deben ser idénticas en estado, código y cuerpo. Su verificación está en [Plan de pruebas](11-plan-pruebas.md).
 
 ---
 

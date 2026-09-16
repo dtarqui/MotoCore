@@ -2,7 +2,7 @@
 
 Metodología, descomposición del trabajo, cronograma, hitos, restricciones y supuestos, riesgos, recursos, presupuesto y viabilidad del proyecto de grado. Período: **septiembre a diciembre de 2026**.
 
-> Objetivos y alcance: [anteproyecto/01-definicion-y-alcance.md](../anteproyecto/01-definicion-y-alcance.md); Requisitos: [Requisitos](02-requisitos.md); Historias: [Historias de usuario](03-historias-usuario.md); Verificación: [Plan de pruebas](11-plan-pruebas.md)
+> Objetivos y alcance: [Definición y alcance](../anteproyecto/01-definicion-y-alcance.md); Requisitos: [Requisitos](02-requisitos.md); Historias: [Historias de usuario](03-historias-usuario.md); Verificación: [Plan de pruebas](11-plan-pruebas.md)
 
 ## 1. Metodología
 
@@ -66,7 +66,7 @@ Cuatro fases, una por objetivo núcleo. Los objetivos complementarios se ejecuta
 | **I5** | 27 oct – 9 nov | Módulo de clientes — nivel organización, de punta a punta | HU-13, HU-14, HU-15 |
 | **I6** | 10–23 nov | Módulo de inventario y movimientos — nivel taller, **reclutamiento de operadores** | HU-16 a HU-19 (HU-20 si hay margen), 36 operadores contactados |
 | **I7** | 24 nov – 7 dic | Cliente web, selectores de contexto, instalabilidad y diseño responsivo; pruebas extremo a extremo; publicación en *staging* y producción | Aplicación utilizable de extremo a extremo |
-| **I8** | 8–21 dic | **Ejecución** de las tres corridas C0–C3 con su evidencia; sesiones con operadores; lectura diaria de consumo; redacción final y preparación de la defensa | HU-21, HU-22; Evidencia de aislamiento; Informes complementarios; Documento final |
+| **I8** | 8–21 dic | **Ejecución** de las tres corridas C0–C3 —9, 14 y 18 de diciembre— con su evidencia; sesiones con operadores; lectura diaria de consumo; redacción final y preparación de la defensa | HU-21, HU-22; Evidencia de aislamiento; Informes complementarios; Documento final |
 
 *Reserva: del 22 al 31 de diciembre, para correcciones posteriores a la revisión del tutor.*
 
@@ -152,4 +152,4 @@ La especificación técnica es lo que hace costeable el presupuesto. **Tarifas y
 
 ## 9. Criterio de cierre
 
-El proyecto se considera concluido cuando los **cuatro objetivos núcleo** cuentan con su entregable verificable —según la tabla de trazabilidad de [anteproyecto/01-definicion-y-alcance.md](../anteproyecto/01-definicion-y-alcance.md), sección 1.7.3—, los **objetivos complementarios** se han ejecutado o descartado según su criterio de continuidad, y la suite de aislamiento se ha ejecutado en tres corridas reproducibles con las condiciones que fija [Plan de pruebas](11-plan-pruebas.md), sección 7.3. Las funcionalidades excluidas del alcance (definición y alcance, sección 1.8.3) no condicionan ese cierre.
+El proyecto se considera concluido cuando los **cuatro objetivos núcleo** cuentan con su entregable verificable —según la tabla de trazabilidad de [Definición y alcance](../anteproyecto/01-definicion-y-alcance.md), sección 1.7.3—, los **objetivos complementarios** se han ejecutado o descartado según su criterio de continuidad, y la suite de aislamiento se ha ejecutado en tres corridas reproducibles con las condiciones que fija [Plan de pruebas](11-plan-pruebas.md), sección 7.3. Las funcionalidades excluidas del alcance (definición y alcance, sección 1.8.3) no condicionan ese cierre.

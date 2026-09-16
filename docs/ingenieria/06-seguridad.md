@@ -64,7 +64,7 @@ El rol es **por organización**: la misma cuenta puede tener roles distintos en 
 
 La gestión de identidad —registro, inicio de sesión, renovación de sesión, confirmación de correo y recuperación de contraseña— se delega en un proveedor gestionado. La capa de aplicación no emite credenciales: únicamente **verifica** la recibida y resuelve la identidad de la cuenta.
 
-Delegar la identidad reduce la superficie de código sensible del sistema y permite que el identificador del usuario autenticado esté disponible dentro del motor de base de datos, condición necesaria para que las políticas de aislamiento puedan evaluarlo (ver [07-decisiones-diseno.md](07-decisiones-diseno.md), ADR-004).
+Delegar la identidad reduce la superficie de código sensible del sistema y permite que el identificador del usuario autenticado esté disponible dentro del motor de base de datos, condición necesaria para que las políticas de aislamiento puedan evaluarlo (ver [Decisiones de diseño](07-decisiones-diseno.md), ADR-004).
 
 ## Manejo de errores
 
@@ -101,4 +101,4 @@ La especificación verificable de estos puntos está en [Requisitos](02-requisit
 
 ## Fuera del alcance
 
-Se identifican como líneas de refuerzo posterior: autenticación de doble factor, políticas formales de rotación de credenciales, un **límite de tasa propio sobre el registro** —que en funciones efímeras exige un almacén de estado compartido que el proyecto no incorpora— y auditoría extendida a la totalidad de las entidades de negocio. Esta última exclusión es la misma que registra el alcance del proyecto ([anteproyecto/01-definicion-y-alcance.md](../anteproyecto/01-definicion-y-alcance.md), sección 1.8.3): se audita el conjunto acotado de seis acciones críticas que enumera RF-703, no toda operación del sistema.
+Se identifican como líneas de refuerzo posterior: autenticación de doble factor, políticas formales de rotación de credenciales, un **límite de tasa propio sobre el registro** —que en funciones efímeras exige un almacén de estado compartido que el proyecto no incorpora— y auditoría extendida a la totalidad de las entidades de negocio. Esta última exclusión es la misma que registra el alcance del proyecto ([Definición y alcance](../anteproyecto/01-definicion-y-alcance.md), sección 1.8.3): se audita el conjunto acotado de seis acciones críticas que enumera RF-703, no toda operación del sistema.

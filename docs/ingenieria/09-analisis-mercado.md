@@ -1,6 +1,6 @@
 # Análisis del mercado
 
-Relevamiento de las soluciones de gestión de talleres de motocicletas y automóviles disponibles en **Bolivia**, con el objeto de determinar qué capacidades cubre la oferta existente y cuáles quedan desatendidas. Constituye parte del insumo del objetivo específico 1 y alimenta el estado del arte ([anteproyecto/02-antecedentes-y-estado-del-arte.md](../anteproyecto/02-antecedentes-y-estado-del-arte.md)).
+Relevamiento de las soluciones de gestión de talleres de motocicletas y automóviles disponibles en **Bolivia**, con el objeto de determinar qué capacidades cubre la oferta existente y cuáles quedan desatendidas. Constituye parte del insumo del objetivo específico 1 y alimenta el estado del arte ([Antecedentes y estado del arte](../anteproyecto/02-antecedentes-y-estado-del-arte.md)).
 
 Del relevamiento se desprenden dos capacidades determinantes para el mercado boliviano: la **mensajería con el cliente por WhatsApp** y la **facturación electrónica del Servicio de Impuestos Nacionales (SIN)**.
 
@@ -56,7 +56,7 @@ Capacidades relevadas en las soluciones disponibles, y su relevancia para el mer
 | Reportes y analítica de operación | Parcial | Media |
 | Integración contable | Escasa | Baja |
 
-**Lectura del relevamiento.** Las capacidades operativas básicas están cubiertas por la oferta existente; lo que no se encuentra resuelto es la **estructura organizativa** ni el aislamiento verificable entre organizaciones. La elaboración de esa carencia como vacío que justifica el proyecto corresponde al estado del arte ([Sección 2.3](../anteproyecto/02-antecedentes-y-estado-del-arte.md)) y aquí no se repite.
+**Lectura del relevamiento.** Las capacidades operativas básicas están cubiertas por la oferta existente; lo que no se encuentra resuelto es la **estructura organizativa** ni el aislamiento verificable entre organizaciones. La elaboración de esa carencia como vacío que justifica el proyecto corresponde al estado del arte ([capítulo 2](../anteproyecto/02-antecedentes-y-estado-del-arte.md), sección 2.3) y aquí no se repite.
 
 ## Análisis comparativo
 
@@ -94,7 +94,7 @@ Bolivia exige facturación electrónica/en línea gestionada por el **Servicio d
 
 ## Funcionalidades identificadas y su tratamiento en el proyecto
 
-El relevamiento identifica un conjunto amplio de funcionalidades. El alcance del proyecto de grado ([anteproyecto/01-definicion-y-alcance.md](../anteproyecto/01-definicion-y-alcance.md), sección 1.8) se concentra en la estructura organizativa y el aislamiento de datos; el resto se documenta como continuación.
+El relevamiento identifica un conjunto amplio de funcionalidades. El alcance del proyecto de grado ([Definición y alcance](../anteproyecto/01-definicion-y-alcance.md), sección 1.8) se concentra en la estructura organizativa y el aislamiento de datos; el resto se documenta como continuación.
 
 ### Dentro del alcance
 
@@ -128,4 +128,4 @@ Ordenadas por prioridad para el mercado boliviano:
 
 ## Consideración de diseño
 
-Aunque las funcionalidades de continuación quedan fuera del alcance, el modelo de datos se diseña de modo que su incorporación posterior no exija rehacer la estructura: las entidades que esas funcionalidades requerirán —facturas, presupuestos, citas— pertenecen al nivel taller o al nivel organización según el mismo criterio de alcance ya establecido ([01-glosario.md](01-glosario.md)), y se integran a las políticas de aislamiento existentes sin modificarlas.
+Aunque las funcionalidades de continuación quedan fuera del alcance, el modelo de datos se diseña de modo que su incorporación posterior no exija rehacer la estructura: las entidades que esas funcionalidades requerirán —facturas, presupuestos, citas— pertenecen al nivel taller o al nivel organización según el mismo criterio de alcance ya establecido ([Glosario](01-glosario.md)), y se integran a las políticas de aislamiento existentes sin modificarlas.

@@ -2,7 +2,7 @@
 
 Registro de las decisiones estructurales del proyecto, con las alternativas evaluadas, el criterio de selección y las consecuencias asumidas. Formato ADR (*Architecture Decision Record*): documenta **por qué** el sistema se diseña de una manera y no de otra, de modo que la decisión pueda revisarse con la misma información con que se tomó.
 
-> Terminología: [01-glosario.md](01-glosario.md). Arquitectura resultante: [04-arquitectura.md](04-arquitectura.md). Requisitos que la originan: [02-requisitos.md](02-requisitos.md).
+> Terminología: [Glosario](01-glosario.md). Arquitectura resultante: [Arquitectura](04-arquitectura.md). Requisitos que la originan: [Requisitos](02-requisitos.md).
 
 ---
 
@@ -85,7 +85,7 @@ Esta decisión establece **que** hay dos capas, no **cómo** participa la segund
 
 **Justificación.** Reduce superficie de código sensible —el sistema nunca recibe ni almacena contraseñas (RNF-104)— y el identificador de usuario autenticado queda disponible dentro del motor de base de datos, lo que permite que las políticas de seguridad a nivel de fila lo evalúen directamente. Esto último es condición necesaria para ADR-002.
 
-**Consecuencias.** Se introduce dependencia de un proveedor externo para la identidad. Un cambio de proveedor exigiría migrar credenciales, no solo datos. El riesgo se registra y se mitiga aislando el acceso al proveedor tras una capa propia (ver [08-plan-trabajo.md](08-plan-trabajo.md), riesgo R3).
+**Consecuencias.** Se introduce dependencia de un proveedor externo para la identidad. Un cambio de proveedor exigiría migrar credenciales, no solo datos. El riesgo se registra y se mitiga aislando el acceso al proveedor tras una capa propia (ver [Plan de trabajo](08-plan-trabajo.md), riesgo R3).
 
 ---
 
@@ -132,7 +132,7 @@ El reparto concreto de cada entidad entre los dos niveles, que se deriva de esta
 - Las restricciones de unicidad se definen según el nivel de cada entidad: el número de parte de inventario es único por taller; el correo del cliente, único por organización.
 - La numeración de órdenes de trabajo queda fijada como correlativa **por taller** (RF-802): se sigue del nivel asignado a esa entidad, aunque el módulo esté fuera del alcance actual.
 
-**Alcance del aporte.** El modelo pasa de una multi-tenancy plana a una **jerárquica**: el reto de diseño consiste en sostener un aislamiento verificable entre organizaciones mientras se soporta una subdivisión interna con reglas de alcance distintas según el tipo de entidad (ver [anteproyecto/01-definicion-y-alcance.md](../anteproyecto/01-definicion-y-alcance.md)).
+**Alcance del aporte.** El modelo pasa de una multi-tenancy plana a una **jerárquica**: el reto de diseño consiste en sostener un aislamiento verificable entre organizaciones mientras se soporta una subdivisión interna con reglas de alcance distintas según el tipo de entidad (ver [Definición y alcance](../anteproyecto/01-definicion-y-alcance.md)).
 
 ---
 
@@ -253,7 +253,7 @@ Temas que se plantearon durante el diseño y **no** generan un ADR: unos porque 
 
 | Tema | Situación |
 |---|---|
-| Proveedor de mensajería por WhatsApp | Abierta — depende de funcionalidad fuera del alcance actual (ver [09-analisis-mercado.md](09-analisis-mercado.md)) |
+| Proveedor de mensajería por WhatsApp | Abierta — depende de funcionalidad fuera del alcance actual (ver [Análisis del mercado](09-analisis-mercado.md)) |
 | Enfoque de integración con la facturación electrónica del SIN: proveedor autorizado frente a implementación propia de firma digital y generación de XML | Abierta — requiere validar la normativa vigente antes de decidir |
 
 ### Cerrada — sin consecuencia estructural

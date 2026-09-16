@@ -1,8 +1,8 @@
 # Arquitectura
 
-Diseño arquitectónico preliminar del sistema. Responde a los requisitos especificados en [02-requisitos.md](02-requisitos.md) —sobre todo a los no funcionales— y sus decisiones están registradas en [07-decisiones-diseno.md](07-decisiones-diseno.md).
+Diseño arquitectónico preliminar del sistema. Responde a los requisitos especificados en [Requisitos](02-requisitos.md) —sobre todo a los no funcionales— y sus decisiones están registradas en [Decisiones de diseño](07-decisiones-diseno.md).
 
-> Terminología: [01-glosario.md](01-glosario.md); Interfaz que expone esta arquitectura: [10-contrato-api.md](10-contrato-api.md); Datos: [05-modelo-datos.md](05-modelo-datos.md); Seguridad: [06-seguridad.md](06-seguridad.md)
+> Terminología: [Glosario](01-glosario.md); Interfaz que expone esta arquitectura: [Contrato](10-contrato-api.md); Datos: [Modelo de datos](05-modelo-datos.md); Seguridad: [Seguridad](06-seguridad.md)
 
 ## 1. Selección del estilo arquitectónico
 
@@ -111,7 +111,7 @@ flowchart TD
 
 ## 8. Aislamiento de datos: defensa en profundidad
 
-Dos capas independientes, ambas obligatorias (detalle en [06-seguridad.md](06-seguridad.md)):
+Dos capas independientes, ambas obligatorias (detalle en [Seguridad](06-seguridad.md)):
 
 1. **Seguridad a nivel de fila en el motor de base de datos** — las políticas exigen membresía activa en la organización propietaria del registro. Actúa aunque la capa de aplicación falle u omita un filtro.
 2. **Verificación de membresía en la capa de aplicación** — cada operación valida la membresía y, cuando corresponde, el rol, antes de actuar, y devuelve un error de negocio específico.
@@ -120,7 +120,7 @@ Para que la primera capa actúe **también** sobre las peticiones de la interfaz
 
 ## 9. Persistencia
 
-Base de datos **relacional** —PostgreSQL— con transacciones ACID, integridad referencial y políticas de seguridad a nivel de fila, construida mediante **migraciones versionadas** (RNF-304). No se incorpora almacenamiento documental ni capa de caché: los datos del corte vertical son estructurados y relacionales, y el rendimiento no exige caché. El modelo completo está en [05-modelo-datos.md](05-modelo-datos.md).
+Base de datos **relacional** —PostgreSQL— con transacciones ACID, integridad referencial y políticas de seguridad a nivel de fila, construida mediante **migraciones versionadas** (RNF-304). No se incorpora almacenamiento documental ni capa de caché: los datos del corte vertical son estructurados y relacionales, y el rendimiento no exige caché. El modelo completo está en [Modelo de datos](05-modelo-datos.md).
 
 ## 10. Seguridad por capas
 
@@ -159,6 +159,7 @@ La columna de **alternativas** es obligatoria: sin ella no hay justificación, s
 | Estado de servidor en el cliente: sincronización y caché | Estado propio de React con recarga manual, Redux Toolkit Query, SWR, TanStack Query | **TanStack Query** | La clave de consulta incorpora la organización y el taller activos, de modo que ningún cambio de contexto puede servirse desde la caché anterior; no impone un contenedor de estado global (ADR-010) |
 | Pruebas unitarias y de integración | Jest, Mocha, Vitest | **Vitest** | Mismo ecosistema TypeScript y ESM, sin transpilación adicional |
 | Pruebas extremo a extremo | Cypress, Selenium, Playwright | **Playwright** | Varios motores de navegador y anchos de pantalla en un solo ejecutor, sin interfaz gráfica en el pipeline |
+| Auditoría de accesibilidad | Pa11y, auditoría de Lighthouse, revisión manual, axe-core | **axe-core**, integrado en Playwright | Evalúa los criterios de WCAG 2.1 A y AA dentro del mismo ejecutor extremo a extremo, sin servicio adicional, y clasifica cada incumplimiento por impacto, lo que permite aplicar tal cual el umbral de RNF-405: cero incumplimientos graves o críticos |
 | Calidad de código | TSLint (obsoleto), Biome, ESLint con Prettier | **ESLint + Prettier en *pre-commit*** | Estándar del ecosistema TypeScript; la calidad se automatiza antes de integrar |
 | Integración y despliegue continuos | GitLab CI, Jenkins, GitHub Actions | **GitHub Actions** | Integrado con el repositorio, sin servidor propio que operar |
 
@@ -179,13 +180,13 @@ Qué se ejecuta en cada nivel está en el [Plan de pruebas](11-plan-pruebas.md),
 
 ## 14. Alcance de plataformas
 
-La plataforma soportada es **web**, responsiva para escritorio y móvil (RNF-402) e instalable como aplicación web progresiva (RNF-403). Las aplicaciones nativas están **fuera del alcance** ([anteproyecto/01-definicion-y-alcance.md](../anteproyecto/01-definicion-y-alcance.md), sección 1.8.3).
+La plataforma soportada es **web**, responsiva para escritorio y móvil (RNF-402) e instalable como aplicación web progresiva (RNF-403). Las aplicaciones nativas están **fuera del alcance** ([Definición y alcance](../anteproyecto/01-definicion-y-alcance.md), sección 1.8.3).
 
 ## 15. Registros y observabilidad
 
 Qué queda registrado cuando algo falla, dónde vive ese registro y qué no debe entrar en él.
 
-**No confundir con el registro de auditoría** (sección 8): aquel es un **dato de negocio** —seis acciones críticas, de solo inserción, consultable por el `Owner` y conservado mientras exista la organización (RF-703, RF-704)—. Los registros de esta sección son **operativos**: sirven para diagnosticar fallos, no se exponen en la interfaz y su retención es la que ofrezca el plan del proveedor.
+**No confundir con el registro de auditoría** ([Modelo de datos](05-modelo-datos.md)): aquel es un **dato de negocio** —seis acciones críticas, de solo inserción, consultable por el `Owner` y conservado mientras exista la organización (RF-703, RF-704)—. Los registros de esta sección son **operativos**: sirven para diagnosticar fallos, no se exponen en la interfaz y su retención es la que ofrezca el plan del proveedor.
 
 | Registro | Qué contiene | Dónde vive | Para qué se usa |
 |---|---|---|---|

@@ -2,7 +2,7 @@
 
 Historias organizadas por épica, con criterios de aceptación en formato **Dado–Cuando–Entonces** y trazabilidad a los requisitos ([Requisitos](02-requisitos.md)) y a la iteración que las construye ([Plan de trabajo](08-plan-trabajo.md), sección 3).
 
-> Solo se detallan las historias **dentro del alcance** del proyecto de grado. Las funcionalidades excluidas ([Sección 1.8.3](../anteproyecto/01-definicion-y-alcance.md)) están en [Requisitos](02-requisitos.md) como RF-800.
+> Solo se detallan las historias **dentro del alcance** del proyecto de grado. Las funcionalidades excluidas ([definición y alcance](../anteproyecto/01-definicion-y-alcance.md), sección 1.8.3) están en [Requisitos](02-requisitos.md) como RF-800.
 
 ## Actores
 

@@ -1,6 +1,6 @@
 # Requisitos
 
-Especificación de requerimientos del proyecto: actores, requisitos funcionales, reglas de negocio, requisitos no funcionales, requisitos de seguridad, priorización y trazabilidad. Es el eslabón entre el alcance ([anteproyecto/01-definicion-y-alcance.md](../anteproyecto/01-definicion-y-alcance.md), sección 1.8) y la arquitectura ([Arquitectura](04-arquitectura.md)): traduce el alcance en enunciados verificables **antes** de decidir cómo se construye.
+Especificación de requerimientos del proyecto: actores, requisitos funcionales, reglas de negocio, requisitos no funcionales, requisitos de seguridad, priorización y trazabilidad. Es el eslabón entre el alcance ([Definición y alcance](../anteproyecto/01-definicion-y-alcance.md), sección 1.8) y la arquitectura ([Arquitectura](04-arquitectura.md)): traduce el alcance en enunciados verificables **antes** de decidir cómo se construye.
 
 > Terminología: [Glosario](01-glosario.md); Historias de usuario: [Historias de usuario](03-historias-usuario.md); Interfaz por la que se ejercen: [Contrato](10-contrato-api.md); Casos de prueba, nivel y evidencia: [Plan de pruebas](11-plan-pruebas.md)
 
@@ -192,7 +192,7 @@ Restricciones del dominio que condicionan los requisitos sin ser funcionalidades
 | RNF-402 | Compatibilidad | La interfaz es utilizable en navegador de escritorio y móvil. | **0** desbordamientos horizontales a **360 px** y **1280 px** en las pantallas del corte vertical, en los motores **Chromium** y **WebKit** | Auditoría con Playwright (CP-N402) | Must | Sí |
 | RNF-403 | Compatibilidad | La aplicación es instalable como PWA. | Manifiesto con nombre, iconos de **192 px** y **512 px**, `start_url` y `display: standalone`; *service worker* registrado | Auditoría con Playwright (CP-N403) | Should | Sí |
 | RNF-404 | Usabilidad | El cambio de contexto resulta operable por un usuario del rubro sin formación previa. | Tasa de éxito **≥ 80 %** por tarea; puntuación SUS **≥ 68** (Brooke, 1996, en la versión en español validada por Sevilla-González et al., 2020; baremo de Bangor et al., 2008) con **α > 0,8** | Evaluación con operadores, objetivo complementario 5 (CP-N404.1 a CP-N404.3) | Should | Sí |
-| RNF-405 | Compatibilidad | La interfaz cumple los criterios de accesibilidad aplicables a las pantallas del corte vertical. | **0** incumplimientos graves o críticos de **WCAG 2.1 nivel AA** en las pantallas del corte vertical | Auditoría automatizada en el ejecutor extremo a extremo (CP-N405) | Should | Sí |
+| RNF-405 | Compatibilidad | La interfaz cumple los criterios de accesibilidad aplicables a las pantallas del corte vertical. | **0** incumplimientos graves o críticos de **WCAG 2.1 nivel AA** en las pantallas del corte vertical | Auditoría con axe-core en el ejecutor extremo a extremo (CP-N405) | Should | Sí |
 
 ### RNF-500 — Rendimiento *(fuera de alcance)*
 

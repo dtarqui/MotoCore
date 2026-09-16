@@ -114,7 +114,7 @@ Dos objetivos adicionales, **ya problematizados** en la sección 1.2 —el cambi
 
 | # | Objetivo | Pregunta | Entregable verificable |
 |---|---|---|---|
-| 1 | Diagnosticar la literatura y la oferta boliviana | 1 | Matriz del estado del arte por autor, metodología, aporte y limitaciones (capítulo 2, sección 2.2); análisis del mercado; enunciado del vacío (sección 2.3); definición operativa de la línea base |
+| 1 | Diagnosticar la literatura y la oferta boliviana | 1 | Matriz del estado del arte por autor, metodología, aporte y limitaciones (capítulo 2, sección 2.2); análisis del mercado; enunciado del vacío (capítulo 2, sección 2.3); definición operativa de la línea base |
 | 2 | Diseñar el modelo, las políticas y el contrato | 2 | Especificación de requerimientos —actores, requisitos funcionales, reglas de negocio y no funcionales—; modelo entidad-relación con alcance por nivel; políticas de seguridad a nivel de fila y funciones de verificación especificadas; diagramas C4 de contenedores y componentes; contrato de la interfaz de programación |
 | 3 | Desarrollar el corte vertical | 3 | Sistema desplegado en *staging* con el corte vertical operativo, pipeline de integración continua en verde, cobertura de pruebas ≥ 80 % en los servicios de dominio del servidor |
 | 4 | Validar el aislamiento frente a la línea base | 4 | Suite de aislamiento con su matriz de requisito, caso y evidencia; resultados de todas las condiciones experimentales en tres corridas reproducibles desde una base vacía |
@@ -147,7 +147,7 @@ Los casos de uso, historias de usuario, reglas de negocio y criterios de aceptac
 | **Backend** | Node.js, TypeScript, Hono (marco de la interfaz de programación) y Zod (validación) | Interfaz REST conforme al [contrato](../ingenieria/10-contrato-api.md), con su descripción OpenAPI |
 | **Persistencia e identidad** | Supabase: PostgreSQL con seguridad a nivel de fila, Supabase Auth y migraciones versionadas | Modelo entidad-relación con políticas activas en las siete tablas de negocio |
 | **Despliegue** | Vercel (funciones serverless) sobre dos entornos —*staging* y producción— y un proyecto de base de datos dedicado y desechable para la validación | Entornos desplegados y reconstruibles desde el repositorio |
-| **Pruebas** | Vitest (unitarias, de contrato, de integración y de aislamiento) y Playwright (flujos extremo a extremo del cambio de contexto, instalabilidad y diseño responsivo) | Suite multinivel con cobertura ≥ 80 % en los servicios de dominio del servidor |
+| **Pruebas** | Vitest (unitarias, de contrato, de integración y de aislamiento) y Playwright (flujos extremo a extremo del cambio de contexto, instalabilidad y diseño responsivo) con axe-core para la accesibilidad | Suite multinivel con cobertura ≥ 80 % en los servicios de dominio del servidor |
 | **Integración y despliegue continuos** | GitHub Actions: verificación de tipos, pruebas, cobertura y auditoría de dependencias en cada integración; la integración de Vercel publica la rama `main` en *staging* y la rama `release` en producción tras superar el pipeline | Pipeline en verde en cada integración; ninguna publicación sin pipeline aprobado |
 
 > Las teorías, modelos y estándares que justifican cada una de estas elecciones se desarrollan en el [Marco teórico y conceptual](03-marco-teorico-y-conceptual.md); las alternativas evaluadas y descartadas, en [Decisiones de diseño](../ingenieria/07-decisiones-diseno.md) y en la matriz de selección tecnológica de [Arquitectura](../ingenieria/04-arquitectura.md).
