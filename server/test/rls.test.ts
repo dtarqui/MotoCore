@@ -1,6 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { createApp } from '../src/app.js';
+import { anotarMedida } from './support/evidencia.js';
 import { type Account, clientAs, hasEnv, registerAccount, request, unique } from './support/scenario.js';
 
 /**
@@ -98,6 +99,7 @@ describe.skipIf(!hasEnv)('N4 — aislamiento por acceso directo al motor (condic
   it.each(TABLES)('CP-702 y CP-N101 · %s — B no obtiene ninguna fila de A, sin error', async (table) => {
     const { data, error } = await asB.from(table).select('*').eq('organization_id', A.orgId);
     expect(error).toBeNull();
+    anotarMedida({ condicion: 'C3', via: 'base de datos', objetivo: table, filas_ajenas: (data ?? []).length });
     expect(data).toEqual([]);
   });
 

@@ -2,7 +2,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { fromDb } from '../../lib/db.js';
 import { internal } from '../../lib/errors.js';
 import { getEnv } from '../../lib/env.js';
-import { serviceClient } from '../../lib/supabase.js';
+import { publicClient, serviceClient } from '../../lib/supabase.js';
 import type { Role } from '../../types.js';
 import {
   ORGANIZATION_COLUMNS,
@@ -41,29 +41,54 @@ export interface ProfileRepository {
 }
 
 /**
- * Excepción 2 de ADR-008: el registro ocurre antes de que exista una sesión, y
- * solo la API de administración del proveedor crea cuentas.
+ * Excepción 2 de ADR-008: el registro ocurre antes de que exista una sesión.
+ *
+ * DOS CAMINOS, Y POR QUÉ. La gestión de identidad —incluida la **confirmación
+ * de correo**— se delega en el proveedor (ADR-004, RF-102):
+ *
+ *  · Con la confirmación activada (producción), el alta va por el flujo público
+ *    del proveedor, que es el que **envía el correo**. Crearla con la API de
+ *    administración dejaría la cuenta sin confirmar y sin aviso: nadie podría
+ *    iniciar sesión, y el sistema no tiene por dónde enviar ese correo.
+ *  · Con la confirmación desactivada (desarrollo, sin proveedor de correo), el
+ *    alta va por la API de administración y la cuenta queda confirmada, que es
+ *    lo que permite iniciar sesión de inmediato.
+ *
+ * En ambos casos la contraseña se entrega al proveedor y no se persiste en el
+ * sistema (RNF-104).
  */
 export const supabaseAccountGateway: AccountGateway = {
   async create(account) {
+    // El disparador `mt_handle_new_user` crea el perfil a partir de estos datos.
+    const perfil = { first_name: account.first_name, last_name: account.last_name };
+
+    if (!getEnv().autoConfirmEmail) {
+      const { data, error } = await publicClient().auth.signUp({
+        email: account.email,
+        password: account.password,
+        options: { data: perfil },
+      });
+
+      if (error) {
+        if (esCorreoTomado(error.message, (error as { code?: string }).code)) return 'email_taken';
+        throw internal(`auth.signUp: ${error.message}`);
+      }
+      // Con la confirmación activada, el proveedor no distingue un correo ya
+      // registrado para no ofrecer un mecanismo de enumeración: devuelve un
+      // usuario sin identidades. Para la interfaz es el mismo caso.
+      if (!data.user || (data.user.identities ?? []).length === 0) return 'email_taken';
+      return { user_id: data.user.id };
+    }
+
     const { data, error } = await serviceClient('registration').auth.admin.createUser({
       email: account.email,
       password: account.password,
-      email_confirm: getEnv().autoConfirmEmail,
-      // El disparador `mt_handle_new_user` crea el perfil a partir de estos datos.
-      user_metadata: { first_name: account.first_name, last_name: account.last_name },
+      email_confirm: true,
+      user_metadata: perfil,
     });
 
     if (error || !data.user) {
-      const code = (error as { code?: string } | null)?.code;
-      const message = (error?.message ?? '').toLowerCase();
-      if (
-        code === 'email_exists' ||
-        message.includes('already been registered') ||
-        message.includes('already exists')
-      ) {
-        return 'email_taken';
-      }
+      if (error && esCorreoTomado(error.message, (error as { code?: string }).code)) return 'email_taken';
       throw internal(`auth.admin.createUser: ${error?.message ?? 'sin usuario devuelto'}`);
     }
     return { user_id: data.user.id };
@@ -74,6 +99,18 @@ export const supabaseAccountGateway: AccountGateway = {
     if (error) throw internal(`auth.admin.deleteUser: ${error.message}`);
   },
 };
+
+/** El proveedor nombra de varias formas el mismo caso: el correo ya tiene cuenta. */
+function esCorreoTomado(mensaje: string, code?: string): boolean {
+  const texto = mensaje.toLowerCase();
+  return (
+    code === 'email_exists' ||
+    code === 'user_already_exists' ||
+    texto.includes('already been registered') ||
+    texto.includes('already exists') ||
+    texto.includes('already registered')
+  );
+}
 
 export function supabaseProfileRepository(db: SupabaseClient): ProfileRepository {
   return {

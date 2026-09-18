@@ -1,0 +1,119 @@
+name: Publicación
+
+# PUBLICACIÓN AUTOMÁTICA TRAS EL PIPELINE — RNF-305 y Arquitectura, sección 13.
+#
+#   · `main`    → *staging*, y ahí se ejecutan las pruebas que exigen un entorno
+#                 real: N3 (integración) y N7 (extremo a extremo y auditorías).
+#                 Un fallo bloquea la promoción.
+#   · `release` → producción.
+#
+# El pipeline de integración (`ci.yml`) corre sobre los mismos commits; que su
+# aprobación sea **obligatoria** antes de fusionar se configura como comprobación
+# requerida de la rama protegida, que es ajuste del repositorio y no de este
+# archivo.
+#
+# CONFIGURACIÓN NECESARIA (Settings → Secrets):
+#   VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID_API, VERCEL_PROJECT_ID_WEB,
+#   y, para las pruebas contra *staging*: STAGING_SUPABASE_URL,
+#   STAGING_SUPABASE_PUBLISHABLE_KEY, STAGING_SUPABASE_SECRET_KEY,
+#   STAGING_API_URL y STAGING_WEB_URL.
+#
+# Mientras falten, los pasos se **omiten** en lugar de fallar: un repositorio
+# recién clonado no tiene por qué publicar en ningún sitio.
+
+on:
+  push:
+    branches: [main, release]
+
+concurrency:
+  group: publicacion-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  publicar:
+    name: Publicar ${{ github.ref_name == 'release' && 'en producción' || 'en staging' }}
+    runs-on: ubuntu-latest
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      ENTORNO: ${{ github.ref_name == 'release' && 'production' || 'preview' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Preparar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Instalar la herramienta de publicación
+        if: env.VERCEL_TOKEN != ''
+        run: npm install --global vercel@latest
+
+      - name: Publicar la interfaz de programación
+        if: env.VERCEL_TOKEN != ''
+        working-directory: server
+        env:
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_API }}
+        run: |
+          vercel pull --yes --environment="$ENTORNO" --token="$VERCEL_TOKEN"
+          vercel build ${{ github.ref_name == 'release' && '--prod' || '' }} --token="$VERCEL_TOKEN"
+          vercel deploy --prebuilt ${{ github.ref_name == 'release' && '--prod' || '' }} --token="$VERCEL_TOKEN"
+
+      - name: Publicar el cliente web
+        if: env.VERCEL_TOKEN != ''
+        working-directory: frontend
+        env:
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_WEB }}
+        run: |
+          vercel pull --yes --environment="$ENTORNO" --token="$VERCEL_TOKEN"
+          vercel build ${{ github.ref_name == 'release' && '--prod' || '' }} --token="$VERCEL_TOKEN"
+          vercel deploy --prebuilt ${{ github.ref_name == 'release' && '--prod' || '' }} --token="$VERCEL_TOKEN"
+
+  verificar-staging:
+    name: Pruebas contra staging (N3 y N7)
+    needs: publicar
+    if: github.ref_name == 'main'
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_URL: ${{ secrets.STAGING_SUPABASE_URL }}
+      SUPABASE_PUBLISHABLE_KEY: ${{ secrets.STAGING_SUPABASE_PUBLISHABLE_KEY }}
+      SUPABASE_SECRET_KEY: ${{ secrets.STAGING_SUPABASE_SECRET_KEY }}
+      AUTH_AUTO_CONFIRM_EMAIL: 'true'
+      E2E_API_URL: ${{ secrets.STAGING_API_URL }}
+      E2E_BASE_URL: ${{ secrets.STAGING_WEB_URL }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Preparar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      # Sin credenciales de *staging*, N3 se saltaría en silencio. Y un caso
+      # omitido no cubre su requisito (Plan de pruebas, §7.2): mejor no fingir
+      # que se verificó.
+      - name: Integración contra staging (N3) y aislamiento (N4)
+        if: env.SUPABASE_URL != ''
+        working-directory: server
+        run: |
+          npm ci
+          npm test
+
+      - name: Flujos T1–T3, instalabilidad, diseño responsivo y accesibilidad (N7)
+        if: env.E2E_BASE_URL != ''
+        working-directory: frontend
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium webkit
+          npm run test:e2e
+
+      - name: Conservar el informe del nivel N7
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: n7-staging
+          path: |
+            frontend/playwright-report/
+            frontend/e2e-resultados.json
+          if-no-files-found: ignore
+          retention-days: 14

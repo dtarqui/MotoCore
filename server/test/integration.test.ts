@@ -1,6 +1,7 @@
 import { beforeAll, describe, expect, it } from 'vitest';
 import { createApp } from '../src/app.js';
 import { internal } from '../src/lib/errors.js';
+import { anotarMedida } from './support/evidencia.js';
 import {
   type Account,
   clientAs,
@@ -944,6 +945,8 @@ describe.skipIf(!hasEnv)('N3 — integración con Supabase real (condición C1)'
             method,
             body,
           });
+          // Ninguna operación devuelve dato alguno: es la vía 1 bajo C1 (§6.2).
+          anotarMedida({ condicion: 'C1', via: 'interfaz', objetivo: `${method} ${path}`, filas_ajenas: 0 });
           expect({ op: `${method} ${path}`, status: reply.status, code: codeOf(reply) }).toEqual({
             op: `${method} ${path}`,
             status: 403,

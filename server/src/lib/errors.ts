@@ -81,11 +81,23 @@ function logServerError(c: Context, code: string, cause: unknown): void {
   });
 }
 
+/**
+ * Respuesta de error con el tipo de medio que fija RFC 9457 §3:
+ * `application/problem+json`, no `application/json` a secas. Es lo que permite
+ * a un consumidor distinguir un problema de una respuesta de negocio sin mirar
+ * el estado.
+ */
+function problemResponse(c: Context, details: ProblemDetails): Response {
+  return c.json(details, details.status as ContentfulStatusCode, {
+    'Content-Type': 'application/problem+json',
+  });
+}
+
 /** Manejador central de errores: AppError, ZodError y fallos inesperados, todos como Problem Details. */
 export function handleError(err: unknown, c: Context): Response {
   if (err instanceof AppError) {
     if (err.status >= 500) logServerError(c, err.code, err.internalCause ?? err.message);
-    return c.json(problem(err.status, err.code, err.message, err.fieldErrors), err.status);
+    return problemResponse(c, problem(err.status, err.code, err.message, err.fieldErrors));
   }
   if (err instanceof ZodError) {
     const fieldErrors: Record<string, string[]> = {};
@@ -93,8 +105,33 @@ export function handleError(err: unknown, c: Context): Response {
       const key = issue.path.join('.') || '_';
       (fieldErrors[key] ??= []).push(issue.message);
     }
-    return c.json(problem(400, 'validation.invalid_body', 'Uno o más campos son inválidos.', fieldErrors), 400);
+    return problemResponse(c, problem(400, 'validation.invalid_body', 'Uno o más campos son inválidos.', fieldErrors));
   }
   logServerError(c, 'server.error', err);
-  return c.json(problem(500, 'server.error', 'Ocurrió un error inesperado.'), 500);
+  return problemResponse(c, problem(500, 'server.error', 'Ocurrió un error inesperado.'));
+}
+
+/**
+ * Ruta desconocida.
+ *
+ * Una ruta que no existe **dentro de un módulo** se responde con el `404` de
+ * ese módulo: para quien llama es indistinguible de un recurso inexistente, que
+ * es justo lo que exige la regla de no divulgación (RNF-105). Así toda respuesta
+ * de error de la interfaz sigue Problem Details con un código del catálogo
+ * (RNF-204), sin inventar uno nuevo para el caso.
+ *
+ * Lo que queda fuera de `/api` no es interfaz: ahí se responde un `404` desnudo.
+ */
+const MODULE_NOT_FOUND: Array<[string, string]> = [
+  ['/api/organizations', 'organization.not_found'],
+  ['/api/workshops', 'workshop.not_found'],
+  ['/api/members', 'member.not_found'],
+  ['/api/clients', 'client.not_found'],
+  ['/api/inventory', 'inventory.part_not_found'],
+];
+
+export function handleNotFound(c: Context): Response {
+  const match = MODULE_NOT_FOUND.find(([prefix]) => c.req.path.startsWith(prefix));
+  if (!match) return c.text('404 Not Found', 404);
+  return problemResponse(c, problem(404, match[1], 'Recurso no encontrado.'));
 }

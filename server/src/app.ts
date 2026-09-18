@@ -1,7 +1,8 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { getAllowedOrigins } from './lib/env.js';
-import { handleError } from './lib/errors.js';
+import { handleError, handleNotFound } from './lib/errors.js';
+import { requestLog } from './lib/logging.js';
 import { auditRoutes } from './modules/audit/audit.routes.js';
 import { clientRoutes } from './modules/clients/clients.routes.js';
 import { identityRoutes } from './modules/identity/identity.routes.js';
@@ -20,6 +21,10 @@ export function createApp(overrides: Partial<Platform> = {}) {
   const platform: Platform = { ...supabasePlatform, ...overrides };
   const app = new Hono();
 
+  // Una línea por invocación, con el identificador de la organización activa
+  // (Arquitectura, sección 15; riesgo R10).
+  app.use('*', requestLog());
+
   // Solo los orígenes del cliente web de cada entorno (Requisitos, sección 5).
   app.use(
     '*',
@@ -31,6 +36,7 @@ export function createApp(overrides: Partial<Platform> = {}) {
   );
 
   app.onError(handleError);
+  app.notFound(handleNotFound);
 
   // Comprobación de disponibilidad: pública, sin tocar la base (§2.1).
   app.get('/health', (c) => c.json({ status: 'ok' }));

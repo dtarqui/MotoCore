@@ -9,7 +9,11 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: 'bg-brand-600 text-white hover:bg-brand-600/90 dark:bg-brand-500 dark:hover:bg-brand-500/90',
+        // El tono de marca sobre blanco no llega al 4.5:1 que exige WCAG 2.1 AA
+        // para texto normal (RNF-405): el botón usa el tono 700, que sí llega.
+        // En oscuro se invierte —fondo claro, texto casi negro— por lo mismo.
+        default:
+          'bg-brand-700 text-white hover:bg-brand-800 dark:bg-brand-400 dark:text-brand-950 dark:hover:bg-brand-300',
         destructive:
           'bg-red-500 text-white hover:bg-red-500/90 dark:bg-red-900 dark:text-red-50 dark:hover:bg-red-900/90',
         outline:

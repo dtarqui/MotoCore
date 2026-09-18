@@ -1,5 +1,6 @@
 import { beforeAll, describe, expect, it } from 'vitest';
 import { createApp } from '../src/app.js';
+import { anotarMedida } from './support/evidencia.js';
 import { type Account, hasEnv, registerAccount, request, unique } from './support/scenario.js';
 
 /**
@@ -80,6 +81,7 @@ describe.skipIf(!hasEnv)('N4 — CP-N102: el aislamiento se sostiene sin la capa
       const reply = await request<Record<string, unknown[]>>(breached, path, intruder(workshop));
       expect(reply.status, path).toBe(200);
       // Cero filas ajenas: el indicador de la variable dependiente.
+      anotarMedida({ condicion: 'C2', via: 'interfaz', objetivo: path, filas_ajenas: (reply.body[key] ?? []).length });
       expect(reply.body[key], path).toEqual([]);
     }
   });

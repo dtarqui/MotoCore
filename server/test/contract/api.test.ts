@@ -309,7 +309,8 @@ describe('N2 — entrada y forma del error (RNF-204, RNF-205)', () => {
       await call('/api/clients', { ...owner, method: 'POST', body: {} }),
     ];
     for (const res of responses) {
-      expect(res.headers.get('content-type')).toContain('application/json');
+      // RFC 9457 §3: el tipo de medio de un problema es `application/problem+json`.
+      expect(res.headers.get('content-type')).toContain('application/problem+json');
       const problem = (await res.json()) as Problem;
       expect(problem.type).toBe('about:blank');
       expect(problem.status).toBe(res.status);
@@ -337,6 +338,23 @@ describe('N2 — regla de rutas y superficie (§2.3, §2.6, §3.7)', () => {
   it('no hay rutas de inicio ni renovación de sesión: ocurren contra el proveedor (ADR-004)', async () => {
     for (const path of ['/api/auth/login', '/api/auth/refresh']) {
       expect((await call(path, { method: 'POST', body: {} })).status, path).toBe(404);
+    }
+  });
+
+  it('RNF-105 y RNF-204 — una ruta inexistente dentro de un módulo responde el 404 de ese módulo', async () => {
+    // Indistinguible de un recurso inexistente, y con el formato de error
+    // uniforme: la interfaz no inventa un código fuera del catálogo.
+    const casos: Array<[string, string]> = [
+      [`/api/clients/${MISSING}/inventado`, 'client.not_found'],
+      [`/api/workshops/${MISSING}/inventado`, 'workshop.not_found'],
+      [`/api/members/${MISSING}/inventado`, 'member.not_found'],
+      [`/api/inventory/inventado`, 'inventory.part_not_found'],
+      [`/api/organizations/${ORG}/inventado`, 'organization.not_found'],
+    ];
+    for (const [path, code] of casos) {
+      const res = await call(path, { ...owner, workshop: WORKSHOP });
+      await expectProblem(res, 404, code);
+      expect(res.headers.get('content-type'), path).toContain('application/problem+json');
     }
   });
 

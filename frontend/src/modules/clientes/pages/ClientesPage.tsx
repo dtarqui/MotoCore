@@ -49,6 +49,9 @@ export function ClientesPage() {
   const orgId = useActiveOrgId()
 
   const [search, setSearch] = useState('')
+  // RF-504: la baja es lógica y el registro se conserva; poder verlo es lo que
+  // lo hace comprobable desde la interfaz.
+  const [includeInactive, setIncludeInactive] = useState(false)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editing, setEditing] = useState<Client | null>(null)
   const [form, setForm] = useState<ClientUpsertPayload>(EMPTY)
@@ -57,8 +60,8 @@ export function ClientesPage() {
   // El contexto activo forma parte de la clave: ninguna respuesta puede
   // servirse desde la cache de otra organizacion (ADR-010).
   const clientsQuery = useQuery({
-    queryKey: ['clients', orgId, search],
-    queryFn: () => getClients({ search }),
+    queryKey: ['clients', orgId, search, includeInactive],
+    queryFn: () => getClients({ search, includeInactive }),
     enabled: Boolean(orgId),
   })
 
@@ -205,12 +208,23 @@ export function ClientesPage() {
       {error && !dialogOpen ? <Alert variant="destructive">{error}</Alert> : null}
       {!canWrite ? <Alert>Tu rol permite consultar clientes, pero no crearlos ni editarlos.</Alert> : null}
 
-      <Input
-        placeholder="Buscar por nombre, email o documento"
-        value={search}
-        onChange={(event) => setSearch(event.target.value)}
-        className="max-w-md"
-      />
+      <div className="flex flex-wrap items-center gap-4">
+        <Input
+          placeholder="Buscar por nombre, email o documento"
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+          className="max-w-md"
+        />
+        <label className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+          <input
+            type="checkbox"
+            checked={includeInactive}
+            onChange={(event) => setIncludeInactive(event.target.checked)}
+            className="accent-brand-600"
+          />
+          Incluir los dados de baja
+        </label>
+      </div>
 
       {clientsQuery.isLoading ? (
         <div className="space-y-2">

@@ -1,6 +1,7 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { expect } from 'vitest';
 import type { createApp } from '../../src/app.js';
+import { anotarEscenario } from './evidencia.js';
 
 /**
  * Soporte de N3 y N4: pruebas contra un proyecto Supabase real con las
@@ -112,13 +113,23 @@ export async function registerAccount(
   );
   expect(reply.status, JSON.stringify(reply.body)).toBe(201);
 
-  return {
+  const cuenta: Account = {
     email,
     token: await signIn(email),
     userId: reply.body.user_id,
     orgId: reply.body.organization.id,
     workshopId: reply.body.workshop.id,
   };
+
+  // Queda en la evidencia de la corrida: qué cuentas, organizaciones y talleres
+  // existían, con su identificador y su hora (Plan de pruebas, §6.6).
+  anotarEscenario({
+    cuenta: prefix,
+    user_id: cuenta.userId,
+    organization_id: cuenta.orgId,
+    workshop_id: cuenta.workshopId ?? null,
+  });
+  return cuenta;
 }
 
 /**

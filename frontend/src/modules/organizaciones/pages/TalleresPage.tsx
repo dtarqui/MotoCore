@@ -51,11 +51,14 @@ export function TalleresPage() {
   const [createOpen, setCreateOpen] = useState(false)
   const [editing, setEditing] = useState<Workshop | null>(null)
   const [assigning, setAssigning] = useState<Workshop | null>(null)
+  // RF-305: el taller desactivado deja de listarse como activo, pero sus datos
+  // siguen consultables.
+  const [includeInactive, setIncludeInactive] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const workshopsQuery = useQuery({
-    queryKey: ['workshops', orgId],
-    queryFn: () => getWorkshops(),
+    queryKey: ['workshops', orgId, includeInactive],
+    queryFn: () => getWorkshops({ includeInactive }),
     enabled: Boolean(orgId),
   })
 
@@ -123,6 +126,16 @@ export function TalleresPage() {
 
       {error ? <Alert variant="destructive">{error}</Alert> : null}
       {!isOwner ? <Alert>Solo el Propietario puede administrar los talleres de la organización.</Alert> : null}
+
+      <label className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+        <input
+          type="checkbox"
+          checked={includeInactive}
+          onChange={(event) => setIncludeInactive(event.target.checked)}
+          className="accent-brand-600"
+        />
+        Incluir los talleres desactivados
+      </label>
 
       {editing ? (
         <WorkshopFormDialog

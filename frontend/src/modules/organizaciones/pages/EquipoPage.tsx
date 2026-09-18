@@ -59,10 +59,13 @@ export function EquipoPage() {
     role: 'mechanic',
   })
   const [error, setError] = useState<string | null>(null)
+  // RF-407 y HU-12: el listado muestra rol y **estado**; la remoción es una baja
+  // lógica, así que los removidos se pueden consultar.
+  const [includeInactive, setIncludeInactive] = useState(false)
 
   const membersQuery = useQuery({
-    queryKey: ['members', orgId],
-    queryFn: () => getMembers(),
+    queryKey: ['members', orgId, includeInactive],
+    queryFn: () => getMembers({ includeInactive }),
     enabled: Boolean(orgId),
   })
 
@@ -165,6 +168,16 @@ export function EquipoPage() {
 
       {error && !inviteOpen ? <Alert variant="destructive">{error}</Alert> : null}
 
+      <label className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+        <input
+          type="checkbox"
+          checked={includeInactive}
+          onChange={(event) => setIncludeInactive(event.target.checked)}
+          className="accent-brand-600"
+        />
+        Incluir a los miembros removidos
+      </label>
+
       {membersQuery.isLoading ? (
         <div className="space-y-2">
           {Array.from({ length: 3 }).map((_, i) => (
@@ -180,6 +193,7 @@ export function EquipoPage() {
               <TableHead>Nombre</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>Rol</TableHead>
+              <TableHead>Estado</TableHead>
               {isOwner ? <TableHead className="text-right">Acciones</TableHead> : null}
             </TableRow>
           </TableHeader>
@@ -210,6 +224,13 @@ export function EquipoPage() {
                       </Select>
                     ) : (
                       <Badge variant={isOwnerRow ? 'default' : 'secondary'}>{ROLE_LABELS[member.role]}</Badge>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {member.is_active ? (
+                      <Badge variant="secondary">Activo</Badge>
+                    ) : (
+                      <Badge variant="outline">Removido</Badge>
                     )}
                   </TableCell>
                   {isOwner ? (

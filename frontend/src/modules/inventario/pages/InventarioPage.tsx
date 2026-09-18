@@ -52,6 +52,7 @@ export function InventarioPage() {
   const activeOrgId = useActiveOrgId()
   const activeWorkshopId = useActiveWorkshopId()
 
+  const [search, setSearch] = useState('')
   const [lowStockOnly, setLowStockOnly] = useState(false)
   const [createOpen, setCreateOpen] = useState(false)
   const [editing, setEditing] = useState<Part | null>(null)
@@ -63,8 +64,8 @@ export function InventarioPage() {
   // Organizacion y taller activos en la clave: al cambiar de contexto ninguna
   // respuesta puede servirse desde la cache del anterior (ADR-010).
   const partsQuery = useQuery({
-    queryKey: ['parts', activeOrgId, activeWorkshopId, lowStockOnly],
-    queryFn: () => getParts({ lowStock: lowStockOnly }),
+    queryKey: ['parts', activeOrgId, activeWorkshopId, search, lowStockOnly],
+    queryFn: () => getParts({ search, lowStock: lowStockOnly }),
     enabled: Boolean(activeWorkshopId),
   })
 
@@ -176,15 +177,23 @@ export function InventarioPage() {
 
       {error && !createOpen ? <Alert variant="destructive">{error}</Alert> : null}
 
-      <label className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-        <input
-          type="checkbox"
-          checked={lowStockOnly}
-          onChange={(event) => setLowStockOnly(event.target.checked)}
-          className="accent-brand-600"
+      <div className="flex flex-wrap items-center gap-4">
+        <Input
+          placeholder="Buscar por nombre, número de parte o marca"
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+          className="max-w-md"
         />
-        Mostrar solo repuestos en o por debajo del mínimo
-      </label>
+        <label className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+          <input
+            type="checkbox"
+            checked={lowStockOnly}
+            onChange={(event) => setLowStockOnly(event.target.checked)}
+            className="accent-brand-600"
+          />
+          Mostrar solo repuestos en o por debajo del mínimo
+        </label>
+      </div>
 
       {editing ? <PartEditDialog part={editing} onOpenChange={(next) => !next && setEditing(null)} /> : null}
       {movementsFor ? (

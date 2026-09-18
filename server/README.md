@@ -172,10 +172,27 @@ Los niveles siguen el [plan de pruebas](../docs/ingenieria/11-plan-pruebas.md). 
 | `test/integration.test.ts`      | N3 y N4 (C1) | Flujo completo y reglas de negocio contra Supabase real; vía 1 del aislamiento                                        |
 | `test/rls.test.ts`              | N4 (C3)      | **Aislamiento por acceso directo al motor**, sin pasar por la interfaz: CP-702, CP-N101, CP-402.2, CP-N106 y CP-704.2 |
 | `test/defense-in-depth.test.ts` | N4 (C2)      | **CP-N102**: con la capa de aplicación anulada, las políticas siguen filtrando                                        |
+| `test/baseline.test.ts`         | N4 (C0)      | **CP-LB1 y CP-LB2**: la línea base, que **debe mostrar la fuga**. Solo corre sobre el proyecto desechable             |
 
 Los dos últimos sostienen la premisa central del proyecto: uno demuestra que el aislamiento se mantiene cuando se prescinde de la interfaz, y el otro que se mantiene **dentro** de la interfaz aunque su control de membresía falle. En ninguno se usa la clave secreta: saltaría las políticas y la prueba pasaría siempre.
 
 Los archivos se ejecutan **uno a uno** (`fileParallelism: false`): N3 y N4 registran cuentas contra el proveedor de identidad, que limita la tasa de altas, y en paralelo fallaban por una causa ajena a lo verificado.
+
+### La corrida de validación y su evidencia
+
+```bash
+npm run evidencia -- --corrida 1
+```
+
+Ejecuta el ciclo **C0 → C1 → C2 → C3** y deja en `evidencia/corrida-N/` los seis elementos que enumera el §6.6 del plan: `escenario.json`, un `resultados-<condición>.json` por condición, `version.txt` con el _commit_ y la última migración aplicada, `resumen.md` con las filas ajenas por tabla y condición, y `sha256.txt`. Una corrida se conserva **completa aunque falle**: descartarla sesgaría el resultado.
+
+La **línea base (C0)** deshabilita las políticas del motor, así que solo puede existir en el proyecto de validación desechable. No basta una variable: hay que **nombrar ese proyecto** en `MOTOCORE_BASELINE_URL` y que coincida con `SUPABASE_URL`. Si no coincide, C0 se omite y el resumen lo declara. Tras C0, el script reconstruye el esquema desde las migraciones antes de medir las demás condiciones.
+
+### Descripción OpenAPI
+
+`openapi.json` es la descripción **OpenAPI 3.1** que exige el §7 del contrato. Se genera con `npm run openapi` desde `src/openapi.ts`, que deriva los cuerpos de petición de **los mismos esquemas Zod** que validan cada operación. Tres pruebas de contrato la sostienen: que el archivo publicado coincide con lo que genera el código, que describe **exactamente** las rutas que la aplicación monta —ni una de más ni una de menos— y que ningún código de error que el código emite queda fuera del catálogo.
+
+No se sirve como ruta: la superficie pública son el registro y la comprobación de disponibilidad, y publicarla ahí la ampliaría sin necesidad.
 
 ## Despliegue en Vercel
 
@@ -184,5 +201,4 @@ Los archivos se ejecutan **uno a uno** (`fileParallelism: false`): N3 y N4 regis
 
 ## Trabajo posterior
 
-- Publicar la **descripción OpenAPI 3.1** que el contrato exige en su §7 (entregable del objetivo 3).
 - Construir los módulos de RF-800 —motocicletas, órdenes de trabajo, historial y panel— con sus tablas `mt_`, su `organization_id` y su `grant` explícito en la `0004`.

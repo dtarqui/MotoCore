@@ -83,7 +83,7 @@ Todos los objetos del esquema llevan el prefijo `mt_`, de modo que MotoCore pued
 
 **Fuera del alcance del proyecto de grado** (RF-800, ver [Requisitos](docs/ingenieria/02-requisitos.md)): motocicletas, órdenes de trabajo, historial de mantenimiento y panel de métricas. No están en el repositorio; se incorporarán reutilizando el mismo patrón de alcance por nivel.
 
-**Pendiente dentro del alcance**: la descripción **OpenAPI** del contrato (§7) y las pruebas **extremo a extremo** con Playwright y axe-core (nivel N7).
+**Pendiente dentro del alcance**: ejecutar las tres corridas de validación C0–C3 sobre el proyecto desechable (`npm run evidencia` en `server/`), la evaluación con operadores y la medición de costo — los tres son trabajo de la fase de validación, no construcción.
 
 **Funcionalidades identificadas para el mercado boliviano** (ver [docs/ingenieria/09-analisis-mercado.md](docs/ingenieria/09-analisis-mercado.md)): facturación electrónica del SIN, mensajería por WhatsApp, presupuestos con aprobación del cliente, facturación y cobro en línea, agendamiento, inspección digital y portal del cliente.
 
@@ -153,11 +153,13 @@ Vite solo expone al navegador las variables con prefijo `VITE_`; una sin él se 
 ## Testing
 
 ```bash
-cd server   && npm test && npm run typecheck   # Node/TS: N1, N2 y —con credenciales— N3 y N4
-cd frontend && npm test && npm run build       # Vitest + React Testing Library
+cd server   && npm test && npm run typecheck   # N1 y N2; con credenciales, también N3 y N4
+cd frontend && npm test && npm run build       # N6: contrato desde el lado del cliente
+cd frontend && npm run test:e2e                # N7: flujos T1–T3, instalabilidad, responsivo y accesibilidad
+cd server   && npm run evidencia -- --corrida 1  # ciclo C0–C3 con su evidencia en evidencia/corrida-1/
 ```
 
-Los niveles de prueba, la matriz requisito → caso → evidencia y el criterio de cierre están en el [Plan de pruebas](docs/ingenieria/11-plan-pruebas.md). Los casos de integración y de aislamiento (N3, N4) se saltan sin credenciales de Supabase: **un caso omitido no cubre su requisito**.
+Los niveles de prueba, la matriz requisito → caso → evidencia y el criterio de cierre están en el [Plan de pruebas](docs/ingenieria/11-plan-pruebas.md). Los casos de integración y de aislamiento (N3, N4) se saltan sin credenciales de Supabase: **un caso omitido no cubre su requisito**. La línea base (C0) deshabilita las políticas del motor y por eso solo corre sobre el proyecto de validación desechable, nombrándolo de forma explícita.
 
 ## CI/CD
 
@@ -166,6 +168,8 @@ Los niveles de prueba, la matriz requisito → caso → evidencia y el criterio 
 Antes de integrar, un gancho de _pre-commit_ pasa **Prettier y ESLint** sobre lo que se va a confirmar (`npm install` en la raíz lo instala).
 
 Los niveles N3 y N4 —integración y aislamiento— exigen un proyecto Supabase real y **se omiten** en el pipeline. Un caso omitido no cubre su requisito: la validación del aislamiento se ejecuta aparte, contra un entorno real, antes de cada hito.
+
+`.github/workflows/deploy.yml` publica tras el pipeline (RNF-305): `main` en _staging_ —y ahí ejecuta N3 y N7 contra lo publicado, de modo que un fallo bloquea la promoción— y `release` en producción. Sin los secretos de despliegue configurados, esos pasos se omiten en lugar de fallar.
 
 ## Documentación
 

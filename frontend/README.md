@@ -96,9 +96,27 @@ Vitest sobre jsdom con React Testing Library. El entorno se configura en `vite.c
 
 Este nivel evalúa **el cumplimiento del contrato desde el lado del cliente**, no la interfaz de usuario: un participante puede completar las tareas con éxito mientras el cliente envía una cabecera equivocada. El diseño responsivo, la instalabilidad y la accesibilidad se auditan en N7 (Playwright y axe-core), y la usabilidad del cambio de contexto, con operadores reales (N5).
 
+## Pruebas de extremo a extremo y auditorías (nivel N7)
+
+```bash
+npm run test:e2e:install   # una vez: descarga Chromium y WebKit
+npm run test:e2e
+```
+
+El ejecutor levanta por su cuenta la aplicación **compilada** —el service worker solo se registra en producción— y la interfaz de programación, monta el escenario una sola vez contra la API y corre cuatro combinaciones: **Chromium y WebKit**, a **1280 px y 360 px**, que es lo que exige RNF-402.
+
+| Archivo                  | Qué verifica                                                                                                                                                                                       |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `e2e/contexto.spec.ts`   | Los flujos **T1, T2 y T3** del cambio de contexto (RNF-401): cambiar de organización sin cerrar sesión, registrar un repuesto en el taller activo y encontrar un cliente registrado en otro taller |
+| `e2e/auditorias.spec.ts` | **CP-N402** (sin desbordamiento horizontal), **CP-N403** (manifiesto, iconos y service worker) y **CP-N405** (sin incumplimientos graves o críticos de WCAG 2.1 AA, con axe-core)                  |
+
+Para auditar lo publicado en _staging_ en lugar de lo local, bastan `E2E_BASE_URL` y `E2E_API_URL`: el ejecutor no levanta nada y apunta ahí.
+
+**No sustituye a N5**: que un flujo funcione no dice si un operador lo comprende. Eso se mide con operadores reales.
+
 ## Tipos de la interfaz
 
-Se declaran **a mano** en cada módulo (`<modulo>-api.ts` y `types.ts`), siguiendo el [contrato](../docs/ingenieria/10-contrato-api.md), que es la fuente de verdad. Cuando el servidor publique su descripción OpenAPI (§7 del contrato), podrán derivarse de ahí.
+Se declaran **a mano** en cada módulo (`<modulo>-api.ts` y `types.ts`), siguiendo el [contrato](../docs/ingenieria/10-contrato-api.md), que es la fuente de verdad. El servidor publica además su descripción **OpenAPI 3.1** en [`server/openapi.json`](../server/openapi.json), de la que pueden derivarse cuando convenga.
 
 ## Diagramas de arquitectura (`/arquitectura`)
 
