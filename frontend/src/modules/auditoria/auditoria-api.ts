@@ -4,7 +4,7 @@ import type { UserProfile } from '../auth/types'
 /**
  * Acciones críticas que el sistema registra — RF-703.
  *
- * El tipo es cerrado a propósito: si el backend empieza a registrar una acción
+ * El tipo es cerrado a propósito: si el servidor empieza a registrar una acción
  * nueva, la interfaz debe declararla aquí para poder etiquetarla, en lugar de
  * mostrar un identificador crudo al usuario.
  */
@@ -12,35 +12,35 @@ export type AuditAction =
   | 'member.invited'
   | 'member.role_changed'
   | 'member.removed'
+  | 'organization.updated'
   | 'workshop.deactivated'
   | 'client.deactivated'
-  | 'organization.updated'
 
 export const AUDIT_ACTION_LABELS: Record<AuditAction, string> = {
   'member.invited': 'Miembro invitado',
   'member.role_changed': 'Rol modificado',
   'member.removed': 'Miembro removido',
+  'organization.updated': 'Datos de la organización editados',
   'workshop.deactivated': 'Taller desactivado',
   'client.deactivated': 'Cliente dado de baja',
-  'organization.updated': 'Datos de la organización editados',
 }
 
 export type AuditEntry = {
   id: string
-  organizationId: string
-  workshopId: string | null
-  performedBy: string | null
+  organization_id: string
+  workshop_id: string | null
+  performed_by: string | null
   /**
    * Perfil de quien ejecutó la acción. Puede venir nulo: el registro no tiene
    * clave foránea al usuario, de modo que sobrevive al borrado de la cuenta.
    * Un nulo aquí es el comportamiento correcto, no un fallo de carga.
    */
-  performedByProfile: UserProfile | null
+  performed_by_profile: UserProfile | null
   action: AuditAction
   entity: string
-  entityId: string | null
+  entity_id: string | null
   details: Record<string, unknown> | null
-  createdAt: string
+  created_at: string
 }
 
 export type AuditFilters = {
@@ -62,7 +62,5 @@ export function getAuditLog(filters: AuditFilters = {}) {
   if (filters.limit) params.set('limit', String(filters.limit))
 
   const query = params.toString()
-  return apiRequest<{ audit: AuditEntry[] }>(`/api/audit${query ? `?${query}` : ''}`).then(
-    (r) => r.audit,
-  )
+  return apiRequest<{ entries: AuditEntry[] }>(`/api/audit${query ? `?${query}` : ''}`).then((r) => r.entries)
 }

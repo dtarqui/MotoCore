@@ -47,5 +47,19 @@ export default defineConfig({
     // en el montaje del escenario, que registra varias cuentas seguidas.
     testTimeout: 60_000,
     hookTimeout: 120_000,
+    // Un archivo por vez. N3 y N4 registran cuentas contra el proveedor de
+    // identidad, que limita la tasa de altas: en paralelo, las tres suites
+    // superan ese limite y el registro falla por una causa ajena a lo que se
+    // esta verificando. Serializar cuesta segundos y evita un rojo enganoso.
+    fileParallelism: false,
+    coverage: {
+      provider: 'v8',
+      // RNF-207 mide los servicios de dominio: es donde viven las reglas de
+      // negocio y de rol. Los repositorios y las rutas son adaptadores al
+      // proveedor y al marco, y se ejercen en N2 y N3.
+      include: ['src/modules/**/*.service.ts'],
+      reporter: ['text', 'json-summary'],
+      thresholds: { lines: 80 },
+    },
   },
 });

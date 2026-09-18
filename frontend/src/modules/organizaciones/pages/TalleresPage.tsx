@@ -303,17 +303,20 @@ function WorkshopAssignmentsDialog({
   const [error, setError] = useState<string | null>(null)
   const [selectedUserId, setSelectedUserId] = useState('')
 
+  // El contexto activo va en la clave de toda consulta de negocio (ADR-010).
+  const orgId = useActiveOrgId()
+
   const assignmentsQuery = useQuery({
-    queryKey: ['workshop-assignments', workshop.id],
+    queryKey: ['workshop-assignments', orgId, workshop.id],
     queryFn: () => getWorkshopAssignments(workshop.id),
   })
 
   const membersQuery = useQuery({
-    queryKey: ['members'],
+    queryKey: ['members', orgId],
     queryFn: () => getMembers(),
   })
 
-  const invalidate = () => queryClient.invalidateQueries({ queryKey: ['workshop-assignments', workshop.id] })
+  const invalidate = () => queryClient.invalidateQueries({ queryKey: ['workshop-assignments'] })
 
   const assignMutation = useMutation({
     mutationFn: (userId: string) => assignMemberToWorkshop(workshop.id, userId),
@@ -336,15 +339,15 @@ function WorkshopAssignmentsDialog({
   })
 
   const members: Member[] = membersQuery.data ?? []
-  const membersById = new Map(members.map((m) => [m.userId, m]))
-  const assignments = (assignmentsQuery.data ?? []).filter((a) => a.userId)
-  const assignedIds = new Set(assignments.map((a) => a.userId))
-  const availableMembers = members.filter((m) => !assignedIds.has(m.userId))
+  const membersById = new Map(members.map((m) => [m.user_id, m]))
+  const assignments = assignmentsQuery.data ?? []
+  const assignedIds = new Set(assignments.map((a) => a.user_id))
+  const availableMembers = members.filter((m) => !assignedIds.has(m.user_id))
 
   function describe(member: Member | undefined, fallbackId: string) {
     if (!member) return fallbackId
-    const name = member.profile ? `${member.profile.first_name} ${member.profile.last_name}`.trim() : ''
-    return name || member.profile?.email || fallbackId
+    const name = `${member.first_name ?? ''} ${member.last_name ?? ''}`.trim()
+    return name || member.email || fallbackId
   }
 
   return (
@@ -368,9 +371,9 @@ function WorkshopAssignmentsDialog({
             {assignments.map((a) => (
               <li key={a.id} className="flex items-center justify-between gap-2 p-3 text-sm">
                 <span className="text-gray-800 dark:text-gray-100">
-                  {describe(membersById.get(a.userId!), a.userId!)}
+                  {describe(membersById.get(a.user_id), a.user_id)}
                 </span>
-                <Button size="sm" variant="outline" onClick={() => removeMutation.mutate(a.userId!)}>
+                <Button size="sm" variant="outline" onClick={() => removeMutation.mutate(a.user_id)}>
                   Quitar
                 </Button>
               </li>
@@ -382,15 +385,11 @@ function WorkshopAssignmentsDialog({
           <Skeleton className="h-10 w-full" />
         ) : availableMembers.length > 0 ? (
           <div className="flex flex-wrap items-end gap-2">
-            <Select
-              value={selectedUserId}
-              onChange={(e) => setSelectedUserId(e.target.value)}
-              className="flex-1"
-            >
+            <Select value={selectedUserId} onChange={(e) => setSelectedUserId(e.target.value)} className="flex-1">
               <option value="">Elegir miembro…</option>
               {availableMembers.map((m) => (
-                <option key={m.userId} value={m.userId}>
-                  {describe(m, m.userId)}
+                <option key={m.user_id} value={m.user_id}>
+                  {describe(m, m.user_id)}
                 </option>
               ))}
             </Select>

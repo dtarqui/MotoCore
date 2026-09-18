@@ -1,5 +1,17 @@
 name: CI
 
+# Pipeline de integración continua (Arquitectura, sección 13; RNF-203).
+#
+# Verifica en cada integración: tipos sin errores (RNF-201), las pruebas que no
+# necesitan credenciales —N1, N2 y N6—, la cobertura de los servicios de dominio
+# (RNF-207) y la auditoría de dependencias (RNF-208). Un fallo bloquea la
+# integración.
+#
+# Lo que este pipeline NO cubre, y por qué: los niveles N3 y N4 exigen un
+# proyecto Supabase real y aquí se **omiten**. Un caso omitido no cubre su
+# requisito (Plan de pruebas, §7.2), de modo que la validación del aislamiento
+# se ejecuta aparte, contra un entorno real, antes de cada hito.
+
 on:
   push:
     branches: [main]
@@ -8,7 +20,7 @@ on:
 
 jobs:
   frontend:
-    name: Frontend (lint, test & build)
+    name: Cliente web (lint, pruebas y compilación)
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -16,27 +28,31 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Preparar Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "24"
-          cache: "npm"
+          # jsdom, con el que corre el nivel N6, exige Node 22.22 o superior.
+          node-version: '24'
+          cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
 
-      - name: Install dependencies
+      - name: Instalar dependencias
         run: npm ci
 
       - name: Lint
         run: npm run lint
 
-      - name: Test
+      - name: Pruebas de componente (N6)
         run: npm test
 
-      - name: Type-check & build
+      - name: Verificación de tipos y compilación
         run: npm run build
 
+      - name: Auditoría de dependencias
+        run: npm audit --audit-level=high
+
   server:
-    name: Server (typecheck & test)
+    name: Interfaz de programación (lint, tipos, pruebas y cobertura)
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -44,18 +60,35 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Preparar Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "24"
-          cache: "npm"
+          node-version: '24'
+          cache: 'npm'
           cache-dependency-path: server/package-lock.json
 
-      - name: Install dependencies
+      - name: Instalar dependencias
         run: npm ci
 
-      - name: Type-check
+      - name: Lint
+        run: npm run lint
+
+      - name: Verificación de tipos
         run: npm run typecheck
 
-      - name: Test
-        run: npm test
+      # El umbral de cobertura (≥ 80 % de líneas en los servicios de dominio)
+      # lo hace cumplir `vitest.config.ts`: por debajo, este paso falla.
+      - name: Pruebas y cobertura de los servicios de dominio
+        run: npm run test:coverage
+
+      - name: Auditoría de dependencias
+        run: npm audit --audit-level=high
+
+      - name: Conservar el informe de cobertura
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cobertura-servidor
+          path: server/coverage/
+          if-no-files-found: ignore
+          retention-days: 14

@@ -1,11 +1,7 @@
 import { useCallback, useEffect, useMemo, useState, type PropsWithChildren } from 'react'
 import type { Session } from '@supabase/supabase-js'
 import { supabase } from '@/shared/lib/supabase'
-import {
-  clearActiveContext,
-  getActiveOrgId,
-  setActiveOrgId,
-} from '@/shared/lib/active-context'
+import { clearActiveContext, getActiveOrgId, setActiveOrgId } from '@/shared/lib/active-context'
 import { fetchMe, registerRequest } from './auth-api'
 import type { MeResponse, RegisterRequest, UserRole } from './types'
 import { AuthContext, type AuthContextValue } from './auth-context'

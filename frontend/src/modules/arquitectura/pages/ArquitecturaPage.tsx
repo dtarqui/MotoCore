@@ -28,9 +28,9 @@ export function ArquitecturaPage() {
             <p className="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">MotoCore</p>
             <h1 className="text-lg font-semibold text-gray-900 dark:text-white">Diagramas de arquitectura</h1>
             <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
-              MotoCore es un sistema de gestión para talleres de motocicletas. Estos tres diagramas documentan,
-              directamente a partir del código, cómo está construido: qué corre dónde, cómo se protegen los datos
-              entre talleres, y qué tan completo está cada módulo.
+              MotoCore es un sistema de gestión para organizaciones de servicio de motocicletas. Estos tres diagramas
+              documentan, a partir del código y de la especificación, cómo está construido: qué corre dónde, cómo se
+              separan los datos de cada organización, y cómo se comprueba que esa separación no se puede apagar.
             </p>
           </div>
           <nav className="flex flex-wrap gap-2">
@@ -48,7 +48,11 @@ export function ArquitecturaPage() {
         </div>
 
         <div className="flex items-center gap-2">
-          <Button size="sm" variant={glosarioAbierto ? 'default' : 'outline'} onClick={() => setGlosarioAbierto((v) => !v)}>
+          <Button
+            size="sm"
+            variant={glosarioAbierto ? 'default' : 'outline'}
+            onClick={() => setGlosarioAbierto((v) => !v)}
+          >
             <BookOpen className="mr-1.5 h-3.5 w-3.5" />
             Glosario
           </Button>
@@ -94,12 +98,7 @@ export function ArquitecturaPage() {
         </div>
       )}
 
-      <iframe
-        key={activo.slug}
-        src={activo.archivo}
-        title={activo.titulo}
-        className="w-full flex-1 border-0"
-      />
+      <iframe key={activo.slug} src={activo.archivo} title={activo.titulo} className="w-full flex-1 border-0" />
     </div>
   )
 }

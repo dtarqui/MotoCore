@@ -1,0 +1,15 @@
+# Dependencias y artefactos de compilación
+node_modules/
+frontend/dist/
+frontend/coverage/
+server/dist/
+server/coverage/
+
+# Los diagramas son HTML autocontenido, escrito y ajustado a mano para
+# proyectarlo: reformatearlo no aporta y desordena su maquetación.
+frontend/public/diagramas/
+
+# El esquema y su documentación se formatean con criterios propios.
+server/supabase/
+docs/
+LICENSE

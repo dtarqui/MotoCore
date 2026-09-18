@@ -196,7 +196,14 @@ function CreateOrganizationDialog({ onCreated }: { onCreated: (orgId: string) =>
       }}
     >
       <DialogTrigger asChild>
-        <Button type="button" variant="ghost" size="icon" className="h-8 w-8" title="Nueva organización" aria-label="Nueva organización">
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8"
+          title="Nueva organización"
+          aria-label="Nueva organización"
+        >
           <Plus className="h-4 w-4" />
         </Button>
       </DialogTrigger>
@@ -305,7 +312,14 @@ function EditOrganizationDialog({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button type="button" variant="ghost" size="icon" className="h-8 w-8" title="Editar organización" aria-label="Editar organización">
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8"
+          title="Editar organización"
+          aria-label="Editar organización"
+        >
           <Pencil className="h-4 w-4" />
         </Button>
       </DialogTrigger>

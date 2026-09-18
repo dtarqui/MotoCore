@@ -1,4 +1,3 @@
-
 <p align="center">
         <img src="https://github.com/user-attachments/assets/37b92f90-e109-4989-9789-7bf45a1c6afa" alt="MotoCore logo" width="280" />
 </p>
@@ -7,7 +6,9 @@
 
 Plataforma SaaS para la gestión integral de talleres de motocicletas, evolucionando hacia un modelo **ERP multiorganización**: una cuenta administra varias organizaciones, y cada organización opera varios talleres. **Mercado objetivo por ahora: Bolivia.**
 
-> **Estado — pivote de backend completado.** El backend es **Node/TypeScript + Supabase**, desplegable en **Vercel**; el frontend lo consume y la implementación .NET anterior se retiró del repositorio (sigue en el historial de git). El detalle técnico está en [server/README.md](server/README.md); la especificación que gobierna la construcción, en [docs/](docs/README.md).
+> **La especificación gobierna la construcción**, no al revés: la norma está en [docs/](docs/README.md) y, cuando el código difiere de ella, **se corrige el código**. El detalle técnico de cada parte está en [server/README.md](server/README.md) y [frontend/README.md](frontend/README.md).
+>
+> **Lo construido es el corte vertical** que demuestra el modelo jerárquico: identidad, organizaciones, talleres, miembros, **clientes** (nivel organización) e **inventario** (nivel taller), más el registro de auditoría y el aislamiento verificado en dos capas.
 
 ## Resumen
 
@@ -45,12 +46,15 @@ Supabase (PostgreSQL + Auth + RLS + Storage)
 ## Estructura del repositorio
 
 ```
-server/              Backend — Node/TS (Hono) + Supabase — ver server/README.md
-frontend/            React 19 + Vite — ver frontend/README.md
+server/              Interfaz de programación — Node/TS (Hono) + Supabase — ver server/README.md
+  src/modules/         Un directorio por módulo, con controlador, servicio y repositorio
+  supabase/            Migraciones versionadas, comprobación del esquema y limpieza
+frontend/            Cliente web — React 19 + Vite — ver frontend/README.md
 docs/                Documentación del proyecto de grado — empezar por docs/README.md
   anteproyecto/        Documento académico (definición, estado del arte, marco teórico)
   ingenieria/          Especificación técnica (requisitos, arquitectura, datos, seguridad, plan)
-.github/workflows/   Pipeline de CI (frontend + server)
+.github/workflows/   Pipeline de integración continua
+package.json         Solo la calidad antes de integrar: Prettier y ESLint en pre-commit
 ```
 
 ## Stack tecnológico
@@ -66,7 +70,7 @@ docs/                Documentación del proyecto de grado — empezar por docs/R
 Todos los objetos del esquema llevan el prefijo `mt_`, de modo que MotoCore pueda convivir en `public` con otro sistema sin colisionar.
 
 - `auth.users` (Supabase) = identidad global; `mt_profiles` = perfil.
-- `mt_organizations` = **organización**, y es la unidad de aislamiento (*tenant*); **una cuenta puede tener varias**.
+- `mt_organizations` = **organización**, y es la unidad de aislamiento (_tenant_); **una cuenta puede tener varias**.
 - `mt_workshops` = **taller** dentro de una organización; subdivisión operativa, no unidad de aislamiento.
 - `mt_memberships` = usuario ↔ organización con rol (`owner`/`mechanic`/`receptionist`); el rol es por organización, no global. **Cada organización tiene un solo propietario activo**, y no lo garantiza solo la API: un índice único parcial lo hace cumplir en el motor.
 - Todo dato de negocio se acota por `organization_id`; las entidades de nivel taller llevan además `workshop_id`. El contexto activo se selecciona por petición: cabecera `X-Org-Id` para la organización y `X-Workshop-Id` para el taller.
@@ -75,9 +79,11 @@ Todos los objetos del esquema llevan el prefijo `mt_`, de modo que MotoCore pued
 
 ## Módulos y roadmap
 
-**Construido**: registro atómico que crea cuenta + 1.ª organización + 1.er taller, gestión de organizaciones y miembros, talleres y asignación de miembros a talleres, clientes (nivel organización), inventario y movimientos de stock con transferencia entre talleres (nivel taller), registro de auditoría de acciones críticas y aislamiento por RLS.
+**Construido**: registro atómico que crea cuenta, primera organización, primer taller y membresía propietaria; organizaciones y miembros con control de acceso por rol; talleres y asignación operativa de miembros; clientes (nivel organización); inventario con movimientos de existencias y transferencia entre talleres (nivel taller); registro de auditoría de las seis acciones críticas; y el aislamiento en dos capas, con sus pruebas por las dos vías.
 
-**Pendiente**: motocicletas, órdenes de trabajo (estados, diagnóstico, cierre, entrega), historial de mantenimiento y dashboard. Quedan fuera del alcance del proyecto de grado (ver [Requisitos](docs/ingenieria/02-requisitos.md), RF-800) y se incorporarán reutilizando el mismo patrón de alcance por nivel.
+**Fuera del alcance del proyecto de grado** (RF-800, ver [Requisitos](docs/ingenieria/02-requisitos.md)): motocicletas, órdenes de trabajo, historial de mantenimiento y panel de métricas. No están en el repositorio; se incorporarán reutilizando el mismo patrón de alcance por nivel.
+
+**Pendiente dentro del alcance**: la descripción **OpenAPI** del contrato (§7) y las pruebas **extremo a extremo** con Playwright y axe-core (nivel N7).
 
 **Funcionalidades identificadas para el mercado boliviano** (ver [docs/ingenieria/09-analisis-mercado.md](docs/ingenieria/09-analisis-mercado.md)): facturación electrónica del SIN, mensajería por WhatsApp, presupuestos con aprobación del cliente, facturación y cobro en línea, agendamiento, inspección digital y portal del cliente.
 
@@ -117,29 +123,30 @@ Configura `VITE_API_BASE_URL` en `frontend/.env` apuntando a la URL del backend.
 
 ### Requisitos previos
 
-| Herramienta | Necesaria para |
-|---|---|
-| Node.js 20+ | Backend (`server/`) y frontend |
-| Cuenta de Supabase | Backend nuevo (Postgres + Auth) |
+| Herramienta               | Necesaria para                                                                        |
+| ------------------------- | ------------------------------------------------------------------------------------- |
+| Node.js 24 (mínimo 22.22) | Interfaz de programación y cliente web — lo exige jsdom, con el que corre el nivel N6 |
+| Cuenta de Supabase        | Backend nuevo (Postgres + Auth)                                                       |
 
 ## Variables de entorno
 
 **Backend (`server/.env`)**
 
-| Variable | Descripción |
-|---|---|
-| `SUPABASE_URL` | URL del proyecto Supabase |
-| `SUPABASE_PUBLISHABLE_KEY` | Clave publicable — pública por diseño |
-| `SUPABASE_SECRET_KEY` | Clave secreta — salta las políticas RLS; nunca commitear ni exponer al navegador |
-| `AUTH_AUTO_CONFIRM_EMAIL` | `true` en dev para iniciar sesión sin confirmar email |
+| Variable                   | Descripción                                                                      |
+| -------------------------- | -------------------------------------------------------------------------------- |
+| `SUPABASE_URL`             | URL del proyecto Supabase                                                        |
+| `SUPABASE_PUBLISHABLE_KEY` | Clave publicable — pública por diseño                                            |
+| `SUPABASE_SECRET_KEY`      | Clave secreta — salta las políticas RLS; nunca commitear ni exponer al navegador |
+| `AUTH_AUTO_CONFIRM_EMAIL`  | `true` en desarrollo, para iniciar sesión sin confirmar el correo                |
+| `CORS_ALLOWED_ORIGINS`     | Orígenes de navegador admitidos: solo los del cliente web de ese entorno         |
 
 **Frontend (`frontend/.env`)**
 
-| Variable | Descripción |
-|---|---|
-| `VITE_API_BASE_URL` | URL del backend que consume el frontend |
-| `VITE_SUPABASE_URL` | URL del proyecto Supabase — el login ocurre contra Auth, no contra la API (ADR-004) |
-| `VITE_SUPABASE_PUBLISHABLE_KEY` | Clave publicable. **Nunca la secreta**: este archivo se empaqueta en el navegador |
+| Variable                        | Descripción                                                                         |
+| ------------------------------- | ----------------------------------------------------------------------------------- |
+| `VITE_API_BASE_URL`             | URL del backend que consume el frontend                                             |
+| `VITE_SUPABASE_URL`             | URL del proyecto Supabase — el login ocurre contra Auth, no contra la API (ADR-004) |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | Clave publicable. **Nunca la secreta**: este archivo se empaqueta en el navegador   |
 
 Vite solo expone al navegador las variables con prefijo `VITE_`; una sin él se ignora en silencio.
 
@@ -154,25 +161,34 @@ Los niveles de prueba, la matriz requisito → caso → evidencia y el criterio 
 
 ## CI/CD
 
-`.github/workflows/ci.yml` corre en cada push/PR a `main`: lint, test y build del frontend, y typecheck + test del backend (`server/`). El despliegue continuo a Vercel no forma parte del alcance (RNF-203 solo exige la verificación en cada integración).
+`.github/workflows/ci.yml` corre en cada integración a `main`: lint, pruebas y compilación del cliente web, y lint, verificación de tipos, pruebas y **cobertura de los servicios de dominio (≥ 80 %)** de la interfaz de programación. Ambos trabajos terminan con la **auditoría de dependencias**, que falla ante una vulnerabilidad alta o crítica (RNF-201, RNF-203, RNF-207, RNF-208).
+
+Antes de integrar, un gancho de _pre-commit_ pasa **Prettier y ESLint** sobre lo que se va a confirmar (`npm install` en la raíz lo instala).
+
+Los niveles N3 y N4 —integración y aislamiento— exigen un proyecto Supabase real y **se omiten** en el pipeline. Un caso omitido no cubre su requisito: la validación del aislamiento se ejecuta aparte, contra un entorno real, antes de cada hito.
 
 ## Documentación
 
 **[Índice y orden de lectura](docs/README.md)** — la documentación está numerada para leerse en secuencia.
 
 **Anteproyecto**
+
 - [1. Definición y alcance](docs/anteproyecto/01-definicion-y-alcance.md) · [2. Antecedentes y estado del arte](docs/anteproyecto/02-antecedentes-y-estado-del-arte.md) · [3. Marco teórico y conceptual](docs/anteproyecto/03-marco-teorico-y-conceptual.md)
 
 **Especificación**
+
 - [1. Glosario](docs/ingenieria/01-glosario.md) · [2. Requisitos](docs/ingenieria/02-requisitos.md) · [3. Historias de usuario](docs/ingenieria/03-historias-usuario.md)
 
 **Diseño**
+
 - [4. Arquitectura](docs/ingenieria/04-arquitectura.md) · [5. Modelo de datos](docs/ingenieria/05-modelo-datos.md) · [6. Seguridad](docs/ingenieria/06-seguridad.md) · [7. Decisiones de diseño](docs/ingenieria/07-decisiones-diseno.md)
 
 **Contrato y verificación**
+
 - [10. Contrato de la interfaz de programación](docs/ingenieria/10-contrato-api.md) · [11. Plan de pruebas y validación](docs/ingenieria/11-plan-pruebas.md)
 
 **Ejecución y contexto**
+
 - [8. Plan de trabajo](docs/ingenieria/08-plan-trabajo.md) · [9. Análisis del mercado](docs/ingenieria/09-analisis-mercado.md)
 
 ## Licencia

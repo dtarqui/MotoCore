@@ -1,55 +1,37 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 
-export type Role = 'owner' | 'mechanic' | 'receptionist';
+export const ROLES = ['owner', 'mechanic', 'receptionist'] as const;
+export type Role = (typeof ROLES)[number];
 
-export const ROLES: readonly Role[] = ['owner', 'mechanic', 'receptionist'];
-
-/** Variables que la autenticacion deja en el contexto de Hono. */
-export interface AuthedVars {
+/** Identidad verificada de quien llama. El servidor la verifica, no la emite (ADR-004). */
+export interface Identity {
   userId: string;
-  userEmail: string;
-  userToken: string;
-  /**
-   * Cliente de datos de la peticion, atado a la credencial de quien llama, de
-   * modo que las politicas RLS se evaluen sobre su identidad (ADR-002).
-   *
-   * Es el que deben usar los handlers para leer y escribir datos de negocio.
-   * Las siete excepciones que exigen clave de servicio estan enumeradas en
-   * `lib/supabase.ts`.
-   */
-  db: SupabaseClient;
+  email: string;
 }
 
-export type AppBindings = { Variables: AuthedVars };
-
-export interface Membership {
-  organization_id: string;
-  user_id: string;
+/**
+ * Contexto activo ya validado: la organización declarada en `X-Org-Id` y el rol
+ * que el solicitante tiene en ella (ADR-005). Solo existe si la membresía está
+ * activa.
+ */
+export interface OrgContext {
+  userId: string;
+  orgId: string;
   role: Role;
-  is_active: boolean;
 }
 
-/** Taller: subdivision operativa de la organizacion, no unidad de aislamiento (ADR-006). */
-export interface Workshop {
-  id: string;
-  organization_id: string;
-  name: string;
-  address: string | null;
-  phone: string | null;
-  is_active: boolean;
-  created_at: string;
-  updated_at: string | null;
+/** Contexto de nivel taller: además, el taller de `X-Workshop-Id`, validado como de la organización. */
+export interface WorkshopContext extends OrgContext {
+  workshopId: string;
 }
 
-export interface Organization {
-  id: string;
-  name: string;
-  description: string | null;
-  address: string | null;
-  phone: string | null;
-  email: string | null;
-  owner_id: string;
-  is_active: boolean;
-  created_at: string;
-  updated_at: string | null;
-}
+/**
+ * Variables que deja la autenticación.
+ *
+ * `db` es el cliente de datos **de la petición**, atado a la credencial de quien
+ * llama, de modo que las políticas se evalúen sobre su identidad (ADR-008). Se
+ * construye una sola vez por petición.
+ */
+export type AuthEnv = { Variables: { identity: Identity; db: SupabaseClient } };
+export type OrgEnv = { Variables: AuthEnv['Variables'] & { ctx: OrgContext } };
+export type WorkshopEnv = { Variables: AuthEnv['Variables'] & { ctx: WorkshopContext } };

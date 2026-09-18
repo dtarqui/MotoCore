@@ -13,10 +13,13 @@ import { UnauthorizedPage } from '../modules/auth/pages/UnauthorizedPage'
 import { ProtectedRoute, RoleRoute } from '../modules/auth/components/ProtectedRoute'
 
 /**
- * Rutas del alcance construido. Los módulos de motocicletas, órdenes e
- * historial conservan su interfaz en el repositorio pero todavía no tienen
- * endpoints en el backend nuevo, así que no se exponen como ruta: una pantalla
- * accesible que falla al cargar es peor que una que aún no está.
+ * Rutas del alcance construido: el corte vertical —clientes e inventario— más
+ * la administración de la jerarquía y la auditoría.
+ *
+ * Motocicletas, órdenes de trabajo e historial de mantenimiento **no están**:
+ * quedan fuera del alcance del proyecto de grado (RF-800) y se incorporarán
+ * reutilizando este mismo patrón cuando tengan su módulo en la interfaz de
+ * programación.
  */
 export const appRouter = createBrowserRouter([
   {

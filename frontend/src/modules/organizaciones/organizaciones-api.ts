@@ -13,26 +13,24 @@ import type { Organization, OrganizationMembership, UserRole, Workshop } from '.
 
 /** Organizaciones donde la cuenta tiene membresía activa — RF-202. */
 export function getOrganizations() {
-  return apiRequest<{ organizations: OrganizationMembership[] }>('/api/organizations').then(
-    (r) => r.organizations,
-  )
+  return apiRequest<{ organizations: OrganizationMembership[] }>('/api/organizations').then((r) => r.organizations)
+}
+
+export type OrganizationPayload = {
+  name: string
+  description?: string | null
+  address?: string | null
+  phone?: string | null
+  email?: string | null
 }
 
 /** Crea una organización adicional; el creador queda como Owner — RF-201. */
-export function createOrganization(payload: { name: string; address?: string; phone?: string }) {
+export function createOrganization(payload: OrganizationPayload) {
   return apiRequest<{ organization: Organization }>('/api/organizations', {
     method: 'POST',
     body: JSON.stringify(payload),
   }).then((r) => r.organization)
 }
-
-export type UpdateOrganizationPayload = Partial<{
-  name: string
-  description: string
-  address: string
-  phone: string
-  email: string
-}>
 
 /**
  * Edita los datos de la organización activa (solo Owner) — RF-204.
@@ -40,22 +38,37 @@ export type UpdateOrganizationPayload = Partial<{
  * Única función del módulo cuya ruta lleva el identificador de organización:
  * aquí la organización es el recurso, no el contexto (§2.3 del contrato).
  */
-export function updateOrganization(orgId: string, payload: UpdateOrganizationPayload) {
+export function updateOrganization(orgId: string, payload: Partial<OrganizationPayload>) {
   return apiRequest<{ organization: Organization }>(`/api/organizations/${orgId}`, {
     method: 'PATCH',
     body: JSON.stringify(payload),
   }).then((r) => r.organization)
 }
 
-/** Talleres de la organización activa — RF-302. */
-export function getWorkshops() {
-  return apiRequest<{ workshops: Workshop[] }>('/api/workshops').then((r) => r.workshops)
+/** Talleres de la organización activa — RF-302. Por omisión, solo los activos. */
+export function getWorkshops(options?: { includeInactive?: boolean }) {
+  const query = options?.includeInactive ? '?includeInactive=true' : ''
+  return apiRequest<{ workshops: Workshop[] }>(`/api/workshops${query}`).then((r) => r.workshops)
+}
+
+export type WorkshopPayload = {
+  name: string
+  address?: string | null
+  phone?: string | null
 }
 
 /** Crea un taller en la organización activa (solo Owner) — RF-301. */
-export function createWorkshop(payload: { name: string; address?: string; phone?: string }) {
+export function createWorkshop(payload: WorkshopPayload) {
   return apiRequest<{ workshop: Workshop }>('/api/workshops', {
     method: 'POST',
+    body: JSON.stringify(payload),
+  }).then((r) => r.workshop)
+}
+
+/** Edita los datos de un taller (solo Owner) — RF-301. */
+export function updateWorkshop(workshopId: string, payload: Partial<WorkshopPayload>) {
+  return apiRequest<{ workshop: Workshop }>(`/api/workshops/${workshopId}`, {
+    method: 'PATCH',
     body: JSON.stringify(payload),
   }).then((r) => r.workshop)
 }
@@ -72,23 +85,18 @@ export function deactivateWorkshop(workshopId: string) {
   }).then((r) => r.workshop)
 }
 
-/** Edita los datos de un taller (solo Owner) — RF-301. */
-export function updateWorkshop(
-  workshopId: string,
-  payload: Partial<{ name: string; address: string; phone: string }>,
-) {
-  return apiRequest<{ workshop: Workshop }>(`/api/workshops/${workshopId}`, {
-    method: 'PATCH',
-    body: JSON.stringify(payload),
-  }).then((r) => r.workshop)
-}
-
-/** Asignación operativa de un miembro a un taller: indica dónde trabaja, no cambia lo que puede ver (RF-304, ADR-006). */
+/**
+ * Asignación operativa de un miembro a un taller: indica dónde trabaja, no
+ * cambia lo que puede ver (RF-304, ADR-006).
+ */
 export type WorkshopAssignment = {
   id: string
-  userId: string | null
-  role: UserRole | null
-  isActive: boolean | null
+  organization_id: string
+  workshop_id: string
+  user_id: string
+  role: UserRole
+  is_active: boolean
+  created_at: string
 }
 
 /** Miembros asignados al taller — RF-304. */
@@ -98,12 +106,12 @@ export function getWorkshopAssignments(workshopId: string) {
   )
 }
 
-/** Asigna un miembro al taller (solo Owner) — RF-304. */
+/** Asigna un miembro al taller (solo Owner) — RF-304. Es idempotente. */
 export function assignMemberToWorkshop(workshopId: string, userId: string) {
-  return apiRequest<{ workshopId: string; userId: string }>(`/api/workshops/${workshopId}/assignments`, {
+  return apiRequest<{ assignment: WorkshopAssignment }>(`/api/workshops/${workshopId}/assignments`, {
     method: 'POST',
-    body: JSON.stringify({ userId }),
-  })
+    body: JSON.stringify({ user_id: userId }),
+  }).then((r) => r.assignment)
 }
 
 /** Retira la asignación de un miembro al taller (solo Owner) — RF-304. */
@@ -111,33 +119,41 @@ export function removeWorkshopAssignment(workshopId: string, userId: string) {
   return apiRequest<void>(`/api/workshops/${workshopId}/assignments/${userId}`, { method: 'DELETE' })
 }
 
+/** Miembro de la organización activa, con su rol, su estado y sus datos de perfil — RF-407. */
 export type Member = {
-  userId: string
+  user_id: string
   role: UserRole
-  isActive: boolean
-  joinedAt: string
-  profile: { email: string; first_name: string; last_name: string } | null
+  is_active: boolean
+  joined_at: string
+  updated_at: string | null
+  email: string | null
+  first_name: string | null
+  last_name: string | null
 }
 
-/** Miembros de la organización activa con su rol y estado — RF-407. */
-export function getMembers() {
-  return apiRequest<{ members: Member[] }>('/api/members').then((r) => r.members)
+/** Miembros de la organización activa — RF-407. Por omisión, solo los activos. */
+export function getMembers(options?: { includeInactive?: boolean }) {
+  const query = options?.includeInactive ? '?includeInactive=true' : ''
+  return apiRequest<{ members: Member[] }>(`/api/members${query}`).then((r) => r.members)
 }
 
-/** Invita a una cuenta existente. No se puede invitar como Owner — RF-401, RF-402. */
-export function inviteMember(payload: { email: string; role: 'mechanic' | 'receptionist' }) {
-  return apiRequest<{ userId: string; role: UserRole }>('/api/members/invite', {
+/** Roles que se pueden conceder: el Owner es quien crea la organización (RF-402). */
+export type AssignableRole = Exclude<UserRole, 'owner'>
+
+/** Invita a una cuenta existente — RF-401, RF-402. */
+export function inviteMember(payload: { email: string; role: AssignableRole }) {
+  return apiRequest<{ member: Member }>('/api/members/invite', {
     method: 'POST',
     body: JSON.stringify(payload),
-  })
+  }).then((r) => r.member)
 }
 
 /** Cambia el rol de un miembro — RF-403. */
-export function updateMemberRole(userId: string, role: 'mechanic' | 'receptionist') {
-  return apiRequest<{ userId: string; role: UserRole }>(`/api/members/${userId}/role`, {
+export function updateMemberRole(userId: string, role: AssignableRole) {
+  return apiRequest<{ member: Member }>(`/api/members/${userId}/role`, {
     method: 'PATCH',
     body: JSON.stringify({ role }),
-  })
+  }).then((r) => r.member)
 }
 
 /**

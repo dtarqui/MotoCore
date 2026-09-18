@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Condiciones de validacion | MotoCore</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
+<style>
+  :root{
+    --ground:#F4F6F8; --surface:#FFFFFF; --surface-2:#EBEFF3;
+    --ink:#141A20; --ink-2:#38434F; --muted:#5E6A77; --faint:#8A95A1;
+    --line:#D2DAE1; --line-soft:#E3E9EE;
+    --accent:#0B5F86; --accent-soft:#E0EDF4;
+    --warn:#9C4C11; --warn-soft:#F8EBDD;
+    --safe:#1A6A47; --safe-soft:#E4F0EA;
+    --danger:#B0261C; --danger-soft:#FBE6E3;
+    --shadow:0 1px 2px rgba(20,26,32,.05), 0 8px 24px -16px rgba(20,26,32,.28);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ground:#0F1319; --surface:#161C23; --surface-2:#1D242C;
+      --ink:#E7ECF1; --ink-2:#C0CAD4; --muted:#94A0AC; --faint:#6E7A87;
+      --line:#2B343E; --line-soft:#222A33;
+      --accent:#5DB6DC; --accent-soft:#14313F;
+      --warn:#DB9455; --warn-soft:#33220F;
+      --safe:#5FBE90; --safe-soft:#12291F;
+      --danger:#F08A80; --danger-soft:#341613;
+      --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.7);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#0F1319; --surface:#161C23; --surface-2:#1D242C;
+    --ink:#E7ECF1; --ink-2:#C0CAD4; --muted:#94A0AC; --faint:#6E7A87;
+    --line:#2B343E; --line-soft:#222A33;
+    --accent:#5DB6DC; --accent-soft:#14313F;
+    --warn:#DB9455; --warn-soft:#33220F;
+    --safe:#5FBE90; --safe-soft:#12291F;
+    --danger:#F08A80; --danger-soft:#341613;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.7);
+  }
+
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ground);color:var(--ink);font-family:"Source Serif 4",Georgia,serif;font-size:16.5px;line-height:1.6;-webkit-font-smoothing:antialiased}
+  .shell{max-width:1060px;margin:0 auto;padding:44px 26px 70px}
+  h1,h2,.disp{font-family:Archivo,"Helvetica Neue",Arial,sans-serif;text-wrap:balance}
+  .mono,code{font-family:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace}
+
+  .eyebrow{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:0 0 12px}
+  h1{font-size:clamp(28px,4vw,42px);font-weight:700;letter-spacing:-.02em;line-height:1.08;margin:0 0 10px}
+  .lede{font-size:18px;color:var(--ink-2);max-width:72ch;margin:0}
+
+  .finding{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--danger);border-radius:3px;padding:16px 20px;margin:24px 0 30px;font-size:15px;color:var(--ink-2)}
+  .finding strong{color:var(--ink)}
+
+  figure{margin:0}
+  .canvas{background:var(--surface);border:1px solid var(--line);border-radius:3px;box-shadow:var(--shadow);padding:20px 20px 6px;overflow-x:auto}
+  .canvas svg{display:block;width:100%;min-width:900px;height:auto}
+  figcaption{margin-top:14px;color:var(--ink-2);font-size:15px}
+
+  .zone-lbl{font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.13em;fill:var(--faint)}
+  .st rect{fill:var(--surface);stroke:var(--accent);stroke-width:1.5;rx:3}
+  .st .n{font-family:Archivo,sans-serif;font-size:15px;font-weight:600;fill:var(--ink)}
+  .st .l{font-family:"JetBrains Mono",monospace;font-size:10px;fill:var(--muted)}
+  .st.term rect{stroke:var(--safe);stroke-width:2.2;fill:var(--safe-soft)}
+  .st.term .n{fill:var(--safe)}
+
+  .tr{fill:none;stroke:var(--accent);stroke-width:2}
+  .tr-l{font-family:"JetBrains Mono",monospace;font-size:9px;fill:var(--accent);font-weight:500}
+  .free{fill:none;stroke:var(--warn);stroke-width:1.6}
+  .free-t{fill:none;stroke:var(--warn);stroke-width:1.1;stroke-dasharray:3 3}
+  .free-l{font-family:"JetBrains Mono",monospace;font-size:10px;fill:var(--warn)}
+  .term-l{font-family:"JetBrains Mono",monospace;font-size:9.5px;letter-spacing:.1em;fill:var(--safe);font-weight:700}
+
+  .gh rect{fill:none;stroke:var(--faint);stroke-width:1.3;stroke-dasharray:5 4;rx:3}
+  .gh .gn{font-family:Archivo,sans-serif;font-size:13.5px;font-weight:600;fill:var(--muted)}
+  .gh .gt{font-family:"JetBrains Mono",monospace;font-size:9px;letter-spacing:.08em;font-weight:700;fill:var(--danger)}
+
+  .legend{display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:16px;padding-top:14px;border-top:1px solid var(--line-soft);font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--muted)}
+  .legend span{display:flex;align-items:center;gap:8px}
+  .legend i{display:block;width:22px;height:0;border-top-width:2.2px;border-top-style:solid;flex:none}
+  .lg-tr{border-color:var(--accent)}
+  .lg-fr{border-color:var(--warn)}
+  .lg-gh{border-color:var(--faint);border-top-style:dashed}
+  .legend span.bx i{height:12px;width:12px;border:2px solid var(--safe);background:var(--safe-soft);border-radius:2px}
+
+  .step{transition:opacity .18s ease}
+  .canvas.focused .step{opacity:.2}
+  .canvas.focused .step.on{opacity:1}
+  @media (prefers-reduced-motion:reduce){.step{transition:none}}
+
+  .sec{margin-top:44px}
+  .sec-bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;margin:0 0 16px}
+  .sec-bar h2{flex:1 1 auto;min-width:0;margin:0}
+  .reset{font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:transparent;border:1px solid var(--line);color:var(--muted);padding:5px 10px;border-radius:2px;cursor:pointer}
+  .reset:hover{border-color:var(--accent);color:var(--accent)}
+  .sec h2{font-size:19px;font-weight:600;margin:0}
+  .rows{display:flex;flex-direction:column;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:3px;overflow:hidden}
+  .row{width:100%;background:var(--surface);border:0;padding:13px 16px;display:grid;grid-template-columns:1fr auto;gap:14px;align-items:baseline;font:inherit;color:inherit;text-align:left;cursor:pointer}
+  .row:hover,.row.on{background:var(--accent-soft)}
+  .row .t{font-family:Archivo,sans-serif;font-size:14.5px;font-weight:600;color:var(--ink)}
+  .row .d{font-size:14px;color:var(--muted);grid-column:1/-1}
+  .tag{font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:2px;font-weight:600;white-space:nowrap}
+  .tag-ok{color:var(--safe);background:var(--safe-soft)}
+  .tag-no{color:var(--danger);background:var(--danger-soft)}
+
+  footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-family:"JetBrains Mono",monospace;font-size:10.5px;color:var(--faint)}
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <p class="eyebrow">MotoCore &middot; validaci&oacute;n del aislamiento</p>
+  <h1>Cuatro condiciones para demostrar que el aislamiento no se puede apagar</h1>
+  <p class="lede">El sistema separa los datos de cada organizaci&oacute;n con dos controles independientes: uno en la base de datos y otro en el servidor. Estas cuatro condiciones apagan uno, el otro, o los dos &mdash; y comparan lo que ocurre.</p>
+
+  <div class="finding">
+    <strong>Qu&eacute; se quiere probar:</strong> que la separaci&oacute;n <em>no depende del c&oacute;digo del servidor</em>. Si alguien desactivara ese control &mdash;por error o a prop&oacute;sito&mdash;, la base de datos seguir&iacute;a entregando cero filas ajenas. La l&iacute;nea base existe para lo contrario: ense&ntilde;ar la fuga cuando no hay reglas en la base, que es como resuelve el aislamiento el software relevado en el mercado.
+  </div>
+
+  <figure>
+    <div class="canvas" id="canvas">
+      <svg viewBox="0 0 1000 470" role="img" aria-label="Las cuatro condiciones experimentales C0 a C3: para cada una, si las reglas de la base de datos estan activas, si la verificacion del servidor esta activa, y cuantas filas ajenas se obtienen.">
+        <defs>
+          <marker id="m-tr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--accent)"></path></marker>
+        </defs>
+
+        <text class="zone-lbl" x="30" y="26">LAS CUATRO CONDICIONES</text>
+
+        <g class="step" data-step="0">
+          <g class="st"><rect x="30" y="42" width="215" height="66"><title>Linea base: reproduce el aislamiento resuelto solo en la aplicacion, cuando su filtro falla.</title></rect><text class="n" x="44" y="72">C0 &middot; L&iacute;nea base</text><text class="l" x="44" y="92">lo que hace hoy el mercado</text></g>
+          <g class="gh"><rect x="30" y="124" width="215" height="44"></rect><text class="gt" x="44" y="144">REGLAS DE LA BASE</text><text class="gn" x="44" y="161">deshabilitadas</text></g>
+          <g class="gh"><rect x="30" y="180" width="215" height="44"></rect><text class="gt" x="44" y="200">CONTROL DEL SERVIDOR</text><text class="gn" x="44" y="217">omitido</text></g>
+          <g class="st term"><rect x="30" y="252" width="215" height="76"><title>Debe mostrar la fuga: si no la muestra, la comparacion no discrimina.</title></rect><text class="n" x="44" y="284">Filas ajenas: S&Iacute;</text><text class="l" x="44" y="304">la fuga que se quiere evitar</text></g>
+        </g>
+
+        <g class="step" data-step="1">
+          <g class="st"><rect x="275" y="42" width="215" height="66"><title>La arquitectura propuesta, tal como se despliega.</title></rect><text class="n" x="289" y="72">C1 &middot; Completa</text><text class="l" x="289" y="92">por la interfaz del sistema</text></g>
+          <g class="st"><rect x="275" y="124" width="215" height="44"></rect><text class="n" x="289" y="152">Base: reglas activas</text></g>
+          <g class="st"><rect x="275" y="180" width="215" height="44"></rect><text class="n" x="289" y="208">Servidor: control activo</text></g>
+          <g class="st"><rect x="275" y="252" width="215" height="76"></rect><text class="n" x="289" y="284">Filas ajenas: 0</text><text class="l" x="289" y="304">responde &laquo;sin acceso&raquo;</text></g>
+        </g>
+
+        <g class="step" data-step="2">
+          <g class="st"><rect x="520" y="42" width="215" height="66"><title>El control del servidor se sustituye por uno que concede sin comprobar. Solo en el banco de pruebas.</title></rect><text class="n" x="534" y="72">C2 &middot; Sin el servidor</text><text class="l" x="534" y="92">su control, anulado</text></g>
+          <g class="st"><rect x="520" y="124" width="215" height="44"></rect><text class="n" x="534" y="152">Base: reglas activas</text></g>
+          <g class="gh"><rect x="520" y="180" width="215" height="44"></rect><text class="gt" x="534" y="200">CONTROL DEL SERVIDOR</text><text class="gn" x="534" y="217">sustituido: deja pasar</text></g>
+          <g class="st"><rect x="520" y="252" width="215" height="76"><title>La peticion entra como si fuera miembro, y aun asi no obtiene nada.</title></rect><text class="n" x="534" y="284">Filas ajenas: 0</text><text class="l" x="534" y="304">la base filtra igual</text></g>
+        </g>
+
+        <g class="step" data-step="3">
+          <g class="st"><rect x="765" y="42" width="205" height="66"><title>Se prescinde por completo del servidor: conexion directa con la identidad de otra cuenta.</title></rect><text class="n" x="779" y="72">C3 &middot; Acceso directo</text><text class="l" x="779" y="92">sin pasar por el servidor</text></g>
+          <g class="st"><rect x="765" y="124" width="205" height="44"></rect><text class="n" x="779" y="152">Base: reglas activas</text></g>
+          <g class="gh"><rect x="765" y="180" width="205" height="44"></rect><text class="gt" x="779" y="200">CONTROL DEL SERVIDOR</text><text class="gn" x="779" y="217">no interviene</text></g>
+          <g class="st"><rect x="765" y="252" width="205" height="76"></rect><text class="n" x="779" y="284">Filas ajenas: 0</text><text class="l" x="779" y="304">7 tablas, y sin error</text></g>
+        </g>
+
+        <line class="tr" x1="137" y1="228" x2="137" y2="248" marker-end="url(#m-tr)"></line>
+        <line class="tr" x1="382" y1="228" x2="382" y2="248" marker-end="url(#m-tr)"></line>
+        <line class="tr" x1="627" y1="228" x2="627" y2="248" marker-end="url(#m-tr)"></line>
+        <line class="tr" x1="867" y1="228" x2="867" y2="248" marker-end="url(#m-tr)"></line>
+
+        <text class="zone-lbl" x="30" y="374">C&Oacute;MO SE EJECUTA</text>
+        <g class="st"><rect x="30" y="390" width="460" height="60"><title>Cada ciclo corre sobre un proyecto de base de datos reconstruido desde las migraciones.</title></rect><text class="n" x="44" y="418">Tres corridas, en d&iacute;as distintos</text><text class="l" x="44" y="438">entorno desechable, reconstruido en cada ciclo</text></g>
+        <g class="st"><rect x="520" y="390" width="450" height="60"><title>La evidencia la produce el propio ejecutor, no una transcripcion a mano.</title></rect><text class="n" x="534" y="418">La evidencia se genera sola</text><text class="l" x="534" y="438">salida del ejecutor, escenario y versi&oacute;n, con su firma</text></g>
+      </svg>
+
+      <div class="legend">
+        <span><i class="lg-tr"></i>lleva al resultado</span>
+        <span><i class="lg-gh"></i>control apagado o ausente</span>
+        <span class="bx"><i></i>resultado que debe mostrar la fuga</span>
+      </div>
+    </div>
+    <figcaption>Las tres condiciones de la derecha deben dar cero filas ajenas. La de la izquierda debe fallar: es el t&eacute;rmino de comparaci&oacute;n, y sin ella el resultado no dir&iacute;a nada.</figcaption>
+  </figure>
+
+  <section class="sec">
+    <div class="sec-bar">
+      <h2>Qu&eacute; demuestra cada una</h2>
+      <button class="reset" id="reset" type="button">Ver todo</button>
+    </div>
+    <div class="rows" id="rows">
+      <button type="button" class="row" data-step="0"><span class="t">C0 &middot; L&iacute;nea base</span><span class="tag tag-no">Debe fugar</span><span class="d">Sin reglas en la base y sin control en el servidor, una cuenta ajena lee las filas de otra organizaci&oacute;n. Es lo que ocurre cuando la separaci&oacute;n vive solo en el c&oacute;digo y ese c&oacute;digo falla.</span></button>
+      <button type="button" class="row" data-step="1"><span class="t">C1 &middot; Arquitectura completa</span><span class="tag tag-ok">0 filas ajenas</span><span class="d">Todas las operaciones del sistema, intentadas por una cuenta sin membres&iacute;a: ninguna devuelve datos, y la respuesta no delata si el dato existe.</span></button>
+      <button type="button" class="row" data-step="2"><span class="t">C2 &middot; Sin el control del servidor</span><span class="tag tag-ok">0 filas ajenas</span><span class="d">La prueba central: el control del servidor se sustituye por uno que deja pasar a cualquiera, y la base sigue sin entregar nada. Demuestra que los dos controles son independientes.</span></button>
+      <button type="button" class="row" data-step="3"><span class="t">C3 &middot; Acceso directo a la base</span><span class="tag tag-ok">0 filas ajenas</span><span class="d">Conect&aacute;ndose a la base con la identidad de otra cuenta, sin servidor de por medio, las siete tablas de negocio responden vac&iacute;as. La consulta no falla: se filtra sola.</span></button>
+    </div>
+    <p style="margin-top:10px;font-size:12.5px;color:var(--faint);font-family:'JetBrains Mono',monospace">clic en una fila para ubicarla en el diagrama</p>
+  </section>
+
+  <footer>MotoCore &middot; condiciones de validaci&oacute;n del aislamiento</footer>
+</div>
+
+<script>
+  (function () {
+    var canvas = document.getElementById('canvas');
+    var rows = document.getElementById('rows');
+    var reset = document.getElementById('reset');
+    var stepGroups = canvas.querySelectorAll('.step');
+    var buttons = rows.querySelectorAll('.row');
+
+    function clear() {
+      canvas.classList.remove('focused');
+      stepGroups.forEach(function (g) { g.classList.remove('on'); });
+      buttons.forEach(function (b) { b.classList.remove('on'); });
+    }
+
+    function focusStep(n) {
+      var already = rows.querySelector('.row.on[data-step="' + n + '"]');
+      clear();
+      if (already) return;
+      canvas.classList.add('focused');
+      stepGroups.forEach(function (g) { if (g.getAttribute('data-step') === n) g.classList.add('on'); });
+      buttons.forEach(function (b) { if (b.getAttribute('data-step') === n) b.classList.add('on'); });
+    }
+
+    buttons.forEach(function (b) {
+      b.addEventListener('click', function () { focusStep(b.getAttribute('data-step')); });
+    });
+    reset.addEventListener('click', clear);
+  })();
+</script>
+</body>
+</html>

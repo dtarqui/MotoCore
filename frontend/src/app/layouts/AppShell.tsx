@@ -58,17 +58,11 @@ export function AppShell() {
           <NavLink
             key={item.to}
             to={item.to}
-            className={({ isActive }) =>
-              isActive ? 'nav-link-active' : ''
-            }
+            className={({ isActive }) => (isActive ? 'nav-link-active' : '')}
             end={item.to === '/'}
           >
             {({ isActive }) => (
-              <Button
-                variant={isActive ? 'default' : 'outline'}
-                size="sm"
-                className="h-8"
-              >
+              <Button variant={isActive ? 'default' : 'outline'} size="sm" className="h-8">
                 {item.label}
               </Button>
             )}

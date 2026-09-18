@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Users } from 'lucide-react'
 import { useAuth } from '@/modules/auth/hooks/useAuth'
+import { useActiveOrgId } from '@/shared/lib/active-context'
 import { PageHeader } from '@/shared/ui/PageHeader'
 import { Button } from '@/shared/ui/button'
 import { Input } from '@/shared/ui/input'
@@ -25,7 +26,15 @@ import { useToast } from '@/shared/ui/toast-context'
 import { createClient, deactivateClient, getClients, updateClient } from '../clientes-api'
 import type { Client, ClientUpsertPayload } from '../types'
 
-const EMPTY: ClientUpsertPayload = { firstName: '', lastName: '', email: '', phone: '', documentId: '', address: '', notes: '' }
+const EMPTY: ClientUpsertPayload = {
+  first_name: '',
+  last_name: '',
+  email: '',
+  phone: '',
+  document_id: '',
+  address: '',
+  notes: '',
+}
 
 /**
  * Clientes — nivel organización. Se listan según la organización activa, sin importar la
@@ -37,6 +46,7 @@ export function ClientesPage() {
   const { toast } = useToast()
 
   const canWrite = hasAnyRole(['owner', 'receptionist'])
+  const orgId = useActiveOrgId()
 
   const [search, setSearch] = useState('')
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -44,16 +54,18 @@ export function ClientesPage() {
   const [form, setForm] = useState<ClientUpsertPayload>(EMPTY)
   const [error, setError] = useState<string | null>(null)
 
+  // El contexto activo forma parte de la clave: ninguna respuesta puede
+  // servirse desde la cache de otra organizacion (ADR-010).
   const clientsQuery = useQuery({
-    queryKey: ['clients', search],
-    queryFn: () => getClients(search),
+    queryKey: ['clients', orgId, search],
+    queryFn: () => getClients({ search }),
+    enabled: Boolean(orgId),
   })
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ['clients'] })
 
   const saveMutation = useMutation({
-    mutationFn: (payload: ClientUpsertPayload) =>
-      editing ? updateClient(editing.id, payload) : createClient(payload),
+    mutationFn: (payload: ClientUpsertPayload) => (editing ? updateClient(editing.id, payload) : createClient(payload)),
     onSuccess: async (client) => {
       setDialogOpen(false)
       setForm(EMPTY)
@@ -88,11 +100,11 @@ export function ClientesPage() {
   function openEdit(client: Client) {
     setEditing(client)
     setForm({
-      firstName: client.first_name,
-      lastName: client.last_name,
+      first_name: client.first_name,
+      last_name: client.last_name,
       email: client.email ?? '',
       phone: client.phone ?? '',
-      documentId: client.document_id ?? '',
+      document_id: client.document_id ?? '',
       address: client.address ?? '',
       notes: client.notes ?? '',
     })
@@ -117,7 +129,9 @@ export function ClientesPage() {
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>{editing ? `Editar a ${editing.first_name} ${editing.last_name}` : 'Nuevo cliente'}</DialogTitle>
+                  <DialogTitle>
+                    {editing ? `Editar a ${editing.first_name} ${editing.last_name}` : 'Nuevo cliente'}
+                  </DialogTitle>
                   <DialogDescription>
                     {editing
                       ? 'Los cambios se aplican de inmediato.'
@@ -134,14 +148,14 @@ export function ClientesPage() {
                   <Input
                     required
                     placeholder="Nombre"
-                    value={form.firstName}
-                    onChange={(e) => setForm({ ...form, firstName: e.target.value })}
+                    value={form.first_name}
+                    onChange={(e) => setForm({ ...form, first_name: e.target.value })}
                   />
                   <Input
                     required
                     placeholder="Apellido"
-                    value={form.lastName}
-                    onChange={(e) => setForm({ ...form, lastName: e.target.value })}
+                    value={form.last_name}
+                    onChange={(e) => setForm({ ...form, last_name: e.target.value })}
                   />
                   <Input
                     type="email"
@@ -156,8 +170,8 @@ export function ClientesPage() {
                   />
                   <Input
                     placeholder="Documento de identidad"
-                    value={form.documentId}
-                    onChange={(e) => setForm({ ...form, documentId: e.target.value })}
+                    value={form.document_id}
+                    onChange={(e) => setForm({ ...form, document_id: e.target.value })}
                   />
                   <Input
                     placeholder="Dirección"

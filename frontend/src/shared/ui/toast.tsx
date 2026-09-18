@@ -13,10 +13,8 @@ const VARIANT_ICON: Record<ToastVariant, typeof Info> = {
 
 const VARIANT_CLASS: Record<ToastVariant, string> = {
   default: 'border-gray-200 bg-white text-gray-900 dark:border-gray-800 dark:bg-gray-950 dark:text-gray-50',
-  success:
-    'border-green-200 bg-green-50 text-green-800 dark:border-green-900/50 dark:bg-green-950 dark:text-green-300',
-  destructive:
-    'border-red-200 bg-red-50 text-red-700 dark:border-red-900/50 dark:bg-red-950 dark:text-red-300',
+  success: 'border-green-200 bg-green-50 text-green-800 dark:border-green-900/50 dark:bg-green-950 dark:text-green-300',
+  destructive: 'border-red-200 bg-red-50 text-red-700 dark:border-red-900/50 dark:bg-red-950 dark:text-red-300',
 }
 
 const AUTO_DISMISS_MS = 4000

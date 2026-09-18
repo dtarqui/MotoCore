@@ -1,7 +1,7 @@
 /**
  * Identificadores de rol tal como viajan por la API y viven en la base de
  * datos. El texto visible al usuario se traduce en la interfaz; estos valores
- * no se traducen ni se capitalizan.
+ * no se traducen ni se capitalizan (Glosario).
  */
 export type UserRole = 'owner' | 'mechanic' | 'receptionist'
 
@@ -11,6 +11,11 @@ export const ROLE_LABELS: Record<UserRole, string> = {
   receptionist: 'Recepcionista',
 }
 
+/**
+ * Los campos llegan tal como los devuelve la API, en `snake_case` (§2.4 del
+ * contrato): el contrato y el esquema hablan un solo vocabulario, y no hay una
+ * capa de traducción que mantener en dos sitios.
+ */
 export type UserProfile = {
   id: string
   email: string
@@ -26,6 +31,7 @@ export type Organization = {
   address: string | null
   phone: string | null
   email: string | null
+  owner_id: string
   is_active: boolean
 }
 
@@ -46,23 +52,18 @@ export type OrganizationMembership = {
 }
 
 export type MeResponse = {
-  userId: string
+  user_id: string
   email: string
   profile: UserProfile | null
   organizations: OrganizationMembership[]
 }
 
-export type LoginRequest = {
-  email: string
-  password: string
-}
-
 export type RegisterRequest = {
   email: string
   password: string
-  firstName: string
-  lastName: string
+  first_name: string
+  last_name: string
   /** RF-101: el registro crea la organización y su primer taller. */
-  organizationName: string
-  workshopName?: string
+  organization_name: string
+  workshop_name?: string
 }

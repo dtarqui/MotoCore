@@ -2,8 +2,9 @@
  * Cliente — entidad de NIVEL ORGANIZACIÓN. No lleva taller: se atiende en
  * cualquiera de los locales de la organización (RF-502).
  *
- * Los campos llegan tal como los devuelve la API, en snake_case, para no
- * introducir una capa de traducción que haya que mantener en dos sitios.
+ * Los campos van tal como los recibe y los espera la API, en `snake_case`
+ * (§2.4 del contrato), para no introducir una capa de traducción que haya que
+ * mantener en dos sitios.
  */
 export type Client = {
   id: string
@@ -21,11 +22,11 @@ export type Client = {
 }
 
 export type ClientUpsertPayload = {
-  firstName: string
-  lastName: string
+  first_name: string
+  last_name: string
   email?: string
   phone?: string
-  documentId?: string
+  document_id?: string
   address?: string
   notes?: string
 }

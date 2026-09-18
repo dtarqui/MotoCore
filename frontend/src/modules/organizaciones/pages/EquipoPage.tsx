@@ -25,14 +25,19 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { useToast } from '@/shared/ui/toast-context'
 import { useActiveOrgId } from '@/shared/lib/active-context'
 import { ROLE_LABELS } from '@/modules/auth/types'
-import { getMembers, inviteMember, removeMember, updateMemberRole } from '../organizaciones-api'
+import {
+  getMembers,
+  inviteMember,
+  removeMember,
+  updateMemberRole,
+  type AssignableRole,
+  type Member,
+} from '../organizaciones-api'
 
-type InvitableRole = 'mechanic' | 'receptionist'
-
-function describeMember(member: { profile: { email: string; first_name: string; last_name: string } | null; userId: string }) {
-  if (!member.profile) return member.userId
-  const name = `${member.profile.first_name} ${member.profile.last_name}`.trim()
-  return name || member.profile.email
+/** El nombre visible del miembro; si el perfil no trae datos, su identificador. */
+function describeMember(member: Member) {
+  const name = `${member.first_name ?? ''} ${member.last_name ?? ''}`.trim()
+  return name || member.email || member.user_id
 }
 
 /**
@@ -49,7 +54,7 @@ export function EquipoPage() {
 
   const isOwner = hasAnyRole(['owner'])
   const [inviteOpen, setInviteOpen] = useState(false)
-  const [invite, setInvite] = useState<{ email: string; role: InvitableRole }>({
+  const [invite, setInvite] = useState<{ email: string; role: AssignableRole }>({
     email: '',
     role: 'mechanic',
   })
@@ -76,7 +81,7 @@ export function EquipoPage() {
   })
 
   const roleMutation = useMutation({
-    mutationFn: ({ userId, role }: { userId: string; role: InvitableRole }) => updateMemberRole(userId, role),
+    mutationFn: ({ userId, role }: { userId: string; role: AssignableRole }) => updateMemberRole(userId, role),
     onSuccess: async () => {
       toast({ title: 'Rol actualizado', variant: 'success' })
       await invalidate()
@@ -135,7 +140,7 @@ export function EquipoPage() {
                   />
                   <Select
                     value={invite.role}
-                    onChange={(e) => setInvite({ ...invite, role: e.target.value as InvitableRole })}
+                    onChange={(e) => setInvite({ ...invite, role: e.target.value as AssignableRole })}
                   >
                     <option value="mechanic">{ROLE_LABELS.mechanic}</option>
                     <option value="receptionist">{ROLE_LABELS.receptionist}</option>
@@ -180,24 +185,24 @@ export function EquipoPage() {
           </TableHeader>
           <TableBody>
             {members.map((member) => {
-              const isSelf = member.userId === me?.userId
+              const isSelf = member.user_id === me?.user_id
               const isOwnerRow = member.role === 'owner'
               return (
-                <TableRow key={member.userId}>
+                <TableRow key={member.user_id}>
                   <TableCell className="font-medium text-gray-900 dark:text-white">
                     <span className="inline-flex items-center gap-2">
                       {describeMember(member)}
                       {isSelf ? <Badge variant="secondary">Tú</Badge> : null}
                     </span>
                   </TableCell>
-                  <TableCell className="text-gray-500 dark:text-gray-400">{member.profile?.email ?? '—'}</TableCell>
+                  <TableCell className="text-gray-500 dark:text-gray-400">{member.email ?? '—'}</TableCell>
                   <TableCell>
                     {isOwner && !isOwnerRow ? (
                       <Select
                         className="h-8 w-auto py-1"
                         value={member.role}
                         onChange={(e) =>
-                          roleMutation.mutate({ userId: member.userId, role: e.target.value as InvitableRole })
+                          roleMutation.mutate({ userId: member.user_id, role: e.target.value as AssignableRole })
                         }
                       >
                         <option value="mechanic">{ROLE_LABELS.mechanic}</option>
@@ -219,7 +224,7 @@ export function EquipoPage() {
                           title={`¿Remover a ${describeMember(member)}?`}
                           description="Pierde el acceso a esta organización de inmediato."
                           confirmLabel="Remover"
-                          onConfirm={() => removeMutation.mutate(member.userId)}
+                          onConfirm={() => removeMutation.mutate(member.user_id)}
                         />
                       ) : null}
                     </TableCell>

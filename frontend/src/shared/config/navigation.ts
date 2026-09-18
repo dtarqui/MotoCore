@@ -8,11 +8,10 @@ type NavigationItem = {
 
 /**
  * Navegación del alcance construido: el corte vertical (clientes e inventario)
- * más la administración de la jerarquía (talleres y equipo).
+ * más la administración de la jerarquía (talleres y equipo) y la auditoría.
  *
- * Los módulos de motocicletas, órdenes e historial existen como interfaz pero
- * todavía no tienen respaldo en el backend nuevo; se incorporan cuando se
- * porten sus endpoints.
+ * Los módulos de RF-800 —motocicletas, órdenes e historial— no figuran: están
+ * fuera del alcance del proyecto de grado.
  */
 export const navigationItems: NavigationItem[] = [
   { to: '/', label: 'Inicio' },

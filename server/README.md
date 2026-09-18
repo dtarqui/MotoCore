@@ -1,213 +1,188 @@
-# MotoCore — Backend Node/TypeScript (Supabase)
+# MotoCore — Interfaz de programación (Node/TypeScript + Supabase)
 
-Reescritura del backend a **Node/TS + Hono** sobre **Supabase** (Postgres + Auth + RLS), con **multi-tenancy jerárquica**: una cuenta administra varias **organizaciones** (`organizations`) y cada organización opera varios **talleres** (`workshops`). Se despliega en **Vercel** como funciones serverless.
+Monolito modular en **Hono** desplegado como funciones serverless en **Vercel**, sobre **Supabase** (PostgreSQL + Auth + RLS), con multi-tenancy **jerárquica**: una cuenta administra varias **organizaciones** y cada organización opera varios **talleres** (ADR-006, ADR-009).
 
-> **Alcance actual**: base multi-tenant (Auth + Organizaciones + Membresías + Talleres) y el corte vertical de negocio — **Clientes** (nivel organización) e **Inventario** (nivel taller) — más el registro de auditoría. Los módulos restantes —motocicletas, órdenes de trabajo, historial de mantenimiento y panel de métricas— se construirán reutilizando este mismo patrón; están fuera del alcance del proyecto de grado (RF-800).
+> **La especificación gobierna este código**, no al revés ([`docs/`](../docs/README.md)): terminología en el [Glosario](../docs/ingenieria/01-glosario.md), reglas en [Requisitos](../docs/ingenieria/02-requisitos.md), esquema en [Modelo de datos](../docs/ingenieria/05-modelo-datos.md) y, sobre todo, la interfaz en el [Contrato](../docs/ingenieria/10-contrato-api.md). Cuando el código difiera de lo especificado, **se corrige el código**.
 >
-> **La especificación gobierna este código**, no al revés ([`docs/`](../docs/README.md)): terminología en el [Glosario](../docs/ingenieria/01-glosario.md), reglas en [Requisitos](../docs/ingenieria/02-requisitos.md), esquema en [Modelo de datos](../docs/ingenieria/05-modelo-datos.md) y, sobre todo, la interfaz en el [Contrato de la API](../docs/ingenieria/10-contrato-api.md). Cuando el código difiera de lo especificado, **se corrige el código**.
+> **Alcance construido**: identidad, organizaciones, talleres, miembros y el corte vertical de negocio —**clientes** (nivel organización) e **inventario** (nivel taller)— más el registro de auditoría. Motocicletas, órdenes de trabajo, historial y panel de métricas están fuera del alcance del proyecto de grado (RF-800).
 
 ## Stack
 
-- **Hono** — API HTTP en TypeScript, nativa de Vercel.
-- **Supabase** — Postgres, Auth (registro/login/refresh/OAuth), RLS para el aislamiento por inquilino.
-- **Zod** — validación de entrada.
-- **Vitest** — pruebas.
+- **Hono** — interfaz HTTP en TypeScript, nativa de entornos serverless (ADR-003).
+- **Supabase** — PostgreSQL, Auth (registro, sesión y renovación) y RLS para el aislamiento (ADR-004).
+- **Zod** — validación de entrada; los esquemas son los DTO y de ellos se derivan los tipos.
+- **Vitest** — pruebas de los niveles N1, N2, N3 y N4.
 
-## Modelo de datos (multi-tenancy)
+## Estructura: controlador, servicio y repositorio
 
-| Tabla | Nivel | Rol |
-|---|---|---|
-| `auth.users` | — | Identidad global (gestionada por Supabase Auth) |
-| `profiles` | — | Datos de perfil 1:1 con la cuenta |
-| `organizations` | *tenant* | **Organización** — unidad de aislamiento |
-| `workshops` | organización | **Taller** — local físico dentro de una organización |
-| `memberships` | organización | `cuenta ↔ organización` con rol (`owner`/`mechanic`/`receptionist`) — **N por cuenta** |
-| `workshop_assignments` | organización | En qué talleres trabaja un miembro (operativo, no afecta permisos) |
-| `clients` | organización | Clientes, visibles desde cualquier taller de la organización |
-| `parts` | taller | Repuestos con existencia propia por taller |
-| `part_movements` | taller | Historial inmutable de movimientos de existencias |
-| `audit_log` | organización | Acciones críticas (RF-703), inmutable |
+Cada módulo de dominio tiene las mismas tres capas (Arquitectura, secciones 4 y 5). El orden de las dependencias es siempre el mismo, y es lo que mantiene las reglas de negocio independientes del marco y del proveedor de datos:
 
-Las **siete tablas de negocio** —de `workshops` hacia abajo— llevan todas `organization_id`, también las de nivel taller, que llevan además `workshop_id`. Es el censo sobre el que se mide la cobertura de políticas (RNF-101); `organizations` y `profiles` quedan fuera de él por no ser datos de negocio, con el motivo documentado en el [Modelo de datos](../docs/ingenieria/05-modelo-datos.md).
+| Archivo                  | Responsabilidad                                                           | De qué depende                     |
+| ------------------------ | ------------------------------------------------------------------------- | ---------------------------------- |
+| `<modulo>.routes.ts`     | Traduce HTTP: lee cabeceras, cuerpo y parámetros, y devuelve la respuesta | Del servicio                       |
+| `<modulo>.service.ts`    | Reglas de negocio y de rol; valida la entrada con su esquema              | De la **interfaz** del repositorio |
+| `<modulo>.repository.ts` | Acceso a datos y traducción de los errores del motor                      | Del cliente de datos               |
+| `<modulo>.schemas.ts`    | Esquemas Zod de entrada (los DTO)                                         | De nada                            |
 
-El aislamiento lo garantizan **políticas RLS** —una cuenta solo ve filas de organizaciones donde tiene membresía activa— **más** la verificación de membresía en la capa de aplicación (ADR-002, defensa en profundidad).
+```
+src/
+├── app.ts              Monta los módulos y el manejador de errores
+├── platform.ts         Raíz de composición: acceso, cuentas, organizaciones y auditoría
+├── lib/                Transversal: credencial, contexto activo, errores, clientes de datos
+└── modules/            identity · organizations · workshops · members · clients · inventory · audit
+```
 
-### Los dos clientes de datos, y por qué importa cuál se usa
+**Un módulo no invoca el repositorio de otro.** Lo que se comparte —la creación atómica de una organización, la escritura de auditoría, la verificación de membresía— viaja por `platform.ts`, que es también el punto donde el banco de pruebas sustituye una pieza sin que exista ningún interruptor en producción.
 
-Es la decisión más fácil de romper sin darse cuenta al añadir un endpoint.
+## Los dos clientes de datos, y por qué importa cuál se usa
 
-| Cliente | Respeta RLS | Cuándo |
-|---|---|---|
-| `c.get('db')` — atado a la credencial de la petición | **Sí** | Toda lectura y escritura de datos de negocio |
-| `serviceClient()` — clave de servicio | **No, la salta** | Siete excepciones, enumeradas en `src/lib/supabase.ts` |
+Es la decisión más fácil de romper sin darse cuenta al añadir un endpoint (ADR-008).
 
-Si un handler consulta con `serviceClient()`, las políticas **no intervienen** y el aislamiento pasa a depender solo del control de la aplicación. Por eso el reparto está acotado y documentado excepción por excepción — la decisión y sus alternativas están en **ADR-008** ([Decisiones de diseño](../docs/ingenieria/07-decisiones-diseno.md)).
+| Cliente                                              | Respeta RLS      | Cuándo                                                                            |
+| ---------------------------------------------------- | ---------------- | --------------------------------------------------------------------------------- |
+| `c.get('db')` — atado a la credencial de la petición | **Sí**           | Toda lectura y escritura de datos de negocio                                      |
+| `serviceClient(uso)` — clave secreta                 | **No, la salta** | Siete excepciones, enumeradas en el tipo `PrivilegedUse` de `src/lib/supabase.ts` |
 
-La de más peso es la primera: **la propia verificación de membresía consulta con clave de servicio**. Es deliberado — si el control de la aplicación dependiera de RLS para funcionar, las dos capas dejarían de ser independientes, que es justo lo que RNF-102 exige demostrar. Esa independencia se verifica en `test/defense-in-depth.test.ts` (CP-N102): allí se anula la capa de aplicación y se comprueba que las políticas siguen filtrando.
+Si un handler consulta con la clave secreta, las políticas **no intervienen** y el aislamiento pasa a depender solo del control de la aplicación. Por eso cada llamada declara **cuál** de las siete excepciones la justifica: `membership-verification`, `registration`, `organization-creation`, `member-profiles`, `account-lookup`, `inventory-atomic` y `audit-write`.
+
+La de más peso es la primera: **la propia verificación de membresía consulta con clave secreta**. Es deliberado — si dependiera de RLS para funcionar, las dos capas dejarían de ser independientes, que es justo lo que RNF-102 exige demostrar. Esa independencia se verifica en `test/defense-in-depth.test.ts` (CP-N102).
 
 ## Contexto activo: la regla de rutas
 
-El §2.3 del contrato fija una regla que atraviesa toda la API: **el identificador de la organización aparece en la ruta solo cuando el recurso es la organización misma**. Todo lo interior a ella —talleres, miembros, clientes, inventario, auditoría— se dirige a una ruta plana y el contexto viaja por cabecera:
+El §2.3 del contrato fija una regla que atraviesa toda la interfaz: **el identificador de la organización aparece en la ruta solo cuando el recurso es la organización misma**. Todo lo interior a ella se dirige a una ruta plana y el contexto viaja por cabecera:
 
-| Cabecera | Contenido | Cuándo |
-|---|---|---|
-| `Authorization: Bearer <jwt>` | Credencial de Supabase Auth | Siempre, salvo registro y `/health` |
-| `X-Org-Id` | Organización activa | Toda operación sobre datos internos de una organización |
-| `X-Workshop-Id` | Taller activo | Operaciones de nivel taller (inventario y sus movimientos) |
+| Cabecera                      | Contenido                   | Cuándo                                                     |
+| ----------------------------- | --------------------------- | ---------------------------------------------------------- |
+| `Authorization: Bearer <jwt>` | Credencial de Supabase Auth | Siempre, salvo el registro y `/health`                     |
+| `X-Org-Id`                    | Organización activa         | Toda operación sobre datos internos de una organización    |
+| `X-Workshop-Id`               | Taller activo               | Operaciones de nivel taller (inventario y sus movimientos) |
 
-El servidor **nunca asume un contexto por defecto**: si falta la cabecera exigida, rechaza la petición (ADR-005). Admitir a la vez la ruta anidada y la cabecera dejaría dos mecanismos de contexto conviviendo y la validación dejaría de estar concentrada en un punto único.
+El servidor **nunca asume un contexto por defecto**: si falta la cabecera exigida, rechaza la petición (ADR-005).
 
 ## Endpoints
 
+Los cuerpos de petición y de respuesta usan la misma grafía que el esquema (`snake_case`); los parámetros de consulta, `camelCase` (§2.4 del contrato). Las colecciones se devuelven bajo una clave en plural (`clients`, `workshops`, `parts`, `members`, `entries`).
+
 ### Identidad y organizaciones
 
-| Método | Ruta | Auth | Descripción |
-|---|---|---|---|
-| GET | `/health` | — | Comprobación de disponibilidad |
-| POST | `/api/auth/register` | — | Crea cuenta + 1.ª organización + 1.er taller + membresía Owner (atómico, vía `register_account`) |
-| GET | `/api/auth/me` | Bearer | Perfil + organizaciones con rol |
-| GET | `/api/organizations` | Bearer | Organizaciones de la cuenta (por membresía) |
-| POST | `/api/organizations` | Bearer | Crear organización (el creador queda Owner) |
-| GET | `/api/organizations/:orgId` | Bearer (miembro) | Detalle de la organización |
-| PATCH | `/api/organizations/:orgId` | Bearer (Owner) | Editar sus datos. **Acción auditada** |
-| POST | `/api/organizations/:orgId/switch` | Bearer (miembro) | Validar y devolver el rol para activar el contexto |
+| Método      | Ruta                                | Acceso          | Descripción                                                                  |
+| ----------- | ----------------------------------- | --------------- | ---------------------------------------------------------------------------- |
+| GET         | `/health`                           | —               | Comprobación de disponibilidad                                               |
+| POST        | `/api/auth/register`                | —               | Cuenta + 1.ª organización + 1.er taller + membresía `owner`, en un solo acto |
+| GET         | `/api/auth/me`                      | Credencial      | Perfil y organizaciones con su rol                                           |
+| GET / POST  | `/api/organizations`                | Credencial      | Listar por membresía · crear (el solicitante queda `owner`)                  |
+| GET / PATCH | `/api/organizations/{orgId}`        | Miembro / Owner | Detalle · editar. **Acción auditada**                                        |
+| POST        | `/api/organizations/{orgId}/switch` | Miembro         | Valida el contexto y devuelve el rol                                         |
 
-### Talleres — requieren `X-Org-Id`
+### Talleres, miembros y clientes — requieren `X-Org-Id`
 
-| Método | Ruta | Auth | Descripción |
-|---|---|---|---|
-| GET | `/api/workshops` | miembro | Listar los talleres de la organización activa |
-| POST | `/api/workshops` | Owner | Crear taller |
-| GET | `/api/workshops/:workshopId` | miembro | Detalle |
-| PATCH | `/api/workshops/:workshopId` | Owner | Editar campos |
-| POST | `/api/workshops/:workshopId/deactivate` | Owner | Baja lógica. **Acción auditada** |
-| GET | `/api/workshops/:workshopId/assignments` | miembro | Miembros asignados |
-| POST | `/api/workshops/:workshopId/assignments` | Owner | Asignar miembro |
-| DELETE | `/api/workshops/:workshopId/assignments/:userId` | Owner | Retirar asignación |
+| Método      | Ruta                                               | Rol                           | Descripción                                                          |
+| ----------- | -------------------------------------------------- | ----------------------------- | -------------------------------------------------------------------- |
+| GET / POST  | `/api/workshops`                                   | Miembro / Owner               | Listar (`includeInactive`) · crear                                   |
+| GET / PATCH | `/api/workshops/{workshopId}`                      | Miembro / Owner               | Detalle · editar                                                     |
+| POST        | `/api/workshops/{workshopId}/deactivate`           | Owner                         | Baja lógica. **Auditada**                                            |
+| GET / POST  | `/api/workshops/{workshopId}/assignments`          | Miembro / Owner               | Asignados · asignar (idempotente: `201` si crea, `200` si ya estaba) |
+| DELETE      | `/api/workshops/{workshopId}/assignments/{userId}` | Owner                         | Retirar la asignación                                                |
+| GET         | `/api/members`                                     | Miembro                       | Listar con rol y estado (`includeInactive`)                          |
+| POST        | `/api/members/invite`                              | Owner                         | Incorporar una cuenta existente. **Auditada**                        |
+| PATCH       | `/api/members/{userId}/role`                       | Owner                         | Cambiar el rol. **Auditada**                                         |
+| DELETE      | `/api/members/{userId}`                            | Owner                         | Revocar la membresía. **Auditada**                                   |
+| GET / POST  | `/api/clients`                                     | Miembro / Owner, Receptionist | Listar (`search`, `includeInactive`) · crear                         |
+| GET / PATCH | `/api/clients/{clientId}`                          | Miembro / Owner, Receptionist | Detalle · editar                                                     |
+| POST        | `/api/clients/{clientId}/deactivate`               | Owner, Receptionist           | Baja lógica. **Auditada**                                            |
 
-### Miembros — requieren `X-Org-Id`
+Que las rutas de clientes **no** exijan `X-Workshop-Id` es deliberado: su ausencia es la evidencia de RF-502 — el cliente pertenece a la organización, no al local.
 
-| Método | Ruta | Auth | Descripción |
-|---|---|---|---|
-| GET | `/api/members` | miembro | Listar con rol y estado |
-| POST | `/api/members/invite` | Owner | Incorporar una cuenta existente. **Acción auditada** |
-| PATCH | `/api/members/:userId/role` | Owner | Cambiar rol. **Acción auditada** |
-| DELETE | `/api/members/:userId` | Owner | Revocar la membresía (baja lógica). **Acción auditada** |
+### Inventario — nivel taller, requiere `X-Org-Id` **y** `X-Workshop-Id`
 
-### Clientes — nivel organización, requieren `X-Org-Id`
+| Método      | Ruta                                      | Rol                           | Descripción                                              |
+| ----------- | ----------------------------------------- | ----------------------------- | -------------------------------------------------------- |
+| GET / POST  | `/api/inventory/parts`                    | Miembro / Owner, Receptionist | Listar (`search`, `lowStock`, `includeInactive`) · crear |
+| GET / PATCH | `/api/inventory/parts/{partId}`           | Miembro / Owner, Receptionist | Detalle · editar el catálogo, **nunca la existencia**    |
+| GET / POST  | `/api/inventory/parts/{partId}/movements` | Miembro                       | Historial · registrar movimiento                         |
+| POST        | `/api/inventory/parts/{partId}/transfer`  | **Owner**                     | Transferir a otro taller de la organización              |
 
-| Método | Ruta | Descripción |
-|---|---|---|
-| GET / POST | `/api/clients` | Listar y buscar · crear |
-| GET / PATCH | `/api/clients/:clientId` | Detalle · editar |
-| POST | `/api/clients/:clientId/deactivate` | Baja lógica. **Acción auditada** |
-
-Que estas rutas **no** exijan `X-Workshop-Id` es deliberado: su ausencia es la evidencia de RF-502 — el cliente pertenece a la organización, no al local.
-
-### Inventario — nivel taller, requieren `X-Org-Id` **y** `X-Workshop-Id`
-
-| Método | Ruta | Rol | Descripción |
-|---|---|---|---|
-| GET | `/api/inventory/parts` | miembro | Listar (con `search` y `lowStock`) |
-| POST | `/api/inventory/parts` | Owner, Receptionist | Crear repuesto |
-| GET | `/api/inventory/parts/:partId` | miembro | Detalle |
-| PATCH | `/api/inventory/parts/:partId` | Owner, Receptionist | Editar catálogo, **nunca la existencia** |
-| GET / POST | `/api/inventory/parts/:partId/movements` | miembro | Historial · registrar movimiento |
-| POST | `/api/inventory/parts/:partId/transfer` | **Owner** | Transferir existencias a otro taller de la organización |
-
-RF-609 fija ese reparto: el Mechanic consume repuestos —consulta y registra movimientos— pero no administra el catálogo, y la transferencia entre locales queda reservada al Owner. Los tipos de movimiento registrables directamente son `purchase`, `sale`, `adjustment`, `return` y `damaged`; **`transfer` no se acepta** en esa operación, lo genera la transferencia como par de movimientos vinculados (RF-604, RF-608).
+Tipos de movimiento registrables directamente: `compra`, `venta`, `ajuste`, `devolucion` y `merma`. **`transferencia` no se acepta** ahí: la generan las transferencias, como par de movimientos vinculados por `transfer_id` (RF-604, RF-608). El destino de una transferencia es el repuesto con el **mismo número de parte** en el taller receptor.
 
 ### Auditoría — nivel organización, requiere `X-Org-Id`, **solo Owner**
 
-| Método | Ruta | Descripción |
-|---|---|---|
-| GET | `/api/audit` | Acciones críticas de la organización activa. Filtros: `action`, `workshopId`, `limit` |
+| Método | Ruta         | Descripción                                                                           |
+| ------ | ------------ | ------------------------------------------------------------------------------------- |
+| GET    | `/api/audit` | Acciones críticas de la organización activa. Filtros: `action`, `workshopId`, `limit` |
 
-Es la única lectura reservada a un rol. La restricción se aplica **también en la base de datos**: la política de `audit_log` exige `is_org_owner` (migración `0007`), de modo que el acceso directo tampoco la elude (RF-704). No se expone ninguna operación de escritura: el registro es historial inmutable.
-
-Las **seis acciones críticas** que registra (RF-703) son `member.invited`, `member.role_changed`, `member.removed`, `organization.updated`, `workshop.deactivated` y `client.deactivated`.
+Es la única lectura reservada a un rol, y la restricción se aplica **también en la base de datos** (RF-704). No se expone ninguna escritura: el registro lo escribe solo el servidor y es de solo inserción. Las seis acciones que registra (RF-703) son `member.invited`, `member.role_changed`, `member.removed`, `organization.updated`, `workshop.deactivated` y `client.deactivated`.
 
 ## Errores
 
-Todas las respuestas de error siguen **Problem Details** (RFC 9457, que sustituye al RFC 7807), con el código estable `modulo.razon` en el campo `title`. El catálogo completo es el del [§4 del contrato](../docs/ingenieria/10-contrato-api.md) y **la API no emite ningún código fuera de él**: un fallo inesperado del motor se propaga como `server.error` (500) en lugar de inventar un código nuevo.
+Toda respuesta de error sigue **Problem Details** (RFC 9457) con el código estable `modulo.razon` en `title`. El catálogo completo es el del [§4 del contrato](../docs/ingenieria/10-contrato-api.md) y **la interfaz no emite ningún código fuera de él**: un fallo inesperado del motor se propaga como `server.error` (500) en lugar de inventar un código.
 
-Dos reglas que conviene tener presentes al tocar este código:
+Tres reglas que conviene tener presentes al tocar este código:
 
-- **No divulgación (RNF-105).** Un recurso de otra organización responde `404` del módulo, indistinguible de uno inexistente; un `403` confirmaría que ese identificador existe en alguna parte. El `403 organization.access_denied` se reserva para cuando el solicitante *declara* operar sobre una organización ajena: ahí no revela nada que él no haya afirmado.
-- **Transiciones de estado (§2.6).** Una baja lógica auditada se expone como `POST /…/deactivate`, no como `PATCH`. La excepción son los **vínculos** —membresía y asignación a taller—, que se revocan con `DELETE` porque lo que se corta es una relación, no el estado de un recurso propio.
+- **No divulgación (RNF-105).** Un recurso de otra organización responde `404` del módulo, indistinguible de uno inexistente; también un identificador mal formado. El `403 organization.access_denied` se reserva para cuando el solicitante _declara_ operar sobre una organización ajena: ahí no revela nada que él no haya afirmado.
+- **Orden de las comprobaciones (§2.2).** Cabeceras presentes → membresía → taller → rol → validación del cuerpo. Un rol insuficiente recibe `403` aunque el cuerpo sea inválido.
+- **Transiciones de estado (§2.6).** Una baja lógica auditada se expone como `POST /…/deactivate`, no como `PATCH`. La excepción son los **vínculos** —membresía y asignación a taller—, que se revocan con `DELETE`.
 
-El **login** se hace desde el cliente con Supabase Auth (`signInWithPassword`), no contra esta API (ADR-004): aquí solo se **verifica** el token recibido.
+El **inicio de sesión** se hace desde el cliente con Supabase Auth, no contra esta interfaz (ADR-004): aquí solo se **verifica** la credencial recibida.
 
 ## Puesta en marcha
 
-1. **Crear un proyecto Supabase** (https://supabase.com). Debe ser un proyecto **dedicado**: el esquema instala un disparador sobre `auth.users`, que es común a toda aplicación que comparta el proyecto.
-2. **Aplicar las migraciones** en orden, desde el SQL Editor de Supabase o con `supabase db push`:
+1. **Crear un proyecto Supabase dedicado**: el esquema instala un disparador sobre `auth.users`, común a toda aplicación que comparta el proyecto.
+2. **Aplicar las migraciones en orden**, con `npm run db:migrate` (usa `DATABASE_URL`) o pegándolas en el SQL Editor:
+
    ```
    supabase/migrations/0001_identidad_y_jerarquia.sql   Cuentas, organizaciones, talleres, membresías, funciones y políticas
-   supabase/migrations/0002_negocio.sql                 Clientes (nivel organización) e inventario (nivel taller)
+   supabase/migrations/0002_negocio.sql                 Clientes (organización) e inventario (taller) con sus funciones atómicas
    supabase/migrations/0003_auditoria.sql               Registro de acciones críticas, lectura reservada al Owner
-   supabase/migrations/0004_permisos.sql                Permisos de esquema y de tabla
-   ```
-   Son **cuatro**, agrupadas por tema y no por orden histórico. El orden importa: la `0002` y la `0003` dependen de las tablas y funciones de la `0001`, y la `0004` concede sobre todo lo anterior — por eso va la última.
-
-   Ninguna es opcional. Sin la `0003` la auditoría no queda reservada al Owner y CP-704.2 no puede pasar; sin la `0004` el esquema depende de los valores por defecto del proyecto y, en una base donde no estén, todo responde `permission denied for schema public`.
-
-   Después, ejecutar `supabase/verify.sql` —solo lectura— para comprobar que las nueve tablas, las 28 políticas, los permisos y la restricción de propietario único quedaron en su sitio: son **once comprobaciones** y todas deben decir `OK`.
-
-   > **Partir de cero sobre un proyecto ya usado**: `supabase/reset.sql` retira **solo los objetos `mt_`** —las nueve tablas, sus ocho funciones, su disparador sobre `auth.users` y las cuentas que tenían perfil en MotoCore—, sin tocar nada más del esquema `public`. Es **destructivo e irreversible** para los datos de MotoCore, y vive fuera de `migrations/` para que `supabase db push` no lo aplique nunca.
-
-3. **Configurar el entorno**: copiar `.env.example` a `.env` con los valores de *Project Settings → API Keys*:
-   ```
-   SUPABASE_URL=https://<tu-proyecto>.supabase.co
-   SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
-   SUPABASE_SECRET_KEY=sb_secret_...
-   AUTH_AUTO_CONFIRM_EMAIL=true   # dev: permite iniciar sesión sin confirmar correo
+   supabase/migrations/0004_permisos.sql                Permisos de esquema, de tabla y de columna
    ```
 
-   **Si buscas «anon» y «service_role» y no las encuentras**, es porque Supabase las renombró: son la **publicable** y la **secreta** respectivamente. El servidor usa solo los nombres actuales.
+   Son **cuatro**, agrupadas por tema y no por orden histórico; el orden lo dan las dependencias, y la `0004` va la última porque concede sobre todo lo anterior. Ninguna es opcional: sin la `0003` la auditoría no queda reservada al Owner y CP-704.2 no puede pasar; sin la `0004` el esquema hereda los privilegios por defecto del proyecto, que conceden de más.
 
-   No hace falta la URL del JWKS: la credencial se verifica llamando a la API de Auth, no comprobando la firma localmente.
+   Después, `npm run db:verify` —solo lectura— comprueba en **15 filas** que las nueve tablas, las 21 políticas, los permisos y las restricciones quedaron en su sitio. Las últimas comprueban lo que el esquema **niega**: que `anon` no tenga privilegios, que el historial inmutable no se pueda escribir desde el cliente y que `current_stock` no se pueda modificar sin un movimiento.
+
+   > **Partir de cero sobre un proyecto ya usado**: `supabase/reset.sql` retira solo los objetos `mt_` y las cuentas que tenían perfil en MotoCore. Es **destructivo e irreversible**, y vive fuera de `migrations/` para que nunca se aplique en un despliegue.
+
+3. **Configurar el entorno**: copiar `.env.example` a `.env` y completar `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY`, `AUTH_AUTO_CONFIRM_EMAIL` y `CORS_ALLOWED_ORIGINS`. Toda diferencia entre entornos vive en variables, ninguna en el código (RNF-303).
 4. **Instalar y ejecutar**:
+
    ```bash
    npm install
-   npm run dev        # http://localhost:8787
-   npm test
+   npm run dev          # http://localhost:8787
    npm run typecheck
+   npm test
+   npm run test:unit    # solo N1 y N2, sin base de datos
+   npm run test:coverage
    ```
 
 ## Pruebas
 
 Los niveles siguen el [plan de pruebas](../docs/ingenieria/11-plan-pruebas.md). Cada caso lleva su identificador `CP-nnn` en el nombre, para leer la evidencia contra la matriz de trazabilidad sin traducción intermedia.
 
-**Sin Supabase** (N1 unitaria y N2 contrato HTTP) — corren siempre, en cada integración:
+**Sin Supabase** — corren en cada integración:
 
-| Archivo | Qué cubre |
-|---|---|
-| `test/schemas.test.ts` | Esquemas Zod |
-| `test/app.test.ts` | Superficie HTTP: credencial ausente, validación, forma del Problem Details |
-| `test/workshops.test.ts` | Esquemas de taller y **regresión de la regla de rutas** |
-| `test/business-routes.test.ts` | Clientes e inventario: contexto activo obligatorio y tipos de movimiento |
+| Archivo                       | Nivel | Qué cubre                                                                                                                                                   |
+| ----------------------------- | ----- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `test/unit/*.service.test.ts` | N1    | Las reglas de negocio y de rol de cada servicio, con repositorios en memoria. Es lo que mide la cobertura de RNF-207                                        |
+| `test/contract/api.test.ts`   | N2    | La interfaz completa con la plataforma sustituida: credencial, contexto obligatorio, rol, forma del error, validación, regla de rutas y orígenes permitidos |
 
-**Solo con credenciales** (N3 integración y N4 aislamiento) — se saltan con `describe.skipIf` si faltan. Requieren las migraciones aplicadas y `AUTH_AUTO_CONFIRM_EMAIL=true`:
+**Solo con credenciales** — se omiten si faltan, y **un caso omitido no cubre su requisito** (§7.2 del plan):
 
-| Archivo | Qué cubre |
-|---|---|
-| `test/integration.test.ts` | Flujo completo y reglas de negocio: CP-101 a CP-609, CP-703, CP-N105 |
-| `test/rls.test.ts` | **Aislamiento por acceso directo a la base de datos** (RF-702, CP-702, CP-N101, CP-N106, CP-704.2), sin pasar por la capa de aplicación |
-| `test/defense-in-depth.test.ts` | **CP-N102**: con la capa de aplicación anulada, las políticas del motor siguen impidiendo el acceso cruzado |
+| Archivo                         | Nivel        | Qué cubre                                                                                                             |
+| ------------------------------- | ------------ | --------------------------------------------------------------------------------------------------------------------- |
+| `test/integration.test.ts`      | N3 y N4 (C1) | Flujo completo y reglas de negocio contra Supabase real; vía 1 del aislamiento                                        |
+| `test/rls.test.ts`              | N4 (C3)      | **Aislamiento por acceso directo al motor**, sin pasar por la interfaz: CP-702, CP-N101, CP-402.2, CP-N106 y CP-704.2 |
+| `test/defense-in-depth.test.ts` | N4 (C2)      | **CP-N102**: con la capa de aplicación anulada, las políticas siguen filtrando                                        |
 
-Esos dos últimos archivos son los que sostienen la premisa central del proyecto: uno demuestra que el aislamiento se mantiene cuando se prescinde de la API, y el otro que se mantiene **dentro** de la API aunque su control de membresía falle.
+Los dos últimos sostienen la premisa central del proyecto: uno demuestra que el aislamiento se mantiene cuando se prescinde de la interfaz, y el otro que se mantiene **dentro** de la interfaz aunque su control de membresía falle. En ninguno se usa la clave secreta: saltaría las políticas y la prueba pasaría siempre.
 
-> **Un caso omitido no cubre su requisito.** Si N3 y N4 se saltan por falta de credenciales, la suite pasa en verde pero **no** constituye evidencia de cumplimiento (§6.2 del plan de pruebas). La validación del objetivo 3 se ejecuta contra un entorno real antes de cada hito.
+Los archivos se ejecutan **uno a uno** (`fileParallelism: false`): N3 y N4 registran cuentas contra el proveedor de identidad, que limita la tasa de altas, y en paralelo fallaban por una causa ajena a lo verificado.
 
 ## Despliegue en Vercel
 
-- Este directorio (`server/`) es un proyecto Vercel independiente. `vercel.json` reescribe todas las rutas a la función `api/index.ts`, que ejecuta la app Hono completa.
-- Configurar en Vercel `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY` y `AUTH_AUTO_CONFIRM_EMAIL` según el entorno. **Nunca** commitear la clave secreta.
-- El frontend se despliega como sitio estático (otro proyecto Vercel) apuntando a la URL de esta API.
+- Este directorio es un proyecto Vercel independiente. `vercel.json` reescribe todas las rutas a `api/index.ts`, que ejecuta la aplicación Hono completa.
+- Configurar en Vercel las mismas variables del `.env`, con `CORS_ALLOWED_ORIGINS` apuntando al dominio del cliente web de ese entorno. **Nunca** commitear la clave secreta (RNF-103).
 
 ## Trabajo posterior
 
-- Construir los módulos restantes (motocicletas → órdenes de trabajo → historial de mantenimiento → panel de métricas) con sus tablas `mt_` y sus políticas por `organization_id`. Están fuera del alcance del proyecto de grado (RF-800).
-- Funcionalidades del [análisis del mercado](../docs/ingenieria/09-analisis-mercado.md): facturación electrónica del SIN, mensajería por WhatsApp, presupuestos con aprobación, agendamiento y portal del cliente.
-- Publicar el esquema OpenAPI desde este servidor, para que el frontend derive sus tipos en lugar de declararlos a mano.
+- Publicar la **descripción OpenAPI 3.1** que el contrato exige en su §7 (entregable del objetivo 3).
+- Construir los módulos de RF-800 —motocicletas, órdenes de trabajo, historial y panel— con sus tablas `mt_`, su `organization_id` y su `grant` explícito en la `0004`.

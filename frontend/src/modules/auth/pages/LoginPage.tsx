@@ -3,13 +3,7 @@ import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { Network } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from '@/shared/ui/alert'
 import { Button } from '@/shared/ui/button'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/shared/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/card'
 import { Input } from '@/shared/ui/input'
 import { useAuth } from '../hooks/useAuth'
 
@@ -40,10 +34,7 @@ export function LoginPage() {
       const nextPath = (location.state as LocationState | null)?.from?.pathname ?? '/'
       navigate(nextPath, { replace: true })
     } catch (submitError) {
-      const message =
-        submitError instanceof Error
-          ? submitError.message
-          : 'No fue posible iniciar sesión.'
+      const message = submitError instanceof Error ? submitError.message : 'No fue posible iniciar sesión.'
       setError(message)
     }
   }
@@ -54,18 +45,13 @@ export function LoginPage() {
         <Card>
           <CardHeader>
             <CardTitle>Iniciar sesión</CardTitle>
-            <CardDescription>
-              Accede a MotoCore con tu correo y contraseña.
-            </CardDescription>
+            <CardDescription>Accede a MotoCore con tu correo y contraseña.</CardDescription>
           </CardHeader>
 
           <CardContent>
             <form className="space-y-4" onSubmit={handleSubmit}>
               <div className="space-y-2">
-                <label
-                  htmlFor="email"
-                  className="text-sm font-medium text-gray-900 dark:text-gray-100"
-                >
+                <label htmlFor="email" className="text-sm font-medium text-gray-900 dark:text-gray-100">
                   Correo
                 </label>
                 <Input
@@ -79,10 +65,7 @@ export function LoginPage() {
               </div>
 
               <div className="space-y-2">
-                <label
-                  htmlFor="password"
-                  className="text-sm font-medium text-gray-900 dark:text-gray-100"
-                >
+                <label htmlFor="password" className="text-sm font-medium text-gray-900 dark:text-gray-100">
                   Contraseña
                 </label>
                 <Input

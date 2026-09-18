@@ -41,7 +41,11 @@ beforeEach(() => {
           workshop: {},
           client: {},
           organization: {},
+          organizations: [],
           assignments: [],
+          assignment: {},
+          member: {},
+          entries: [],
         }),
         { status: 200, headers: { 'Content-Type': 'application/json' } },
       )

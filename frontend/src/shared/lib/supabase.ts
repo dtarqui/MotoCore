@@ -15,9 +15,7 @@ const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
 const supabasePublishableKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
 
 if (!supabaseUrl || !supabasePublishableKey) {
-  throw new Error(
-    'Faltan VITE_SUPABASE_URL y/o VITE_SUPABASE_PUBLISHABLE_KEY. Ver frontend/.env.example.',
-  )
+  throw new Error('Faltan VITE_SUPABASE_URL y/o VITE_SUPABASE_PUBLISHABLE_KEY. Ver frontend/.env.example.')
 }
 
 export const supabase = createClient(supabaseUrl, supabasePublishableKey, {

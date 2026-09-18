@@ -10,12 +10,7 @@ import { Skeleton } from '@/shared/ui/skeleton'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shared/ui/table'
 import { useActiveOrgId } from '@/shared/lib/active-context'
 import { ApiError } from '@/shared/lib/api-client'
-import {
-  AUDIT_ACTION_LABELS,
-  getAuditLog,
-  type AuditAction,
-  type AuditEntry,
-} from '../auditoria-api'
+import { AUDIT_ACTION_LABELS, getAuditLog, type AuditAction, type AuditEntry } from '../auditoria-api'
 
 /** Formato legible para la fecha del registro. */
 function formatearFecha(iso: string) {
@@ -32,13 +27,13 @@ function formatearFecha(iso: string) {
 
 /** Nombre de quien ejecutó la acción, con reserva cuando la cuenta ya no existe. */
 function describirAutor(entry: AuditEntry) {
-  const perfil = entry.performedByProfile
+  const perfil = entry.performed_by_profile
   if (perfil) {
     const nombre = `${perfil.first_name} ${perfil.last_name}`.trim()
     return nombre || perfil.email
   }
   // El registro sobrevive al borrado de la cuenta: es lo que exige RF-703.
-  return entry.performedBy ? 'Cuenta eliminada' : 'Sistema'
+  return entry.performed_by ? 'Cuenta eliminada' : 'Sistema'
 }
 
 /**
@@ -125,7 +120,7 @@ export function AuditoriaPage() {
                 </TableCell>
                 <TableCell className="text-gray-500 dark:text-gray-400">{describirAutor(entry)}</TableCell>
                 <TableCell className="tabular-nums text-gray-500 dark:text-gray-400">
-                  {formatearFecha(entry.createdAt)}
+                  {formatearFecha(entry.created_at)}
                 </TableCell>
               </TableRow>
             ))}

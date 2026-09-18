@@ -1,14 +1,33 @@
 {
-  "name": "MotoCore",
+  "name": "MotoCore — Gestión de talleres",
   "short_name": "MotoCore",
-  "description": "Gestión integral de talleres de motocicletas.",
+  "description": "Gestión de organizaciones de servicio de motocicletas: clientes, talleres e inventario.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "background_color": "#0a0a0a",
-  "theme_color": "#0a0a0a",
+  "theme_color": "#7e14ff",
   "lang": "es",
+  "dir": "ltr",
   "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
     {
       "src": "/favicon.svg",
       "sizes": "any",

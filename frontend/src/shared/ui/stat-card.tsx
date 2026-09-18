@@ -27,7 +27,11 @@ export function StatCard({ label, value, helper, icon: Icon, isLoading }: StatCa
           <Icon className="h-5 w-5" />
         </div>
       </div>
-      {helper ? <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">{helper}</div> : null}
+      {helper ? (
+        <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
+          {helper}
+        </div>
+      ) : null}
     </Card>
   )
 }

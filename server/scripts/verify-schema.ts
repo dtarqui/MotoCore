@@ -6,7 +6,7 @@ import { conectar } from './db-client.js';
  * Corre `supabase/verify.sql` contra `DATABASE_URL` e imprime sus filas.
  *
  * Es de solo lectura: no modifica nada (lo declara el propio `verify.sql`).
- * Once filas deben decir "OK" tras aplicar `migrations/0001…0011`.
+ * Todas las filas deben decir "OK" tras aplicar `migrations/0001…0004`.
  */
 async function principal() {
   const rutaVerify = fileURLToPath(new URL('../supabase/verify.sql', import.meta.url));

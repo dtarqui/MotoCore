@@ -1,35 +1,33 @@
 import type { MiddlewareHandler } from 'hono';
-import { serviceClient, userClient } from './supabase.js';
+import type { AccessGateway } from './access.js';
 import { unauthorized } from './errors.js';
-import type { AppBindings } from '../types.js';
+import type { AuthEnv } from '../types.js';
 
 /**
- * Verifica el access token de Supabase (Authorization: Bearer <jwt>) y deja la
- * identidad y el cliente de datos de la peticion en el contexto. La emision y
- * la renovacion de tokens las maneja Supabase Auth en el cliente; aqui solo se
- * verifica (ADR-004).
+ * Verifica la credencial de sesión (`Authorization: Bearer <jwt>`) y deja en el
+ * contexto la identidad y el cliente de datos de la petición (RF-103).
  *
- * El `db` que deja en el contexto esta atado a esa credencial, de modo que
- * toda consulta de negocio se evalue contra las politicas RLS con la identidad
- * real de quien llama.
+ * La emisión y la renovación de credenciales ocurren contra el proveedor de
+ * identidad, en el cliente; aquí solo se verifica (ADR-004). El cliente de
+ * datos se construye **una sola vez**, en este punto, para que la decisión de
+ * con qué identidad se consulta la base esté concentrada (ADR-008).
  */
-export const requireAuth: MiddlewareHandler<AppBindings> = async (c, next) => {
-  const header = c.req.header('Authorization') ?? '';
-  const token = header.startsWith('Bearer ') ? header.slice(7).trim() : '';
-  if (!token) {
-    throw unauthorized('auth.missing_token', 'Falta la credencial de sesion.');
-  }
+export function requireAuth(access: AccessGateway): MiddlewareHandler<AuthEnv> {
+  return async (c, next) => {
+    const header = c.req.header('Authorization') ?? '';
+    // El esquema no distingue mayúsculas (RFC 9110 §11.1).
+    const token = /^Bearer\s+(\S+)\s*$/i.exec(header)?.[1] ?? '';
+    if (!token) {
+      throw unauthorized('auth.missing_token', 'Falta la credencial de sesión.');
+    }
 
-  const { data, error } = await serviceClient().auth.getUser(token);
-  if (error || !data.user) {
-    throw unauthorized('auth.invalid_token', 'Credencial invalida, expirada o revocada.');
-  }
+    const identity = await access.verifyToken(token);
+    if (!identity) {
+      throw unauthorized('auth.invalid_token', 'Credencial inválida, expirada o revocada.');
+    }
 
-  c.set('userId', data.user.id);
-  c.set('userEmail', data.user.email ?? '');
-  c.set('userToken', token);
-  // Un solo cliente por peticion: crearlo por consulta multiplicaria el coste
-  // de arranque en una funcion efimera.
-  c.set('db', userClient(token));
-  await next();
-};
+    c.set('identity', identity);
+    c.set('db', access.requestClient(token));
+    await next();
+  };
+}

@@ -2,13 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { Alert, AlertDescription, AlertTitle } from '@/shared/ui/alert'
 import { Button } from '@/shared/ui/button'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/shared/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/card'
 import { Input } from '@/shared/ui/input'
 import { useAuth } from '../hooks/useAuth'
 
@@ -35,21 +29,18 @@ export function RegisterPage() {
 
     try {
       await register({
-        firstName: firstName.trim(),
-        lastName: lastName.trim(),
+        first_name: firstName.trim(),
+        last_name: lastName.trim(),
         email: email.trim(),
         password,
-        organizationName: organizationName.trim(),
+        organization_name: organizationName.trim(),
         // Si se omite, el servidor nombra el taller como la organización.
-        workshopName: workshopName.trim() || undefined,
+        workshop_name: workshopName.trim() || undefined,
       })
 
       navigate('/', { replace: true })
     } catch (submitError) {
-      const message =
-        submitError instanceof Error
-          ? submitError.message
-          : 'No fue posible crear la cuenta.'
+      const message = submitError instanceof Error ? submitError.message : 'No fue posible crear la cuenta.'
       setError(message)
     }
   }
@@ -60,19 +51,14 @@ export function RegisterPage() {
         <Card>
           <CardHeader>
             <CardTitle>Crear cuenta</CardTitle>
-            <CardDescription>
-              Registro básico para acceder a MotoCore.
-            </CardDescription>
+            <CardDescription>Registro básico para acceder a MotoCore.</CardDescription>
           </CardHeader>
 
           <CardContent>
             <form className="space-y-4" onSubmit={handleSubmit}>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <label
-                    htmlFor="firstName"
-                    className="text-sm font-medium text-gray-900 dark:text-gray-100"
-                  >
+                  <label htmlFor="firstName" className="text-sm font-medium text-gray-900 dark:text-gray-100">
                     Nombre
                   </label>
                   <Input
@@ -84,10 +70,7 @@ export function RegisterPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <label
-                    htmlFor="lastName"
-                    className="text-sm font-medium text-gray-900 dark:text-gray-100"
-                  >
+                  <label htmlFor="lastName" className="text-sm font-medium text-gray-900 dark:text-gray-100">
                     Apellido
                   </label>
                   <Input
@@ -100,10 +83,7 @@ export function RegisterPage() {
               </div>
 
               <div className="space-y-2">
-                <label
-                  htmlFor="registerEmail"
-                  className="text-sm font-medium text-gray-900 dark:text-gray-100"
-                >
+                <label htmlFor="registerEmail" className="text-sm font-medium text-gray-900 dark:text-gray-100">
                   Correo
                 </label>
                 <Input
@@ -117,10 +97,7 @@ export function RegisterPage() {
               </div>
 
               <div className="space-y-2">
-                <label
-                  htmlFor="registerPassword"
-                  className="text-sm font-medium text-gray-900 dark:text-gray-100"
-                >
+                <label htmlFor="registerPassword" className="text-sm font-medium text-gray-900 dark:text-gray-100">
                   Contraseña
                 </label>
                 <Input
@@ -134,10 +111,7 @@ export function RegisterPage() {
               </div>
 
               <div className="space-y-2">
-                <label
-                  htmlFor="organizationName"
-                  className="text-sm font-medium text-gray-900 dark:text-gray-100"
-                >
+                <label htmlFor="organizationName" className="text-sm font-medium text-gray-900 dark:text-gray-100">
                   Nombre de la organización
                 </label>
                 <Input
@@ -149,12 +123,8 @@ export function RegisterPage() {
               </div>
 
               <div className="space-y-2">
-                <label
-                  htmlFor="workshopName"
-                  className="text-sm font-medium text-gray-900 dark:text-gray-100"
-                >
-                  Nombre de la primera taller{' '}
-                  <span className="font-normal text-gray-500">(opcional)</span>
+                <label htmlFor="workshopName" className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                  Nombre de la primera taller <span className="font-normal text-gray-500">(opcional)</span>
                 </label>
                 <Input
                   id="workshopName"

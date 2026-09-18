@@ -6,7 +6,8 @@
 -- organización, desactivación de un taller y baja lógica de un cliente.
 --
 -- Es de nivel organización —debe poder revisarse de forma consolidada— con
--- referencia opcional al taller cuando la acción ocurrió en uno.
+-- referencia opcional al taller cuando la acción ocurrió en uno. Se conserva
+-- mientras exista la organización (Requisitos, sección 5).
 -- ============================================================================
 
 create table if not exists public.mt_audit_log (
@@ -17,7 +18,10 @@ create table if not exists public.mt_audit_log (
   -- al borrado de la cuenta que ejecutó la acción. Una auditoría que desaparece
   -- con su autor no es una auditoría.
   performed_by     uuid,
-  action           text not null,
+  action           text not null
+                     check (action in ('member.invited', 'member.role_changed', 'member.removed',
+                                       'organization.updated', 'workshop.deactivated',
+                                       'client.deactivated')),
   entity           text not null,
   entity_id        uuid,
   details          jsonb,
@@ -37,10 +41,14 @@ drop policy if exists mt_audit_log_select_owner on public.mt_audit_log;
 create policy mt_audit_log_select_owner on public.mt_audit_log
   for select using (public.mt_is_org_owner(organization_id));
 
-drop policy if exists mt_audit_log_insert_member on public.mt_audit_log;
-create policy mt_audit_log_insert_member on public.mt_audit_log
-  for insert with check (public.mt_is_org_member(organization_id));
-
--- Sin políticas de `update` ni de `delete`: el registro es de solo inserción.
--- Su ausencia es deliberada y es la primera de las dos capas que lo hacen
--- inmutable; la segunda son los permisos de la 0004.
+-- SIN POLÍTICA DE INSERCIÓN, a propósito (RN-15, ADR-008).
+--
+-- La escritura de auditoría es una de las excepciones privilegiadas: ocurre
+-- siempre con la credencial del servidor, que no evalúa políticas. Apoyar una
+-- política de inserción en `mt_is_org_member` dejaría que un miembro insertara
+-- entradas por acceso directo y falseara el registro, que es justamente lo que
+-- RF-703 debe impedir.
+--
+-- Tampoco hay `update` ni `delete`: el registro es de solo inserción. La
+-- ausencia de políticas es la primera de las dos capas que lo hacen inmutable;
+-- la segunda son los permisos de la 0004.

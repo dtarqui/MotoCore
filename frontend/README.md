@@ -1,86 +1,40 @@
-# MotoCore Frontend
+# MotoCore — Cliente web
 
-SPA de React para la gestión de organizaciones de servicio de motocicletas.
+SPA en React + TypeScript para la gestión de organizaciones de servicio de motocicletas. Consume la interfaz de programación de [`server/`](../server/README.md), con **Supabase Auth** para la sesión y los **selectores de organización y taller** enviando `X-Org-Id` y `X-Workshop-Id` en cada petición (ADR-005).
 
-> **Estado:** el SPA consume el backend en [`server/`](../server/README.md), con **Supabase Auth** para la sesión y los **selectores de organización y taller** enviando `X-Org-Id` / `X-Workshop-Id` en cada petición (ADR-005).
+> **La especificación gobierna este código**, no al revés ([`docs/`](../docs/README.md)). El texto visible sigue el [Glosario](../docs/ingenieria/01-glosario.md): la unidad de aislamiento es la **organización** y el local físico es el **taller**; «empresa» y «sucursal» están retirados del proyecto. Los identificadores del contrato y del esquema se conservan en inglés y **no** se traducen.
 >
-> Rutas expuestas: clientes e inventario (el corte vertical), talleres, equipo y auditoría. Los módulos de **motocicletas, órdenes e historial** conservan su interfaz en el repositorio pero **no están enrutados**: todavía no tienen endpoints en el backend nuevo, y una pantalla accesible que falla al cargar es peor que una que aún no está.
->
-> **Terminología:** el texto visible sigue el [Glosario](../docs/ingenieria/01-glosario.md) — la unidad de aislamiento es la **organización** (`mt_organizations`) y el local físico es el **taller** (`mt_workshops`). Los términos «empresa» y «sucursal» están retirados del proyecto. Los identificadores del contrato y del esquema se conservan en inglés y **no** se traducen.
+> **Alcance construido**: el corte vertical —clientes (nivel organización) e inventario (nivel taller)—, más talleres, equipo y auditoría. Motocicletas, órdenes de trabajo e historial de mantenimiento **no están en el repositorio**: quedan fuera del alcance del proyecto de grado (RF-800).
 
 ## Stack
 
 - React 19 + TypeScript + Vite
 - TailwindCSS 4
-- React Query (`@tanstack/react-query`) para estado de servidor
+- **TanStack Query** para el estado de servidor (ADR-010)
 - React Router 7
-- Vitest + React Testing Library para las pruebas
-- UI propia sobre Radix + `class-variance-authority` + `tailwind-merge` (estilo shadcn/ui) en `src/shared/ui`
+- Vitest + React Testing Library para las pruebas de componente (nivel N6)
+- UI propia sobre Radix, `class-variance-authority` y `tailwind-merge` en `src/shared/ui`
 
 ## Cómo ejecutar
 
 ```bash
 npm install
-npm run dev       # servidor de desarrollo (http://localhost:5173)
-npm test          # suite de Vitest
+npm run dev       # http://localhost:5173
+npm test          # nivel N6
 npm run lint
 npm run build     # tsc -b + vite build
-npm run preview   # sirve el build de producción
+npm run preview   # sirve la compilación de producción (con service worker)
 ```
 
 Copia `.env.example` a `.env` y completa:
 
-| Variable | Para qué |
-|---|---|
-| `VITE_API_BASE_URL` | URL del backend `server/`. Por defecto `http://localhost:8787` (su dev-server) |
-| `VITE_SUPABASE_URL` | Proyecto Supabase, para el inicio de sesión |
-| `VITE_SUPABASE_PUBLISHABLE_KEY` | Clave **publicable** (*Project Settings → API Keys*) — es pública por diseño: el acceso lo deciden las políticas de la base de datos, no el secreto de la clave |
+| Variable                        | Para qué                                                                                                                        |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `VITE_API_BASE_URL`             | URL de la interfaz de programación. Por defecto `http://localhost:8787`                                                         |
+| `VITE_SUPABASE_URL`             | Proyecto Supabase, para el inicio de sesión                                                                                     |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | Clave **publicable** — es pública por diseño: el acceso lo deciden las políticas de la base de datos, no el secreto de la clave |
 
-**Nunca** pongas la clave **secreta** en este archivo: se empaqueta en el navegador y esa clave salta las políticas de aislamiento.
-
-### Con Docker
-
-```bash
-docker build -t motocore-frontend .
-```
-
-Multi-stage: build con `node:20-alpine`, se sirve con `nginx:alpine` (`nginx.conf` incluye fallback de rutas para el SPA).
-
-### Tipos de la API
-
-Se declaran **a mano** en cada módulo (`<modulo>-api.ts`). El script `generate:api-types` y la dependencia `openapi-typescript` se retiraron junto con el backend .NET: apuntaban a un `swagger.json` que ya no existe, y el servidor actual (`server/`, Hono) no publica un documento OpenAPI.
-
-Si algún día se publica OpenAPI desde `server/`, la generación puede retomarse; hasta entonces, el [contrato](../docs/ingenieria/10-contrato-api.md) es la fuente de verdad de la interfaz.
-
-### Empaquetado multiplataforma (PWA / Capacitor / Electron)
-
-- **PWA**: ya instalable (`public/manifest.webmanifest`) — sin service worker todavía, no funciona offline.
-- **Capacitor / Electron**: `capacitor.config.ts` y `electron/main.js` son placeholders documentados, sin las dependencias instaladas todavía (deliberado). Cada archivo tiene las instrucciones de los siguientes pasos en un comentario.
-
-## Estructura
-
-```
-src/
-├── app/
-│   ├── layouts/       # AppShell (layout autenticado con navegación)
-│   └── providers/     # QueryProvider, AppProviders
-├── modules/
-│   ├── auth/            # login, registro, sesión, rutas protegidas por rol
-│   ├── clientes/        # clientes — nivel organización
-│   ├── inventario/      # repuestos y movimientos — nivel taller
-│   ├── organizaciones/  # selectores de contexto, talleres y equipo
-│   ├── auditoria/       # registro de acciones críticas (solo Owner)
-│   ├── dashboard/       # resumen del contexto activo
-│   ├── motocicletas/    # sin enrutar — a la espera de endpoints
-│   ├── ordenes/         # sin enrutar — a la espera de endpoints
-│   └── historial/       # sin enrutar — se usa embebido en motocicletas
-├── router/             # definición de rutas (React Router)
-├── test/               # setup de Vitest
-└── shared/
-    ├── config/          # API_BASE_URL, navegación
-    ├── lib/             # apiRequest, contexto activo, utils
-    └── ui/              # componentes de UI reutilizables
-```
+**Nunca** pongas aquí la clave **secreta**: se empaqueta en el navegador y esa clave salta las políticas de aislamiento (RNF-103).
 
 ## El contexto activo
 
@@ -88,23 +42,22 @@ Es la pieza que materializa la jerarquía en la interfaz, y conviene entenderla 
 
 `shared/lib/active-context.ts` guarda la organización y el taller activos **fuera de React**, para que `apiRequest` pueda adjuntarlos como cabeceras sin recibirlos por parámetro en cada llamada. Se persisten en el almacenamiento local, de modo que recargar la página no pierda el contexto; el valor guardado es solo una preferencia, porque el servidor revalida la membresía en cada petición.
 
-Dos reglas que no deben romperse:
+Tres reglas que no deben romperse:
 
-- **Cambiar de organización limpia el taller activo.** El que estaba elegido pertenecía a la organización anterior; conservarlo dejaría al operador trabajando sobre un local ajeno al contexto que cree tener.
+- **Cambiar de organización limpia el taller activo.** El que estaba elegido pertenecía a la organización anterior; conservarlo dejaría al operador trabajando sobre un local ajeno al contexto que cree tener (CP-N401.1).
 - **`X-Workshop-Id` se envía solo en los endpoints de nivel taller**, pasando `withWorkshop: true` a `apiRequest`. En clientes no se envía, y esa ausencia es precisamente lo que demuestra RF-502.
+- **El contexto activo forma parte de la clave de cada consulta** (ADR-010): `['clients', orgId, …]`, `['parts', orgId, workshopId, …]`. Dos organizaciones producen claves distintas, de modo que ninguna respuesta puede servirse desde la caché de otra. Al cambiar de organización se invalida **todo** el caché; al cambiar de taller, solo `parts` y `movements`.
 
 `ContextSelectors` **deriva** la selección efectiva en cada render en lugar de duplicarla en estado: si la organización o el taller elegidos dejan de ser válidos, cae en el primero disponible sin sincronizar estados entre sí.
 
 ## Convención de módulos
 
-Cada módulo de feature sigue el mismo patrón (ver `clientes/` como referencia):
+Cada módulo sigue el mismo patrón (ver `clientes/` como referencia):
 
-- `types.ts` — tipos de dominio y payloads.
-- `<modulo>-api.ts` — funciones que llaman a la API vía `apiRequest` de `shared/lib/api-client.ts` (adjunta la credencial y el contexto, y traduce los Problem Details a `ApiError` conservando el código de negocio).
+- `types.ts` — tipos de dominio y payloads, en **`snake_case`**, tal como viajan por el contrato (§2.4). No hay capa de traducción que mantener en dos sitios.
+- `<modulo>-api.ts` — funciones que llaman a la interfaz vía `apiRequest`, que adjunta credencial y contexto y traduce el Problem Details a `ApiError` conservando el código de negocio.
 - `pages/` — páginas de React Router.
-- `components/` (opcional) — piezas de UI reutilizadas solo dentro del módulo.
-
-Al agregar un módulo nuevo, replica esta estructura en vez de improvisar una distinta.
+- `components/` (opcional) — piezas reutilizadas solo dentro del módulo.
 
 ### Rutas: el contexto no va en la URL
 
@@ -114,45 +67,39 @@ Las bajas lógicas auditadas se invocan con `POST /…/deactivate`, no con `PATC
 
 ## Autenticación y roles
 
-`modules/auth` maneja el registro, el inicio de sesión y la sesión contra **Supabase Auth**; la API solo verifica el token (ADR-004). Las rutas se protegen con `ProtectedRoute` (requiere sesión) y `RoleRoute` (requiere alguno de los roles `owner`, `mechanic`, `receptionist`) — ver `router/index.tsx`.
+`modules/auth` maneja el registro, el inicio de sesión y la sesión contra **Supabase Auth**; la interfaz de programación solo verifica la credencial (ADR-004). Las rutas se protegen con `ProtectedRoute` (requiere sesión) y `RoleRoute` (requiere alguno de los roles).
 
-La protección por rol en el cliente es **cosmética**: evita mostrar una pantalla que fallaría al cargar. La restricción real la aplican la API y las políticas de la base de datos. Nunca la trates como control de acceso.
+La protección por rol en el cliente es **cosmética**: evita mostrar una pantalla que fallaría al cargar. La restricción real la aplican la interfaz y las políticas de la base de datos. Nunca la trates como control de acceso.
 
-## Estado de servidor con React Query
+## Instalable como PWA (RNF-403)
 
-Cada página usa `useQuery`/`useMutation` directamente (no hay una capa de hooks intermedia). Convención de `queryKey`: un array con el nombre del recurso en plural y, si aplica, el id relacionado — `['clients']`, `['workshops', orgId]`, `['parts']`. Tras una mutación exitosa se invalida la query relacionada en vez de actualizar el caché a mano.
+- `public/manifest.webmanifest` declara nombre, `start_url`, `display: standalone` e iconos de **192 y 512 px**, más uno _maskable_.
+- `public/sw.js` es el _service worker_, registrado desde `main.tsx` **solo en producción** —en desarrollo interceptaría la recarga en caliente de Vite—.
+- El worker cachea **únicamente el armazón** de la aplicación. Ninguna respuesta de la interfaz se guarda ahí: la caché de datos de negocio vive en memoria y se vacía al cerrar la sesión (ADR-010). Persistirla dejaría datos de una organización en el equipo del operador.
 
-Al cambiar de organización se invalida **todo** el caché: los datos que hubiera son de la organización anterior. Al cambiar de taller solo se invalidan `['parts']` y `['movements']`, porque los datos de nivel organización siguen siendo válidos.
-
-## UI compartida (`src/shared/ui`)
-
-Componentes propios sobre Radix + `class-variance-authority` + `tailwind-merge`, estilo shadcn/ui: `Button`, `Card` (+ `CardHeader`/`CardTitle`/`CardContent`/`CardFooter`), `Badge`, `Alert` (+ `AlertTitle`/`AlertDescription`), `Table` (+ subcomponentes), `Input`, `PageHeader`. No hay componente de `Select` propio — los formularios usan `<select>` nativo con clases de Tailwind calcadas del estilo de `Input`.
-
-## Pruebas
+## Pruebas (nivel N6)
 
 ```bash
-npm test          # una pasada
+npm test
 npm run test:watch
 ```
 
-Vitest sobre jsdom, con React Testing Library. El entorno se configura en `vite.config.ts` y el setup común en `src/test/setup.ts`, que limpia el DOM y el almacenamiento local entre casos: el contexto activo se persiste, y sin esa limpieza un caso heredaría la organización que dejó otro.
+Vitest sobre jsdom con React Testing Library. El entorno se configura en `vite.config.ts` y el setup común en `src/test/setup.ts`, que limpia el DOM y el almacenamiento local entre casos: sin esa limpieza un caso heredaría el contexto que dejó otro.
 
-Qué cubre, y por qué esas cosas y no otras:
+| Archivo                                             | Qué asegura                                                                                                                    |
+| --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `shared/lib/active-context.test.ts`                 | Que cambiar de organización **limpia** el taller activo — el fallo más dañino del modelo jerárquico en la interfaz             |
+| `shared/lib/api-client.test.ts`                     | Que la credencial y el contexto viajan como fija el §2 del contrato, y que el código de negocio del error sobrevive al cliente |
+| `modules/organizaciones/organizaciones-api.test.ts` | Regresión de la regla de rutas (§2.3) y del método de las bajas lógicas (§2.6)                                                 |
+| `modules/organizaciones/ContextSelectors.test.tsx`  | HU-05 y HU-07, y la invalidación de la caché al cambiar de contexto (CP-N401.1, CP-N401.2)                                     |
+| `modules/auditoria/auditoria-api.test.ts`           | Que las seis acciones de RF-703 tengan etiqueta y no queden identificadores crudos en pantalla                                 |
 
-| Archivo | Qué asegura |
-|---|---|
-| `shared/lib/active-context.test.ts` | Que cambiar de organización **limpia** el taller activo — el fallo más dañino del modelo jerárquico en la interfaz |
-| `shared/lib/api-client.test.ts` | Que la credencial y el contexto viajan como fija el §2 del contrato, y que el código de negocio del error sobrevive al cliente |
-| `modules/organizaciones/organizaciones-api.test.ts` | Regresión de la regla de rutas (§2.3) y del método de las bajas lógicas (§2.6) |
-| `modules/organizaciones/ContextSelectors.test.tsx` | HU-05 y HU-07: que el contexto elegido sea el que viaja después en las cabeceras |
-| `modules/auditoria/auditoria-api.test.ts` | Que las seis acciones de RF-703 tengan etiqueta y no queden identificadores crudos en pantalla |
+Este nivel evalúa **el cumplimiento del contrato desde el lado del cliente**, no la interfaz de usuario: un participante puede completar las tareas con éxito mientras el cliente envía una cabecera equivocada. El diseño responsivo, la instalabilidad y la accesibilidad se auditan en N7 (Playwright y axe-core), y la usabilidad del cambio de contexto, con operadores reales (N5).
 
-Esta suite es el **nivel N6** del [plan de pruebas](../docs/ingenieria/11-plan-pruebas.md) §1.3: no evalúa la interfaz, sino el cumplimiento del contrato desde el lado del cliente. Corre en cada integración, junto a N1 y N2.
+## Tipos de la interfaz
 
-No sustituye a la evaluación con operadores ni relaja sus umbrales: RNF-402 y RNF-403 siguen verificándose por inspección (N0), y RNF-401 y RNF-404 con operadores reales (N5). Un participante puede completar las tres tareas con éxito mientras el cliente envía una cabecera equivocada, y a la inversa — por eso hacen falta los dos niveles.
+Se declaran **a mano** en cada módulo (`<modulo>-api.ts` y `types.ts`), siguiendo el [contrato](../docs/ingenieria/10-contrato-api.md), que es la fuente de verdad. Cuando el servidor publique su descripción OpenAPI (§7 del contrato), podrán derivarse de ahí.
 
-## Estado de las features
+## Diagramas de arquitectura (`/arquitectura`)
 
-Enrutadas y conectadas al backend: **clientes**, **inventario**, **talleres**, **equipo** y **auditoría**, más el registro y el inicio de sesión con Supabase Auth y los selectores de contexto activo.
-
-Sin enrutar, a la espera de sus endpoints: **motocicletas**, **órdenes**, **historial** y el detalle del **dashboard**. Están fuera del alcance del proyecto de grado (RF-800). Ver el [análisis del mercado](../docs/ingenieria/09-analisis-mercado.md) para el orden de prioridad de las funcionalidades pendientes.
+Ruta pública, fuera de `AppShell` y de `ProtectedRoute`, pensada para proyectar el proyecto en una presentación: tres diagramas HTML autocontenidos en `public/diagramas/` —arquitectura en ejecución, aislamiento entre organizaciones y condiciones de validación C0–C3—. No es una funcionalidad del producto y no consume la interfaz de programación.

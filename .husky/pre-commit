@@ -1,0 +1,7 @@
+# Calidad automatizada ANTES de integrar (Arquitectura, sección 13): Prettier y
+# ESLint sobre lo que se va a confirmar, no sobre todo el repositorio.
+#
+# Lo que este gancho NO hace: ejecutar las pruebas ni la verificación de tipos.
+# Eso lo hace el pipeline en cada integración, donde un fallo bloquea de verdad
+# (RNF-203); repetirlo aquí alargaría cada confirmación sin añadir garantía.
+npx lint-staged

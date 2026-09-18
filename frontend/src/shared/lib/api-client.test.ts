@@ -124,13 +124,14 @@ describe('apiRequest: mapeo de errores', () => {
 
     const error = await apiRequest('/api/clients').catch((e: unknown) => e)
     expect(error).toBeInstanceOf(ApiError)
-    expect((error as InstanceType<typeof ApiError>).fieldErrors?.email).toEqual([
-      'No es un correo válido.',
-    ])
+    expect((error as InstanceType<typeof ApiError>).fieldErrors?.email).toEqual(['No es un correo válido.'])
   })
 
   it('degrada con gracia si el cuerpo del error no es JSON', async () => {
-    vi.stubGlobal('fetch', vi.fn(async () => new Response('502 Bad Gateway', { status: 502 })))
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => new Response('502 Bad Gateway', { status: 502 })),
+    )
 
     await expect(apiRequest('/api/clients')).rejects.toMatchObject({
       code: 'server.error',

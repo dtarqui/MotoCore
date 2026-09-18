@@ -10,19 +10,18 @@ import type {
 
 /**
  * Inventario: nivel taller. TODAS las llamadas usan `withWorkshop`, porque el
- * servidor exige el taller activo y rechaza la petición sin ella (RF-303).
+ * servidor exige el taller activo y rechaza la petición sin él (RF-303).
  */
 const withWorkshop = { withWorkshop: true } as const
 
-export function getParts(options?: { search?: string; lowStock?: boolean }) {
+export function getParts(options?: { search?: string; lowStock?: boolean; includeInactive?: boolean }) {
   const params = new URLSearchParams()
   if (options?.search?.trim()) params.set('search', options.search.trim())
   if (options?.lowStock) params.set('lowStock', 'true')
+  if (options?.includeInactive) params.set('includeInactive', 'true')
   const query = params.toString() ? `?${params.toString()}` : ''
 
-  return apiRequest<{ parts: Part[] }>(`/api/inventory/parts${query}`, withWorkshop).then(
-    (r) => r.parts,
-  )
+  return apiRequest<{ parts: Part[] }>(`/api/inventory/parts${query}`, withWorkshop).then((r) => r.parts)
 }
 
 /** RF-607: repuestos en o por debajo del mínimo. */
@@ -31,32 +30,30 @@ export function getLowStockParts() {
 }
 
 /**
- * Catálogo de un taller que NO es el activo — lectura puntual para elegir el
- * repuesto de destino de una transferencia (RF-608) sin abandonar el taller
- * de origen.
+ * Catálogo de un taller que NO es el activo — lectura puntual, por ejemplo para
+ * comprobar el destino de una transferencia (RF-608) sin abandonar el taller de
+ * origen.
  */
 export function getPartsInWorkshop(workshopId: string, options?: { search?: string }) {
   const params = new URLSearchParams()
   if (options?.search?.trim()) params.set('search', options.search.trim())
   const query = params.toString() ? `?${params.toString()}` : ''
 
-  return apiRequest<{ parts: Part[] }>(`/api/inventory/parts${query}`, { workshopId }).then(
-    (r) => r.parts,
-  )
+  return apiRequest<{ parts: Part[] }>(`/api/inventory/parts${query}`, { workshopId }).then((r) => r.parts)
 }
 
 export function createPart(payload: CreatePartPayload) {
   const body: Record<string, unknown> = {
-    partNumber: payload.partNumber.trim(),
+    part_number: payload.part_number.trim(),
     name: payload.name.trim(),
   }
   if (payload.description?.trim()) body.description = payload.description.trim()
   if (payload.brand?.trim()) body.brand = payload.brand.trim()
   if (payload.category?.trim()) body.category = payload.category.trim()
-  if (payload.initialStock !== undefined) body.initialStock = payload.initialStock
-  if (payload.minimumStock !== undefined) body.minimumStock = payload.minimumStock
-  if (payload.maximumStock !== undefined) body.maximumStock = payload.maximumStock
-  if (payload.unitCost !== undefined) body.unitCost = payload.unitCost
+  if (payload.initial_stock !== undefined) body.initial_stock = payload.initial_stock
+  if (payload.minimum_stock !== undefined) body.minimum_stock = payload.minimum_stock
+  if (payload.maximum_stock !== undefined) body.maximum_stock = payload.maximum_stock
+  if (payload.unit_cost !== undefined) body.unit_cost = payload.unit_cost
 
   return apiRequest<{ part: Part }>('/api/inventory/parts', {
     ...withWorkshop,
@@ -75,10 +72,9 @@ export function updatePart(partId: string, payload: UpdatePartPayload) {
 }
 
 export function getMovements(partId: string) {
-  return apiRequest<{ movements: PartMovement[] }>(
-    `/api/inventory/parts/${partId}/movements`,
-    withWorkshop,
-  ).then((r) => r.movements)
+  return apiRequest<{ movements: PartMovement[] }>(`/api/inventory/parts/${partId}/movements`, withWorkshop).then(
+    (r) => r.movements,
+  )
 }
 
 /**
@@ -87,10 +83,10 @@ export function getMovements(partId: string) {
  */
 export function createMovement(partId: string, payload: CreateMovementPayload) {
   const body: Record<string, unknown> = {
-    movementType: payload.movementType,
+    movement_type: payload.movement_type,
     quantity: payload.quantity,
   }
-  if (payload.unitCost !== undefined) body.unitCost = payload.unitCost
+  if (payload.unit_cost !== undefined) body.unit_cost = payload.unit_cost
   if (payload.reference?.trim()) body.reference = payload.reference.trim()
   if (payload.notes?.trim()) body.notes = payload.notes.trim()
 
@@ -102,13 +98,14 @@ export function createMovement(partId: string, payload: CreateMovementPayload) {
 }
 
 /**
- * Transfiere existencias al repuesto equivalente en otro taller — RF-608.
- * Reservada al Owner; el origen es el taller activo, por eso usa `withWorkshop`.
+ * Transfiere existencias al repuesto con el mismo número de parte en otro
+ * taller — RF-608. Reservada al Owner; el origen es el taller activo, por eso
+ * usa `withWorkshop`. Devuelve los dos movimientos vinculados.
  */
 export function transferPart(partId: string, payload: TransferPartPayload) {
-  return apiRequest<{ transferred: number; toPartId: string }>(`/api/inventory/parts/${partId}/transfer`, {
+  return apiRequest<{ movements: PartMovement[] }>(`/api/inventory/parts/${partId}/transfer`, {
     ...withWorkshop,
     method: 'POST',
     body: JSON.stringify(payload),
-  })
+  }).then((r) => r.movements)
 }

@@ -1,0 +1,29 @@
+{
+  "name": "motocore",
+  "private": true,
+  "description": "Raíz del repositorio: solo la calidad automatizada antes de integrar. El sistema vive en server/ y frontend/, cada uno con sus dependencias.",
+  "scripts": {
+    "prepare": "husky",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "lint-staged": {
+    "frontend/**/*.{ts,tsx}": [
+      "prettier --write",
+      "eslint --config frontend/eslint.config.js --fix"
+    ],
+    "server/**/*.ts": [
+      "prettier --write",
+      "eslint --config server/eslint.config.js --fix"
+    ],
+    "*.{json,md,yml,yaml,css,html}": [
+      "prettier --write"
+    ]
+  },
+  "devDependencies": {
+    "eslint": "^9.39.5",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.6",
+    "prettier": "^3.6.2"
+  }
+}

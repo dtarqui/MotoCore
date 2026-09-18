@@ -37,13 +37,13 @@ export const DIAGRAMAS: Diagrama[] = [
     archivo: '/diagramas/aislamiento-tenants.html',
   },
   {
-    slug: 'ordenes',
-    titulo: 'Ciclo de vida de la orden de trabajo',
+    slug: 'validacion',
+    titulo: 'Condiciones de validación',
     resumen:
-      'Qué tan avanzado está el módulo de órdenes de trabajo: qué existe de verdad en el código hoy, qué se pidió pero no se construyó todavía, y por qué.',
+      'Cómo se comprueba que la separación entre organizaciones no se puede apagar: se desactiva un control, el otro, o los dos, y se compara lo que ocurre.',
     detalle:
-      'Los cinco estados definidos en el frontend, sus transiciones reales, y los estados de espera y anulación que el alcance actual todavía no cubre.',
-    archivo: '/diagramas/ciclo-orden-trabajo.html',
+      'Las cuatro condiciones experimentales C0 a C3 del plan de pruebas, con el resultado esperado de cada una y cómo se ejecuta el ciclo: tres corridas sobre un entorno reconstruido, con evidencia generada por el propio ejecutor.',
+    archivo: '/diagramas/condiciones-validacion.html',
   },
 ]
 

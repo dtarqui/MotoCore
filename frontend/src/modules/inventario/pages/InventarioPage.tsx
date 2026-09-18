@@ -23,7 +23,7 @@ import {
 } from '@/shared/ui/dialog'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shared/ui/table'
 import { useToast } from '@/shared/ui/toast-context'
-import { useActiveWorkshopId } from '@/shared/lib/active-context'
+import { useActiveOrgId, useActiveWorkshopId } from '@/shared/lib/active-context'
 import {
   createMovement,
   createPart,
@@ -33,7 +33,7 @@ import {
   transferPart,
   updatePart,
 } from '../inventario-api'
-import { DIRECT_MOVEMENT_TYPES, MOVEMENT_LABELS, type MovementType, type Part } from '../types'
+import { DIRECT_MOVEMENT_TYPES, MOVEMENT_EFFECT, MOVEMENT_LABELS, type DirectMovementType, type Part } from '../types'
 
 type NewPartForm = { partNumber: string; name: string; initialStock: string; minimumStock: string }
 const EMPTY_NEW_PART: NewPartForm = { partNumber: '', name: '', initialStock: '0', minimumStock: '0' }
@@ -49,6 +49,7 @@ export function InventarioPage() {
 
   const canManageCatalog = hasAnyRole(['owner', 'receptionist'])
   const canTransfer = hasAnyRole(['owner'])
+  const activeOrgId = useActiveOrgId()
   const activeWorkshopId = useActiveWorkshopId()
 
   const [lowStockOnly, setLowStockOnly] = useState(false)
@@ -59,8 +60,10 @@ export function InventarioPage() {
   const [newPart, setNewPart] = useState<NewPartForm>(EMPTY_NEW_PART)
   const [error, setError] = useState<string | null>(null)
 
+  // Organizacion y taller activos en la clave: al cambiar de contexto ninguna
+  // respuesta puede servirse desde la cache del anterior (ADR-010).
   const partsQuery = useQuery({
-    queryKey: ['parts', activeWorkshopId, lowStockOnly],
+    queryKey: ['parts', activeOrgId, activeWorkshopId, lowStockOnly],
     queryFn: () => getParts({ lowStock: lowStockOnly }),
     enabled: Boolean(activeWorkshopId),
   })
@@ -70,10 +73,10 @@ export function InventarioPage() {
   const createPartMutation = useMutation({
     mutationFn: () =>
       createPart({
-        partNumber: newPart.partNumber,
+        part_number: newPart.partNumber,
         name: newPart.name,
-        initialStock: Number(newPart.initialStock) || 0,
-        minimumStock: Number(newPart.minimumStock) || 0,
+        initial_stock: Number(newPart.initialStock) || 0,
+        minimum_stock: Number(newPart.minimumStock) || 0,
       }),
     onSuccess: async (part) => {
       setCreateOpen(false)
@@ -283,9 +286,9 @@ function PartEditDialog({ part, onOpenChange }: { part: Part; onOpenChange: (ope
         description: form.description || null,
         brand: form.brand || null,
         category: form.category || null,
-        minimumStock: Number(form.minimumStock) || 0,
-        maximumStock: form.maximumStock ? Number(form.maximumStock) : null,
-        unitCost: form.unitCost ? Number(form.unitCost) : null,
+        minimum_stock: Number(form.minimumStock) || 0,
+        maximum_stock: form.maximumStock ? Number(form.maximumStock) : null,
+        unit_cost: form.unitCost ? Number(form.unitCost) : null,
       }),
     onSuccess: async () => {
       toast({ title: 'Repuesto actualizado', variant: 'success' })
@@ -301,8 +304,8 @@ function PartEditDialog({ part, onOpenChange }: { part: Part; onOpenChange: (ope
         <DialogHeader>
           <DialogTitle>Editar {part.name}</DialogTitle>
           <DialogDescription>
-            Número de parte: <span className="font-medium text-gray-700 dark:text-gray-300">{part.part_number}</span> (no
-            editable).
+            Número de parte: <span className="font-medium text-gray-700 dark:text-gray-300">{part.part_number}</span>{' '}
+            (no editable).
           </DialogDescription>
         </DialogHeader>
         <form
@@ -380,30 +383,30 @@ function PartEditDialog({ part, onOpenChange }: { part: Part; onOpenChange: (ope
 function MovementsDialog({ part, onOpenChange }: { part: Part; onOpenChange: (open: boolean) => void }) {
   const { toast } = useToast()
   const queryClient = useQueryClient()
-  const [movementType, setMovementType] = useState<MovementType>('purchase')
+  const [movementType, setMovementType] = useState<DirectMovementType>('compra')
   const [quantity, setQuantity] = useState('1')
   const [error, setError] = useState<string | null>(null)
 
   const movementsQuery = useQuery({
-    queryKey: ['movements', part.id],
+    queryKey: ['movements', part.organization_id, part.workshop_id, part.id],
     queryFn: () => getMovements(part.id),
   })
 
   const partsQuery = useQuery({
-    queryKey: ['parts', part.workshop_id],
+    queryKey: ['parts', part.organization_id, part.workshop_id],
     // Refleja la existencia actual sin abandonar el diálogo tras cada movimiento.
     queryFn: () => getParts(),
   })
   const currentStock = partsQuery.data?.find((p) => p.id === part.id)?.current_stock ?? part.current_stock
 
   const mutation = useMutation({
-    mutationFn: () => createMovement(part.id, { movementType, quantity: Number(quantity) || 0 }),
+    mutationFn: () => createMovement(part.id, { movement_type: movementType, quantity: Number(quantity) || 0 }),
     onSuccess: async () => {
       setError(null)
       setQuantity('1')
       toast({ title: 'Movimiento registrado', variant: 'success' })
       await queryClient.invalidateQueries({ queryKey: ['parts'] })
-      await queryClient.invalidateQueries({ queryKey: ['movements', part.id] })
+      await queryClient.invalidateQueries({ queryKey: ['movements'] })
     },
     onError: (err: Error) => setError(err.message),
   })
@@ -426,7 +429,7 @@ function MovementsDialog({ part, onOpenChange }: { part: Part; onOpenChange: (op
           <Select
             className="flex-1"
             value={movementType}
-            onChange={(e) => setMovementType(e.target.value as MovementType)}
+            onChange={(e) => setMovementType(e.target.value as DirectMovementType)}
           >
             {DIRECT_MOVEMENT_TYPES.map((type) => (
               <option key={type} value={type}>
@@ -444,7 +447,7 @@ function MovementsDialog({ part, onOpenChange }: { part: Part; onOpenChange: (op
           <Button type="submit" disabled={mutation.isPending}>
             Registrar
           </Button>
-          {movementType === 'adjustment' ? (
+          {MOVEMENT_EFFECT[movementType] === 'fija' ? (
             <p className="w-full text-xs text-gray-500 dark:text-gray-400">
               El ajuste fija la existencia en el valor indicado; no lo suma ni lo resta.
             </p>
@@ -476,7 +479,7 @@ function MovementsDialog({ part, onOpenChange }: { part: Part; onOpenChange: (op
   )
 }
 
-/** Transfiere existencias a un taller distinto de la misma organización — RF-608, reservada al Owner. */
+/** Transfiere existencias a otro taller de la misma organización — RF-608, reservada al Owner. */
 function TransferDialog({
   part,
   activeWorkshopId,
@@ -488,31 +491,34 @@ function TransferDialog({
 }) {
   const { toast } = useToast()
   const queryClient = useQueryClient()
+  const activeOrgId = useActiveOrgId()
   const [toWorkshopId, setToWorkshopId] = useState('')
-  // `null` = todavía no la tocó el usuario: se usa la sugerencia por número de parte.
-  const [toPartIdOverride, setToPartIdOverride] = useState<string | null>(null)
   const [quantity, setQuantity] = useState('1')
   const [error, setError] = useState<string | null>(null)
 
-  const workshopsQuery = useQuery({ queryKey: ['workshops'], queryFn: () => getWorkshops() })
+  const workshopsQuery = useQuery({ queryKey: ['workshops', activeOrgId], queryFn: () => getWorkshops() })
   const destinations = (workshopsQuery.data ?? []).filter((w) => w.id !== activeWorkshopId && w.is_active)
 
+  /**
+   * El destino es el repuesto con el **mismo número de parte** en el taller
+   * receptor: es la misma pieza, con existencia propia en cada local. Se
+   * consulta aquí solo para avisar antes de enviar; quien decide es el
+   * servidor, que responde `inventory.part_not_found` si no existe.
+   */
   const destinationPartsQuery = useQuery({
-    queryKey: ['parts-in-workshop', toWorkshopId],
+    queryKey: ['parts', activeOrgId, toWorkshopId],
     queryFn: () => getPartsInWorkshop(toWorkshopId),
     enabled: Boolean(toWorkshopId),
   })
-
-  // Sugiere el repuesto con el mismo número de parte en el destino; el
-  // backend no lo exige, así que sigue siendo una elección, no una restricción.
-  const suggestedPartId = destinationPartsQuery.data?.find((p) => p.part_number === part.part_number)?.id ?? ''
-  const toPartId = toPartIdOverride ?? suggestedPartId
+  const destinationPart = destinationPartsQuery.data?.find((p) => p.part_number === part.part_number)
+  const destinationReady = !toWorkshopId || destinationPartsQuery.isLoading || Boolean(destinationPart)
 
   const mutation = useMutation({
-    mutationFn: () => transferPart(part.id, { toWorkshopId, toPartId, quantity: Number(quantity) || 0 }),
+    mutationFn: () => transferPart(part.id, { to_workshop_id: toWorkshopId, quantity: Number(quantity) || 0 }),
     onSuccess: async () => {
       toast({ title: 'Transferencia registrada', variant: 'success' })
       await queryClient.invalidateQueries({ queryKey: ['parts'] })
+      await queryClient.invalidateQueries({ queryKey: ['movements'] })
       onOpenChange(false)
     },
     onError: (err: Error) => setError(err.message),
@@ -533,14 +539,7 @@ function TransferDialog({
             mutation.mutate()
           }}
         >
-          <Select
-            required
-            value={toWorkshopId}
-            onChange={(e) => {
-              setToWorkshopId(e.target.value)
-              setToPartIdOverride(null) // el destino cambió: la sugerencia se recalcula para el nuevo taller
-            }}
-          >
+          <Select required value={toWorkshopId} onChange={(e) => setToWorkshopId(e.target.value)}>
             <option value="">Taller de destino…</option>
             {destinations.map((w) => (
               <option key={w.id} value={w.id}>
@@ -549,22 +548,16 @@ function TransferDialog({
             ))}
           </Select>
 
-          {toWorkshopId ? (
-            destinationPartsQuery.isLoading ? (
-              <Skeleton className="h-10 w-full" />
-            ) : (destinationPartsQuery.data ?? []).length === 0 ? (
+          {toWorkshopId && !destinationPartsQuery.isLoading ? (
+            destinationPart ? (
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                Ese taller todavía no tiene repuestos registrados; crea primero el repuesto de destino ahí.
+                Llega a <span className="font-medium text-gray-700 dark:text-gray-300">{part.part_number}</span> en ese
+                taller · existencia actual: {destinationPart.current_stock}
               </p>
             ) : (
-              <Select required value={toPartId} onChange={(e) => setToPartIdOverride(e.target.value)}>
-                <option value="">Repuesto de destino…</option>
-                {(destinationPartsQuery.data ?? []).map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.part_number} · {p.name}
-                  </option>
-                ))}
-              </Select>
+              <Alert>
+                Ese taller todavía no tiene el número de parte {part.part_number}. Regístralo ahí antes de transferir.
+              </Alert>
             )
           ) : null}
 
@@ -585,7 +578,7 @@ function TransferDialog({
                 Cancelar
               </Button>
             </DialogClose>
-            <Button type="submit" disabled={mutation.isPending || !toWorkshopId || !toPartId}>
+            <Button type="submit" disabled={mutation.isPending || !toWorkshopId || !destinationReady}>
               {mutation.isPending ? 'Transfiriendo…' : 'Transferir'}
             </Button>
           </DialogFooter>

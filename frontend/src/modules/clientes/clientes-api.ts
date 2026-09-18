@@ -7,16 +7,16 @@ import type { Client, ClientUpsertPayload } from './types'
  * organización (RF-502).
  */
 
-/** Omite las cadenas vacías para no enviar un email vacío que falle la validación. */
+/** Omite las cadenas vacías para no enviar campos en blanco que el esquema rechazaría. */
 function normalize(payload: ClientUpsertPayload) {
   const body: Record<string, string> = {
-    firstName: payload.firstName.trim(),
-    lastName: payload.lastName.trim(),
+    first_name: payload.first_name.trim(),
+    last_name: payload.last_name.trim(),
   }
   const optional: Array<[string, string | undefined]> = [
     ['email', payload.email],
     ['phone', payload.phone],
-    ['documentId', payload.documentId],
+    ['document_id', payload.document_id],
     ['address', payload.address],
     ['notes', payload.notes],
   ]
@@ -27,8 +27,12 @@ function normalize(payload: ClientUpsertPayload) {
   return body
 }
 
-export function getClients(search?: string) {
-  const query = search?.trim() ? `?search=${encodeURIComponent(search.trim())}` : ''
+export function getClients(options?: { search?: string; includeInactive?: boolean }) {
+  const params = new URLSearchParams()
+  if (options?.search?.trim()) params.set('search', options.search.trim())
+  if (options?.includeInactive) params.set('includeInactive', 'true')
+  const query = params.toString() ? `?${params.toString()}` : ''
+
   return apiRequest<{ clients: Client[] }>(`/api/clients${query}`).then((r) => r.clients)
 }
 

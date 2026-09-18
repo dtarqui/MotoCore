@@ -10,7 +10,7 @@
 --
 --   * las nueve tablas, con prefijo `mt_` y sin el —el esquema anterior al
 --     prefijo—, con todo lo que dependa de ellas;
---   * sus ocho funciones;
+--   * sus siete funciones, y las de nombres ya retirados;
 --   * su disparador sobre `auth.users`;
 --   * las cuentas de `auth.users` que tenian perfil en MotoCore.
 --
@@ -70,9 +70,12 @@ begin
     join pg_namespace n on n.oid = p.pronamespace
     where n.nspname = 'public'
       and p.proname = any (array[
-        'mt_is_org_member','mt_is_org_owner','mt_workshop_org','mt_handle_new_user',
-        'mt_get_user_id_by_email','mt_register_account','mt_register_part_movement',
+        'mt_is_org_member','mt_is_org_owner','mt_handle_new_user',
+        'mt_get_user_id_by_email','mt_create_organization','mt_register_part_movement',
         'mt_transfer_stock',
+        -- Nombres de funciones retiradas del esquema: se siguen borrando para
+        -- que una base anterior no conserve restos.
+        'mt_workshop_org','mt_register_account',
         'is_org_member','is_org_owner','workshop_org','handle_new_user',
         'get_user_id_by_email','register_account','register_part_movement',
         'transfer_stock'])

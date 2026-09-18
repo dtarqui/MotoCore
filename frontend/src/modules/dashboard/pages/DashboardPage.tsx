@@ -28,14 +28,15 @@ export function DashboardPage() {
     enabled: Boolean(orgId),
   })
 
+  // El contexto activo forma parte de toda clave de consulta (ADR-010).
   const clientsQuery = useQuery({
-    queryKey: ['clients', ''],
+    queryKey: ['clients', orgId],
     queryFn: () => getClients(),
     enabled: Boolean(orgId),
   })
 
   const partsQuery = useQuery({
-    queryKey: ['parts', workshopId, false],
+    queryKey: ['parts', orgId, workshopId],
     queryFn: () => getParts(),
     enabled: Boolean(workshopId),
   })

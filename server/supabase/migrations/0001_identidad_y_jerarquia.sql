@@ -14,7 +14,7 @@
 --
 -- Orden del archivo: tablas → funciones → disparador → RLS → políticas. No es
 -- estético: las políticas invocan las funciones, y las funciones consultan las
--- tablas.
+-- tablas. Los permisos de tabla se conceden en la 0004.
 -- ============================================================================
 
 create extension if not exists "pgcrypto";  -- gen_random_uuid()
@@ -24,7 +24,8 @@ create extension if not exists "pgcrypto";  -- gen_random_uuid()
 -- 1. Tablas
 -- ============================================================================
 
--- Perfil, 1:1 con la cuenta de Supabase. Lo crea el disparador del §3.
+-- Perfil, 1:1 con la cuenta de Supabase. Lo crea el disparador del §3. Es
+-- identidad, no negocio: no lleva `organization_id` y queda fuera del censo.
 create table if not exists public.mt_profiles (
   id           uuid primary key references auth.users (id) on delete cascade,
   email        text not null default '',
@@ -62,7 +63,10 @@ create table if not exists public.mt_memberships (
   is_active        boolean not null default true,
   joined_at        timestamptz not null default now(),
   updated_at       timestamptz,
-  unique (organization_id, user_id)
+  unique (organization_id, user_id),
+  -- Destino de la clave ajena compuesta de `mt_workshop_assignments` (§1): es
+  -- lo que impide asignar a un taller la membresía de OTRA organización.
+  unique (id, organization_id)
 );
 
 -- ÍNDICES DE mt_memberships — leer antes de añadir uno.
@@ -104,29 +108,46 @@ create table if not exists public.mt_workshops (
   is_active        boolean not null default true,
   created_at       timestamptz not null default now(),
   updated_at       timestamptz,
-  unique (organization_id, name)
+  unique (organization_id, name),
+  -- Destino de las claves ajenas compuestas de las tablas de nivel taller.
+  unique (id, organization_id)
 );
 create index if not exists mt_workshops_org_id_idx on public.mt_workshops (organization_id);
 
 -- Asignación operativa de un miembro a un taller (RF-304). **No otorga ni
 -- restringe permisos**: los permisos vienen del rol de la membresía (ADR-006).
+--
+-- Porta `organization_id` como toda tabla de negocio (Modelo de datos,
+-- principio rector). Es redundante en términos de integridad —membresía y
+-- taller ya pertenecen a la organización— y deliberadamente no lo es en
+-- términos de aislamiento: sin ella, la política tendría que resolver el
+-- inquilino navegando hasta `mt_workshops`, con una función auxiliar más.
+--
+-- Esa redundancia se hace **consistente** con las dos claves ajenas
+-- compuestas: el motor rechaza una fila cuya membresía o cuyo taller sean de
+-- otra organización, aunque llegue por acceso directo.
 create table if not exists public.mt_workshop_assignments (
-  id             uuid primary key default gen_random_uuid(),
-  membership_id  uuid not null references public.mt_memberships (id) on delete cascade,
-  workshop_id    uuid not null references public.mt_workshops (id) on delete cascade,
-  created_at     timestamptz not null default now(),
-  unique (membership_id, workshop_id)
+  id               uuid primary key default gen_random_uuid(),
+  organization_id  uuid not null references public.mt_organizations (id) on delete cascade,
+  membership_id    uuid not null,
+  workshop_id      uuid not null,
+  created_at       timestamptz not null default now(),
+  unique (membership_id, workshop_id),
+  foreign key (membership_id, organization_id)
+    references public.mt_memberships (id, organization_id) on delete cascade,
+  foreign key (workshop_id, organization_id)
+    references public.mt_workshops (id, organization_id) on delete cascade
 );
 create index if not exists mt_workshop_assignments_workshop_idx
   on public.mt_workshop_assignments (workshop_id);
 
 
 -- ============================================================================
--- 2. Funciones auxiliares
+-- 2. Funciones auxiliares de las políticas
 -- ============================================================================
 --
--- `security definer` en las tres primeras para evitar recursión: consultan
--- `mt_memberships`, que está protegida por políticas que a su vez las invocan.
+-- `security definer` para evitar recursión: consultan `mt_memberships`, que
+-- está protegida por políticas que a su vez las invocan.
 
 create or replace function public.mt_is_org_member(org uuid)
 returns boolean
@@ -159,22 +180,17 @@ as $$
   );
 $$;
 
--- La organización a la que pertenece un taller: permite que las políticas de
--- `mt_workshop_assignments` resuelvan el inquilino sin quedar atrapadas por el
--- RLS de `mt_workshops`.
-create or replace function public.mt_workshop_org(ws uuid)
-returns uuid
-language sql
-security definer
-set search_path = public
-stable
-as $$
-  select w.organization_id from public.mt_workshops w where w.id = ws;
-$$;
+-- Las políticas se evalúan con los privilegios de quien consulta, de modo que
+-- `authenticated` necesita ejecutarlas. `anon` no: no tiene permisos sobre
+-- ninguna tabla (0004) y nunca llega a evaluar una política.
+revoke all on function public.mt_is_org_member(uuid) from public, anon;
+revoke all on function public.mt_is_org_owner(uuid)  from public, anon;
+grant execute on function public.mt_is_org_member(uuid) to authenticated;
+grant execute on function public.mt_is_org_owner(uuid)  to authenticated;
 
 
 -- ============================================================================
--- 3. Alta de cuenta
+-- 3. Alta de cuenta y de organización
 -- ============================================================================
 
 -- El perfil se crea por disparador, no desde la aplicación: así existe siempre,
@@ -203,14 +219,30 @@ create trigger mt_on_auth_user_created
   after insert on auth.users
   for each row execute function public.mt_handle_new_user();
 
--- Registro atómico (RF-101, ADR-007): organización, primer taller y membresía
--- propietaria, o nada. Sin esto, una interrupción entre los tres pasos dejaría
--- una cuenta a medias — y en un entorno de funciones efímeras el proceso puede
--- terminar antes de compensar.
-create or replace function public.mt_register_account(
-  p_user_id        uuid,
-  p_org_name       text,
-  p_workshop_name  text
+-- El disparador no necesita que nadie pueda invocar la función a mano.
+revoke all on function public.mt_handle_new_user() from public, anon, authenticated;
+
+-- Organización y membresía propietaria —y, en el registro, el primer taller—,
+-- o nada (RF-101, RF-201, ADR-007).
+--
+-- Una sola función para las dos vías porque es la misma operación: la creación
+-- de una organización exige escribir la membresía propietaria, que ninguna
+-- política puede autorizar todavía —el solicitante aún no es miembro— (ADR-008,
+-- excepción 3). Sin transacción, una interrupción entre los pasos dejaría una
+-- organización sin propietario, y en un entorno de funciones efímeras el
+-- proceso puede terminar antes de compensar.
+--
+-- `p_workshop_name` nulo: la organización se crea sin taller (RF-201). El
+-- registro lo pasa siempre, porque la cuenta nueva debe poder operar sin
+-- configuración adicional (HU-01).
+create or replace function public.mt_create_organization(
+  p_owner_id       uuid,
+  p_name           text,
+  p_workshop_name  text default null,
+  p_description    text default null,
+  p_address        text default null,
+  p_phone          text default null,
+  p_email          text default null
 )
 returns table (
   organization_id  uuid,
@@ -224,16 +256,18 @@ declare
   v_org_id       uuid;
   v_workshop_id  uuid;
 begin
-  insert into public.mt_organizations (name, owner_id)
-  values (p_org_name, p_user_id)
+  insert into public.mt_organizations (name, description, address, phone, email, owner_id)
+  values (p_name, p_description, p_address, p_phone, p_email, p_owner_id)
   returning id into v_org_id;
 
-  insert into public.mt_workshops (organization_id, name)
-  values (v_org_id, coalesce(nullif(btrim(p_workshop_name), ''), p_org_name))
-  returning id into v_workshop_id;
-
   insert into public.mt_memberships (organization_id, user_id, role)
-  values (v_org_id, p_user_id, 'owner');
+  values (v_org_id, p_owner_id, 'owner');
+
+  if nullif(btrim(p_workshop_name), '') is not null then
+    insert into public.mt_workshops (organization_id, name)
+    values (v_org_id, btrim(p_workshop_name))
+    returning id into v_workshop_id;
+  end if;
 
   return query select v_org_id, v_workshop_id;
 end;
@@ -256,13 +290,20 @@ $$;
 revoke all on function public.mt_get_user_id_by_email(text) from public, anon, authenticated;
 grant execute on function public.mt_get_user_id_by_email(text) to service_role;
 
-revoke all on function public.mt_register_account(uuid, text, text) from public, anon, authenticated;
-grant execute on function public.mt_register_account(uuid, text, text) to service_role;
+revoke all on function public.mt_create_organization(uuid, text, text, text, text, text, text)
+  from public, anon, authenticated;
+grant execute on function public.mt_create_organization(uuid, text, text, text, text, text, text)
+  to service_role;
 
 
 -- ============================================================================
 -- 4. Seguridad a nivel de fila
 -- ============================================================================
+--
+-- Ninguna tabla de este archivo tiene política de `delete` salvo las
+-- asignaciones: organizaciones, talleres y membresías se dan de baja de forma
+-- lógica. Que la política no exista es la primera de las dos capas que lo
+-- impiden; la segunda son los permisos de la 0004.
 
 alter table public.mt_profiles             enable row level security;
 alter table public.mt_organizations        enable row level security;
@@ -270,38 +311,30 @@ alter table public.mt_memberships          enable row level security;
 alter table public.mt_workshops            enable row level security;
 alter table public.mt_workshop_assignments enable row level security;
 
--- mt_profiles: cada cuenta ve y edita el suyo. No lleva `organization_id` —es
--- identidad, no negocio— y por eso queda fuera del censo de tablas de negocio.
+-- mt_profiles: cada cuenta ve y edita el suyo. Lo crea el disparador, de modo
+-- que nadie necesita insertarlo.
 drop policy if exists mt_profiles_select_own on public.mt_profiles;
 create policy mt_profiles_select_own on public.mt_profiles
   for select using (id = auth.uid());
-
-drop policy if exists mt_profiles_upsert_own on public.mt_profiles;
-create policy mt_profiles_upsert_own on public.mt_profiles
-  for insert with check (id = auth.uid());
 
 drop policy if exists mt_profiles_update_own on public.mt_profiles;
 create policy mt_profiles_update_own on public.mt_profiles
   for update using (id = auth.uid());
 
--- mt_organizations: la lee quien tiene membresía activa; la administra el owner.
+-- mt_organizations: la lee quien tiene membresía activa (RF-202); la modifica
+-- el owner (RF-204). No hay política de inserción: toda organización nace de
+-- `mt_create_organization`, con su membresía propietaria en la misma
+-- transacción.
 drop policy if exists mt_organizations_select_member on public.mt_organizations;
 create policy mt_organizations_select_member on public.mt_organizations
   for select using (public.mt_is_org_member(id));
-
-drop policy if exists mt_organizations_insert_owner on public.mt_organizations;
-create policy mt_organizations_insert_owner on public.mt_organizations
-  for insert with check (owner_id = auth.uid());
 
 drop policy if exists mt_organizations_update_owner on public.mt_organizations;
 create policy mt_organizations_update_owner on public.mt_organizations
   for update using (public.mt_is_org_owner(id));
 
-drop policy if exists mt_organizations_delete_owner on public.mt_organizations;
-create policy mt_organizations_delete_owner on public.mt_organizations
-  for delete using (public.mt_is_org_owner(id));
-
--- mt_memberships
+-- mt_memberships: el listado lo lee cualquier miembro (RF-407); el alta, el
+-- cambio de rol y la baja son administrativos.
 drop policy if exists mt_memberships_select_member on public.mt_memberships;
 create policy mt_memberships_select_member on public.mt_memberships
   for select using (public.mt_is_org_member(organization_id));
@@ -314,11 +347,7 @@ drop policy if exists mt_memberships_update_owner on public.mt_memberships;
 create policy mt_memberships_update_owner on public.mt_memberships
   for update using (public.mt_is_org_owner(organization_id));
 
-drop policy if exists mt_memberships_delete_owner on public.mt_memberships;
-create policy mt_memberships_delete_owner on public.mt_memberships
-  for delete using (public.mt_is_org_owner(organization_id));
-
--- mt_workshops
+-- mt_workshops: lo lee cualquier miembro (RF-302); lo administra el owner.
 drop policy if exists mt_workshops_select_member on public.mt_workshops;
 create policy mt_workshops_select_member on public.mt_workshops
   for select using (public.mt_is_org_member(organization_id));
@@ -331,20 +360,16 @@ drop policy if exists mt_workshops_update_owner on public.mt_workshops;
 create policy mt_workshops_update_owner on public.mt_workshops
   for update using (public.mt_is_org_owner(organization_id));
 
-drop policy if exists mt_workshops_delete_owner on public.mt_workshops;
-create policy mt_workshops_delete_owner on public.mt_workshops
-  for delete using (public.mt_is_org_owner(organization_id));
-
--- mt_workshop_assignments: sin `organization_id` propio, resuelve el inquilino
--- a través del taller.
+-- mt_workshop_assignments: el mismo criterio que el resto, sobre su propio
+-- `organization_id`. La asignación es el único vínculo que se retira de verdad.
 drop policy if exists mt_workshop_assignments_select_member on public.mt_workshop_assignments;
 create policy mt_workshop_assignments_select_member on public.mt_workshop_assignments
-  for select using (public.mt_is_org_member(public.mt_workshop_org(workshop_id)));
+  for select using (public.mt_is_org_member(organization_id));
 
 drop policy if exists mt_workshop_assignments_insert_owner on public.mt_workshop_assignments;
 create policy mt_workshop_assignments_insert_owner on public.mt_workshop_assignments
-  for insert with check (public.mt_is_org_owner(public.mt_workshop_org(workshop_id)));
+  for insert with check (public.mt_is_org_owner(organization_id));
 
 drop policy if exists mt_workshop_assignments_delete_owner on public.mt_workshop_assignments;
 create policy mt_workshop_assignments_delete_owner on public.mt_workshop_assignments
-  for delete using (public.mt_is_org_owner(public.mt_workshop_org(workshop_id)));
+  for delete using (public.mt_is_org_owner(organization_id));

@@ -1,49 +1,53 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
+import { getAllowedOrigins } from './lib/env.js';
 import { handleError } from './lib/errors.js';
-import { authRoutes } from './modules/auth.js';
-import { organizationRoutes } from './modules/organizations.js';
-import { workshopRoutes } from './modules/workshops.js';
-import { memberRoutes } from './modules/members.js';
-import { clientRoutes } from './modules/clients.js';
-import { inventoryRoutes } from './modules/inventory.js';
-import { auditRoutes } from './modules/audit.js';
-import type { AppBindings } from './types.js';
+import { auditRoutes } from './modules/audit/audit.routes.js';
+import { clientRoutes } from './modules/clients/clients.routes.js';
+import { identityRoutes } from './modules/identity/identity.routes.js';
+import { inventoryRoutes } from './modules/inventory/inventory.routes.js';
+import { memberRoutes } from './modules/members/members.routes.js';
+import { organizationRoutes } from './modules/organizations/organizations.routes.js';
+import { workshopRoutes } from './modules/workshops/workshops.routes.js';
+import { supabasePlatform, type Platform } from './platform.js';
 
-/** Construye la app Hono. Sirve tanto para el dev-server local como para Vercel. */
-export function createApp() {
-  const app = new Hono<AppBindings>();
+/**
+ * Construye la aplicación: un monolito modular desplegado como funciones
+ * serverless (ADR-009). Sirve igual al servidor de desarrollo, a Vercel y a las
+ * pruebas, que pueden sustituir piezas de la plataforma (ver `platform.ts`).
+ */
+export function createApp(overrides: Partial<Platform> = {}) {
+  const platform: Platform = { ...supabasePlatform, ...overrides };
+  const app = new Hono();
 
+  // Solo los orígenes del cliente web de cada entorno (Requisitos, sección 5).
   app.use(
     '*',
     cors({
-      origin: (origin) => origin ?? '*',
+      origin: getAllowedOrigins(),
       allowHeaders: ['Authorization', 'Content-Type', 'X-Org-Id', 'X-Workshop-Id'],
-      allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-      exposeHeaders: ['X-Total-Count', 'X-Page', 'X-Page-Size'],
+      allowMethods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
     }),
   );
 
   app.onError(handleError);
 
+  // Comprobación de disponibilidad: pública, sin tocar la base (§2.1).
   app.get('/health', (c) => c.json({ status: 'ok' }));
 
-  app.route('/api/auth', authRoutes);
+  app.route('/api/auth', identityRoutes(platform));
 
-  // Regla de rutas del §2.3 del contrato: el identificador de la organizacion
-  // aparece en la ruta SOLO cuando el recurso es la organizacion misma. Todo lo
-  // interior a ella —talleres, miembros, clientes, inventario, auditoria— se
-  // resuelve por la cabecera X-Org-Id, de modo que exista un unico mecanismo de
-  // contexto y un unico punto donde validarlo (ADR-005).
-  app.route('/api/organizations', organizationRoutes);
-
-  app.route('/api/workshops', workshopRoutes);
-  app.route('/api/members', memberRoutes);
-  app.route('/api/clients', clientRoutes);
-  // Inventario exige ademas el taller activo (X-Workshop-Id).
-  app.route('/api/inventory', inventoryRoutes);
-  // Auditoria: nivel organizacion, reservada al Owner (RF-704).
-  app.route('/api/audit', auditRoutes);
+  // Regla de rutas del §2.3 del contrato: el identificador de la organización
+  // aparece en la ruta SOLO cuando el recurso es la organización misma. Todo lo
+  // interior a ella se resuelve por la cabecera X-Org-Id, de modo que exista un
+  // único mecanismo de contexto y un único punto donde validarlo (ADR-005).
+  app.route('/api/organizations', organizationRoutes(platform));
+  app.route('/api/workshops', workshopRoutes(platform));
+  app.route('/api/members', memberRoutes(platform));
+  app.route('/api/clients', clientRoutes(platform));
+  // Nivel taller: exige además X-Workshop-Id.
+  app.route('/api/inventory', inventoryRoutes(platform));
+  app.route('/api/audit', auditRoutes(platform));
 
   return app;
 }
